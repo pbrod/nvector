@@ -23,6 +23,7 @@ Matlab. In Matlab one would normally write x'*y (i.e. x transposed
 times y)
 '''
 import numpy as np
+
 import unittest
 from nvector import (deg, rad,
                      lat_long2n_E,
@@ -30,9 +31,15 @@ from nvector import (deg, rad,
                      n_E2R_EN,
                      zyx2R, unit,
                      n_EA_E_and_n_EB_E2p_AB_E,
-                     n_EA_E_and_p_AB_E2n_EB_E)
-from nvector._core import p_EB_E2n_EB_E, n_EB_E2p_EB_E, R_Ee
+                     n_EA_E_and_p_AB_E2n_EB_E,
+                     p_EB_E2n_EB_E,
+                     n_EB_E2p_EB_E,
+                     set_north_pole_axis_for_E_frame)
+from nvector.navigator import GeoPoint, EARTH_RADIUS_M
+
 from numpy.testing import assert_array_almost_equal
+
+R_Ee = set_north_pole_axis_for_E_frame(axis='z')
 
 
 class TestNvector(unittest.TestCase):
@@ -42,22 +49,25 @@ class TestNvector(unittest.TestCase):
         # Positions A and B are given in (decimal) degrees and depths:
 
         # Position A:
-        lat_EA_deg = 1
-        long_EA_deg = 2
+        lat_EA = rad(1)
+        long_EA = rad(2)
         z_EA = 3
 
         # Position B:
-        lat_EB_deg = 4
-        long_EB_deg = 5
+        lat_EB = rad(4)
+        long_EB = rad(5)
         z_EB = 6
 
+        point_a = GeoPoint(lat_EA, long_EA)
+        point_b = GeoPoint(lat_EB, long_EB)
+        distance, bearing = point_a.distance_and_bearing_between_points(point_b)
         # Find the exact vector between the two positions, given in meters
         # north, east, and down, i.e. find p_AB_N.
 
         # SOLUTION:
         # Step1: Convert to n-vectors (rad() converts to radians):
-        n_EA_E = lat_long2n_E(rad(lat_EA_deg), rad(long_EA_deg))
-        n_EB_E = lat_long2n_E(rad(lat_EB_deg), rad(long_EB_deg))
+        n_EA_E = lat_long2n_E(lat_EA, long_EA)
+        n_EB_E = lat_long2n_E(lat_EB, long_EB)
 
         # Step2: Find p_AB_E (delta decomposed in E).
         # WGS-84 ellipsoid is default:
@@ -71,9 +81,10 @@ class TestNvector(unittest.TestCase):
         # (Note the transpose of R_EN: The "closest-rule" says that when
         # decomposing, the frame in the subscript of the rotation matrix that
         # is closest to the vector, should equal the frame where the vector is
-        # decomposed. Thus the calculation R_NE*p_AB_E is correct, since the
-        # vector is decomposed in E, and E is closest to the vector. In the
-        # example we only had R_EN, and thus we must transpose it: R_EN'=R_NE)
+        # decomposed. Thus the calculation np.dot(R_NE, p_AB_E) is correct,
+        # since the vector is decomposed in E, and E is closest to the vector.
+        # In the example we only had R_EN, and thus we must transpose it:
+        # R_EN'=R_NE)
 
         # Step5: Also find the direction (azimuth) to B, relative to north:
         azimuth = np.arctan2(p_AB_N[1], p_AB_N[0])
@@ -123,9 +134,8 @@ class TestNvector(unittest.TestCase):
         # convenient to see lat, long:
         lat_EC, long_EC = n_E2lat_long(n_EC_E)
         # Here we also assume that the user wants output height (= - depth):
-        print('Ex2, Pos C: lat, long = {},{} deg,  height = {} m'.format(deg(lat_EC),
-                                                                         deg(long_EC),
-                                                                         -z_EC))
+        msg = 'Ex2, Pos C: lat, long = {},{} deg,  height = {} m'
+        print(msg.format(deg(lat_EC), deg(long_EC), -z_EC))
 
         self.assertAlmostEqual(deg(lat_EC), 53.32637826)
         self.assertAlmostEqual(deg(long_EC), 63.46812344)
@@ -140,18 +150,14 @@ class TestNvector(unittest.TestCase):
         # Find position B as geodetic latitude, longitude and height
 
         # SOLUTION:
-
         # Find n-vector from the p-vector:
         n_EB_E, z_EB = p_EB_E2n_EB_E(p_EB_E)
 
         # Convert to lat, long and height:
-
         lat_EB, long_EB = n_E2lat_long(n_EB_E)
         h_EB = -z_EB
-
-        print('Ex3, Pos B: lat, long = {} {} deg, height = {} m'.format(deg(lat_EB),
-                                                                        deg(long_EB),
-                                                                        h_EB))
+        msg = 'Ex3, Pos B: lat, long = {} {} deg, height = {} m'
+        print(msg.format(deg(lat_EB), deg(long_EB), h_EB))
 
         self.assertAlmostEqual(deg(lat_EB), 39.37874867)
         self.assertAlmostEqual(deg(long_EB), -48.0127875)
@@ -193,9 +199,9 @@ class TestNvector(unittest.TestCase):
         r_Earth = 6371e3  # m, mean Earth radius
 
         # SOLUTION:
-
         # The great circle distance is given by equation (16) in Gade (2010):
         # Well conditioned for all angles:
+
         s_AB = np.arctan2(np.linalg.norm(np.cross(n_EA_E, n_EB_E, axis=0), axis=0),
                           np.dot(n_EA_E.T, n_EB_E)) * r_Earth
 
@@ -208,12 +214,8 @@ class TestNvector(unittest.TestCase):
         # The Euclidean distance is given by:
         d_AB = np.linalg.norm(n_EB_E - n_EA_E, axis=0) * r_Earth
 
-        print(
-            'Ex5, Great circle distance = {} km, Euclidean distance = {} km'.format(
-                s_AB /
-                1000,
-                d_AB /
-                1000))
+        msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
+        print(msg.format(s_AB / 1000, d_AB / 1000))
 
         self.assertAlmostEqual(s_AB / 1000, 332.45644411)
         self.assertAlmostEqual(d_AB / 1000, 332.41872486)
@@ -237,16 +239,15 @@ class TestNvector(unittest.TestCase):
         # Find the interpolated position at time ti, n_EB_E_ti
 
         # SOLUTION:
-
         # Using standard interpolation:
-        n_EB_E_ti = unit(
-            n_EB_E_t0 + (ti - t0) * (n_EB_E_t1 - n_EB_E_t0) / (t1 - t0))
+        n_EB_E_ti = unit(n_EB_E_t0 +
+                         (ti - t0) * (n_EB_E_t1 - n_EB_E_t0) / (t1 - t0))
 
         # When displaying the resulting position for humans, it is more
         # convenient to see lat, long:
         lat_EB_ti, long_EB_ti = n_E2lat_long(n_EB_E_ti)
-        print('Ex6, Interpolated position: lat, long = {} {} deg'.format(deg(lat_EB_ti),
-                                                                         deg(long_EB_ti)))
+        msg = 'Ex6, Interpolated position: lat, long = {} {} deg'
+        print(msg.format(deg(lat_EB_ti), deg(long_EB_ti)))
 
         self.assertAlmostEqual(deg(lat_EB_ti), 89.7999805)
         self.assertAlmostEqual(deg(long_EB_ti), 180.)
@@ -255,9 +256,9 @@ class TestNvector(unittest.TestCase):
 
         # Three positions A, B and C are given:
         # Enter elements directly:
-        # n_EA_E=unit([1 0 -2]')
-        # n_EB_E=unit([-1 -2 0]')
-        # n_EC_E=unit([0 -2 3]')
+        # n_EA_E=unit(np.vstack((1, 0, -2)))
+        # n_EB_E=unit(np.vstack((-1, -2, 0)))
+        # n_EC_E=unit(np.vstack((0, -2, 3)))
 
         # or input as lat/long in deg:
         n_EA_E = lat_long2n_E(rad(90), rad(0))
@@ -281,21 +282,24 @@ class TestNvector(unittest.TestCase):
         # n_EA_E=unit([1 0 -2]')
 
         # or input as lat/long in deg:
-        n_EA_E = lat_long2n_E(rad(80), rad(-90))
+        lat, lon = rad(80), rad(-90)
+        point_a = GeoPoint(lat, lon)
+        point_b = point_a.distance_bearing2point(distance=1000, bearing=200)
+
+        n_EA_E = lat_long2n_E(lat, lon)
 
         # The initial azimuth and great circle distance (s_AB), and Earth
         # radius (r_Earth) are also given:
         azimuth = rad(200)
         s_AB = 1000  # m
-        r_Earth = 6371e3  # m, mean Earth radius
+        r_Earth = EARTH_RADIUS_M  # 6371e3  # m, mean Earth radius
 
         # Find the destination point B, as n_EB_E ("The direct/first geodetic
         # problem" for a sphere)
 
         # SOLUTION:
-
         # Step1: Find unit vectors for north and east:
-        k_east_E = unit(np.cross(np.dot(R_Ee().T, [[1], [0], [0]]),
+        k_east_E = unit(np.cross(np.dot(R_Ee.T, [[1], [0], [0]]),
                                  n_EA_E, axis=0))
         k_north_E = np.cross(n_EA_E, k_east_E, axis=0)
 
@@ -310,6 +314,9 @@ class TestNvector(unittest.TestCase):
         lat_EB, long_EB = n_E2lat_long(n_EB_E)
         print('Ex8, Destination: lat, long = {} {} deg'.format(deg(lat_EB),
                                                                deg(long_EB)))
+
+        print('Ex8, Destination: lat, long = {} {} deg'.format(deg(point_b.lat),
+                                                               deg(point_b.lon)))
         self.assertAlmostEqual(deg(lat_EB), 79.99154867)
         self.assertAlmostEqual(deg(long_EB), -90.01769837)
 
@@ -337,13 +344,11 @@ class TestNvector(unittest.TestCase):
         # product between n_EC_E_tmp and n_EA1_E:
         n_EC_E = np.sign(np.dot(n_EC_E_tmp.T, n_EA1_E)) * n_EC_E_tmp
 
-        # When dipslaying the resulting position for humans, it is more
+        # When displaying the resulting position for humans, it is more
         # convenient to see lat, long:
         lat_EC, long_EC = n_E2lat_long(n_EC_E)
-        print(
-            'Ex9, Intersection: lat, long = {} {} deg'.format(
-                deg(lat_EC),
-                deg(long_EC)))
+        msg = 'Ex9, Intersection: lat, long = {} {} deg'
+        print(msg.format(deg(lat_EC), deg(long_EC)))
         self.assertAlmostEqual(deg(lat_EC), 40.31864307)
         self.assertAlmostEqual(deg(long_EC), 55.90186788)
 
@@ -365,15 +370,14 @@ class TestNvector(unittest.TestCase):
         # Find the cross track distance from path A to position B.
 
         # SOLUTION:
-
         # Find the unit normal to the great circle:
-        c_E = unit(np.cross(n_EA1_E, n_EA2_E, axis=0)).T
+        c_E = unit(np.cross(n_EA1_E, n_EA2_E, axis=0))
 
         # Find the great circle cross track distance:
-        s_xt = (np.arccos(np.dot(c_E, n_EB_E)) - np.pi / 2) * r_Earth
+        s_xt = (np.arccos(np.dot(c_E.T, n_EB_E)) - np.pi / 2) * r_Earth
 
         # Find the Euclidean cross track distance:
-        d_xt = -np.dot(c_E, n_EB_E) * r_Earth
+        d_xt = -np.dot(c_E.T, n_EB_E) * r_Earth
 
         print(
             'Ex10, Cross track distance = {} m, Euclidean = {} m'.format(
@@ -382,197 +386,6 @@ class TestNvector(unittest.TestCase):
 
         self.assertAlmostEqual(s_xt, 11117.79911015)
         self.assertAlmostEqual(d_xt, 11117.79346741)
-
-
-#
-# function plot_Earth_figure(n_EA_E,n_EB_E,n_EC_E,n_EM_E)
-# # Plotting the Earth figure for Example 7.
-#
-# Earth_radius_for_plotting =0.7 # plot an Earth sphere with radius smaller
-# # than 1 (n-vector) to make the tip of the n-vectors visible.
-#
-# # R_Ee selects correct E-axes, see R_Ee.m for details:
-# n_EA_E=R_Ee*n_EA_E n_EB_E=R_Ee*n_EB_E n_EC_E=R_Ee*n_EC_E n_EM_E=R_Ee*n_EM_E
-#
-# figure(1)
-# clf
-# hold on
-#
-# # To plot 3D arrows the function arrow3d.m, available from Matlab file
-# # exchange, written by Moshe Lindner is used (a copy of the function is at
-# # the end of this file):
-# arrow3d([0 -n_EA_E(3)],[0 n_EA_E(2)],[0 n_EA_E(1)],0.9,0.02,0.05,'r') # A, n_EA_E
-# arrow3d([0 -n_EB_E(3)],[0 n_EB_E(2)],[0 n_EB_E(1)],0.9,0.02,0.05,'r') # B, n_EB_E
-# arrow3d([0 -n_EC_E(3)],[0 n_EC_E(2)],[0 n_EC_E(1)],0.9,0.02,0.05,'r') # C, n_EC_E
-# arrow3d([0 -n_EM_E(3)],[0 n_EM_E(2)],[0 n_EM_E(1)],0.9,0.02,0.05,'g') # M, n_EM_E
-#
-#
-# ###################### Plotting a spherical Earth surface:
-# try
-#     # Loads a simple topographic model of Earth (available as part of default Matlab)
-#     load topo
-#
-#     # Remove height info, only storing info about water or land:
-#     Earth_topo_binary=zeros(size(topo))
-#     Earth_topo_binary(topo>0)=1 # Set all positions above water to 1
-#     Earth_topo_binary(topo<=0)=-1 # Set all positions below or equal to zero to -1
-#     Earth_topo_binary=[Earth_topo_binary(:,181:360) Earth_topo_binary(:,1:180)] # Switch the halves to get correct mapping for our plot
-#     clear topo
-# catch
-#     Earth_topo_binary=zeros(2)-1
-# end
-#
-# # Number of elements in the sphere (in each direction)
-# n_of_Earth_plot_elements=90
-#
-# # Data for a 3D Earth sphere
-# [Earth_plot_X,Earth_plot_Y,Earth_plot_Z]=sphere(n_of_Earth_plot_elements)
-# Earth_plot_X=Earth_plot_X*Earth_radius_for_plotting
-# Earth_plot_Y=Earth_plot_Y*Earth_radius_for_plotting
-# Earth_plot_Z=Earth_plot_Z*Earth_radius_for_plotting
-#
-# Earth_surface_properties.Cdata = Earth_topo_binary # Color data
-# Earth_surface_properties.FaceLighting = 'gouraud' # Smooth out light reflex
-# Earth_surface_properties.FaceColor= 'texture' # Note that the 'facecolor' property needs to be set to
-# # 'texturemap' if the size of the z-data is different from the size of the data in the colormap (topo) that is loaded.
-# Earth_surface_properties.EdgeColor = 'none' # Remove mesh
-# Earth_surface_properties.AmbientStrength=0.1 # Ambient light strength
-# surface(Earth_plot_X,Earth_plot_Y,Earth_plot_Z,Earth_surface_properties)
-# material dull
-#
-# colmap_Earth_binary=[0.6 0.6 1
-#     0.6 1 0.6] # blue and green, coloring sea and land
-# colormap(colmap_Earth_binary)
-#
-# # Add two light sources:
-# light('Position',[0 -1 0.5],'Style','infinite')
-# light('Position',[0 1 -0.5],'Style','infinite')
-#
-# hold off
-# grid on
-# axis equal
-# title('Example 7')
-# view(60,30)
-# rotate3d on
-#
-# end
-#
-#
-# # The following code, written by Moshe Lindner, is from Matlab file exchange, to plot 3D arrows:
-#
-# function [h]=arrow3d(x,y,z,head_frac,radii,radii2,colr)
-# #
-# # The function plotting 3-dimensional arrow
-# #
-# # h=arrow3d(x,y,z,head_frac,radii,radii2,colr)
-# #
-# # The inputs are:
-# #       x,y,z =  vectors of the starting point and the ending point of the
-# #           arrow, e.g.:  x=[x_start, x_end] y=[y_start, y_end]z=[z_start,z_end]
-# #       head_frac = fraction of the arrow length where the head should  start
-# #       radii = radius of the arrow
-# #       radii2 = radius of the arrow head (defult = radii*2)
-# #       colr =   color of the arrow, can be string of the color name, or RGB vector  (default='blue')
-# #
-# # The output is the handle of the surfaceplot graphics object.
-# # The settings of the plot can changed using: set(h, 'PropertyName', PropertyValue)
-# #
-# # example #1:
-# #        arrow3d([0 0],[0 0],[0 6],.5,3,4,[1 0 .5])
-# # example #2:
-# #        arrow3d([2 0],[5 0],[0 -6],.2,3,5,'r')
-# # example #3:
-# #        h = arrow3d([1 0],[0 1],[-2 3],.8,3)
-# #        set(h,'facecolor',[1 0 0])
-# #
-# # Written by Moshe Lindner , Bar-Ilan University, Israel.
-# # July 2010 (C)
-#
-# if nargin==5
-#     radii2=radii*2
-#     colr='blue'
-# elseif nargin==6
-#     colr='blue'
-# end
-# if size(x,1)==2
-#     x=x'
-#     y=y'
-#     z=z'
-# end
-#
-# x(3)=x(2)
-# x(2)=x(1)+head_frac*(x(3)-x(1))
-# y(3)=y(2)
-# y(2)=y(1)+head_frac*(y(3)-y(1))
-# z(3)=z(2)
-# z(2)=z(1)+head_frac*(z(3)-z(1))
-# r=[x(1:2)',y(1:2)',z(1:2)']
-#
-# N=50
-# dr=diff(r)
-# dr(end+1,:)=dr(end,:)
-# origin_shift=(ones(size(r))*(1+max(abs(r(:))))+[dr(:,1) 2*dr(:,2) -dr(:,3)])
-# r=r+origin_shift
-#
-# normdr=(sqrt((dr(:,1).^2)+(dr(:,2).^2)+(dr(:,3).^2)))
-# normdr=[normdr,normdr,normdr]
-# dr=dr./normdr
-# Pc=r
-# n1=cross(dr,Pc)
-# normn1=(sqrt((n1(:,1).^2)+(n1(:,2).^2)+(n1(:,3).^2)))
-# normn1=[normn1,normn1,normn1]
-# n1=n1./normn1
-# P1=n1+Pc
-#
-# X1=[]Y1=[]Z1=[]
-# j=1
-# for theta=([0:N])*2*pi./(N)
-#     R1=Pc+radii*cos(theta).*(P1-Pc) + radii*sin(theta).*cross(dr,(P1-Pc)) -origin_shift
-#     X1(2:3,j)=R1(:,1)
-#     Y1(2:3,j)=R1(:,2)
-#     Z1(2:3,j)=R1(:,3)
-#     j=j+1
-# end
-#
-# r=[x(2:3)',y(2:3)',z(2:3)']
-#
-# dr=diff(r)
-# dr(end+1,:)=dr(end,:)
-# origin_shift=(ones(size(r))*(1+max(abs(r(:))))+[dr(:,1) 2*dr(:,2) -dr(:,3)])
-# r=r+origin_shift
-#
-# normdr=(sqrt((dr(:,1).^2)+(dr(:,2).^2)+(dr(:,3).^2)))
-# normdr=[normdr,normdr,normdr]
-# dr=dr./normdr
-# Pc=r
-# n1=cross(dr,Pc)
-# normn1=(sqrt((n1(:,1).^2)+(n1(:,2).^2)+(n1(:,3).^2)))
-# normn1=[normn1,normn1,normn1]
-# n1=n1./normn1
-# P1=n1+Pc
-#
-# j=1
-# for theta=([0:N])*2*pi./(N)
-#     R1=Pc+radii2*cos(theta).*(P1-Pc) + radii2*sin(theta).*cross(dr,(P1-Pc)) -origin_shift
-#     X1(4:5,j)=R1(:,1)
-#     Y1(4:5,j)=R1(:,2)
-#     Z1(4:5,j)=R1(:,3)
-#     j=j+1
-# end
-#
-# X1(1,:)=X1(1,:)*0 + x(1)
-# Y1(1,:)=Y1(1,:)*0 + y(1)
-# Z1(1,:)=Z1(1,:)*0 + z(1)
-# X1(5,:)=X1(5,:)*0 + x(3)
-# Y1(5,:)=Y1(5,:)*0 + y(3)
-# Z1(5,:)=Z1(5,:)*0 + z(3)
-#
-# h=surf(X1,Y1,Z1,'facecolor',colr,'edgecolor','none')
-# #camlight
-# lighting phong
-#
-# end
-#
 
 
 if __name__ == "__main__":

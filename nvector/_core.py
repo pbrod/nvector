@@ -38,11 +38,138 @@ THE POSSIBILITY OF SUCH DAMAGE.
 """
 from __future__ import division
 import numpy as np
+from numpy import rad2deg, deg2rad, arctan2, sin, cos, array, cross, dot, sqrt
+from numpy.linalg import norm
 import warnings
 
 
+NORTH_POLE = dict(z=array([[0, 0, 1],
+                           [0, 1, 0],
+                           [-1, 0, 0]]),
+                  x=np.eye(3))
+R_Ee = NORTH_POLE['z']
+_EPS = np.finfo(float).eps  # machine precision (machine epsilon)
+
+
+ELLIPSOID = {1: (6377563.3960, 1.0/299.3249646, 'Airy 1858'),
+             2: (6377340.189, 1.0/299.3249646, 'Airy Modified'),
+             3: (6378160, 1.0/298.25, 'Australian National'),
+             4: (6377397.155, 1.0/299.1528128, 'Bessel 1841'),
+             5: (6378249.145, 1.0/293.465, 'Clarke 1880'),
+             6: (6377276.345, 1.0/300.8017, 'Everest 1830'),
+             7: (6377304.063, 1.0/300.8017, 'Everest Modified'),
+             8: (6378166.0, 1.0/298.3, 'Fisher 1960'),
+             9: (6378150.0, 1.0/298.3, 'Fisher 1968'),
+             10: (6378270.0, 1.0/297, 'Hough 1956'),
+             11: (6378388.0, 1.0/297, 'International (Hayford)'),
+             12: (6378245.0, 1.0/298.3, 'Krassovsky 1938'),
+             13: (6378145., 1.0/298.25, 'NWL-9D  (WGS 66)'),
+             14: (6378160., 1.0/298.25, 'South American 1969'),
+             15: (6378136, 1.0/298.257, 'Soviet Geod. System 1985'),
+             16: (6378135., 1.0/298.26, 'WGS 72'),
+             17: (6378206.4, 1.0/294.9786982138, 'Clarke 1866    (NAD27)'),
+             18: (6378137.0, 1.0/298.257222100882711243162836600094,
+                  'GRS80 / WGS84  (NAD83)')}
+
+ELLIPSOID_IX = {'airy1858': 1, 'airymodified': 2, 'australiannational': 3,
+                'everest1830': 6, 'everestmodified': 7, 'krassovsky': 12,
+                'krassovsky1938': 12, 'fisher1968': 9, 'fisher1960': 8,
+                'international': 11, 'hayford': 11,
+                'clarke1866': 17, 'nad27': 17, 'bessel': 4,
+                'bessel1841': 4, 'grs80': 18, 'wgs84': 18, 'nad83': 18,
+                'sovietgeod.system1985': 15, 'wgs72': 16,
+                'hough1956': 10, 'hough': 10, 'nwl-9d': 13, 'wgs66': 13,
+                'southamerican1969': 14,  'clarke1880': 5}
+
+
+def select_ellipsoid(name):
+
+    msg = """
+    Other Ellipsoids.'
+    -----------------'
+    '
+    1) Airy 1858
+    2) Airy Modified
+    3) Australian National
+    4) Bessel 1841
+    5) Clarke 1880
+    6) Everest 1830
+    7) Everest Modified
+    8) Fisher 1960
+    9) Fisher 1968
+    10) Hough 1956
+    11) International (Hayford)
+    12) Krassovsky 1938
+    13) NWL-9D (WGS 66)
+    14) South American 1969
+    15) Soviet Geod. System 1985
+    16) WGS 72
+    17) User defined.
+    '
+    Enter choice :
+    """
+    if name:
+        option = ELLIPSOID_IX.get(name.lower().replace(' ', ''), name)
+    else:
+        option = input(msg)
+    return ELLIPSOID[option]
+
+
+def set_north_pole_axis_for_E_frame(axis='z'):
+    """
+    Selects axes of the coordinate frame E.
+
+    R_Ee controls the axes of the coordinate frame E (Earth-Centred,
+    Earth-Fixed, ECEF) used by the other functions in this library
+
+    There are two choices of E-axes that are described in Table 2 in Gade
+    (2010):
+
+    * e: z-axis points to the North Pole and
+         x-axis points to the point where latitude = longitude = 0.
+         This choice is very common in many fields.
+
+    * E: x-axis points to the North Pole,
+         y-axis points towards longitude +90deg (east) and latitude = 0.
+         This choice of axis directions ensures that at zero latitude and
+         longitude, N (North-East-Down) has the same orientation as E.
+         If roll/pitch/yaw are zero, also B (Body, forward, starboard, down)
+         has this orientation. In this manner, the axes of E is chosen to
+         correspond with the axes of N and B.
+
+    Based on this we get:
+    R_Ee=[0 0 1
+          0 1 0
+         -1 0 0]
+
+    The above R_Ee should be returned from this function when using z-axis to
+    the North pole (which is most common). When using x-axis to the North
+    pole, R_Ee should be set to I (identity matrix) (since the functions in
+    this library are originally written for this option).
+
+    Reference
+    ---------
+    Gade, K. (2010). A Nonsingular Horizontal Position Representation,
+    The Journal of Navigation, Volume 63, Issue 03, pp 395-417, July 2010.
+    www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf
+    """
+    global R_Ee
+    R_Ee = NORTH_POLE[axis]
+    return R_Ee
+
+
+def nthroot(x, n):
+    """
+    Return the n'th root of x to machine precision
+    """
+    y = x**(1./n)
+    return np.where((x != 0) & (_EPS * np.abs(x) < 1),
+                    y - (y**n-x)/(n*y**(n-1)), y)
+
+
 def deg(rad_angle):
-    """deg Converts angle in radians to degrees.
+    """
+    Converts angle in radians to degrees.
 
     Parameters
     ----------
@@ -56,13 +183,9 @@ def deg(rad_angle):
 
     See also
     --------
-    rad.
+    rad
     """
-
-    # Originated: 1996 Kenneth Gade, FFI
-
-    deg_angle = rad_angle * 180 / np.pi
-    return deg_angle
+    return rad2deg(rad_angle)
 
 
 def rad(deg_angle):
@@ -81,85 +204,26 @@ def rad(deg_angle):
 
     See also
     --------
-    deg.
+    deg
     """
-
-    # Originated: 1996 Kenneth Gade, FFI
-
-    rad_angle = deg_angle * np.pi / 180
-    return rad_angle
-
-
-def R_Ee():
-    """
-    R_Ee Selects axes of the coordinate frame E.
-
-    This file controls the axes of the coordinate frame E (Earth-Centred,
-    Earth-Fixed, ECEF) used by the other files in this library
-
-    There are two choices of E-axes that are described in Table 2 in Gade
-    (2010):
-
-    * e: z-axis points to the North Pole and x-axis points to the point where
-        latitude = longitude = 0. This choice is very common in many fields.
-
-    * E: x-axis points to the North Pole,
-         y-axis points towards longitude +90deg
-        (east) and latitude = 0. This choice of axis directions ensures
-        that at zero latitude and longitude, N (North-East-Down) has the
-        same orientation as E. If roll/pitch/yaw are zero, also B (Body,
-        forward, starboard, down) has this orientation. In this manner, the
-        axes of E is chosen to correspond with the axes of N and B.
-
-    Based on this we get:
-    R_Ee=[0 0 1
-          0 1 0
-         -1 0 0]
-
-    The above R_Ee should be returned from this file when using z-axis to the
-    North pole (which is most common). When using x-axis to the North
-    pole, R_Ee should be set to I (identity matrix) (since the files in
-    this library are originally written for this option).
-
-    Reference:
-    ----------
-    K Gade (2010): A Nonsingular Horizontal Position Representation,
-    The Journal of Navigation, Volume 63, Issue 03, pp 395-417, July 2010.
-    (www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf)
-    """
-
-    # Originated: 2015.02.19 Kenneth Gade and Kristian Svartveit, FFI
-    # Modified:
-
-    # Select axes of E (by commenting/uncommenting the two choices):
-    # z-axis to the North Pole, most common choice:
-
-    R_Ee = np.array([[0, 0, 1],
-                     [0, 1, 0],
-                     [-1, 0, 0]])
-
-    # x-axis to the North Pole, corresponds to typical choices of N and B:
-    # R_Ee_selected = np.eye(3)
-
-    return R_Ee
+    return deg2rad(deg_angle)
 
 
 def unit(vector):
     """
-    unit Makes input vector unit length, i.e. norm==1.
+    Return input vector of unit length, i.e. norm==1.
 
-    unit_vector = unit(vector)
-    makes the general 1xm vector a unit_vector (norm==1).
-    A matrix of vectors is accepted as input.
+    Parameters
+    ----------
+    vector : 3 x m array
+        m column vectors
+
+    Returns
+    -------
+    unitvector : 3 x m array
+        normalized unitvector(s) along axis==0.
     """
-
-    # Originated: 2002.07.04 Kenneth Gade, FFI
-    # Modified:   2012.04.25 Kristian Svartveit, FFI: Vectorization
-    # Modified:   2015.02.19 Kristian Svartveit, FFI: Bugfix and speedup
-    # Modified:   2015.11.04 Kristian Svartveit, FFI: Fast for both matrix of
-    #                        vectors and single vector input
-
-    current_norm = np.linalg.norm(vector, axis=0)
+    current_norm = norm(vector, axis=0)
     unit_vector = vector / current_norm
     idx = np.flatnonzero(current_norm == 0)
     unit_vector[:, idx] = 0
@@ -169,82 +233,68 @@ def unit(vector):
 
 def lat_long2n_E(latitude, longitude):
     """
-    lat_long2n_E Converts latitude and longitude to n-vector.
-    n_E = lat_long2n_E(latitude,longitude)
-    n-vector (n_E) is calculated from (geodetic) latitude and longitude.
+    Converts latitude and longitude to n-vector.
 
-    IN:
-    latitude:  [rad]     Geodetic latitude
-    longitude: [rad]
+    Parameters
+    ----------
+    latitude, longitude: real scalars or vectors of length n.
+        Geodetic latitude and longitude given in [rad]
 
-    OUT:
-    n_E:       [no unit] n-vector decomposed in E (3x1 vector)
+    Returns
+    -------
+    n_E: 3 x n array
+        n-vector(s) [no unit] decomposed in E.
 
-    The function also accepts vectors (1xm) with lat and long, then a 3xm
-    matrix of n-vectors is returned.
-
-    See also n_E2lat_long.
+    See also
+    --------
+    n_E2lat_long.
     """
 
-    # Originated: 1999.02.23 Kenneth Gade, FFI
-    # Modified:   2015.02.20 Kenneth Gade, FFI: Added possibility of using
-    # alternative E axes
-
     # Equation (3) from Gade (2010):
-    # R_Ee selects correct E-axes, see R_Ee.m for details
-    nvec = np.vstack((np.sin(latitude),
-                      np.sin(longitude) * np.cos(latitude),
-                      -np.cos(longitude) * np.cos(latitude)))
-    n_E = np.dot(R_Ee().T, nvec)
+    nvec = np.vstack((sin(latitude),
+                      sin(longitude) * cos(latitude),
+                      -cos(longitude) * cos(latitude)))
+    n_E = np.dot(R_Ee.T, nvec)
     return n_E
 
 
 def n_E2lat_long(n_E):
     """
-    n_E2lat_long Converts n-vector to latitude and lontitude.
-    [latitude,longitude] = n_E2lat_long(n_E)
-    Geodetic latitude and longitude are calculated from n-vector (n_E).
+    Converts n-vector to latitude and longitude.
 
-    IN:
-    n_E:       [no unit] n-vector decomposed in E (3x1 vector)
+    Parameters
+    ----------
+    n_E: 3 x n array
+        n-vector [no unit] decomposed in E.
 
-    OUT:
-    latitude:  [rad]     Geodetic latitude
-    longitude: [rad]
+    Returns
+    -------
+    latitude, longitude: real scalars or vectors of lengt n.
+        Geodetic latitude and longitude given in [rad]
 
-    The function also accepts vectorized form (i.e. a 3xm matrix of n-vectors
-    is input, returning 1xm vectors of latitude and longitude)
-
-    See also lat_long2n_E.
+    See also
+    --------
+    lat_long2n_E.
     """
+    _check_length_deviation(n_E)
+    n_E = np.dot(R_Ee, n_E)
 
-    # Originated: 1999.02.23 Kenneth Gade, FFI
-    # Modified:   2004.11.23 Kenneth Gade, FFI: Accepts vectorized input
-    # Modified:   2015.02.20 Kenneth Gade, FFI:
-    #                        Added possibility of using alternative E axes
-
-    check_length_deviation(n_E)
-
-    n_E = np.dot(R_Ee(), n_E)
-    # R_Ee selects correct E-axes, see R_Ee.m for details
-
-    # CALCULATIONS:
     # Equation (5) in Gade (2010):
-    longitude = np.arctan2(n_E[1, :], -n_E[2, :])
+    longitude = arctan2(n_E[1, :], -n_E[2, :])
 
     # Equation (6) in Gade (2010) (Robust numerical solution)
-    equatorial_component = np.sqrt(n_E[1, :]**2 + n_E[2, :]**2)
+    equatorial_component = sqrt(n_E[1, :]**2 + n_E[2, :]**2)
     # vector component in the equatorial plane
-    latitude = np.arctan2(n_E[0, :], equatorial_component)
+    latitude = arctan2(n_E[0, :], equatorial_component)
     # atan() could also be used since latitude is within [-pi/2,pi/2]
 
-    # latitude=asin(n_E(1)) is a theoretical solution, but close to the Poles
+    # latitude=asin(n_E[0] is a theoretical solution, but close to the Poles
     # it is ill-conditioned which may lead to numerical inaccuracies (and it
     # will give imaginary results for norm(n_E)>1)
     return latitude, longitude
 
 
-def check_length_deviation(n_E):
+def _check_length_deviation(n_E, limit=0.1):
     """
     n-vector should have length=1,  i.e. norm(n_E)=1.
 
@@ -252,43 +302,37 @@ def check_length_deviation(n_E):
     This function only depends of the direction of n-vector, thus the warning
     is included only to give a notice in cases where a wrong input is given
     unintentionally (i.e. the input is not even approximately a unit vector).
-    """
-    length_deviation_warning_limit = 0.1
-    length_deviation = np.abs(np.linalg.norm(n_E[:, 0]) - 1)
-    # If a matrix of n-vectors is input,
-    # only first is controlled to save time (assuming advanced users input
-    # correct n-vectors)
 
-    if length_deviation > length_deviation_warning_limit:
+    If a matrix of n-vectors is input, only first is controlled to save time
+    (assuming advanced users input correct n-vectors)
+    """
+    length_deviation = np.abs(norm(n_E[:, 0]) - 1)
+    if length_deviation > limit:
         warnings.warn('n-vector should have unit length: '
                       'norm(n_E)~=1 ! Error is: {}'.format(length_deviation))
 
 
 def n_E2R_EN(n_E):
     """
-    n_E2R_EN Finds the rotation matrix R_EN from n-vector.
-    R_EN = n_E2R_EN(n_E) The rotation matrix (direction cosine matrix) R_EN
-    is calculated based on n-vector (n_E).
+    Returns the rotation matrix R_EN from n-vector.
 
-    IN:
-    n_E:   [no unit] n-vector decomposed in E (3x1 vector)
+    Parameters
+    ----------
+    n_E: 3 x 1 array
+        n-vector [no unit] decomposed in E
 
-    OUT:
-    R_EN:  [no unit] The resulting rotation matrix (direction cosine matrix)
+    Returns
+    -------
+    R_EN:  3 x 3 array
+        The resulting rotation matrix [no unit] (direction cosine matrix).
 
-    See also R_EN2n_E, n_E_and_wa2R_EL, R_EL2n_E.
+    See also
+    --------
+    R_EN2n_E, n_E_and_wa2R_EL, R_EL2n_E.
     """
+    _check_length_deviation(n_E)
+    n_E = unit(np.dot(R_Ee, n_E))
 
-    # Originated: 2015.02.23 Kenneth Gade, FFI
-    # Modified:
-
-    check_length_deviation(n_E)
-    n_E = unit(np.dot(R_Ee(), n_E))
-    # Ensures unit length. R_Ee selects correct E-axes, see R_Ee.m for details.
-    # Note: In code where the norm of the input n_EB_E is guaranteed to be 1,
-    # the use of the unit-function can be removed, to gain some speed.
-
-    # CALCULATIONS:
     # N coordinate frame (North-East-Down) is defined in Table 2 in Gade (2010)
     # Find z-axis of N (Nz):
     Nz_E = -n_E  # z-axis of N (down) points opposite to n-vector
@@ -296,59 +340,59 @@ def n_E2R_EN(n_E):
     # Find y-axis of N (East)(remember that N is singular at Poles)
     # Equation (9) in Gade (2010):
     # Ny points perpendicular to the plane
-    Ny_E_direction = np.cross([[1], [0], [0]], n_E, axis=0)
+    Ny_E_direction = cross([[1], [0], [0]], n_E, axis=0)
     # formed by n-vector and Earth's spin axis
-    outside_poles = (np.linalg.norm(Ny_E_direction) != 0)
+    outside_poles = (norm(Ny_E_direction) != 0)
     if outside_poles:
         Ny_E = unit(Ny_E_direction)
     else:  # Pole position:
-        Ny_E = np.array([[0], [1], [0]])  # selected y-axis direction
+        Ny_E = array([[0], [1], [0]])  # selected y-axis direction
 
     # Find x-axis of N (North):
-    Nx_E = np.cross(Ny_E, Nz_E, axis=0)  # Final axis found by right hand rule
+    Nx_E = cross(Ny_E, Nz_E, axis=0)  # Final axis found by right hand rule
 
     # Form R_EN from the unit vectors:
-    R_EN = np.dot(R_Ee().T, np.hstack((Nx_E, Ny_E, Nz_E)))
-    # R_Ee selects correct E-axes, see R_Ee.m for details
+    R_EN = dot(R_Ee.T, np.hstack((Nx_E, Ny_E, Nz_E)))
 
     return R_EN
 
 
 def n_E_and_wa2R_EL(n_E, wander_azimuth):
     """
-    n_E_and_wa2R_EL Finds R_EL from n-vector and wander azimuth angle.
+    Returns rotation matrix R_EL from n-vector and wander azimuth angle.
+
     R_EL = n_E_and_wa2R_EL(n_E,wander_azimuth) Calculates the rotation matrix
     (direction cosine matrix) R_EL using n-vector (n_E) and the wander
     azimuth angle.
     When wander_azimuth=0, we have that N=L (See Table 2 in Gade (2010) for
     details)
 
-    IN:
-    n_E:        [no unit] n-vector decomposed in E (3x1 vector)
-    wander_azimuth: [rad] The angle between L's x-axis and north, pos about
-    L's z-axis
+    Parameters
+    ----------
+    n_E: 3 x 1 array
+        n-vector [no unit] decomposed in E
+    wander_azimuth: real scalar
+        Angle [rad] between L's x-axis and north, positive about L's z-axis.
 
-    OUT:
-    R_EL:       [no unit] The resulting rotation matrix (3x3)
+    Returns
+    -------
+    R_EL: 3 x 3 array
+        The resulting rotation matrix.       [no unit]
 
-    See also R_EL2n_E, R_EN2n_E, n_E2R_EN.
+    See also
+    --------
+    R_EL2n_E, R_EN2n_E, n_E2R_EN.
     """
-
-    # Originated: 1999.02.23 Kenneth Gade, FFI
-    # Modified:   2015.02.20 Kenneth Gade, FFI: Added possibility of using
-    # alternative E axes
-
     latitude, longitude = n_E2lat_long(n_E)
 
     # Reference: See start of Section 5.2 in Gade (2010):
-    R_EL = np.dot(R_Ee().T, xyz2R(longitude, -latitude, wander_azimuth))
-    # R_Ee selects correct E-axes, see R_Ee.m for details
+    R_EL = dot(R_Ee.T, xyz2R(longitude, -latitude, wander_azimuth))
     return R_EL
 
 
-def check_backward_compatibility(a, f):
+def _check_backward_compatibility(a, f):
     """
-    Previously, custom ellipsoid was spesified by a and b in this function.
+    Previously, custom ellipsoid was spesified by a and b.
     However, for more spherical globes than the Earth, or if f has more
     decimals than in WGS-84, using f and a as input will give better
     numerical precicion than a and b.
@@ -365,304 +409,252 @@ def check_backward_compatibility(a, f):
     return a, f
 
 
-def n_EB_E2p_EB_E(n_EB_E, z_EB=None, a=6378137, f=1 / 298.257223563):
+def n_EB_E2p_EB_E(n_EB_E, z_EB=0, a=6378137, f=1.0/298.257223563):
     """
-    n_EB_E2p_EB_E Converts n-vector to Cartesian position vector in meters.
+    Converts n-vector to Cartesian position vector in meters.
 
-    p_EB_E = n_EB_E2p_EB_E(n_EB_E)
+    Parameters
+    ----------
+    n_EB_E:  3 x n array
+        n-vector(s) [no unit] of position B, decomposed in E.
+    z_EB:  1 x n array
+        Depth(s) [m] of system B, relative to the ellipsoid (z_EB = -height)
+    a: real scalar, default WGS-84 ellipsoid.
+        Semi-major axis of the Earth ellipsoid given in [m].
+    f: real scalar, default WGS-84 ellipsoid.
+        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+        Earth with radius a is used in stead of WGS-84.
+
+    Returns
+    -------
+    p_EB_E:  3 x n array
+        Cartesian position vector(s) from E to B, decomposed in E.
 
     The position of B (typically body) relative to E (typically Earth) is
     given into this function as n-vector, n_EB_E. The function converts
     to cartesian position vector ("ECEF-vector"), p_EB_E, in meters.
     The calculation is excact, taking the ellipsity of the Earth into account.
-    It is also nonsingular as both n-vector and p-vector are nonsingular
+    It is also non-singular as both n-vector and p-vector are non-singular
     (except for the center of the Earth).
     The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
     might be specified.
 
-    p_EB_E = n_EB_E2p_EB_E(n_EB_E,z_EB)
-
-    Depth of B, z_EB, is also specified,
-    z_EB = 0 is used when not spefified.
-
-    p_EB_E = n_EB_E2p_EB_E(n_EB_E,z_EB,a)
-    Spherical Earth with radius a is used in stead of WGS-84.
-
-    p_EB_E = n_EB_E2p_EB_E(n_EB_E,z_EB,a,f)
-    Ellipsoidal Earth model with semi-major axis a and flattening f is used
-    in stead of WGS-84.
-
-    IN:
-    n_EB_E:  [no unit] n-vector of position B, decomposed in E (3x1 vector).
-    z_EB:    [m]     (Optional, assumed to be zero if not given) Depth of system B,
-                     relative to the ellipsoid (z_EB = -height)
-    a:       [m]       (Optional) Semi-major axis of the Earth ellipsoid
-
-    f:       [no unit] (Optional) Flattening of the Earth ellipsoid
-
-    OUT:
-    p_EB_E:  [m]       Cartesian position vector from E to B, decomposed in E (3x1 vector).
-
-    The function also accepts vectorized form, i.e. n_EB_E is a 3xn matrix, z_EB is
-    a 1xn vector and p_EB_E is a 3xn matrix.
-
-    See also p_EB_E2n_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E.
+    See also
+    --------
+    p_EB_E2n_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E.
     """
+    _check_length_deviation(n_EB_E)
 
-    # Originated: 2004.11.17 Kenneth Gade and Brita Hafskjold, FFI
-    # Modified:   2015.02.20 Kenneth Gade, FFI: Added possibility of using
-    # alternative E axes
-
-    check_length_deviation(n_EB_E)
-
-    n_EB_E = unit(np.dot(R_Ee(), n_EB_E))
-    # Ensures unit length. R_Ee selects correct E-axes, see R_Ee function for
-    # details.
-    # Note: In code where the norm of the input n_EB_E is guaranteed to be 1,
-    # the use of the unit-function can be removed, to gain some speed.
+    n_EB_E = unit(dot(R_Ee, n_EB_E))
     if z_EB is None:
         z_EB = np.zeros((1, np.shape(n_EB_E)[1]))
 
-    a, f = check_backward_compatibility(a, f)
-    # WGS-84 ellipsoid is used
-    # a = 6378137  the equatorial radius of the Earth-ellipsoid
-    # f = 1/298.257223563 the flattening of the Earth-ellipsoid
-
-    # CALCULATIONS:
-
-    # semi-minor axis:
-    b = a * (1 - f)
+    a, f = _check_backward_compatibility(a, f)
+    b = a * (1 - f)  # semi-minor axis
 
     # The following code implements equation (22) in Gade (2010):
-
     scale = np.vstack((1,
                        (1 - f),
                        (1 - f)))
-    denominator = np.linalg.norm(n_EB_E / scale, axis=0)
+    denominator = norm(n_EB_E / scale, axis=0)
 
     # We first calculate the position at the origin of coordinate system L,
     # which has the same n-vector as B (n_EL_E = n_EB_E),
     # but lies at the surface of the Earth (z_EL = 0).
 
     p_EL_E = b / denominator * n_EB_E / scale**2
-    p_EB_E = np.dot(R_Ee().T, p_EL_E - n_EB_E * z_EB)
+    p_EB_E = dot(R_Ee.T, p_EL_E - n_EB_E * z_EB)
 
     return p_EB_E
 
 
-def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1 / 298.257223563):
+def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0/298.257223563):
     """
-     p_EB_E2n_EB_E  Converts Cartesian position vector in meters to n-vector.
-    [n_EB_E,z_EB] = p_EB_E2n_EB_E(p_EB_E)
+    Converts Cartesian position vector in meters to n-vector.
+
+    Parameters
+    ----------
+    p_EB_E:  3 x n array
+        Cartesian position vector(s) from E to B, decomposed in E.
+    a: real scalar, default WGS-84 ellipsoid.
+        Semi-major axis of the Earth ellipsoid given in [m].
+    f: real scalar, default WGS-84 ellipsoid.
+        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+        Earth with radius a is used in stead of WGS-84.
+
+    Returns
+    -------
+    n_EB_E:  3 x n array
+        n-vector(s) [no unit] of position B, decomposed in E.
+    z_EB:  1 x n array
+        Depth(s) [m] of system B, relative to the ellipsoid (z_EB = -height)
+
     The position of B (typically body) relative to E (typically Earth) is
     given into this function as cartesian position vector p_EB_E, in meters.
     ("ECEF-vector"). The function converts to n-vector, n_EB_E and its
     depth, z_EB.
     The calculation is excact, taking the ellipsity of the Earth into account.
-    It is also nonsingular as both n-vector and p-vector are nonsingular
+    It is also non-singular as both n-vector and p-vector are non-singular
     (except for the center of the Earth).
     The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
     might be specified.
 
-    [n_EB_E,z_EB] = p_EB_E2n_EB_E(p_EB_E,a) Spherical Earth with radius a is
-    used in stead of WGS-84.
-
-    [n_EB_E,z_EB] = p_EB_E2n_EB_E(p_EB_E,a,f) Ellipsoidal Earth model with
-    semi-major axis a and flattening f is used in stead of WGS-84.
-
-    IN:
-    p_EB_E: [m]       Cartesian position vector from E to B, decomposed in E (3x1 vector).
-    a:      [m]       (Optional) Semi-major axis of the Earth ellipsoid
-    f:      [no unit] (Optional) Flattening of the Earth ellipsoid
-
-    OUT:
-    n_EB_E: [no unit] n-vector  representation of position B, decomposed in E (3x1 vector).
-    z_EB:   [m]       Depth of system B relative to the ellipsoid (z_EB = -height).
-
-
-    The function also accepts vectorized form, i.e. p_EB_E is a 3xn matrix,
-    n_EB_E is a 3xn matrix and z_EB is a 1xn vector.
-
-    See also n_EB_E2p_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E.
+    See also
+    --------
+    n_EB_E2p_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E.
     """
-
-    # Originated: 2004.11.17 Kenneth Gade and Brita Hafskjold, FFI
-    # Modified:   2007.03.02 Brita Hafskjold Gade, FFI
-    #             Replaced formulas to get full numerical accuracy at all positions:
-    # Modified:   2014.08.22 Kenneth Gade, FFI:
-    #                Added possibility of vectorized input/output
-
-    # INPUT HANDLING:
-
-    p_EB_E = np.dot(R_Ee(), p_EB_E)
+    p_EB_E = dot(R_Ee, p_EB_E)
     # R_Ee selects correct E-axes, see R_Ee.m for details
-    a, f = check_backward_compatibility(a, f)
+    a, f = _check_backward_compatibility(a, f)
 
     # e_2 = eccentricity**2
-    e_2 = 2 * f - f**2  # = 1-b^2/a^2;
+    e_2 = 2 * f - f**2  # = 1-b**2/a**2
 
     # The following code implements equation (23) from Gade (2010):
     R_2 = p_EB_E[1, :]**2 + p_EB_E[2, :]**2
-    R = np.sqrt(R_2)   # R = component of p_EB_E in the equatorial plane
+    R = sqrt(R_2)   # R = component of p_EB_E in the equatorial plane
 
     p = R_2 / a**2
     q = (1 - e_2) / (a**2) * p_EB_E[0, :]**2
     r = (p + q - e_2**2) / 6
 
     s = e_2**2 * p * q / (4 * r**3)
-    # t = nthroot((1 + s + sqrt(s.*(2+s))), 3);
-    t = (1 + s + np.sqrt(s * (2 + s)))**(1. / 3)
+    t = nthroot((1 + s + sqrt(s*(2+s))), 3)
+    # t = (1 + s + sqrt(s * (2 + s)))**(1. / 3)
     u = r * (1 + t + 1. / t)
-    v = np.sqrt(u**2 + e_2**2 * q)
+    v = sqrt(u**2 + e_2**2 * q)
 
     w = e_2 * (u + v - q) / (2 * v)
-    k = np.sqrt(u + v + w**2) - w
+    k = sqrt(u + v + w**2) - w
     d = k * R / (k + e_2)
 
     # Calculate height:
-    height = (k + e_2 - 1) / k * np.sqrt(d**2 + p_EB_E[0, :]**2)
+    height = (k + e_2 - 1) / k * sqrt(d**2 + p_EB_E[0, :]**2)
 
-    temp = 1. / np.sqrt(d**2 + p_EB_E[0, :]**2)
+    temp = 1. / sqrt(d**2 + p_EB_E[0, :]**2)
 
     n_EB_E_x = temp * p_EB_E[0, :]
     n_EB_E_y = temp * k / (k + e_2) * p_EB_E[1, :]
     n_EB_E_z = temp * k / (k + e_2) * p_EB_E[2, :]
 
     n_EB_E = np.vstack((n_EB_E_x, n_EB_E_y, n_EB_E_z))
-
-    # Ensure unit length:
-    n_EB_E = unit(np.dot(R_Ee().T, n_EB_E))
+    n_EB_E = unit(dot(R_Ee.T, n_EB_E))  # Ensure unit length:
 
     z_EB = -height
     return n_EB_E, z_EB
 
 
-def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=None, z_EB=None,
-                             a=6378137, f=1 / 298.257223563):
+def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
+                             f=1.0/298.257223563):
     """
-    n_EA_E_and_n_EB_E2p_AB_E From two positions A and B, finds the delta
-    position.
+    From two positions A and B, finds the delta position.
 
-    p_AB_E = n_EA_E_and_n_EB_E2p_AB_E(n_EA_E,n_EB_E)
+    Parameters
+    ----------
+    n_EA_E, n_EB_E:  3 x n array
+        n-vector(s) [no unit] of position A and B, decomposed in E.
+    z_EA, z_EB:  1 x n array
+        Depth(s) [m] of system A and B, relative to the ellipsoid.
+        (z_EA = -height, z_EB = -height)
+    a: real scalar, default WGS-84 ellipsoid.
+        Semi-major axis of the Earth ellipsoid given in [m].
+    f: real scalar, default WGS-84 ellipsoid.
+        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+        Earth with radius a is used in stead of WGS-84.
+
+    Returns
+    -------
+    p_AB_E:  3 x n array
+        Cartesian position vector(s) from A to B, decomposed in E.
+
     The n-vectors for positions A (n_EA_E) and B (n_EB_E) are given. The
     output is the delta vector from A to B (p_AB_E).
     The calculation is excact, taking the ellipsity of the Earth into account.
-    It is also nonsingular as both n-vector and p-vector are nonsingular
+    It is also non-singular as both n-vector and p-vector are non-singular
     (except for the center of the Earth).
-    The default ellipsoid model used is WGS-84, but other ellipsoids (or spheres)
+    The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
     might be specified.
 
-    p_AB_E = n_EA_E_and_n_EB_E2p_AB_E(n_EA_E,n_EB_E,z_EA)
-    p_AB_E = n_EA_E_and_n_EB_E2p_AB_E(n_EA_E,n_EB_E,z_EA,z_EB)
-    Depth(s) of A, z_EA (and of B, z_EB) are also specified, z_EA = 0 (and z_EB = 0)
-    is used when not spefified.
-
-    p_AB_E = n_EA_E_and_n_EB_E2p_AB_E(n_EA_E,n_EB_E,z_EA,z_EB,a)
-    Spherical Earth with radius a is used in stead of WGS-84.
-
-    p_AB_E = n_EA_E_and_n_EB_E2p_AB_E(n_EA_E,n_EB_E,z_EA,z_EB,a,f)
-    Ellipsoidal Earth model with semi-major axis a and flattening f is used
-    in stead of WGS-84.
-
-    IN:
-    n_EA_E:  [no unit] n-vector of position A, decomposed in E (3x1 vector).
-    n_EB_E:  [no unit] n-vector of position B, decomposed in E (3x1 vector).
-    z_EA:    [m]       (Optional, assumed to be zero if not given) Depth of system A,
-                       relative to the ellipsoid (z_EA = -height).
-    z_EB:    [m]       (Optional, assumed to be zero if not given) Depth of system B,
-                       relative to the ellipsoid (z_EB = -height).
-    a:       [m]       (Optional) Semi-major axis of the Earth ellipsoid
-    f:       [no unit] (Optional) Flattening of the Earth ellipsoid
-
-    OUT:
-    p_AB_E:  [m]       Position vector from A to B, decomposed in E (3x1 vector).
-
-    The function also accepts vectorized form, i.e. n_EA_E and n_EB_E are 3xn matrixes,
-    z_EA and z_EB are 1xn vectors and p_AB_E is a 3xn matrix.
-
-    See also n_EA_E_and_p_AB_E2n_EB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E.
+    See also
+    --------
+    n_EA_E_and_p_AB_E2n_EB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E.
     """
-
-    # Originated: 2004.07.07 Kenneth Gade, FFI
-    # Modified:
-
-    # The optional inputs a and f are forwarded to the kernel function (which
-    # uses the same syntax):
-    n = np.shape(n_EA_E)[1]
-    if z_EA is None:
-        z_EA = np.zeros((1, n))
-    if z_EB is None:
-        z_EB = np.zeros((1, n))
 
     # Function 1. in Section 5.4 in Gade (2010):
     p_EA_E = n_EB_E2p_EB_E(n_EA_E, z_EA, a, f)
     p_EB_E = n_EB_E2p_EB_E(n_EB_E, z_EB, a, f)
-    p_AB_E = -p_EA_E + p_EB_E
+    p_AB_E = p_EB_E - p_EA_E
     return p_AB_E
 
 
-def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E,p_AB_E,z_EA=None, a=6378137,
-                             f=1 / 298.257223563):
+def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137,
+                             f=1.0/298.257223563):
     """
-     n_EA_E_and_p_AB_E2n_EB_E From position A and delta, finds position B.
-     n_EB_E      = n_EA_E_and_p_AB_E2n_EB_E(n_EA_E,p_AB_E)
-    [n_EB_E,z_EB] = n_EA_E_and_p_AB_E2n_EB_E(n_EA_E,p_AB_E)
+    From position A and delta, finds position B.
+
+    Parameters
+    ----------
+    n_EA_E:  3 x n array
+        n-vector(s) [no unit] of position A, decomposed in E.
+    p_AB_E:  3 x n array
+        Cartesian position vector(s) from A to B, decomposed in E.
+    z_EA:  1 x n array
+        Depth(s) [m] of system A and B, relative to the ellipsoid.
+        (z_EA = -height)
+    a: real scalar, default WGS-84 ellipsoid.
+        Semi-major axis of the Earth ellipsoid given in [m].
+    f: real scalar, default WGS-84 ellipsoid.
+        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+        Earth with radius a is used in stead of WGS-84.
+
+    Returns
+    -------
+    n_EB_E:  3 x n array
+        n-vector(s) [no unit] of position B, decomposed in E.
+    z_EB:  1 x n array
+        Depth(s) [m] of system B, relative to the ellipsoid.
+        (z_EB = -height)
+
     The n-vector for position A (n_EA_E) and the position-vector from position
     A to position B (p_AB_E) are given. The output is the n-vector of position
     B (n_EB_E) and depth of B (z_EB).
     The calculation is excact, taking the ellipsity of the Earth into account.
-    It is also nonsingular as both n-vector and p-vector are nonsingular
+    It is also non-singular as both n-vector and p-vector are non-singular
     (except for the center of the Earth).
-    The default ellipsoid model used is WGS-84, but other ellipsoids (or spheres)
+    The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
     might be specified.
 
-    [n_EB_E,z_EB] = n_EA_E_and_p_AB_E2n_EB_E(n_EA_E,p_AB_E,z_EA) Depth of A, z_EA,
-    is also specified, z_EA = 0 is used when not spefified.
-
-    [n_EB_E,z_EB] = n_EA_E_and_p_AB_E2n_EB_E(n_EA_E,p_AB_E,z_EA,a)
-    Spherical Earth with radius a is used in stead of WGS-84.
-
-    [n_EB_E,z_EB] = n_EA_E_and_p_AB_E2n_EB_E(n_EA_E,p_AB_E,z_EA,a,f)
-    Ellipsoidal Earth model with semi-major axis a and flattening f is used
-    in stead of WGS-84.
-
-    IN:
-    n_EA_E:  [no unit] n-vector of position A, decomposed in E (3x1 vector).
-    p_AB_E:  [m]       Position vector from A to B, decomposed in E (3x1 vector).
-    z_EA:    [m]       (Optional, assumed to be zero if not given) Depth of system A,
-                       relative to the ellipsoid (z_EA = -height).
-    a:       [m]       (Optional) Semi-major axis of the Earth ellipsoid
-    f:       [no unit] (Optional) Flattening of the Earth ellipsoid
-
-    OUT:
-    n_EB_E:  [no unit] n-vector of position B, decomposed in E (3x1 vector).
-    z_EB:    [m]       Depth of system B, relative to the ellipsoid (z_EB = -height).
-
-    The function also accepts vectorized form, i.e. n_EA_E and p_AB_E are 3xn matrixes,
-    z_EA and z_EB are 1xn vectors and n_EB_E is a 3xn matrix.
-
-    See also n_EA_E_and_n_EB_E2p_AB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E.
+    See also
+    --------
+    n_EA_E_and_n_EB_E2p_AB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E.
     """
+    a, f = _check_backward_compatibility(a, f)
 
-    # Originated: 2004.07.07 Kenneth Gade, FFI
-    # Modified:
-    a, f = check_backward_compatibility(a, f)
-
-    ## CALCULATIONS:
     # Function 2. in Section 5.4 in Gade (2010):
     p_EA_E = n_EB_E2p_EB_E(n_EA_E, z_EA, a, f)
     p_EB_E = p_EA_E + p_AB_E
     n_EB_E, z_EB = p_EB_E2n_EB_E(p_EB_E, a, f)
     return n_EB_E, z_EB
 
+
 def R2xyz(R_AB):
     """
-    Three angles about new axes in the xyz order are found from a rotation matrix.
+    Returns the angles about new axes in the xyz-order from a rotation matrix.
 
-    [x,y,z] = R2xyz(R_AB) 3 angles x,y,z about new axes (intrinsic) in the
-    order x-y-z are found from the rotation matrix R_AB. The angles (called
-    Euler angles or Tait-Bryan angles) are defined by the following procedure
-    of successive rotations:
+    Parameters
+    ----------
+    R_AB: 3x3 array
+        rotation matrix [no unit] (direction cosine matrix) such that the
+        relation between a vector v decomposed in A and B is given by:
+        v_A = np.dot(R_AB, v_B)
+
+    Returns
+    -------
+    x, y, z: real scalars
+        Angles [rad] of rotation about new axes.
+
+    The x, y, z angles are called Euler angles or Tait-Bryan angles and are
+    defined by the following procedure of successive rotations:
     Given two arbitrary coordinate frames A and B. Consider a temporary frame
     T that initially coincides with A. In order to make T align with B, we
     first rotate T an angle x about its x-axis (common axis for both A and T).
@@ -673,44 +665,43 @@ def R2xyz(R_AB):
     The signs of the angles are given by the directions of the axes and the
     right hand rule.
 
-    IN:
-    R_AB  [no unit]    3x3 rotation matrix (direction cosine matrix) such that
-                    the relation between a vector v decomposed in A and B is
-                    given by: v_A = R_AB * v_B
-
-    OUT:
-    x,y,z [rad]        Angles of rotation about new axes.
-
-    See also xyz2R, R2zyx, xyz2R.
+    See also
+    --------
+    xyz2R, R2zyx, xyz2R.
     """
-
-    # Originated: 1996.10.01 Kenneth Gade, FFI
-    # Modified:
-
-    # atan2: [-pi pi]
-    z = np.arctan2(-R_AB[0, 1], R_AB[0, 0])
-    x = np.arctan2(-R_AB[1, 2], R_AB[2, 2])
+    z = arctan2(-R_AB[0, 1], R_AB[0, 0])  # atan2: [-pi pi]
+    x = arctan2(-R_AB[1, 2], R_AB[2, 2])
 
     sin_y = R_AB[0, 2]
 
     # cos_y is based on as many elements as possible, to average out
     # numerical errors. It is selected as the positive square root since
     # y: [-pi/2 pi/2]
-    cos_y = np.sqrt((R_AB[0, 0]**2 + R_AB[0, 1]**2 +
-                     R_AB[1, 2]**2 + R_AB[2, 2]**2)/2)
+    cos_y = sqrt((R_AB[0, 0]**2 + R_AB[0, 1]**2 +
+                  R_AB[1, 2]**2 + R_AB[2, 2]**2)/2)
 
-    y = np.arctan2(sin_y, cos_y)
+    y = arctan2(sin_y, cos_y)
     return x, y, z
 
 
 def R2zyx(R_AB):
     """
-    Three angles about new axes in the zyx order are found from a rotation matrix.
+    Returns the angles about new axes in the zxy-order from a rotation matrix.
 
-    [z,y,x] = R2zyx(R_AB) 3 angles z,y,x about new axes (intrinsic) in the
-    order z-y-x are found from the rotation matrix R_AB. The angles (called
-    Euler angles or Tait-Bryan angles) are defined by the following procedure
-    of successive rotations:
+    Parameters
+    ----------
+    R_AB:  3x3 array
+        rotation matrix [no unit] (direction cosine matrix) such that the
+        relation between a vector v decomposed in A and B is given by:
+        v_A = np.dot(R_AB, v_B)
+
+    Returns
+    -------
+    z, y, x: real scalars
+        Angles [rad] of rotation about new axes.
+
+    The z, x, y angles are called Euler angles or Tait-Bryan angles and are
+    defined by the following procedure of successive rotations:
     Given two arbitrary coordinate frames A and B. Consider a temporary frame
     T that initially coincides with A. In order to make T align with B, we
     first rotate T an angle z about its z-axis (common axis for both A and T).
@@ -724,94 +715,92 @@ def R2zyx(R_AB):
     Note that if A is a north-east-down frame and B is a body frame, we
     have that z=yaw, y=pitch and x=roll.
 
-    IN:
-    R_AB  [no unit]    3x3 rotation matrix (direction cosine matrix) such that the
-                    relation between a vector v decomposed in A and B is
-                    given by: v_A = R_AB * v_B
-
-    OUT:
-    z,y,x [rad]        Angles of rotation about new axes.
-
-    See also zyx2R, xyz2R, R2xyz.
+    See also
+    --------
+    zyx2R, xyz2R, R2xyz.
     """
 
-    # Originated: 1996.10.01 Kenneth Gade, FFI
-    # Modified:
-
-    # atan2: [-pi pi]
-    z = np.arctan2(R_AB[1, 0], R_AB[0, 0])
-    x = np.arctan2(R_AB[2, 1], R_AB[2, 2])
+    z = arctan2(R_AB[1, 0], R_AB[0, 0])  # atan2: [-pi pi]
+    x = arctan2(R_AB[2, 1], R_AB[2, 2])
 
     sin_y = -R_AB[2, 0]
 
     # cos_y is based on as many elements as possible, to average out
     # numerical errors. It is selected as the positive square root since
     # y: [-pi/2 pi/2]
-    cos_y = np.sqrt((R_AB[0, 0]**2+R_AB[1, 0]**2 +
-                     R_AB[2, 1]**2+R_AB[2, 2]**2)/2)
+    cos_y = sqrt((R_AB[0, 0]**2 + R_AB[1, 0]**2 +
+                  R_AB[2, 1]**2 + R_AB[2, 2]**2)/2)
 
-    y = np.arctan2(sin_y, cos_y)
+    y = arctan2(sin_y, cos_y)
     return z, y, x
 
 
 def R_EL2n_E(R_EL):
     """
-    Finds n-vector from R_EL.
+    Returns n-vector from the rotation matrix R_EL.
 
-    n_E = R_EL2n_E(R_EL) n-vector is found from the rotation matrix
-    (direction cosine matrix) R_EL.
+    Parameters
+    ----------
+    R_EL: 3 x 3 array
+        Rotation matrix (direction cosine matrix) [no unit]
 
-    IN:
-    R_EL:  [no unit] Rotation matrix (direction cosine matrix)
-
-    OUT:
-    n_E:   [no unit] n-vector decomposed in E (3x1 vector)
+    Returns
+    -------
+    n_E: 3 x 1 array
+        n-vector [no unit] decomposed in E.
 
     See also R_EN2n_E, n_E_and_wa2R_EL, n_E2R_EN.
     """
-
-    # Originated: 1999.02.23 Kenneth Gade, FFI
-    # Modified:
-
     # n-vector equals minus the last column of R_EL and R_EN, see Section 5.5
     # in Gade (2010)
-    n_E = np.dot(R_EL, np.r_[0, 0, -1].T)
+    n_E = dot(R_EL, np.vstack((0, 0, -1)))
     return n_E
 
 
 def R_EN2n_E(R_EN):
     """
-    Finds n-vector from R_EN.
+    Returns n-vector from the rotation matrix R_EN.
 
-    n_E = R_EN2n_E(R_EN)
-    n-vector is found from the rotation matrix (direction cosine matrix)
-    R_EN.
+    Parameters
+    ----------
+    R_EN: 3 x 3 array
+        Rotation matrix (direction cosine matrix) [no unit]
 
-    IN:
-    R_EN:  [no unit] Rotation matrix (direction cosine matrix)
+    Returns
+    -------
+    n_E: 3 x 1 array
+        n-vector [no unit] decomposed in E.
 
-    OUT:
-    n_E:   [no unit] n-vector decomposed in E (3x1 vector)
-
-    See also n_E2R_EN, R_EL2n_E, n_E_and_wa2R_EL.
+    See also
+    --------
+    n_E2R_EN, R_EL2n_E, n_E_and_wa2R_EL.
     """
-
-    # Originated: 1999.02.23 Kenneth Gade, FFI
-    # Modified:
-
     # n-vector equals minus the last column of R_EL and R_EN, see Section 5.5
     # in Gade (2010)
-    n_E = np.dot(R_EN, np.r_[0, 0, -1].T);
+    n_E = dot(R_EN, np.vstack((0, 0, -1)))
     return n_E
 
 
 def xyz2R(x, y, z):
     """
-    xyz2R Creates a rotation matrix from 3 angles about new axes in the xyz order.
-    R_AB = xyz2R(x,y,z) The rotation matrix R_AB is created based on 3 angles
-    x,y,z about new axes (intrinsic) in the order x-y-z. The angles (called
-    Euler angles or Tait-Bryan angles) are defined by the following procedure
-    of successive rotations:
+    Returns rotation matrix from 3 angles about new axes in the xyz-order.
+
+    Parameters
+    ----------
+    x,y,z: real scalars
+        Angles [rad] of rotation about new axes.
+
+    Returns
+    -------
+    R_AB: 3 x 3 array
+        rotation matrix [no unit] (direction cosine matrix) such that the
+        relation between a vector v decomposed in A and B is given by:
+        v_A = np.dot(R_AB, v_B)
+
+    The rotation matrix R_AB is created based on 3 angles x,y,z about new axes
+    (intrinsic) in the order x-y-z. The angles are called Euler angles or
+    Tait-Bryan angles and are defined by the following procedure of successive
+    rotations:
     Given two arbitrary coordinate frames A and B. Consider a temporary frame
     T that initially coincides with A. In order to make T align with B, we
     first rotate T an angle x about its x-axis (common axis for both A and T).
@@ -822,38 +811,41 @@ def xyz2R(x, y, z):
     The signs of the angles are given by the directions of the axes and the
     right hand rule.
 
-    IN:
-    x,y,z [rad]        Angles of rotation about new axes.
-
-    OUT:
-    R_AB  [no unit]    3x3 rotation matrix (direction cosine matrix) such that the
-                    relation between a vector v decomposed in A and B is
-                    given by: v_A = R_AB * v_B
-
-    See also R2xyz, zyx2R, R2zyx.
+    See also
+    --------
+    R2xyz, zyx2R, R2zyx.
     """
+    cz, sz = cos(z), sin(z)
+    cy, sy = cos(y), sin(y)
+    cx, sx = cos(x), sin(x)
 
-    # Originated: 1996.10.01 Kenneth Gade, FFI
-    # Modified:
-
-    cz, sz = np.cos(z), np.sin(z)
-    cy, sy = np.cos(y), np.sin(y)
-    cx, sx = np.cos(x), np.sin(x)
-
-    R_AB = np.array([[cy * cz, -cy * sz, sy],
-                     [sy*sx*cz + cx*sz, -sy*sx*sz + cx*cz, -cy*sx],
-                     [-sy*cx*cz + sx*sz, sy*cx*sz + sx*cz, cy*cx]])
+    R_AB = array([[cy * cz, -cy * sz, sy],
+                  [sy*sx*cz + cx*sz, -sy*sx*sz + cx*cz, -cy*sx],
+                  [-sy*cx*cz + sx*sz, sy*cx*sz + sx*cz, cy*cx]])
 
     return R_AB
 
 
-def zyx2R(z,y,x):
+def zyx2R(z, y, x):
     """
-    Creates a rotation matrix from 3 angles about new axes in the zyx order.
-    R_AB = zyx2R(z,y,x) The rotation matrix R_AB is created based on 3 angles
-    z,y,x about new axes (intrinsic) in the order z-y-x. The angles (called
-    Euler angles or Tait-Bryan angles) are defined by the following procedure
-    of successive rotations:
+    Returns rotation matrix from 3 angles about new axes in the zyx-order.
+
+    Parameters
+    ----------
+    z, y, x: real scalars
+        Angles [rad] of rotation about new axes.
+
+    Returns
+    -------
+    R_AB: 3 x 3 array
+        rotation matrix [no unit] (direction cosine matrix) such that the
+        relation between a vector v decomposed in A and B is given by:
+        v_A = np.dot(R_AB, v_B)
+
+    The rotation matrix R_AB is created based on 3 angles
+    z,y,x about new axes (intrinsic) in the order z-y-x. The angles are called
+    Euler angles or Tait-Bryan angles and are defined by the following
+    procedure of successive rotations:
     Given two arbitrary coordinate frames A and B. Consider a temporary frame
     T that initially coincides with A. In order to make T align with B, we
     first rotate T an angle z about its z-axis (common axis for both A and T).
@@ -867,29 +859,148 @@ def zyx2R(z,y,x):
     Note that if A is a north-east-down frame and B is a body frame, we
     have that z=yaw, y=pitch and x=roll.
 
-    IN:
-    z,y,x [rad]        Angles of rotation about new axes.
-
-    OUT:
-    R_AB  [no unit]    3x3 rotation matrix (direction cosine matrix) such that the
-                    relation between a vector v decomposed in A and B is
-                    given by: v_A = R_AB * v_B
-
-    See also R2zyx, xyz2R, R2xyz.
+    See also
+    --------
+    R2zyx, xyz2R, R2xyz.
     """
-    # Originated: 1996.10.01 Kenneth Gade, FFI
-    # Modified:
+    cz, sz = cos(z), sin(z)
+    cy, sy = cos(y), sin(y)
+    cx, sx = cos(x), sin(x)
 
-    cz, sz = np.cos(z), np.sin(z)
-    cy, sy = np.cos(y), np.sin(y)
-    cx, sx = np.cos(x), np.sin(x)
-
-    R_AB = np.array([[cz * cy, -sz * cx + cz * sy * sx, sz * sx + cz * sy*cx],
-                     [sz * cy,  cz * cx + sz * sy * sx, - cz * sx + sz * sy*cx],
-                     [-sy, cy * sx, cy * cx]])
+    R_AB = array([[cz * cy, -sz * cx + cz * sy * sx, sz * sx + cz * sy*cx],
+                  [sz * cy,  cz * cx + sz * sy * sx, - cz * sx + sz*sy*cx],
+                  [-sy, cy * sx, cy * cx]])
 
     return R_AB
 
 
+def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
+    return arctan2(norm(cross(n_EA_E, n_EB_E, axis=0), axis=0),
+                   dot(n_EA_E.T, n_EB_E)) * radius
+
+
+def azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0/298.257223563):
+    """
+    Return direction (azimuth) from A to B, relative to north:
+    """
+    # Step2: Find p_AB_E (delta decomposed in E).
+    # WGS-84 ellipsoid is default:
+    p_AB_E = n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, a=a, f=f)
+
+    # Step3: Find R_EN for position A:
+    R_EN = n_E2R_EN(n_EA_E)
+
+    # Step4: Find p_AB_N
+    p_AB_N = dot(R_EN.T, p_AB_E)
+    # (Note the transpose of R_EN: The "closest-rule" says that when
+    # decomposing, the frame in the subscript of the rotation matrix that
+    # is closest to the vector, should equal the frame where the vector is
+    # decomposed. Thus the calculation np.dot(R_NE, p_AB_E) is correct,
+    # since the vector is decomposed in E, and E is closest to the vector.
+    # In the example we only had R_EN, and thus we must transpose it:
+    # R_EN'=R_NE)
+
+    # Step5: Also find the direction (azimuth) to B, relative to north:
+    return arctan2(p_AB_N[1], p_AB_N[0])
+
+
+def distance_rad_bearing_rad2point(n_EA_E, distance_rad, bearing_rad):
+    k_east_E = unit(cross(dot(R_Ee.T, [[1], [0], [0]]), n_EA_E, axis=0))
+    k_north_E = cross(n_EA_E, k_east_E, axis=0)
+
+    # Step2: Find the initial direction vector d_E:
+    d_E = k_north_E * cos(bearing_rad) + k_east_E * sin(bearing_rad)
+
+    # Step3: Find n_EB_E:
+    n_EB_E = n_EA_E * cos(distance_rad) + d_E * sin(distance_rad)
+    return n_EB_E
+
+
+class Geodesic(object):
+    """Solve geodesic problems.
+
+    The following illustrates its use
+
+
+    from geographiclib.geodesic import Geodesic
+
+    # The geodesic inverse problem
+    Geodesic.WGS84.Inverse(-41.32, 174.81, 40.96, -5.50)
+
+    # The geodesic direct problem
+    Geodesic.WGS84.Direct(40.6, -73.8, 45, 10000e3)
+
+    # How to obtain several points along a geodesic
+    line = Geodesic.WGS84.Line(40.6, -73.8, 45)
+    line.Position( 5000e3)
+    line.Position(10000e3)
+
+    # Computing the area of a geodesic polygon
+    def p(lat,lon): return {'lat': lat, 'lon': lon}
+
+    Geodesic.WGS84.Area([p(0, 0), p(0, 90), p(90, 0)])
+
+    All angles (latitudes, longitudes, azimuths, spherical arc lengths)
+    are measured in radians.  Latitudes must lie in [-pi/2,pi/2].  All lengths
+    (distance, reduced length) are measured in meters.
+
+    """
+    def __init__(self, a=6378137, f=1.0/298.257223563, name=''):
+        if name:
+            a, f, _full_name = select_ellipsoid(name)
+        self.a = a
+        self.f = f
+        self.name = name
+
+    def n_EB_E2p_EB_E(self, n_EB_E, z_EB=0):
+        """
+        Converts n-vector to Cartesian position vector in meters.
+
+        Parameters
+        ----------
+        n_EB_E:  3 x n array
+            n-vector(s) [no unit] of position B, decomposed in E.
+        z_EB:  1 x n array
+            Depth(s) [m] of system B, relative to the ellipsoid (z_EB = -height)
+        a: real scalar, default WGS-84 ellipsoid.
+            Semi-major axis of the Earth ellipsoid given in [m].
+        f: real scalar, default WGS-84 ellipsoid.
+            Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+            Earth with radius a is used in stead of WGS-84.
+
+        Returns
+        -------
+        p_EB_E:  3 x n array
+            Cartesian position vector(s) from E to B, decomposed in E.
+
+        The position of B (typically body) relative to E (typically Earth) is
+        given into this function as n-vector, n_EB_E. The function converts
+        to cartesian position vector ("ECEF-vector"), p_EB_E, in meters.
+        The calculation is excact, taking the ellipsity of the Earth into account.
+        It is also non-singular as both n-vector and p-vector are non-singular
+        (except for the center of the Earth).
+        The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
+        might be specified.
+
+        See also
+        --------
+        p_EB_E2n_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E.
+        """
+        return n_EB_E2p_EB_E(n_EB_E, z_EB, a=self.a, f=self.f)
+
+    def p_EB_E2n_EB_E(self, p_EB_E):
+        __doc__ = p_EB_E2n_EB_E.__doc__  # @ReservedAssignment
+        return p_EB_E2n_EB_E(p_EB_E, a=self.a, f=self.f)
+
+    def n_EA_E_and_n_EB_E2p_AB_E(self, n_EA_E, n_EB_E, z_EA=0, z_EB=0):
+        return n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA, z_EB, a=self.a,
+                                        f=self.f)
+
+    def n_EA_E_and_p_AB_E2n_EB_E(self, n_EA_E, p_AB_E, z_EA=0):
+        return n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA, a=self.a,
+                                        f=self.f)
+
+wgs84 = Geodesic()
+
 if __name__ == '__main__':
-    pass
+    print('{:15.15f}'.format(nthroot(27., 3.)-0.0))
