@@ -6,8 +6,8 @@ Created on 9. des. 2015
 from mpl_toolkits.basemap import Basemap  # @UnresolvedImport
 import matplotlib.pyplot as plt
 import numpy as np
-from nvector import (set_north_pole_axis_for_E_frame, rad, deg, lat_long2n_E,
-                     unit, n_E2lat_long)
+from nvector import (set_north_pole_axis_for_E_frame, rad, deg, lat_lon2n_E,
+                     unit, n_E2lat_lon)
 
 
 R_Ee = set_north_pole_axis_for_E_frame(axis='z')
@@ -16,13 +16,14 @@ R_Ee = set_north_pole_axis_for_E_frame(axis='z')
 def plot_mean_position():
     positions = np.array([(90, 0),
                           (60, 10),
-                          (50, -20)])
+                          (50, -20),
+                          (70,-70)])
     lats, lons = positions.T
-    nvecs = lat_long2n_E(rad(lats), rad(lons))
+    nvecs = lat_lon2n_E(rad(lats), rad(lons))
 
     # Find the horizontal mean position:
     n_EM_E = unit(np.sum(nvecs, axis=1).reshape((3, 1)))
-    lat, lon = n_E2lat_long(n_EM_E)
+    lat, lon = n_E2lat_lon(n_EM_E)
     lat, lon = deg(lat), deg(lon)
     print('Ex7, Average lat={}, lon={}'.format(lat, lon))
 

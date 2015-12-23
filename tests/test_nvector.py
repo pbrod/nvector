@@ -26,8 +26,8 @@ import numpy as np
 
 import unittest
 from nvector import (deg, rad,
-                     lat_long2n_E,
-                     n_E2lat_long,
+                     lat_lon2n_E,
+                     n_E2lat_lon,
                      n_E2R_EN,
                      zyx2R, unit,
                      n_EA_E_and_n_EB_E2p_AB_E,
@@ -44,7 +44,7 @@ R_Ee = set_north_pole_axis_for_E_frame(axis='z')
 
 class TestNvector(unittest.TestCase):
 
-    def test_A_and_B_to_delta(self):
+    def test_A_and_B_to_delta_in_frame_N(self):
 
         # Positions A and B are given in (decimal) degrees and depths:
 
@@ -66,8 +66,8 @@ class TestNvector(unittest.TestCase):
 
         # SOLUTION:
         # Step1: Convert to n-vectors (rad() converts to radians):
-        n_EA_E = lat_long2n_E(lat_EA, long_EA)
-        n_EB_E = lat_long2n_E(lat_EB, long_EB)
+        n_EA_E = lat_lon2n_E(lat_EA, long_EA)
+        n_EB_E = lat_lon2n_E(lat_EB, long_EB)
 
         # Step2: Find p_AB_E (delta decomposed in E).
         # WGS-84 ellipsoid is default:
@@ -100,7 +100,7 @@ class TestNvector(unittest.TestCase):
         self.assertAlmostEqual(p_AB_N[2], 17404.27136194)
         self.assertAlmostEqual(deg(azimuth), 45.10926324)
 
-    def test_B_and_delta_to_C(self):
+    def test_B_and_delta_in_frame_B_to_C_in_frame_E(self):
         # delta vector from B to C, decomposed in B is given:
         p_BC_B = np.r_[3000, 2000, 100].reshape((-1, 1))
 
@@ -132,7 +132,7 @@ class TestNvector(unittest.TestCase):
 
         # When displaying the resulting position for humans, it is more
         # convenient to see lat, long:
-        lat_EC, long_EC = n_E2lat_long(n_EC_E)
+        lat_EC, long_EC = n_E2lat_lon(n_EC_E)
         # Here we also assume that the user wants output height (= - depth):
         msg = 'Ex2, Pos C: lat, long = {},{} deg,  height = {} m'
         print(msg.format(deg(lat_EC), deg(long_EC), -z_EC))
@@ -154,7 +154,7 @@ class TestNvector(unittest.TestCase):
         n_EB_E, z_EB = p_EB_E2n_EB_E(p_EB_E)
 
         # Convert to lat, long and height:
-        lat_EB, long_EB = n_E2lat_long(n_EB_E)
+        lat_EB, long_EB = n_E2lat_lon(n_EB_E)
         h_EB = -z_EB
         msg = 'Ex3, Pos B: lat, long = {} {} deg, height = {} m'
         print(msg.format(deg(lat_EB), deg(long_EB), h_EB))
@@ -174,7 +174,7 @@ class TestNvector(unittest.TestCase):
 
         # SOLUTION:
         # Step1: Convert to n-vector:
-        n_EB_E = lat_long2n_E(rad(lat_EB_deg), rad(long_EB_deg))
+        n_EB_E = lat_lon2n_E(rad(lat_EB_deg), rad(long_EB_deg))
 
         # Step2: Find the ECEF-vector p_EB_E:
         p_EB_E = n_EB_E2p_EB_E(n_EB_E, -h_EB)
@@ -185,7 +185,7 @@ class TestNvector(unittest.TestCase):
                                   [6373290.27721828, 222560.20067474,
                                    110568.82718179])
 
-    def test_surface_distance(self):
+    def test_great_circle_distance(self):
 
         # Position A and B are given as n_EA_E and n_EB_E:
         # Enter elements directly:
@@ -193,8 +193,8 @@ class TestNvector(unittest.TestCase):
         # n_EB_E=unit([-1 -2 0]')
 
         # or input as lat/long in deg:
-        n_EA_E = lat_long2n_E(rad(88), rad(0))
-        n_EB_E = lat_long2n_E(rad(89), rad(-170))
+        n_EA_E = lat_lon2n_E(rad(88), rad(0))
+        n_EB_E = lat_lon2n_E(rad(89), rad(-170))
 
         r_Earth = 6371e3  # m, mean Earth radius
 
@@ -228,8 +228,8 @@ class TestNvector(unittest.TestCase):
         # n_EB_E_t1=unit([-1 -2 0]')
 
         # or input as lat/long in deg:
-        n_EB_E_t0 = lat_long2n_E(rad(89), rad(0))
-        n_EB_E_t1 = lat_long2n_E(rad(89), rad(180))
+        n_EB_E_t0 = lat_lon2n_E(rad(89), rad(0))
+        n_EB_E_t1 = lat_lon2n_E(rad(89), rad(180))
 
         # The times are given as:
         t0 = 10
@@ -245,7 +245,7 @@ class TestNvector(unittest.TestCase):
 
         # When displaying the resulting position for humans, it is more
         # convenient to see lat, long:
-        lat_EB_ti, long_EB_ti = n_E2lat_long(n_EB_E_ti)
+        lat_EB_ti, long_EB_ti = n_E2lat_lon(n_EB_E_ti)
         msg = 'Ex6, Interpolated position: lat, long = {} {} deg'
         print(msg.format(deg(lat_EB_ti), deg(long_EB_ti)))
 
@@ -261,9 +261,9 @@ class TestNvector(unittest.TestCase):
         # n_EC_E=unit(np.vstack((0, -2, 3)))
 
         # or input as lat/long in deg:
-        n_EA_E = lat_long2n_E(rad(90), rad(0))
-        n_EB_E = lat_long2n_E(rad(60), rad(10))
-        n_EC_E = lat_long2n_E(rad(50), rad(-20))
+        n_EA_E = lat_lon2n_E(rad(90), rad(0))
+        n_EB_E = lat_lon2n_E(rad(60), rad(10))
+        n_EC_E = lat_lon2n_E(rad(50), rad(-20))
 
         # Find the horizontal mean position:
         n_EM_E = unit(n_EA_E + n_EB_E + n_EC_E)
@@ -286,7 +286,7 @@ class TestNvector(unittest.TestCase):
         point_a = GeoPoint(lat, lon)
         point_b = point_a.distance_bearing2point(distance=1000, bearing=200)
 
-        n_EA_E = lat_long2n_E(lat, lon)
+        n_EA_E = lat_lon2n_E(lat, lon)
 
         # The initial azimuth and great circle distance (s_AB), and Earth
         # radius (r_Earth) are also given:
@@ -311,7 +311,7 @@ class TestNvector(unittest.TestCase):
 
         # When displaying the resulting position for humans, it is more
         # convenient to see lat, long:
-        lat_EB, long_EB = n_E2lat_long(n_EB_E)
+        lat_EB, long_EB = n_E2lat_lon(n_EB_E)
         print('Ex8, Destination: lat, long = {} {} deg'.format(deg(lat_EB),
                                                                deg(long_EB)))
 
@@ -330,10 +330,10 @@ class TestNvector(unittest.TestCase):
         # n_EB2_E=unit([0 -2 3]')
 
         # or input as lat/long in deg:
-        n_EA1_E = lat_long2n_E(rad(10), rad(20))
-        n_EA2_E = lat_long2n_E(rad(30), rad(40))
-        n_EB1_E = lat_long2n_E(rad(50), rad(60))
-        n_EB2_E = lat_long2n_E(rad(70), rad(80))
+        n_EA1_E = lat_lon2n_E(rad(10), rad(20))
+        n_EA2_E = lat_lon2n_E(rad(30), rad(40))
+        n_EB1_E = lat_lon2n_E(rad(50), rad(60))
+        n_EB2_E = lat_lon2n_E(rad(70), rad(80))
 
         # Find the intersection between the two paths, n_EC_E:
         n_EC_E_tmp = unit(np.cross(np.cross(n_EA1_E, n_EA2_E, axis=0),
@@ -346,7 +346,7 @@ class TestNvector(unittest.TestCase):
 
         # When displaying the resulting position for humans, it is more
         # convenient to see lat, long:
-        lat_EC, long_EC = n_E2lat_long(n_EC_E)
+        lat_EC, long_EC = n_E2lat_lon(n_EC_E)
         msg = 'Ex9, Intersection: lat, long = {} {} deg'
         print(msg.format(deg(lat_EC), deg(long_EC)))
         self.assertAlmostEqual(deg(lat_EC), 40.31864307)
@@ -361,9 +361,9 @@ class TestNvector(unittest.TestCase):
         # n_EB_E=unit([0 -2 3]')
 
         # or input as lat/long in deg:
-        n_EA1_E = lat_long2n_E(rad(0), rad(0))
-        n_EA2_E = lat_long2n_E(rad(10), rad(0))
-        n_EB_E = lat_long2n_E(rad(1), rad(0.1))
+        n_EA1_E = lat_lon2n_E(rad(0), rad(0))
+        n_EA2_E = lat_lon2n_E(rad(10), rad(0))
+        n_EB_E = lat_lon2n_E(rad(1), rad(0.1))
 
         r_Earth = 6371e3  # m, mean Earth radius
 
