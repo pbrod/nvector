@@ -93,8 +93,7 @@ class GeodesicTest(unittest.TestCase):
     def test_inverse(self):
         options = dict(frame=wgs84, degrees=True)
         for l in GeodesicTest.testcases:
-            (lat1, lon1, azi1, lat2, lon2, azi2) = l[:6]
-            s12 = l[6]
+            (lat1, lon1, azi1, lat2, lon2, azi2, s12) = l[:7]
             point1 = GeoPoint(lat1, lon1, **options)
             point2 = GeoPoint(lat2, lon2, **options)
             s_ab, az_a, az_b = point1.distance_and_azimuth(point2,
@@ -108,12 +107,10 @@ class GeodesicTest(unittest.TestCase):
     def test_direct(self):
         options = dict(frame=wgs84, degrees=True)
         for l in GeodesicTest.testcases:
-            (lat1, lon1, azi1, lat2, lon2, azi2) = l[:6]
-            s12 = l[6]
+            (lat1, lon1, azi1, lat2, lon2, azi2, s12) = l[:7]
             point1 = GeoPoint(lat1, lon1, **options)
-
             point2, az_b = point1.geo_point(s12, azi1, long_unroll=True,
-                                            degrees=True) # Geodesic.ALL | Geodesic.LONG_UNROLL)
+                                            degrees=True)
 
             lat_b, lon_b = point2.latitude_deg, point2.longitude_deg
             self.assertAlmostEqual(lat2, lat_b, delta=1e-13)
@@ -124,9 +121,9 @@ class GeodesicTest(unittest.TestCase):
 class GeodSolveTest(unittest.TestCase):
 
     def test_GeodSolve0(self):
-        lat1, lon1, lat2, lon2 = np.deg2rad((40.6, -73.8, 49.01666667, 2.55))
-        s_ab, az_a, az_b = wgs84.inverse(lat1, lon1, lat2, lon2)
-        az_a, az_b = np.rad2deg((az_a, az_b))
+        point1 = GeoPoint(40.6, -73.8, frame=wgs84, degrees=True)
+        point2 = GeoPoint(49.01666667, 2.55, frame=wgs84, degrees=True)
+        s_ab, az_a, az_b = point1.distance_and_azimuth(point2, degrees=True)
         self.assertAlmostEqual(az_a, 53.47022, delta=0.5e-5)
         self.assertAlmostEqual(az_b, 111.59367, delta=0.5e-5)
         self.assertAlmostEqual(s_ab, 5853226, delta=0.5)
@@ -141,7 +138,7 @@ class GeodSolveTest(unittest.TestCase):
 
     def test_GeodSolve2(self):
         # Check fix for antipodal prolate bug found 2010-09-04
-        geod = Geodesic(6.4e6, -1/150.0)
+        geod = FrameE(6.4e6, -1/150.0)
         lat1, lon1, lat2, lon2 = np.deg2rad((0.07476, 0, -0.07476, 180))
         s_ab, az_a, az_b = geod.inverse(lat1, lon1, lat2, lon2)
         az_a, az_b = np.rad2deg((az_a, az_b))
@@ -159,8 +156,8 @@ class GeodSolveTest(unittest.TestCase):
         # Check fix for short line bug found 2010-05-21
         lat1, lon1, lat2, lon2 = np.deg2rad((36.493349428792, 0,
                                              36.49334942879201, .0000008))
-        s_ab, az_a, az_b = wgs84.inverse(lat1, lon1, lat2, lon2)
-        # az_a, az_b = np.rad2deg((az_a, az_b))
+        s_ab, _az_a, _az_b = wgs84.inverse(lat1, lon1, lat2, lon2)
+
         self.assertAlmostEqual(s_ab, 0.072, delta=0.5e-3)
 
     def test_GeodSolve5(self):
@@ -183,19 +180,19 @@ class GeodSolveTest(unittest.TestCase):
         lat1, lon1, lat2, lon2 = np.deg2rad((88.202499451857, 0,
                                              -88.202499451857,
                                              179.981022032992859592))
-        s_ab, az_a, az_b = wgs84.inverse(lat1, lon1, lat2, lon2)
+        s_ab, _az_a, _az_b = wgs84.inverse(lat1, lon1, lat2, lon2)
         self.assertAlmostEqual(s_ab, 20003898.214, delta=0.5e-3)
 
         lat1, lon1, lat2, lon2 = np.deg2rad((89.262080389218, 0,
                                              -89.262080389218,
                                              179.992207982775375662))
-        s_ab, az_a, az_b = wgs84.inverse(lat1, lon1, lat2, lon2)
+        s_ab, _az_a, _az_b = wgs84.inverse(lat1, lon1, lat2, lon2)
         self.assertAlmostEqual(s_ab, 20003925.854, delta=0.5e-3)
 
         lat1, lon1, lat2, lon2 = np.deg2rad((89.333123580033, 0,
                                              -89.333123580032997687,
                                              179.99295812360148422))
-        s_ab, az_a, az_b = wgs84.inverse(lat1, lon1, lat2, lon2)
+        s_ab, _az_a, _az_b = wgs84.inverse(lat1, lon1, lat2, lon2)
         self.assertAlmostEqual(s_ab, 20003926.881, delta=0.5e-3)
 
     def test_GeodSolve9(self):
@@ -203,32 +200,32 @@ class GeodSolveTest(unittest.TestCase):
         lat1, lon1, lat2, lon2 = np.deg2rad((56.320923501171, 0,
                                              -56.320923501171,
                                              179.664747671772880215))
-        s_ab, az_a, az_b = wgs84.inverse(lat1, lon1, lat2, lon2)
+        s_ab, _az_a, _az_b = wgs84.inverse(lat1, lon1, lat2, lon2)
         self.assertAlmostEqual(s_ab, 19993558.287, delta=0.5e-3)
 
     def test_GeodSolve10(self):
         # Check fix for adjust tol1_ bug found 2011-06-25 (Visual Studio
         # 10 rel + debug)
         lat1, lon1, lat2, lon2 = np.deg2rad((52.784459512564, 0,
-                                     -52.784459512563990912,
-                                     179.634407464943777557))
-        s_ab, az_a, az_b = wgs84.inverse(lat1, lon1, lat2, lon2)
+                                             -52.784459512563990912,
+                                             179.634407464943777557))
+        s_ab, _az_a, _az_b = wgs84.inverse(lat1, lon1, lat2, lon2)
         self.assertAlmostEqual(s_ab, 19991596.095, delta=0.5e-3)
 
     def test_GeodSolve11(self):
         # Check fix for bet2 = -bet1 bug found 2011-06-25 (Visual Studio
         # 10 rel + debug)
         lat1, lon1, lat2, lon2 = np.deg2rad((48.522876735459, 0,
-                                     -48.52287673545898293,
-                                     179.599720456223079643))
-        s_ab, az_a, az_b = wgs84.inverse(lat1, lon1, lat2, lon2)
+                                             -48.52287673545898293,
+                                             179.599720456223079643))
+        s_ab, _az_a, _az_b = wgs84.inverse(lat1, lon1, lat2, lon2)
         self.assertAlmostEqual(s_ab, 19989144.774, delta=0.5e-3)
 
     def test_GeodSolve12(self):
         # Check fix for inverse geodesics on extreme prolate/oblate
         # ellipsoids Reported 2012-08-29 Stefan Guenther
         # <stefan.gunther@embl.de>; fixed 2012-10-07
-        geod = Geodesic(89.8, -1.83)
+        geod = FrameE(89.8, -1.83)
         lat1, lon1, lat2, lon2 = np.deg2rad((0, 0, -10, 160))
         s_ab, az_a, az_b = geod.inverse(lat1, lon1, lat2, lon2)
         az_a, az_b = np.rad2deg((az_a, az_b))
@@ -238,99 +235,96 @@ class GeodSolveTest(unittest.TestCase):
 
     def test_GeodSolve14(self):
         # Check fix for inverse ignoring lon12 = nan
-        s_ab, az_a, az_b = wgs84.inverse_deg(0, 0, 1, np.nan)
+        s_ab, az_a, az_b = wgs84.inverse(0, 0, 1, np.nan, degrees=True)
         self.assertTrue(np.isnan(az_a))
         self.assertTrue(np.isnan(az_b))
         self.assertTrue(np.isnan(s_ab))
 
     def test_GeodSolve17(self):
         # Check fix for LONG_UNROLL bug found on 2015-05-07
-        lat_b, lon_b, az_b = wgs84.direct_deg(40, -75, -10, 2e7, long_unroll=True)
-                                    #Geodesic.STANDARD | Geodesic.LONG_UNROLL)
+        lat_b, lon_b, az_b = wgs84.direct(40, -75, -10, 2e7, long_unroll=True,
+                                          degrees=True)
+
         self.assertAlmostEqual(lat_b, -39, delta=1)
         self.assertAlmostEqual(lon_b, -254, delta=1)
         self.assertAlmostEqual(az_b, -170, delta=1)
 
-        lat_b, lon_b, az_b = wgs84.direct_deg(40, -75, -10, 2e7)
+        lat_b, lon_b, az_b = wgs84.direct(40, -75, -10, 2e7, degrees=True)
         self.assertAlmostEqual(lat_b, -39, delta=1)
         self.assertAlmostEqual(lon_b, 105, delta=1)
         self.assertAlmostEqual(az_b, -170, delta=1)
 
     def test_GeodSolve29(self):
         # Check longitude unrolling with inverse calculation 2015-09-16
-        s_ab, az_a, az_b = wgs84.inverse_deg(0, 539, 0, 181)
-        #self.assertAlmostEqual(dir["lon1"], 179, delta=1e-10)
-        #self.assertAlmostEqual(lon_b, -179, delta=1e-10)
+        s_ab, _az_a, _az_b = wgs84.inverse(0, 539, 0, 181, degrees=True)
+
         self.assertAlmostEqual(s_ab, 222639, delta=0.5)
-        s_ab, az_a, az_b = wgs84.inverse_deg(0, 539, 0, 181)
-                             #Geodesic.STANDARD | Geodesic.LONG_UNROLL)
-        #self.assertAlmostEqual(dir["lon1"], 539, delta=1e-10)
-        #self.assertAlmostEqual(lon_b, 541, delta=1e-10)
+        s_ab, _az_a, _az_b = wgs84.inverse(0, 539, 0, 181, degrees=True)
         self.assertAlmostEqual(s_ab, 222639, delta=0.5)
 
     def test_GeodSolve33(self):
         # Check max(-0.0,+0.0) issues 2015-08-22 (triggered by bugs in
         # Octave -- sind(-0.0) = +0.0 -- and in some version of Visual
         # Studio -- fmod(-0.0, 360.0) = +0.0.
-        s_ab, az_a, az_b = wgs84.inverse_deg(0, 0, 0, 179)
+        s_ab, az_a, az_b = wgs84.inverse(0, 0, 0, 179, degrees=True)
         self.assertAlmostEqual(az_a, 90.00000, delta=0.5e-5)
         self.assertAlmostEqual(az_b, 90.00000, delta=0.5e-5)
         self.assertAlmostEqual(s_ab, 19926189, delta=0.5)
 
-        s_ab, az_a, az_b = wgs84.inverse_deg(0, 0, 0, 179.5)
+        s_ab, az_a, az_b = wgs84.inverse(0, 0, 0, 179.5, degrees=True)
         self.assertAlmostEqual(az_a, 55.96650, delta=0.5e-5)
         self.assertAlmostEqual(az_b, 124.03350, delta=0.5e-5)
         self.assertAlmostEqual(s_ab, 19980862, delta=0.5)
 
-        s_ab, az_a, az_b = wgs84.inverse_deg(0, 0, 0, 180)
+        s_ab, az_a, az_b = wgs84.inverse(0, 0, 0, 180, degrees=True)
         self.assertAlmostEqual(az_a, 0.00000, delta=0.5e-5)
         self.assertAlmostEqual(az_b, -180.00000, delta=0.5e-5)
         self.assertAlmostEqual(s_ab, 20003931, delta=0.5)
 
-        s_ab, az_a, az_b = wgs84.inverse_deg(0, 0, 1, 180)
+        s_ab, az_a, az_b = wgs84.inverse(0, 0, 1, 180, degrees=True)
         self.assertAlmostEqual(az_a, 0.00000, delta=0.5e-5)
         self.assertAlmostEqual(az_b, -180.00000, delta=0.5e-5)
         self.assertAlmostEqual(s_ab, 19893357, delta=0.5)
 
-        geod = Geodesic(6.4e6, 0)
-        s_ab, az_a, az_b = geod.inverse_deg(0, 0, 0, 179)
+        geod = FrameE(6.4e6, 0)
+        s_ab, az_a, az_b = geod.inverse(0, 0, 0, 179, degrees=True)
         self.assertAlmostEqual(az_a, 90.00000, delta=0.5e-5)
         self.assertAlmostEqual(az_b, 90.00000, delta=0.5e-5)
         self.assertAlmostEqual(s_ab, 19994492, delta=0.5)
-        s_ab, az_a, az_b = geod.inverse_deg(0, 0, 0, 180)
+        s_ab, az_a, az_b = geod.inverse(0, 0, 0, 180, degrees=True)
         self.assertAlmostEqual(az_a, 0.00000, delta=0.5e-5)
         self.assertAlmostEqual(az_b, -180.00000, delta=0.5e-5)
         self.assertAlmostEqual(s_ab, 20106193, delta=0.5)
-        s_ab, az_a, az_b = geod.inverse_deg(0, 0, 1, 180)
+        s_ab, az_a, az_b = geod.inverse(0, 0, 1, 180, degrees=True)
         self.assertAlmostEqual(az_a, 0.00000, delta=0.5e-5)
         self.assertAlmostEqual(az_b, -180.00000, delta=0.5e-5)
         self.assertAlmostEqual(s_ab, 19994492, delta=0.5)
-        geod = Geodesic(6.4e6, -1/300.0)
-        s_ab, az_a, az_b = geod.inverse_deg(0, 0, 0, 179)
+        geod = FrameE(6.4e6, -1/300.0)
+        s_ab, az_a, az_b = geod.inverse(0, 0, 0, 179, degrees=True)
         self.assertAlmostEqual(az_a, 90.00000, delta=0.5e-5)
         self.assertAlmostEqual(az_b, 90.00000, delta=0.5e-5)
         self.assertAlmostEqual(s_ab, 19994492, delta=0.5)
-        s_ab, az_a, az_b = geod.inverse_deg(0, 0, 0, 180)
+        s_ab, az_a, az_b = geod.inverse(0, 0, 0, 180, degrees=True)
         self.assertAlmostEqual(az_a, 90.00000, delta=0.5e-5)
         self.assertAlmostEqual(az_b, 90.00000, delta=0.5e-5)
         self.assertAlmostEqual(s_ab, 20106193, delta=0.5)
-        s_ab, az_a, az_b = geod.inverse_deg(0, 0, 0.5, 180)
+        s_ab, az_a, az_b = geod.inverse(0, 0, 0.5, 180, degrees=True)
         self.assertAlmostEqual(az_a, 33.02493, delta=0.5e-5)
         self.assertAlmostEqual(az_b, 146.97364, delta=0.5e-5)
         self.assertAlmostEqual(s_ab, 20082617, delta=0.5)
-        s_ab, az_a, az_b = geod.inverse_deg(0, 0, 1, 180)
+        s_ab, az_a, az_b = geod.inverse(0, 0, 1, 180, degrees=True)
         self.assertAlmostEqual(az_a, 0.00000, delta=0.5e-5)
         self.assertAlmostEqual(az_b, -180.00000, delta=0.5e-5)
-        self.assertAlmostEqual(s_ab, 20027270, delta=0.5);
+        self.assertAlmostEqual(s_ab, 20027270, delta=0.5)
 
     def test_GeodSolve55(self):
-        # Check fix for nan + point on equator or pole not returning all nans in
+        # Check fix for nan + point on equator or pole not returning all nans
         # Geodesic::Inverse, found 2015-09-23.
-        s_ab, az_a, az_b = wgs84.inverse_deg(np.nan, 0, 0, 90)
+        s_ab, az_a, az_b = wgs84.inverse(np.nan, 0, 0, 90, degrees=True)
         self.assertTrue(np.isnan(az_a))
         self.assertTrue(np.isnan(az_b))
         self.assertTrue(np.isnan(s_ab))
-        s_ab, az_a, az_b = wgs84.inverse_deg(np.nan, 0, 90, 9)
+        s_ab, az_a, az_b = wgs84.inverse(np.nan, 0, 90, 9, degrees=True)
         self.assertTrue(np.isnan(az_a))
         self.assertTrue(np.isnan(az_b))
         self.assertTrue(np.isnan(s_ab))
