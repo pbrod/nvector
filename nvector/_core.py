@@ -133,6 +133,35 @@ class FrameE(_BaseFrame):
                 np.allclose(self.f, other.f) and
                 np.allclose(self.R_Ee, other.R_Ee))
 
+    def inverse(self, lat_a, lon_a, lat_b, lon_b, z=0, long_unroll=False,
+                degrees=False):
+
+        outmask = _Geodesic.STANDARD
+        if long_unroll:
+            outmask = _Geodesic.STANDARD | _Geodesic.LONG_UNROLL
+
+        geo = _Geodesic(self.a-z, self.f)
+        if not degrees:
+            lat_a, lon_a, lat_b, lon_b = deg((lat_a, lon_a, lat_b, lon_b))
+        result = geo.Inverse(lat_a, lon_a, lat_b, lon_b, outmask=outmask)
+        azimuth_a = result['azi1'] if degrees else rad(result['azi1'])
+        azimuth_b = result['azi2'] if degrees else rad(result['azi2'])
+        return result['s12'], azimuth_a, azimuth_b
+
+    def direct(self, lat_a, lon_a, azimuth, distance, z=0, long_unroll=False,
+               degrees=False):
+        geo = _Geodesic(self.a-z, self.f)
+        outmask = _Geodesic.STANDARD
+        if long_unroll:
+            outmask = _Geodesic.STANDARD | _Geodesic.LONG_UNROLL
+        if not degrees:
+            lat_a, lon_a, azimuth = deg((lat_a, lon_a, azimuth))
+        result = geo.Direct(lat_a, lon_a, azimuth, distance, outmask=outmask)
+        latb, lonb, azimuth_b = result['lat2'], result['lon2'], result['azi2']
+        if not degrees:
+            return rad(latb), rad(lonb), rad(azimuth_b)
+        return latb, lonb, azimuth_b
+
 
 class FrameB(_BaseFrame):
     """
@@ -342,25 +371,24 @@ class GeoPoint(object):
 
         Returns
         -------
-        latlon:  GeoPoint object
+        point_b:  GeoPoint object
             latitude and longitude of position B.
         azimuth_b
             azimuth [rad or deg] of line at position B.
 
         """
-        frame = self.frame
+        E = self.frame
         z = self.z
-        geo = _Geodesic(frame.a-z, frame.f)
-        outmask = _Geodesic.STANDARD
-        if long_unroll:
-            outmask = _Geodesic.STANDARD | _Geodesic.LONG_UNROLL
         if not degrees:
             azimuth = deg(azimuth)
         lat_a, lon_a = self.latitude_deg, self.longitude_deg
-        result = geo.Direct(lat_a, lon_a, azimuth, distance, outmask=outmask)
-        latb, lonb = rad(result['lat2']), rad(result['lon2'])
-        azimuth_b = result['azi2'] if degrees else rad(result['azi2'])
-        return GeoPoint(latitude=latb, longitude=lonb, z=z), azimuth_b
+        latb, lonb, azimuth_b = E.direct(lat_a, lon_a, azimuth, distance, z=z,
+                                         long_unroll=long_unroll, degrees=True)
+        if not degrees:
+            azimuth_b = rad(azimuth_b)
+        point_b = GeoPoint(latitude=latb, longitude=lonb, z=z,
+                           frame=E, degrees=True)
+        return point_b, azimuth_b
 
     def distance_and_azimuth(self, point, long_unroll=False, degrees=False):
         """
@@ -384,18 +412,13 @@ class GeoPoint(object):
         """
         if not self.frame == point.frame:
             raise ValueError('E-frames are note equal')
-        outmask = _Geodesic.STANDARD
-        if long_unroll:
-            outmask = _Geodesic.STANDARD | _Geodesic.LONG_UNROLL
-        frame = self.frame
-        z = self.z
-        geo = _Geodesic(frame.a-z, frame.f)
-        lat_a, lon_a = self.latitude_deg, self.longitude_deg
-        lat_b, lon_b = point.latitude_deg, point.longitude_deg
-        result = geo.Inverse(lat_a, lon_a, lat_b, lon_b, outmask=outmask)
-        azimuth_a = result['azi1'] if degrees else rad(result['azi1'])
-        azimuth_b = result['azi2'] if degrees else rad(result['azi2'])
-        return result['s12'], azimuth_a, azimuth_b
+
+        lat_a, lon_a = self.latitude, self.longitude
+        lat_b, lon_b = point.latitude, point.longitude
+        if degrees:
+            lat_a, lon_a, lat_b, lon_b = deg((lat_a, lon_a, lat_b, lon_b))
+        return self.frame.inverse(lat_a, lon_a, lat_b, lon_b, z=self.z,
+                                  long_unroll=long_unroll, degrees=degrees)
 
 
 class Nvector(object):
