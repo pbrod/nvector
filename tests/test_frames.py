@@ -7,7 +7,7 @@ import unittest
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 from nvector import FrameB, FrameE, FrameN, FrameL, Nvector, ECEFvector
-from nvector._core import GeoPoint, GeoPath, unit, Pvector  # , diff_nvectors
+from nvector import GeoPoint, GeoPath, unit, Pvector  # , diff_nvectors
 from nvector.navigator import EARTH_RADIUS_M
 
 
@@ -24,7 +24,7 @@ class TestFrameE(unittest.TestCase):
         E = FrameE(name='WGS84')
         E2 = FrameE(name='WGS72')
 
-        n_EB_E = Nvector(unit([[1], [2], [3]]), z=-400, frame=E)
+        n_EB_E = E.Nvector(unit([[1], [2], [3]]), z=-400)
         B = FrameB(n_EB_E, yaw=10, pitch=20, roll=30, degrees=True)
         self.assertEqual(B, B)
         self.assertNotEqual(B, E)
@@ -35,7 +35,7 @@ class TestFrameE(unittest.TestCase):
         B3 = FrameB(n_EB_E, yaw=10, pitch=20, roll=30, degrees=True)
         self.assertEqual(B, B3)
 
-        n_EC_E = Nvector(unit([[1], [2], [2]]), z=-400, frame=E)
+        n_EC_E = E.Nvector(unit([[1], [2], [2]]), z=-400)
         B4 = FrameB(n_EC_E, yaw=10, pitch=20, roll=30, degrees=True)
         self.assertNotEqual(B, B4)
 
@@ -43,22 +43,20 @@ class TestFrameE(unittest.TestCase):
         B5 = FrameB(n_ED_E, yaw=10, pitch=20, roll=30, degrees=True)
         self.assertNotEqual(B, B5)
 
-    def test_A_and_B_to_delta_in_frame_N(self):
-
-        options = dict(frame=FrameE(name='WGS84'), degrees=True)
-        pointA = GeoPoint(latitude=1, longitude=2, z=3, **options)
-        pointB = GeoPoint(latitude=4, longitude=5, z=6, **options)
+    def test_Ex1_A_and_B_to_delta_in_frame_N(self):
+        wgs84 = FrameE(name='WGS84')
+        pointA = wgs84.GeoPoint(latitude=1, longitude=2, z=3, degrees=True)
+        pointB = wgs84.GeoPoint(latitude=4, longitude=5, z=6, degrees=True)
 
         # Find the exact vector between the two positions, given in meters
         # north, east, and down, i.e. find p_AB_N.
 
         # SOLUTION:
-        n_EA_E = pointA.to_nvector()
-        p_EA_E = n_EA_E.to_ecef_vector()
+        p_EA_E = pointA.to_ecef_vector()
         p_EB_E = pointB.to_ecef_vector()
         p_AB_E = p_EB_E - p_EA_E  # (delta decomposed in E).
 
-        frame_N = FrameN(n_EA_E)
+        frame_N = FrameN(pointA)
         # frame_N = FrameL(n_EA_E, wander_azimuth=0)
         p_AB_N = p_AB_E.change_frame(frame_N)
         p_AB_N = p_AB_N.pvector
@@ -77,19 +75,17 @@ class TestFrameE(unittest.TestCase):
         self.assertAlmostEqual(p_AB_N[2], 17404.27136194)
         self.assertAlmostEqual(azimuth, 45.10926324)
 
-    def test_B_and_delta_in_frame_B_to_C_in_frame_E(self):
+    def test_Ex2_B_and_delta_in_frame_B_to_C_in_frame_E(self):
         # delta vector from B to C, decomposed in B is given:
 
         # A custom reference ellipsoid is given (replacing WGS-84):
-        frame_E = FrameE(name='WGS72')
+        wgs72 = FrameE(name='WGS72')
 
         # Position and orientation of B is given 400m above E:
-        n_EB_E = Nvector(unit([[1], [2], [3]]), z=-400, frame=frame_E)
+        n_EB_E = wgs72.Nvector(unit([[1], [2], [3]]), z=-400)
 
         frame_B = FrameB(n_EB_E, yaw=10, pitch=20, roll=30, degrees=True)
-
-        p_BC_B = Pvector(np.r_[3000, 2000, 100].reshape((-1, 1)),
-                         frame=frame_B)
+        p_BC_B = frame_B.Pvector(np.r_[3000, 2000, 100].reshape((-1, 1)))
 
         p_BC_E = p_BC_B.to_ecef_vector()
 
@@ -107,12 +103,12 @@ class TestFrameE(unittest.TestCase):
         self.assertAlmostEqual(long_EC, 63.46812344)
         self.assertAlmostEqual(z_EC, -406.00719607)
 
-    def test_ECEF_vector_to_geodetic_latitude(self):
+    def test_Ex3_ECEF_vector_to_geodetic_latitude(self):
 
-        frame_E = FrameE(name='WGS84')
+        wgs84 = FrameE(name='WGS84')
         # Position B is given as p_EB_E ("ECEF-vector")
         position_B = 6371e3 * np.vstack((0.9, -1, 1.1))  # m
-        p_EB_E = ECEFvector(position_B, frame_E)
+        p_EB_E = wgs84.ECEFvector(position_B)
 
         # Find position B as geodetic latitude, longitude and height
         pointB = p_EB_E.to_geo_point()
@@ -124,10 +120,9 @@ class TestFrameE(unittest.TestCase):
         self.assertAlmostEqual(lon, -48.0127875)
         self.assertAlmostEqual(h, 4702059.83429485)
 
-    def test_geodetic_latitude_to_ECEF_vector(self):
-
-        options = dict(frame=FrameE(name='WGS84'), degrees=True)
-        pointB = GeoPoint(latitude=1, longitude=2, z=-3, **options)
+    def test_Ex4_geodetic_latitude_to_ECEF_vector(self):
+        wgs84 = FrameE(name='WGS84')
+        pointB = wgs84.GeoPoint(latitude=1, longitude=2, z=-3, degrees=True)
 
         p_EB_E = pointB.to_ecef_vector()
         print('Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel()))
@@ -136,10 +131,10 @@ class TestFrameE(unittest.TestCase):
                                   [6373290.27721828, 222560.20067474,
                                    110568.82718179])
 
-    def test_great_circle_distance(self):
-        options = dict(frame=FrameE(a=6371e3, f=0), degrees=True)
-        positionA = GeoPoint(latitude=88, longitude=0, **options)
-        positionB = GeoPoint(latitude=89, longitude=-170, **options)
+    def test_Ex5_great_circle_distance(self):
+        frame_E = FrameE(a=6371e3, f=0)
+        positionA = frame_E.GeoPoint(latitude=88, longitude=0, degrees=True)
+        positionB = frame_E.GeoPoint(latitude=89, longitude=-170, degrees=True)
         s_AB, _azia, _azib = positionA.distance_and_azimuth(positionB)
 
         p_AB_E = positionB.to_ecef_vector() - positionA.to_ecef_vector()
@@ -153,9 +148,9 @@ class TestFrameE(unittest.TestCase):
         self.assertAlmostEqual(d_AB / 1000, 332.41872486)
 
     def test_alternative_great_circle_distance(self):
-        options = dict(frame=FrameE(a=6371e3, f=0), degrees=True)
-        positionA = GeoPoint(latitude=88, longitude=0, **options)
-        positionB = GeoPoint(latitude=89, longitude=-170, **options)
+        frame_E = FrameE(a=6371e3, f=0)
+        positionA = frame_E.GeoPoint(latitude=88, longitude=0, degrees=True)
+        positionB = frame_E.GeoPoint(latitude=89, longitude=-170, degrees=True)
         path = GeoPath(positionA, positionB)
 
         s_AB = path.track_distance(method='greatcircle')
@@ -168,9 +163,9 @@ class TestFrameE(unittest.TestCase):
         self.assertAlmostEqual(d_AB / 1000, 332.41872486)
 
     def test_exact_ellipsoidal_distance(self):
-        options = dict(frame=FrameE(name='WGS84'), degrees=True)
-        pointA = GeoPoint(latitude=88, longitude=0, **options)
-        pointB = GeoPoint(latitude=89, longitude=-170, **options)
+        wgs84 = FrameE(name='WGS84')
+        pointA = wgs84.GeoPoint(latitude=88, longitude=0, degrees=True)
+        pointB = wgs84.GeoPoint(latitude=89, longitude=-170, degrees=True)
         s_AB, _azia, _azib = pointA.distance_and_azimuth(pointB)
 
         p_AB_E = pointB.to_ecef_vector() - pointA.to_ecef_vector()
@@ -183,9 +178,26 @@ class TestFrameE(unittest.TestCase):
         self.assertAlmostEqual(s_AB / 1000, 333.94750946834665)
         self.assertAlmostEqual(d_AB / 1000, 333.90962112)
 
-    def test_position_A_and_azimuth_and_distance_to_B(self):
+    def test_Ex7_mean_position(self):
+
+        # Three positions A, B and C are given:
+        # Enter elements directly:
+        # n_EA_E=unit(np.vstack((1, 0, -2)))
+        # n_EB_E=unit(np.vstack((-1, -2, 0)))
+        # n_EC_E=unit(np.vstack((0, -2, 3)))
+
+        # or input as lat/long in deg:
+        points = GeoPoint(latitude=[90, 60, 50], longitude=[0, 10, -20],
+                          degrees=True)
+        nvectors = points.to_nvector()
+        nmean = nvectors.mean_horizontal_position()
+        n_EM_E = nmean.normal
+        assert_array_almost_equal(n_EM_E.ravel(),
+                                  [0.384117, -0.046602, 0.922107])
+
+    def test_Ex8_position_A_and_azimuth_and_distance_to_B(self):
         frame = FrameE(a=EARTH_RADIUS_M, f=0)
-        pointA = GeoPoint(latitude=80, longitude=-90, degrees=True, frame=frame)
+        pointA = frame.GeoPoint(latitude=80, longitude=-90, degrees=True)
         pointB, _azimuthb = pointA.geo_point(distance=1000, azimuth=200,
                                              degrees=True)
 
@@ -195,7 +207,7 @@ class TestFrameE(unittest.TestCase):
         self.assertAlmostEqual(lat_B, 79.99154867)
         self.assertAlmostEqual(lon_B, -90.01769837)
 
-    def test_intersection(self):
+    def test_Ex9_intersection(self):
 
         # Two paths A and B are given by two pairs of positions:
         pointA1 = GeoPoint(10, 20, degrees=True)
@@ -231,26 +243,21 @@ class TestFrameE(unittest.TestCase):
         self.assertTrue(np.isnan(lat))
         self.assertTrue(np.isnan(lon))
 
-    def test_cross_track_distance(self):
+    def test_Ex10_cross_track_distance(self):
 
         frame = FrameE(a=6371e3, f=0)
-        # Position A1 and A2 and B:
-
-        # or input as lat/long in deg:
-        pointA1 = GeoPoint(0, 0, degrees=True, frame=frame)
-        pointA2 = GeoPoint(10, 0, degrees=True, frame=frame)
-        pointB = GeoPoint(1, 0.1, degrees=True, frame=frame)
+        # Position A1 and A2 and B as lat/long in deg:
+        pointA1 = frame.GeoPoint(0, 0, degrees=True)
+        pointA2 = frame.GeoPoint(10, 0, degrees=True)
+        pointB = frame.GeoPoint(1, 0.1, degrees=True)
 
         pathA = GeoPath(pointA1, pointA2)
 
         # Find the cross track distance from path A to position B.
         s_xt = pathA.cross_track_distance(pointB, method='greatcircle')
         d_xt = pathA.cross_track_distance(pointB, method='euclidean')
-
-        print(
-            'Ex10, Cross track distance = {} m, Euclidean = {} m'.format(
-                s_xt,
-                d_xt))
+        msg = 'Ex10, Cross track distance = {} m, Euclidean = {} m'
+        print(msg.format(s_xt, d_xt))
 
         self.assertAlmostEqual(s_xt, 11117.79911015)
         self.assertAlmostEqual(d_xt, 11117.79346741)

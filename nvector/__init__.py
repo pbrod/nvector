@@ -1,8 +1,12 @@
 import pkg_resources
+from .info import __doc__  # @UnresolvedImport
+from numpy.testing import Tester
+from ._core import *
+from .objects import *
 
 try:
     __version__ = pkg_resources.get_distribution(__name__).version
-except:
+except pkg_resources.DistributionNotFound:
     __version__ = 'unknown'
 
-from ._core import *
+test = Tester(raise_warnings="release").test

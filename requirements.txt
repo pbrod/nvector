@@ -1,4 +1,4 @@
 # Add your requirements here like:
-# numpy
-# scipy>=0.9
-
+numpy
+scipy>=0.9
+geographiclib

@@ -1,9 +1,8 @@
-=======
-nvector
-=======
-
-
-Nvector is a suite of tools to solve geographical position calculations like:
+"""
+Introduction to Nvector
+=======================
+Nvector is a suite of tools written in Python to solve geographical position
+calculations like:
 
 * Calculate the surface distance between two geographical positions:*
 
@@ -17,9 +16,6 @@ Nvector is a suite of tools to solve geographical position calculations like:
 
 * Find the cross track distance between a path and a position.*
 
-
-Description
-===========
 
 In this library, we represent position with an "n-vector",  which
 is the normal vector to the Earth model (the same reference ellipsoid that is
@@ -94,7 +90,6 @@ python session::
 
    import nvector as nv
    nv.test(coverage=True, doctests=True)
-
 
 Getting Started
 ---------------
@@ -384,9 +379,13 @@ See also
 --------
 geographiclib
 
+"""
 
-Note
-====
 
-This project has been set up using PyScaffold 2.4.4. For details and usage
-information on PyScaffold see http://pyscaffold.readthedocs.org/.
+def test_docstrings():
+    import doctest
+    doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE)
+
+
+if __name__ == '__main__':
+    test_docstrings()

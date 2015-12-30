@@ -17,7 +17,7 @@ def plot_mean_position():
     positions = np.array([(90, 0),
                           (60, 10),
                           (50, -20),
-                          (70,-70)])
+                          ])
     lats, lons = positions.T
     nvecs = lat_lon2n_E(rad(lats), rad(lons))
 
@@ -39,7 +39,6 @@ def plot_mean_position():
 
     plt.title('Figure of mean position (red dot) compared to positions '
               'A, B, and C (black dots).')
-    plt.show('hold')
 
 
 def plot_world(map1):
@@ -59,3 +58,4 @@ def plot_world(map1):
 
 if __name__ == '__main__':
     plot_mean_position()
+    plt.show('hold')
