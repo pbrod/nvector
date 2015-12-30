@@ -2,6 +2,25 @@
 nvector
 =======
 
+.. image:: https://badge.fury.io/py/Nvector.png
+    :target: https://pypi.python.org/pypi/Nvector/
+
+.. image:: https://travis-ci.org/pbrod/Nvector.svg?branch=master
+    :target: https://travis-ci.org/pbrod/Nvector
+
+.. image:: https://readthedocs.org/projects/pip/badge/?version=latest
+    :target: http://Nvector.readthedocs.org/en/latest/
+
+.. image:: https://landscape.io/github/pbrod/Nvector/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/pbrod/Nvector/master
+   :alt: Code Health
+
+.. image:: https://coveralls.io/repos/pbrod/Nvector/badge.svg?branch=master
+   :target: https://coveralls.io/github/pbrod/Nvector?branch=master
+
+.. image:: https://img.shields.io/pypi/pyversions/Nvector.svg
+   :target: https://github.com/pbrod/Nvector
+
 
 Nvector is a suite of tools to solve geographical position calculations like:
 
