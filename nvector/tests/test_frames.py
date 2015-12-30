@@ -8,7 +8,8 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal
 from nvector import FrameB, FrameE, FrameN, FrameL, Nvector, ECEFvector
 from nvector import GeoPoint, GeoPath, unit, Pvector  # , diff_nvectors
-from nvector.navigator import EARTH_RADIUS_M
+
+EARTH_RADIUS_M = 6371009.0
 
 
 class TestFrameE(unittest.TestCase):
