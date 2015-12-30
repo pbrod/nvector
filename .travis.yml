@@ -44,7 +44,7 @@ before_script:
   - git config --global user.email "per.andreas.brodtkorb@gmail.com"
   - git config --global user.name "pbrod"
 script:
-  - coverage run --source=numdifftools setup.py test
+  - coverage run --source=nvector setup.py test
 after_success:
   - coveralls
   - codecov
