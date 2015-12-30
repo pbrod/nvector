@@ -2,7 +2,8 @@
 [run]
 branch = True
 source = nvector
-# omit = bad_file.py
+omit = 
+   nvector/tests/*
 
 [report]
 # Regexes for lines to exclude from consideration
