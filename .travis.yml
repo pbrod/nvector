@@ -45,6 +45,7 @@ before_script:
   - git config --global user.name "pbrod"
 script:
   - coverage run --source=nvector setup.py test
+
 after_success:
   - coveralls
   - codecov
