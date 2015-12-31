@@ -24,17 +24,17 @@ nvector
 
 Nvector is a suite of tools to solve geographical position calculations like:
 
-* Calculate the surface distance between two geographical positions:*
+* Calculate the surface distance between two geographical positions.
 
-* Convert positions given in one reference frame into another reference frame*
+* Convert positions given in one reference frame into another reference frame.
 
-* Find the destination point given start position, azimuth/bearing and distance*
+* Find the destination point given start position, azimuth/bearing and distance.
 
-* Find the mean position (center/midpoint) of several geographical positions.*
+* Find the mean position (center/midpoint) of several geographical positions.
 
-* Find the intersection between two paths.*
+* Find the intersection between two paths.
 
-* Find the cross track distance between a path and a position.*
+* Find the cross track distance between a path and a position.
 
 
 Description
@@ -159,6 +159,35 @@ Step4: Also find the direction (azimuth) to B, relative to north:
     >>> 'azimuth = {0:4.2f} deg'.format(np.rad2deg(azimuth))
     'azimuth = 45.11 deg'
 
+Functional solution:
+    >>> import numpy as np
+    >>> import nvector as nv
+    >>> from nvector import rad, deg
+
+    >>> lat_EA, lon_EA, z_EA = rad(1), rad(2), 3
+    >>> lat_EB, lon_EB, z_EB = rad(4), rad(5), 6
+
+Step1: Convert to n-vectors:
+    >>> n_EA_E = nv.lat_lon2n_E(lat_EA, lon_EA)
+    >>> n_EB_E = nv.lat_lon2n_E(lat_EB, lon_EB)
+
+Step2: Find p_AB_E (delta decomposed in E).WGS-84 ellipsoid is default:
+    >>> p_AB_E = nv.n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA, z_EB)
+
+Step3: Find R_EN for position A:
+    >>> R_EN = nv.n_E2R_EN(n_EA_E)
+
+Step4: Find p_AB_N (delta decomposed in N).
+    >>> p_AB_N = np.dot(R_EN.T, p_AB_E).ravel()
+    >>> 'delta north, east, down = {0:8.2f}, {1:8.2f}, {2:8.2f}'.format(*p_AB_N)
+    'delta north, east, down = 331730.23, 332997.87, 17404.27'
+
+Step5: Also find the direction (azimuth) to B, relative to north:
+    >>> azimuth = np.arctan2(p_AB_N[1], p_AB_N[0]) # positive angle about down-axis
+    >>> 'azimuth = {0:4.2f} deg'.format(deg(azimuth))
+    'azimuth = 45.11 deg'
+
+
 
 Example 2: "B and delta to C"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -225,7 +254,8 @@ Step 2: Extract latitude and longitude in degrees
 
 
 Example 4: "Geodetic latitude to ECEF-vector"
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Solution:
     >>> wgs84 = nv.FrameE(name='WGS84')
     >>> pointB = wgs84.GeoPoint(latitude=1, longitude=2, z=-3, degrees=True)
     >>> p_EB_E = pointB.to_ecef_vector()
@@ -243,6 +273,7 @@ the Earth, directly above/below A and B. The Euclidean distance (chord length)
 dAB should also be found. Use Earth radius 6371e3 m.
 
 Solution:
+    >>> import nvector as nv
     >>> frame_E = nv.FrameE(a=6371e3, f=0)
     >>> positionA = frame_E.GeoPoint(latitude=88, longitude=0, degrees=True)
     >>> positionB = frame_E.GeoPoint(latitude=89, longitude=-170, degrees=True)
@@ -256,6 +287,7 @@ Solution:
     'Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
 Alternative solution:
+    >>> import nvector as nv
     >>> path = nv.GeoPath(positionA, positionB)
     >>> s_AB2 = path.track_distance(method='greatcircle').ravel()
     >>> d_AB2 = path.track_distance(method='euclidean').ravel()
@@ -263,6 +295,7 @@ Alternative solution:
     'Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
 Exact solution for the WGS84 ellipsoid:
+    >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
     >>> point1 = wgs84.GeoPoint(latitude=88, longitude=0, degrees=True)
     >>> point2 = wgs84.GeoPoint(latitude=89, longitude=-170, degrees=True)
@@ -282,6 +315,7 @@ Find the mean position, M, given as n_EM_E.
 Note that the calculation is independent of the depths of the positions.
 
 Solution:
+    >>> import nvector as nv
     >>> points = nv.GeoPoint(latitude=[90, 60, 50],
     ...                      longitude=[0, 10, -20], degrees=True)
     >>> nvectors = points.to_nvector()
@@ -307,6 +341,7 @@ distance. ("The second/inverse geodetic problem" for a sphere is already
 solved in Examples 1 and 5.)
 
 Solution:
+    >>> import nvector as nv
     >>> frame = nv.FrameE(a=6371e3, f=0)
     >>> pointA = frame.GeoPoint(latitude=80, longitude=-90, degrees=True)
     >>> pointB, _azimuthb = pointA.geo_point(distance=1000, azimuth=200,
@@ -327,6 +362,7 @@ Path A is given by A1 and A2, while path B is given by B1 and B2.
 Find the position C where the two paths intersect.
 
 Solution:
+    >>> import nvector as nv
     >>> pointA1 = nv.GeoPoint(10, 20, degrees=True)
     >>> pointA2 = nv.GeoPoint(30, 40, degrees=True)
     >>> pointB1 = nv.GeoPoint(50, 60, degrees=True)
@@ -355,6 +391,7 @@ Also find the Euclidean distance dxt between B and the plane defined by the
 great circle. Use Earth radius 6371e3.
 
 Solution:
+    >>> import nvector as nv
     >>> frame = nv.FrameE(a=6371e3, f=0)
     >>> pointA1 = frame.GeoPoint(0, 0, degrees=True)
     >>> pointA2 = frame.GeoPoint(10, 0, degrees=True)
@@ -369,38 +406,6 @@ Solution:
     >>> '{}, s_xt, d_xt = {}'.format(msg, val_txt)
     'cross track distance from path A to position B, s_xt, d_xt = 11.12 km, 11.12 km'
 
-Below we also give the functional solutions to example 1.
-
-Example 1: Find the exact vector between the two positions, given in meters
-    north, east, and down, i.e. find p_AB_N:
-
-Solution:
-    >>> import numpy as np
-    >>> import nvector as nv
-    >>> from nvector import rad, deg
-
-    >>> lat_EA, lon_EA, z_EA = rad(1), rad(2), 3
-    >>> lat_EB, lon_EB, z_EB = rad(4), rad(5), 6
-
-Step1: Convert to n-vectors:
-    >>> n_EA_E = nv.lat_lon2n_E(lat_EA, lon_EA)
-    >>> n_EB_E = nv.lat_lon2n_E(lat_EB, lon_EB)
-
-Step2: Find p_AB_E (delta decomposed in E).WGS-84 ellipsoid is default:
-    >>> p_AB_E = nv.n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA, z_EB)
-
-Step3: Find R_EN for position A:
-    >>> R_EN = nv.n_E2R_EN(n_EA_E)
-
-Step4: Find p_AB_N (delta decomposed in N).
-    >>> p_AB_N = np.dot(R_EN.T, p_AB_E).ravel()
-    >>> 'delta north, east, down = {0:8.2f}, {1:8.2f}, {2:8.2f}'.format(*p_AB_N)
-    'delta north, east, down = 331730.23, 332997.87, 17404.27'
-
-Step5: Also find the direction (azimuth) to B, relative to north:
-    >>> azimuth = np.arctan2(p_AB_N[1], p_AB_N[0]) # positive angle about down-axis
-    >>> 'azimuth = {0:4.2f} deg'.format(deg(azimuth))
-    'azimuth = 45.11 deg'
 
 See also
 --------
