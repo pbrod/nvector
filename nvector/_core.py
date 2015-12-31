@@ -563,7 +563,7 @@ def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0/298.257223563, R_Ee=None):
 
 
 def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
-                             f=1.0/298.257223563):
+                             f=1.0/298.257223563, R_Ee=None):
     """
     From two positions A and B, finds the delta position.
 
@@ -599,8 +599,8 @@ def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
     """
 
     # Function 1. in Section 5.4 in Gade (2010):
-    p_EA_E = n_EB_E2p_EB_E(n_EA_E, z_EA, a, f)
-    p_EB_E = n_EB_E2p_EB_E(n_EB_E, z_EB, a, f)
+    p_EA_E = n_EB_E2p_EB_E(n_EA_E, z_EA, a, f, R_Ee)
+    p_EB_E = n_EB_E2p_EB_E(n_EB_E, z_EB, a, f, R_Ee)
     p_AB_E = p_EB_E - p_EA_E
     return p_AB_E
 
@@ -949,7 +949,7 @@ def azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0/298.257223563):
     Returns
     -------
     azimuth: n, array
-        Angle the line makes with a meridian, taken clockwise from north.
+        Angle [rad] the line makes with a meridian, taken clockwise from north.
     """
     # Step2: Find p_AB_E (delta decomposed in E).
     p_AB_E = n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=a, f=f)
@@ -971,12 +971,34 @@ def azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0/298.257223563):
     return arctan2(p_AB_N[1], p_AB_N[0])
 
 
-def distance_rad_bearing_rad2point(n_EA_E, distance_rad, bearing_rad):
+def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth,
+                                       R_Ee=None):
+    """
+    Return position B from direction (azimuth) and distance from position A
+
+    Parameters
+    ----------
+    n_EA_E:  3 x n array
+        n-vector(s) [no unit] of position A decomposed in E.
+    distance_rad: n, array
+        great circle distance [rad] from position A to B
+    azimuth: n, array
+        Angle [rad] the line makes with a meridian, taken clockwise from north.
+
+    Returns
+    -------
+    n_EB_E:  3 x n array
+        n-vector(s) [no unit] of position B decomposed in E.
+
+    """
+    if R_Ee is None:
+        R_Ee = get_north_pole_axis_for_E_frame()
+    # Step1: Find unit vectors for north and east:
     k_east_E = unit(cross(dot(R_Ee.T, [[1], [0], [0]]), n_EA_E, axis=0))
     k_north_E = cross(n_EA_E, k_east_E, axis=0)
 
     # Step2: Find the initial direction vector d_E:
-    d_E = k_north_E * cos(bearing_rad) + k_east_E * sin(bearing_rad)
+    d_E = k_north_E * cos(azimuth) + k_east_E * sin(azimuth)
 
     # Step3: Find n_EB_E:
     n_EB_E = n_EA_E * cos(distance_rad) + d_E * sin(distance_rad)

@@ -39,6 +39,8 @@ from nvector import (deg, rad,
                      euclidean_distance)
 
 from numpy.testing import assert_array_almost_equal
+from nvector._core import n_EA_E_distance_and_azimuth2n_EB_E,\
+    mean_horizontal_position
 
 R_Ee = set_north_pole_axis_for_E_frame(axis='z')
 
@@ -238,6 +240,10 @@ class TestNvector(unittest.TestCase):
         # plot_Earth_figure(n_EA_E,n_EB_E,n_EC_E,n_EM_E)
         assert_array_almost_equal(n_EM_E.ravel(),
                                   [0.384117, -0.046602, 0.922107])
+        # Alternatively:
+        n_EM_E = mean_horizontal_position(np.hstack((n_EA_E, n_EB_E, n_EC_E)))
+        assert_array_almost_equal(n_EM_E.ravel(),
+                                  [0.384117, -0.046602, 0.922107])
 
     def test_Ex8_position_A_and_azimuth_and_distance_to_B(self):
 
@@ -257,16 +263,10 @@ class TestNvector(unittest.TestCase):
         # problem" for a sphere)
 
         # SOLUTION:
-        # Step1: Find unit vectors for north and east:
-        k_east_E = unit(np.cross(np.dot(R_Ee.T, [[1], [0], [0]]),
-                                 n_EA_E, axis=0))
-        k_north_E = np.cross(n_EA_E, k_east_E, axis=0)
-
-        # Step2: Find the initial direction vector d_E:
-        d_E = k_north_E * np.cos(azimuth) + k_east_E * np.sin(azimuth)
-
-        # Step3: Find n_EB_E:
-        n_EB_E = n_EA_E * np.cos(s_AB / r_Earth) + d_E * np.sin(s_AB / r_Earth)
+        # Step1: Convert distance in meter into distance in [rad]:
+        distance_rad = s_AB / r_Earth
+        # Step2: Find n_EB_E:
+        n_EB_E = n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth)
 
         # When displaying the resulting position for humans, it is more
         # convenient to see lat, long:
