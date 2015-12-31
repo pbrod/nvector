@@ -71,10 +71,10 @@ class TestFrameE(unittest.TestCase):
 
         print('Ex1, azimuth = {} deg'.format(azimuth))
 
-        self.assertAlmostEqual(p_AB_N[0], 331730.23478089)
-        self.assertAlmostEqual(p_AB_N[1], 332997.87498927)
-        self.assertAlmostEqual(p_AB_N[2], 17404.27136194)
-        self.assertAlmostEqual(azimuth, 45.10926324)
+        assert_array_almost_equal(p_AB_N[0], 331730.23478089)
+        assert_array_almost_equal(p_AB_N[1], 332997.87498927)
+        assert_array_almost_equal(p_AB_N[2], 17404.27136194)
+        assert_array_almost_equal(azimuth, 45.10926324)
 
     def test_Ex2_B_and_delta_in_frame_B_to_C_in_frame_E(self):
         # delta vector from B to C, decomposed in B is given:
@@ -100,9 +100,9 @@ class TestFrameE(unittest.TestCase):
         msg = 'Ex2, Pos C: lat, long = {},{} deg,  height = {} m'
         print(msg.format(lat_EC, long_EC, -z_EC))
 
-        self.assertAlmostEqual(lat_EC, 53.32637826)
-        self.assertAlmostEqual(long_EC, 63.46812344)
-        self.assertAlmostEqual(z_EC, -406.00719607)
+        assert_array_almost_equal(lat_EC, 53.32637826)
+        assert_array_almost_equal(long_EC, 63.46812344)
+        assert_array_almost_equal(z_EC, -406.00719607)
 
     def test_Ex3_ECEF_vector_to_geodetic_latitude(self):
 
@@ -117,9 +117,9 @@ class TestFrameE(unittest.TestCase):
 
         msg = 'Ex3, Pos B: lat, lon = {} {} deg, height = {} m'
         print(msg.format(lat, lon, h))
-        self.assertAlmostEqual(lat, 39.37874867)
-        self.assertAlmostEqual(lon, -48.0127875)
-        self.assertAlmostEqual(h, 4702059.83429485)
+        assert_array_almost_equal(lat, 39.37874867)
+        assert_array_almost_equal(lon, -48.0127875)
+        assert_array_almost_equal(h, 4702059.83429485)
 
     def test_Ex4_geodetic_latitude_to_ECEF_vector(self):
         wgs84 = FrameE(name='WGS84')
@@ -145,8 +145,8 @@ class TestFrameE(unittest.TestCase):
         msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
         print(msg.format(s_AB / 1000, d_AB / 1000))
 
-        self.assertAlmostEqual(s_AB / 1000, 332.45644411)
-        self.assertAlmostEqual(d_AB / 1000, 332.41872486)
+        assert_array_almost_equal(s_AB / 1000, 332.45644411)
+        assert_array_almost_equal(d_AB / 1000, 332.41872486)
 
     def test_alternative_great_circle_distance(self):
         frame_E = FrameE(a=6371e3, f=0)
@@ -160,8 +160,8 @@ class TestFrameE(unittest.TestCase):
         msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
         print(msg.format(s_AB / 1000, d_AB / 1000))
 
-        self.assertAlmostEqual(s_AB / 1000, 332.45644411)
-        self.assertAlmostEqual(d_AB / 1000, 332.41872486)
+        assert_array_almost_equal(s_AB / 1000, 332.45644411)
+        assert_array_almost_equal(d_AB / 1000, 332.41872486)
 
     def test_exact_ellipsoidal_distance(self):
         wgs84 = FrameE(name='WGS84')
@@ -176,8 +176,8 @@ class TestFrameE(unittest.TestCase):
         msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
         print(msg.format(s_AB / 1000, d_AB / 1000))
 
-        self.assertAlmostEqual(s_AB / 1000, 333.94750946834665)
-        self.assertAlmostEqual(d_AB / 1000, 333.90962112)
+        assert_array_almost_equal(s_AB / 1000, 333.94750946834665)
+        assert_array_almost_equal(d_AB / 1000, 333.90962112)
 
     def test_Ex7_mean_position(self):
 
@@ -205,8 +205,8 @@ class TestFrameE(unittest.TestCase):
         lat_B, lon_B = pointB.latitude_deg, pointB.longitude_deg
 
         print('Ex8, Destination: lat, long = {} {} deg'.format(lat_B, lon_B))
-        self.assertAlmostEqual(lat_B, 79.99154867)
-        self.assertAlmostEqual(lon_B, -90.01769837)
+        assert_array_almost_equal(lat_B, 79.99154867)
+        assert_array_almost_equal(lon_B, -90.01769837)
 
     def test_Ex9_intersection(self):
 
@@ -223,8 +223,8 @@ class TestFrameE(unittest.TestCase):
         lat, lon = pointC.latitude_deg, pointC.longitude_deg
         msg = 'Ex9, Intersection: lat, long = {} {} deg'
         print(msg.format(lat, lon))
-        self.assertAlmostEqual(lat, 40.31864307)
-        self.assertAlmostEqual(lon, 55.90186788)
+        assert_array_almost_equal(lat, 40.31864307)
+        assert_array_almost_equal(lon, 55.90186788)
 
     def test_intersection_of_parallell_paths(self):
 
@@ -260,8 +260,8 @@ class TestFrameE(unittest.TestCase):
         msg = 'Ex10, Cross track distance = {} m, Euclidean = {} m'
         print(msg.format(s_xt, d_xt))
 
-        self.assertAlmostEqual(s_xt, 11117.79911015)
-        self.assertAlmostEqual(d_xt, 11117.79346741)
+        assert_array_almost_equal(s_xt, 11117.79911015)
+        assert_array_almost_equal(d_xt, 11117.79346741)
 
 
 if __name__ == "__main__":

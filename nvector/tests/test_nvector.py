@@ -85,10 +85,10 @@ class TestNvector(unittest.TestCase):
                                                                  p_AB_N[2]))
         print('Ex1, azimuth = {} deg'.format(deg(azimuth)))
 
-        self.assertAlmostEqual(p_AB_N[0], 331730.23478089)
-        self.assertAlmostEqual(p_AB_N[1], 332997.87498927)
-        self.assertAlmostEqual(p_AB_N[2], 17404.27136194)
-        self.assertAlmostEqual(deg(azimuth), 45.10926324)
+        assert_array_almost_equal(p_AB_N[0], 331730.23478089)
+        assert_array_almost_equal(p_AB_N[1], 332997.87498927)
+        assert_array_almost_equal(p_AB_N[2], 17404.27136194)
+        assert_array_almost_equal(deg(azimuth), 45.10926324)
 
     def test_Ex2_B_and_delta_in_frame_B_to_C_in_frame_E(self):
         # delta vector from B to C, decomposed in B is given:
@@ -126,9 +126,9 @@ class TestNvector(unittest.TestCase):
         msg = 'Ex2, Pos C: lat, long = {},{} deg,  height = {} m'
         print(msg.format(deg(lat_EC), deg(long_EC), -z_EC))
 
-        self.assertAlmostEqual(deg(lat_EC), 53.32637826)
-        self.assertAlmostEqual(deg(long_EC), 63.46812344)
-        self.assertAlmostEqual(z_EC, -406.00719607)
+        assert_array_almost_equal(deg(lat_EC), 53.32637826)
+        assert_array_almost_equal(deg(long_EC), 63.46812344)
+        assert_array_almost_equal(z_EC, -406.00719607)
 
     def test_Ex3_ECEF_vector_to_geodetic_latitude(self):
 
@@ -148,9 +148,9 @@ class TestNvector(unittest.TestCase):
         msg = 'Ex3, Pos B: lat, long = {} {} deg, height = {} m'
         print(msg.format(deg(lat_EB), deg(long_EB), h_EB))
 
-        self.assertAlmostEqual(deg(lat_EB), 39.37874867)
-        self.assertAlmostEqual(deg(long_EB), -48.0127875)
-        self.assertAlmostEqual(h_EB, 4702059.83429485)
+        assert_array_almost_equal(deg(lat_EB), 39.37874867)
+        assert_array_almost_equal(deg(long_EB), -48.0127875)
+        assert_array_almost_equal(h_EB, 4702059.83429485)
 
     def test_Ex4_geodetic_latitude_to_ECEF_vector(self):
 
@@ -190,8 +190,8 @@ class TestNvector(unittest.TestCase):
         msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
         print(msg.format(s_AB / 1000, d_AB / 1000))
 
-        self.assertAlmostEqual(s_AB / 1000, 332.45644411)
-        self.assertAlmostEqual(d_AB / 1000, 332.41872486)
+        assert_array_almost_equal(s_AB / 1000, 332.45644411)
+        assert_array_almost_equal(d_AB / 1000, 332.41872486)
 
     def test_Ex6_interpolated_position(self):
 
@@ -218,8 +218,8 @@ class TestNvector(unittest.TestCase):
         msg = 'Ex6, Interpolated position: lat, long = {} {} deg'
         print(msg.format(deg(lat_EB_ti), deg(long_EB_ti)))
 
-        self.assertAlmostEqual(deg(lat_EB_ti), 89.7999805)
-        self.assertAlmostEqual(deg(long_EB_ti), 180.)
+        assert_array_almost_equal(deg(lat_EB_ti), 89.7999805)
+        assert_array_almost_equal(deg(long_EB_ti), 180.)
 
     def test_Ex7_mean_position(self):
 
@@ -274,8 +274,8 @@ class TestNvector(unittest.TestCase):
         print('Ex8, Destination: lat, long = {} {} deg'.format(deg(lat_EB),
                                                                deg(long_EB)))
 
-        self.assertAlmostEqual(deg(lat_EB), 79.99154867)
-        self.assertAlmostEqual(deg(long_EB), -90.01769837)
+        assert_array_almost_equal(deg(lat_EB), 79.99154867)
+        assert_array_almost_equal(deg(long_EB), -90.01769837)
 
     def test_Ex9_intersection(self):
 
@@ -300,8 +300,8 @@ class TestNvector(unittest.TestCase):
         lat_EC, long_EC = n_E2lat_lon(n_EC_E)
         msg = 'Ex9, Intersection: lat, long = {} {} deg'
         print(msg.format(deg(lat_EC), deg(long_EC)))
-        self.assertAlmostEqual(deg(lat_EC), 40.31864307)
-        self.assertAlmostEqual(deg(long_EC), 55.90186788)
+        assert_array_almost_equal(deg(lat_EC), 40.31864307)
+        assert_array_almost_equal(deg(long_EC), 55.90186788)
 
     def test_Ex10_cross_track_distance(self):
 
@@ -327,8 +327,8 @@ class TestNvector(unittest.TestCase):
         msg = 'Ex10, Cross track distance = {} m, Euclidean = {} m'
         print(msg.format(s_xt, d_xt))
 
-        self.assertAlmostEqual(s_xt, 11117.79911015)
-        self.assertAlmostEqual(d_xt, 11117.79346741)
+        assert_array_almost_equal(s_xt, 11117.79911015)
+        assert_array_almost_equal(d_xt, 11117.79346741)
 
 
 if __name__ == "__main__":
