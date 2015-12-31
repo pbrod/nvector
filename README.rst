@@ -15,7 +15,8 @@ nvector
    :target: https://landscape.io/github/pbrod/Nvector/master
    :alt: Code Health
 
-.. image:: https://coveralls.io/repos/pbrod/Nvector/badge.svg?branch=master&service=github :target: https://coveralls.io/github/pbrod/Nvector?branch=master
+.. image:: https://coveralls.io/repos/pbrod/Nvector/badge.svg?branch=master&service=github 
+   :target: https://coveralls.io/github/pbrod/Nvector?branch=master
 
 .. image:: https://img.shields.io/pypi/pyversions/Nvector.svg
    :target: https://github.com/pbrod/Nvector
@@ -117,6 +118,7 @@ python session::
 Getting Started
 ---------------
 Example 1: "A and B to delta"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Given two positions, A and B as latitudes, longitudes and depths relative to
 Earth, E.
@@ -159,6 +161,7 @@ Step4: Also find the direction (azimuth) to B, relative to north:
 
 
 Example 2: "B and delta to C"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A radar or sonar attached to a vehicle B (Body coordinate frame) measures the
 distance and direction to an object C. We assume that the distance and two
@@ -198,6 +201,7 @@ Step 4: Find point C by adding delta BC to EB
 
 
 Example 3: "ECEF-vector to geodetic latitude"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Position B is given as an "ECEF-vector" p_EB_E (i.e. a vector from E, the
 center of the Earth, to B, decomposed in E).
@@ -230,6 +234,7 @@ Example 4: "Geodetic latitude to ECEF-vector"
 
 
 Example 5: "Surface distance"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Find the surface distance sAB (i.e. great circle distance) between two
 positions A and B. The heights of A and B are ignored, i.e. if they don't have
@@ -270,6 +275,7 @@ Exact solution for the WGS84 ellipsoid:
 
 
 Example 7: "Mean position"
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Three positions A, B, and C are given as n-vectors n_EA_E, n_EB_E, and n_EC_E.
 Find the mean position, M, given as n_EM_E.
@@ -288,7 +294,7 @@ Solution:
 
 
 Example 8: "A and azimuth/distance to B"
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 We have an initial position A, direction of travel given as an azimuth
 (bearing) relative to north (clockwise), and finally the
 distance to travel along a great circle given as sAB.
@@ -312,7 +318,7 @@ Solution:
 
 
 Example 9: "Intersection of two paths"
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Define a path from two given positions (at the surface of a spherical Earth),
 as the great circle that goes through the two points.
 
@@ -320,8 +326,7 @@ Path A is given by A1 and A2, while path B is given by B1 and B2.
 
 Find the position C where the two paths intersect.
 
-Solution 9:
-
+Solution:
     >>> pointA1 = nv.GeoPoint(10, 20, degrees=True)
     >>> pointA2 = nv.GeoPoint(30, 40, degrees=True)
     >>> pointB1 = nv.GeoPoint(50, 60, degrees=True)
@@ -338,7 +343,7 @@ Solution 9:
 
 
 Example 10: "Cross track distance"
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Path A is given by the two positions A1 and A2 (similar to the previous
 example).
 
@@ -349,7 +354,7 @@ surface, between the great circle and B).
 Also find the Euclidean distance dxt between B and the plane defined by the
 great circle. Use Earth radius 6371e3.
 
-Solution 10:
+Solution:
     >>> frame = nv.FrameE(a=6371e3, f=0)
     >>> pointA1 = frame.GeoPoint(0, 0, degrees=True)
     >>> pointA2 = frame.GeoPoint(10, 0, degrees=True)
@@ -369,20 +374,19 @@ Below we also give the functional solutions to example 1.
 Example 1: Find the exact vector between the two positions, given in meters
     north, east, and down, i.e. find p_AB_N:
 
->>> import numpy as np
->>> import nvector as nv
->>> from nvector import rad, deg
+Solution:
+    >>> import numpy as np
+    >>> import nvector as nv
+    >>> from nvector import rad, deg
 
->>> lat_EA, lon_EA, z_EA = rad(1), rad(2), 3
->>> lat_EB, lon_EB, z_EB = rad(4), rad(5), 6
+    >>> lat_EA, lon_EA, z_EA = rad(1), rad(2), 3
+    >>> lat_EB, lon_EB, z_EB = rad(4), rad(5), 6
 
-SOLUTION:
 Step1: Convert to n-vectors:
     >>> n_EA_E = nv.lat_lon2n_E(lat_EA, lon_EA)
     >>> n_EB_E = nv.lat_lon2n_E(lat_EB, lon_EB)
 
-Step2: Find p_AB_E (delta decomposed in E).
-WGS-84 ellipsoid is default:
+Step2: Find p_AB_E (delta decomposed in E).WGS-84 ellipsoid is default:
     >>> p_AB_E = nv.n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA, z_EB)
 
 Step3: Find R_EN for position A:
