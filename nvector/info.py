@@ -4,17 +4,17 @@ Introduction to Nvector
 Nvector is a suite of tools written in Python to solve geographical position
 calculations like:
 
-* Calculate the surface distance between two geographical positions:*
+* Calculate the surface distance between two geographical positions.
 
-* Convert positions given in one reference frame into another reference frame*
+* Convert positions given in one reference frame into another reference frame,
 
-* Find the destination point given start position, azimuth/bearing and distance*
+* Find the destination point given start position, azimuth/bearing and distance.
 
-* Find the mean position (center/midpoint) of several geographical positions.*
+* Find the mean position (center/midpoint) of several geographical positions.
 
-* Find the intersection between two paths.*
+* Find the intersection between two paths.
 
-* Find the cross track distance between a path and a position.*
+* Find the cross track distance between a path and a position.
 
 
 In this library, we represent position with an "n-vector",  which

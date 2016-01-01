@@ -36,11 +36,12 @@ PyPi upload:
 import sys
 from setuptools import setup
 
+
 def print_version():
     import pkg_resources
     try:
         __version__ = pkg_resources.get_distribution("nvector").version
-        with open("__conda_version__.txt","w") as fid:
+        with open("__conda_version__.txt", "w") as fid:
             fid.write(__version__)
     except pkg_resources.DistributionNotFound:
         __version__ = 'unknown'
@@ -49,7 +50,8 @@ def print_version():
 
 def setup_package():
     needs_sphinx = {'build_sphinx', 'upload_docs'}.intersection(sys.argv)
-    sphinx = ['sphinx', 'numpydoc', 'sphinx_rtd_theme>=0.1.7'] if needs_sphinx else []
+    sphinx = ['sphinx', 'numpydoc',
+              'sphinx_rtd_theme>=0.1.7'] if needs_sphinx else []
     setup(setup_requires=['six', 'pyscaffold>=2.4rc1,<2.5a0'] + sphinx,
           tests_require=['pytest_cov', 'pytest'],
           use_pyscaffold=True)
