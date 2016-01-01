@@ -39,8 +39,10 @@ from nvector import (deg, rad,
                      euclidean_distance)
 
 from numpy.testing import assert_array_almost_equal
-from nvector._core import n_EA_E_distance_and_azimuth2n_EB_E,\
-    mean_horizontal_position
+from nvector._core import (n_EA_E_distance_and_azimuth2n_EB_E,
+                           mean_horizontal_position,
+                           R2xyz, xyz2R, R2zyx, zyx2R,
+                           n_EA_E_and_n_EB_E2azimuth)
 
 R_Ee = set_north_pole_axis_for_E_frame(axis='z')
 
@@ -276,6 +278,8 @@ class TestNvector(unittest.TestCase):
 
         assert_array_almost_equal(deg(lat_EB), 79.99154867)
         assert_array_almost_equal(deg(long_EB), -90.01769837)
+        azimuth1 = n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=r_Earth, f=0)
+        assert_array_almost_equal(azimuth, azimuth1+2*np.pi)
 
     def test_Ex9_intersection(self):
 
@@ -329,6 +333,27 @@ class TestNvector(unittest.TestCase):
 
         assert_array_almost_equal(s_xt, 11117.79911015)
         assert_array_almost_equal(d_xt, 11117.79346741)
+
+    def test_R2xyz(self):
+        x, y, z = rad((10, 20, 30))
+        R_AB1 = xyz2R(x, y, z)
+        R_AB = [[0.81379768, -0.46984631,  0.34202014],
+                [0.54383814,  0.82317294, -0.16317591],
+                [-0.20487413,  0.31879578,  0.92541658]]
+        assert_array_almost_equal(R_AB, R_AB1)
+        x1, y1, z1 = R2xyz(R_AB1)
+        assert_array_almost_equal((x, y, z), (x1, y1, z1))
+
+    def test_R2zxy(self):
+        x, y, z = rad((10, 20, 30))
+        R_AB1 = zyx2R(z, y, x)
+        R_AB = [[0.813798, -0.44097, 0.378522],
+                [0.469846, 0.882564, 0.018028],
+                [-0.34202, 0.163176, 0.925417]]
+
+        assert_array_almost_equal(R_AB, R_AB1)
+        z1, y1, x1 = R2zyx(R_AB1)
+        assert_array_almost_equal((x, y, z), (x1, y1, z1))
 
 
 if __name__ == "__main__":

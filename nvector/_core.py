@@ -931,7 +931,7 @@ def euclidean_distance(n_EA_E, n_EB_E, radius=6371009.0):
     return d_AB
 
 
-def azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0/298.257223563):
+def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0/298.257223563):
     """
     Return direction (azimuth) from A to B, relative to North:
 
