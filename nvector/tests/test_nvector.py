@@ -42,7 +42,8 @@ from numpy.testing import assert_array_almost_equal
 from nvector._core import (n_EA_E_distance_and_azimuth2n_EB_E,
                            mean_horizontal_position,
                            R2xyz, xyz2R, R2zyx, zyx2R,
-                           n_EA_E_and_n_EB_E2azimuth)
+                           n_EA_E_and_n_EB_E2azimuth,
+                           n_E_and_wa2R_EL, n_E2R_EN, R_EL2n_E, R_EN2n_E)
 
 R_Ee = set_north_pole_axis_for_E_frame(axis='z')
 
@@ -355,6 +356,21 @@ class TestNvector(unittest.TestCase):
         z1, y1, x1 = R2zyx(R_AB1)
         assert_array_almost_equal((x, y, z), (x1, y1, z1))
 
+    def test_n_E_and_wa2R_EL(self):
+        n_E = np.array([[0], [0], [1]])
+        R_EL = n_E_and_wa2R_EL(n_E, wander_azimuth=np.pi/2)
+        R_EL1 = [[0, 1.0, 0],
+                 [1.0, 0, 0],
+                 [0,  0, -1.0]]
+        assert_array_almost_equal(R_EL, R_EL1)
+
+        R_EN = n_E2R_EN(n_E)
+        assert_array_almost_equal(R_EN, np.diag([-1, 1, -1]))
+
+        n_E1 = R_EL2n_E(R_EN)
+        n_E2 = R_EN2n_E(R_EN)
+        assert_array_almost_equal(n_E, n_E1)
+        assert_array_almost_equal(n_E, n_E2)
 
 if __name__ == "__main__":
     # import syssys.argv = ['', 'Test.testName']

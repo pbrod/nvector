@@ -404,25 +404,6 @@ def n_E_and_wa2R_EL(n_E, wander_azimuth, R_Ee=None):
     return R_EL
 
 
-def _check_backward_compatibility(a, f):
-    """
-    Previously, custom ellipsoid was spesified by a and b.
-    However, for more spherical globes than the Earth, or if f has more
-    decimals than in WGS-84, using f and a as input will give better
-    numerical precicion than a and b.
-
-    old input number 3, 4: Polar_semi_axis (b), equatorial_semi_axis (a)
-    """
-    if f > 1e6:  # Checks if a is given as f (=old input)
-        warnings.warn('Deprecated call: '
-                      'Polar_semi_axis (b), equatorial_semi_axis (a) '
-                      'Use a=equatorial radius, f=flattening of ellipsoid')
-        f_new = 1 - a / f
-        a = f
-        f = f_new  # switch old inputs to new format
-    return a, f
-
-
 def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0/298.257223563, R_Ee=None):
     """
     Converts n-vector to Cartesian position vector in meters.
@@ -465,7 +446,6 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0/298.257223563, R_Ee=None):
     if depth is None:
         depth = np.zeros((1, np.shape(n_EB_E)[1]))
 
-    a, f = _check_backward_compatibility(a, f)
     b = a * (1 - f)  # semi-minor axis
 
     # The following code implements equation (22) in Gade (2010):
@@ -523,7 +503,6 @@ def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0/298.257223563, R_Ee=None):
         R_Ee = get_north_pole_axis_for_E_frame()
     p_EB_E = dot(R_Ee, p_EB_E)
     # R_Ee selects correct E-axes, see R_Ee.m for details
-    a, f = _check_backward_compatibility(a, f)
 
     # e_2 = eccentricity**2
     e_2 = 2 * f - f**2  # = 1-b**2/a**2
@@ -647,7 +626,6 @@ def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137,
     """
     if R_Ee is None:
         R_Ee = get_north_pole_axis_for_E_frame()
-    a, f = _check_backward_compatibility(a, f)
 
     # Function 2. in Section 5.4 in Gade (2010):
     p_EA_E = n_EB_E2p_EB_E(n_EA_E, z_EA, a, f, R_Ee)
