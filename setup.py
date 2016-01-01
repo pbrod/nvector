@@ -39,7 +39,7 @@ from setuptools import setup
 def print_version():
     import pkg_resources
     try:
-        __version__ = pkg_resources.get_distribution("numdifftools").version
+        __version__ = pkg_resources.get_distribution("nvector").version
         with open("__conda_version__.txt","w") as fid:
             fid.write(__version__)
     except pkg_resources.DistributionNotFound:
