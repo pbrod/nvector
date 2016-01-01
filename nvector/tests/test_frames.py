@@ -6,14 +6,14 @@ Created on 18. des. 2015
 import unittest
 import numpy as np
 from numpy.testing import assert_array_almost_equal
-from nvector import FrameB, FrameE, FrameN, FrameL, Nvector, ECEFvector
-from nvector import GeoPoint, GeoPath, unit, Pvector  # , diff_nvectors
+from nvector import (FrameB, FrameE, FrameN, FrameL, GeoPoint, GeoPath, unit,
+                     diff_positions)
 
 EARTH_RADIUS_M = 6371009.0
 
 
-class TestFrameE(unittest.TestCase):
-    def test_comparisons_with_frame_E(self):
+class TestFrames(unittest.TestCase):
+    def test_compare_E_frames(self):
         E = FrameE(name='WGS84')
         E2 = FrameE(a=E.a, f=E.f)
         self.assertEqual(E, E2)
@@ -21,7 +21,7 @@ class TestFrameE(unittest.TestCase):
         E3 = FrameE(a=E.a, f=0)
         self.assertNotEqual(E, E3)
 
-    def test_compare_with_frame_B(self):
+    def test_compare_B_frames(self):
         E = FrameE(name='WGS84')
         E2 = FrameE(name='WGS72')
 
@@ -40,10 +40,43 @@ class TestFrameE(unittest.TestCase):
         B4 = FrameB(n_EC_E, yaw=10, pitch=20, roll=30, degrees=True)
         self.assertNotEqual(B, B4)
 
-        n_ED_E = Nvector(unit([[1], [2], [3]]), z=-400, frame=E2)
+        n_ED_E = E2.Nvector(unit([[1], [2], [3]]), z=-400)
         B5 = FrameB(n_ED_E, yaw=10, pitch=20, roll=30, degrees=True)
         self.assertNotEqual(B, B5)
 
+    def test_compare_N_frames(self):
+        wgs84 = FrameE(name='WGS84')
+        wgs72 = FrameE(name='WGS72')
+        pointA = wgs84.GeoPoint(latitude=1, longitude=2, z=3, degrees=True)
+        pointB = wgs72.GeoPoint(latitude=1, longitude=2, z=6, degrees=True)
+
+        frame_N = FrameN(pointA)
+        frame_N1 = FrameL(pointA, wander_azimuth=0)
+        frame_N2 = FrameL(pointB, wander_azimuth=0)
+
+        self.assertEqual(frame_N, frame_N)
+
+        self.assertEqual(frame_N, frame_N1)
+        self.assertNotEqual(frame_N, frame_N2)
+        self.assertNotEqual(frame_N1, frame_N2)
+
+    def test_compare_L_frames(self):
+        wgs84 = FrameE(name='WGS84')
+        wgs72 = FrameE(name='WGS72')
+        pointA = wgs84.GeoPoint(latitude=1, longitude=2, z=3, degrees=True)
+        pointB = wgs72.GeoPoint(latitude=1, longitude=2, z=6, degrees=True)
+
+        frame_N = FrameL(pointA)
+        frame_N1 = FrameL(pointA, wander_azimuth=10)
+        frame_N2 = FrameL(pointB, wander_azimuth=10)
+
+        self.assertEqual(frame_N, frame_N)
+        self.assertNotEqual(frame_N, frame_N1)
+        self.assertNotEqual(frame_N, frame_N2)
+        self.assertNotEqual(frame_N1, frame_N2)
+
+
+class TestExamples(unittest.TestCase):
     def test_Ex1_A_and_B_to_delta_in_frame_N(self):
         wgs84 = FrameE(name='WGS84')
         pointA = wgs84.GeoPoint(latitude=1, longitude=2, z=3, degrees=True)
@@ -53,12 +86,9 @@ class TestFrameE(unittest.TestCase):
         # north, east, and down, i.e. find p_AB_N.
 
         # SOLUTION:
-        p_EA_E = pointA.to_ecef_vector()
-        p_EB_E = pointB.to_ecef_vector()
-        p_AB_E = p_EB_E - p_EA_E  # (delta decomposed in E).
+        p_AB_E = diff_positions(pointA, pointB)  # (delta decomposed in E).
 
         frame_N = FrameN(pointA)
-        # frame_N = FrameL(n_EA_E, wander_azimuth=0)
         p_AB_N = p_AB_E.change_frame(frame_N)
         p_AB_N = p_AB_N.pvector
         # Step5: Also find the direction (azimuth) to B, relative to north:

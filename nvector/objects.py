@@ -15,7 +15,7 @@ from nvector._core import (select_ellipsoid, NORTH_POLE, rad, deg, zyx2R,
 import warnings
 
 __all__ = ['FrameE', 'FrameB', 'FrameL', 'FrameN', 'GeoPoint', 'GeoPath',
-           'Nvector', 'Pvector', 'ECEFvector']
+           'Nvector', 'Pvector', 'ECEFvector', 'diff_positions']
 
 
 class _BaseFrame(object):
@@ -459,36 +459,45 @@ class Nvector(object):
         n_EM_E = unit(np.sum(n_EB_E, axis=1).reshape((3, 1)))
         return self.frame.Nvector(n_EM_E)
 
+    def __eq__(self, other):
+        try:
+            if self is other:
+                return True
+            return self._is_equal_to(other)
+        except AttributeError:
+            return False
+        raise ValueError
 
-def diff_nvectors(n_EA_E, n_EB_E):
+    def _is_equal_to(self, other):
+        return (np.allclose(self.normal, other.normal) and
+                self.frame == other.frame)
+
+
+def diff_positions(pointA, pointB):
     """
-    From two positions A and B, finds the delta position.
+    Return delta position from two positions A and B.
 
     Parameters
     ----------
-    n_EA_E, n_EB_E: Nvector objects
-        n-vector(s) [no unit] of position A and B, decomposed in E.
+    pointA, pointB: Nvector, GeoPoint, ECEFvector objects
+        position A and B, decomposed in E.
 
     Returns
     -------
     p_AB_E:  ECEFvector
         Cartesian position vector(s) from A to B, decomposed in E.
 
-    The n-vectors for positions A (n_EA_E) and B (n_EB_E) are given. The
-    output is the delta vector from A to B (p_AB_E).
     The calculation is excact, taking the ellipsity of the Earth into account.
     It is also non-singular as both n-vector and p-vector are non-singular
     (except for the center of the Earth).
-    The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
-    might be specified.
 
     See also
     --------
     n_EA_E_and_p_AB_E2n_EB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E.
     """
     # Function 1. in Section 5.4 in Gade (2010):
-    p_EA_E = n_EA_E.to_ecef_vector()
-    p_EB_E = n_EB_E.to_ecef_vector()
+    p_EA_E = pointA.to_ecef_vector()
+    p_EB_E = pointB.to_ecef_vector()
     p_AB_E = -p_EA_E + p_EB_E
     return p_AB_E
 

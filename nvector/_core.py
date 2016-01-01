@@ -42,6 +42,17 @@ from numpy import rad2deg, deg2rad, arctan2, sin, cos, array, cross, dot, sqrt
 from numpy.linalg import norm
 import warnings
 
+__all__ = ['unit', 'deg', 'rad', 'lat_lon2n_E', 'n_E2lat_lon',
+           'n_EA_E_and_n_EB_E2p_AB_E', 'n_EA_E_and_p_AB_E2n_EB_E',
+           'p_EB_E2n_EB_E', 'n_EB_E2p_EB_E',
+           'set_north_pole_axis_for_E_frame',
+           'get_north_pole_axis_for_E_frame',
+           'great_circle_distance', 'euclidean_distance',
+           'n_EA_E_distance_and_azimuth2n_EB_E',
+           'n_EA_E_and_n_EB_E2azimuth',
+           'mean_horizontal_position',
+           'R2xyz', 'xyz2R', 'R2zyx', 'zyx2R',
+           'n_E_and_wa2R_EL', 'n_E2R_EN', 'R_EL2n_E', 'R_EN2n_E']
 
 NORTH_POLE = dict(z=array([[0, 0, 1],
                            [0, 1, 0],
