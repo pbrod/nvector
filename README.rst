@@ -266,13 +266,13 @@ Solution:
 Example 5: "Surface distance"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Find the surface distance sAB (i.e. great circle distance) between two
-positions A and B. The heights of A and B are ignored, i.e. if they don't have
-zero height, we seek the distance between the points that are at the surface of
-the Earth, directly above/below A and B. The Euclidean distance (chord length)
+Find the surface distance sAB (i.e. great circle-, Euclidean- and exact ellipsoidal 
+distance) between two positions A and B. The heights of A and B are ignored, i.e. if 
+they don't have zero height, we seek the distance between the points that are at the 
+surface of the Earth, directly above/below A and B. The Euclidean distance (chord length)
 dAB should also be found. Use Earth radius 6371e3 m.
 
-Solution:
+Great circle solution:
     >>> import nvector as nv
     >>> frame_E = nv.FrameE(a=6371e3, f=0)
     >>> positionA = frame_E.GeoPoint(latitude=88, longitude=0, degrees=True)
@@ -286,7 +286,7 @@ Solution:
     >>> msg.format(s_AB / 1000, d_AB / 1000)
     'Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
-Alternative solution:
+Alternative great circle solution:
     >>> import nvector as nv
     >>> path = nv.GeoPath(positionA, positionB)
     >>> s_AB2 = path.track_distance(method='greatcircle').ravel()
@@ -303,8 +303,9 @@ Exact solution for the WGS84 ellipsoid:
 
     >>> p_12_E = point2.to_ecef_vector() - point1.to_ecef_vector()
     >>> d_12 = np.linalg.norm(p_12_E.pvector, axis=0)[0]
+    >>> msg = 'Ellipsoidal and Euclidean distance = {:5.2f} km, {:5.2f} km'
     >>> msg.format(s_12 / 1000, d_12 / 1000)
-    'Great circle and Euclidean distance = 333.95 km, 333.91 km'
+    'Ellipsoidal and Euclidean distance = 333.95 km, 333.91 km'
 
 
 Example 7: "Mean position"
