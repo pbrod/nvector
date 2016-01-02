@@ -4,6 +4,8 @@ branch = True
 source = nvector
 omit = 
    nvector/tests/*
+   __init__.py
+   info.py
 
 [report]
 # Regexes for lines to exclude from consideration

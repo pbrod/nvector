@@ -139,14 +139,10 @@ Solution:
     >>> pointA = wgs84.GeoPoint(latitude=1, longitude=2, z=3, degrees=True)
     >>> pointB = wgs84.GeoPoint(latitude=4, longitude=5, z=6, degrees=True)
 
-Step 1: Convert to ECEF vectors
-    >>> p_EA_E = pointA.to_ecef_vector()
-    >>> p_EB_E = pointB.to_ecef_vector()
+Step 1: Find p_AB_E (delta decomposed in E).
+    >>> p_AB_E = diff_positions(pointA, pointB)  # (delta decomposed in E).
 
-Step 2: Find p_AB_E (delta decomposed in E).
-    >>> p_AB_E = p_EB_E - p_EA_E  # (delta decomposed in E).
-
-Step 3: Find p_AB_N (delta decomposed in N).
+Step 2: Find p_AB_N (delta decomposed in N).
     >>> frame_N = nv.FrameN(pointA)
     >>> p_AB_N = p_AB_E.change_frame(frame_N)
     >>> p_AB_N = p_AB_N.pvector.ravel()
@@ -154,7 +150,7 @@ Step 3: Find p_AB_N (delta decomposed in N).
     >>> 'delta north, east, down = {}'.format(valtxt)
     'delta north, east, down = 331730.23, 332997.87, 17404.27'
 
-Step4: Also find the direction (azimuth) to B, relative to north:
+Step3: Also find the direction (azimuth) to B, relative to north:
     >>> azimuth = np.arctan2(p_AB_N[1], p_AB_N[0])
     >>> 'azimuth = {0:4.2f} deg'.format(np.rad2deg(azimuth))
     'azimuth = 45.11 deg'
@@ -243,7 +239,7 @@ Solution:
     >>> position_B = 6371e3 * np.vstack((0.9, -1, 1.1))  # m
     >>> p_EB_E = wgs84.ECEFvector(position_B)
 
-Step 1: Find position B as geodetic latitude, longitude and height
+Step 1: Find position B as geodetic latitude, longitude and depth
     >>> pointB = p_EB_E.to_geo_point()
 
 Step 2: Extract latitude and longitude in degrees
@@ -287,7 +283,6 @@ Great circle solution:
     'Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
 Alternative great circle solution:
-    >>> import nvector as nv
     >>> path = nv.GeoPath(positionA, positionB)
     >>> s_AB2 = path.track_distance(method='greatcircle').ravel()
     >>> d_AB2 = path.track_distance(method='euclidean').ravel()
@@ -295,7 +290,6 @@ Alternative great circle solution:
     'Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
 Exact solution for the WGS84 ellipsoid:
-    >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
     >>> point1 = wgs84.GeoPoint(latitude=88, longitude=0, degrees=True)
     >>> point2 = wgs84.GeoPoint(latitude=89, longitude=-170, degrees=True)
