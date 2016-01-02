@@ -26,10 +26,6 @@ class _BaseFrame(object):
             return self._is_equal_to(other)
         except AttributeError:
             return False
-        raise ValueError
-
-    def _is_equal_to(self, other):
-        return False
 
 
 class FrameE(_BaseFrame):
@@ -467,7 +463,6 @@ class Nvector(object):
             return self._is_equal_to(other)
         except AttributeError:
             return False
-        raise ValueError
 
     def _is_equal_to(self, other):
         return (np.allclose(self.normal, other.normal) and
