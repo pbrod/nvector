@@ -283,12 +283,6 @@ class GeoPoint(object):
     def longitude_deg(self):
         return deg(self.longitude)
 
-    def ravel(self, degrees=False):
-        lat, lon = self.latitude.ravel(), self.longitude.ravel()
-        if degrees:
-            return deg(lat), deg(lon),  self.z.ravel()
-        return lat, lon, self.z.ravel()
-
     def to_nvector(self):
         """
         Converts latitude and longitude to n-vector.
@@ -479,7 +473,7 @@ def diff_positions(pointA, pointB):
 
     Parameters
     ----------
-    pointA, pointB: Nvector, GeoPoint, ECEFvector objects
+    pointA, pointB: Nvector, GeoPoint or ECEFvector objects
         position A and B, decomposed in E.
 
     Returns
@@ -611,13 +605,13 @@ class ECEFvector(object):
         return Nvector(n_EB_E, z=depth, frame=frame)
 
     def __add__(self, other):
-        if self.frame is not other.frame:
-            warnings.warn('Frames are possibly unequal')
+        if not self.frame == other.frame:
+            raise ValueError('Frames are unequal')
         return ECEFvector(self.pvector + other.pvector, self.frame)
 
     def __sub__(self, other):
-        if self.frame is not other.frame:
-            warnings.warn('Frames are possibly unequal')
+        if not self.frame == other.frame:
+            raise ValueError('Frames are unequal')
         return ECEFvector(self.pvector - other.pvector, self.frame)
 
     def __neg__(self):
