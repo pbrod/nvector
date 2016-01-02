@@ -228,6 +228,12 @@ def _check_frames(self, other):
         raise ValueError('Frames are unequal')
 
 
+def _default_frame(frame):
+    if frame is None:
+        return FrameE()
+    return frame
+
+
 class GeoPoint(object):
     """
     Geographical position given as latitude, longitude, depth in frame E
@@ -270,15 +276,14 @@ class GeoPoint(object):
     'lat2 = 32.64, lon2 = 49.01, az2 = 140.37'
 
     """
+
     def __init__(self, latitude, longitude, z=0, frame=None, degrees=False):
         if degrees:
             latitude, longitude = rad(latitude), rad(longitude)
         self.latitude = latitude
         self.longitude = longitude
         self.z = z
-        if frame is None:
-            frame = FrameE()
-        self.frame = frame
+        self.frame = _default_frame(frame)
 
     @property
     def latitude_deg(self):
@@ -402,9 +407,7 @@ class Nvector(object):
     def __init__(self, normal, z=0, frame=None):
         self.normal = normal
         self.z = z
-        if frame is None:
-            frame = FrameE()
-        self.frame = frame
+        self.frame = _default_frame(frame)
 
     def to_geo_point(self):
         """
@@ -540,9 +543,7 @@ class ECEFvector(object):
     """
     def __init__(self, pvector, frame=None):
         self.pvector = pvector
-        if frame is None:
-            frame = FrameE()
-        self.frame = frame
+        self.frame = _default_frame(frame)
 
     def change_frame(self, frame):
         """
