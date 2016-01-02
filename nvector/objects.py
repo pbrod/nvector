@@ -223,6 +223,11 @@ def frame_definitions():
     pass
 
 
+def _check_frames(self, other):
+    if not self.frame == other.frame:
+        raise ValueError('Frames are unequal')
+
+
 class GeoPoint(object):
     """
     Geographical position given as latitude, longitude, depth in frame E
@@ -362,8 +367,7 @@ class GeoPoint(object):
             North, respectively.
 
         """
-        if not self.frame == point.frame:
-            raise ValueError('E-frames are note equal')
+        _check_frames(self, point)
 
         lat_a, lon_a = self.latitude, self.longitude
         lat_b, lon_b = point.latitude, point.longitude
@@ -559,8 +563,7 @@ class ECEFvector(object):
         --------
         n_EB_E2p_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E.
         """
-        if not self.frame == frame.nvector.frame:
-            raise ValueError('E-frames are not equal')
+        _check_frames(self, frame.nvector)
         p_AB_E = self.pvector
         p_AB_N = np.dot(frame.R_EN.T, p_AB_E)
         return Pvector(p_AB_N, frame=frame)
@@ -605,13 +608,11 @@ class ECEFvector(object):
         return Nvector(n_EB_E, z=depth, frame=frame)
 
     def __add__(self, other):
-        if not self.frame == other.frame:
-            raise ValueError('Frames are unequal')
+        _check_frames(self, other)
         return ECEFvector(self.pvector + other.pvector, self.frame)
 
     def __sub__(self, other):
-        if not self.frame == other.frame:
-            raise ValueError('Frames are unequal')
+        _check_frames(self, other)
         return ECEFvector(self.pvector - other.pvector, self.frame)
 
     def __neg__(self):
