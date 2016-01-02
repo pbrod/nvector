@@ -11,7 +11,7 @@ from geographiclib.geodesic import Geodesic as _Geodesic
 from nvector._core import (select_ellipsoid, NORTH_POLE, rad, deg, zyx2R,
                            lat_lon2n_E, n_E2lat_lon, n_E2R_EN, n_E_and_wa2R_EL,
                            n_EB_E2p_EB_E, p_EB_E2n_EB_E, unit,
-                           great_circle_distance)
+                           great_circle_distance, mean_horizontal_position)
 import warnings
 
 __all__ = ['FrameE', 'FrameB', 'FrameL', 'FrameN', 'GeoPoint', 'GeoPath',
@@ -647,6 +647,11 @@ class GeoPath(object):
         return cross(n_EA1_E, n_EA2_E, axis=0)
 
     def _get_average_radius(self):
+#        n1 = self.point1.to_nvector()
+#        n2 = self.point2.to_nvector()
+#         n_EM_E = mean_horizontal_position(np.hstack((n1.normal, n2.normal)))
+#         p_EM_E = n1.frame.Nvector(n_EM_E).to_ecef_vector()
+#         radius = norm(p_EM_E.pvector, axis=0)
         p_E1_E = self.point1.to_ecef_vector()
         p_E2_E = self.point2.to_ecef_vector()
         radius = (norm(p_E1_E.pvector, axis=0) +

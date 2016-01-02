@@ -42,7 +42,7 @@ class TestFrames(unittest.TestCase):
 
         n_ED_E = E2.Nvector(unit([[1], [2], [3]]), z=-400)
         B5 = FrameB(n_ED_E, yaw=10, pitch=20, roll=30, degrees=True)
-        # self.assertNotEqual(B, B5)
+        self.assertTrue(B != B5)
 
     def test_compare_N_frames(self):
         wgs84 = FrameE(name='WGS84')
@@ -57,8 +57,8 @@ class TestFrames(unittest.TestCase):
         self.assertEqual(frame_N, frame_N)
 
         self.assertEqual(frame_N, frame_N1)
-        # self.assertNotEqual(frame_N, frame_N2)
-        # self.assertNotEqual(frame_N1, frame_N2)
+        self.assertTrue(frame_N != frame_N2)
+        self.assertTrue(frame_N1 != frame_N2)
 
     def test_compare_L_frames(self):
         wgs84 = FrameE(name='WGS84')
@@ -199,6 +199,9 @@ class TestExamples(unittest.TestCase):
         pointB = wgs84.GeoPoint(latitude=89, longitude=-170, degrees=True)
         s_AB, _azia, _azib = pointA.distance_and_azimuth(pointB)
 
+        #path = GeoPath(pointA, pointB)
+        #s_AB = path.track_distance(method='greatcircle', radius=6381e+3)
+        #t1 = np.linalg.norm(pointB.to_ecef_vector().pvector, axis=0)
         p_AB_E = pointB.to_ecef_vector() - pointA.to_ecef_vector()
         # The Euclidean distance is given by:
         d_AB = np.linalg.norm(p_AB_E.pvector, axis=0)
