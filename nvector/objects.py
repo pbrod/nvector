@@ -21,8 +21,8 @@ __all__ = ['FrameE', 'FrameB', 'FrameL', 'FrameN', 'GeoPoint', 'GeoPath',
 class _BaseFrame(object):
     def __eq__(self, other):
         try:
-            # if self is other:
-            #     return True
+            if self is other:
+                return True
             return self._is_equal_to(other)
         except AttributeError:
             return False
