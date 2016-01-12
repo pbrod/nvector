@@ -404,7 +404,7 @@ Solution:
 
 See also
 --------
-[geographiclib](https://pypi.python.org/pypi/geographiclib)
+`geographiclib <https://pypi.python.org/pypi/geographiclib>`_
 
 
 Note
