@@ -1,8 +1,8 @@
-'''
+"""
 Created on 29. des. 2015
 
 @author: pab
-'''
+"""
 from __future__ import division, print_function
 import numpy as np
 from numpy import pi, arccos, cross, dot
@@ -29,6 +29,7 @@ class _BaseFrame(object):
 
 
 class FrameE(_BaseFrame):
+
     """
     E frame
     -------
@@ -106,6 +107,7 @@ class FrameE(_BaseFrame):
 
 
 class FrameN(_BaseFrame):
+
     """
     N frame
     -------
@@ -140,6 +142,7 @@ class FrameN(_BaseFrame):
 
 
 class FrameL(FrameN):
+
     """
     L frame
     -------
@@ -173,6 +176,7 @@ class FrameL(FrameN):
 
 
 class FrameB(FrameN):
+
     """
     B frame
     -------
@@ -231,6 +235,7 @@ def _default_frame(frame):
 
 
 class GeoPoint(object):
+
     """
     Geographical position given as latitude, longitude, depth in frame E
 
@@ -379,6 +384,7 @@ class GeoPoint(object):
 
 
 class Nvector(object):
+
     """
     Geographical position given as N-vector and depth in frame E
 
@@ -453,7 +459,7 @@ class Nvector(object):
             n-vector [no unit] of the mean position, decomposed in E.
         """
         n_EB_E = self.normal
-        n_EM_E = unit(np.sum(n_EB_E, axis=1).reshape((3, 1)))
+        n_EM_E = mean_horizontal_position(n_EB_E)
         return self.frame.Nvector(n_EM_E)
 
     def __eq__(self, other):

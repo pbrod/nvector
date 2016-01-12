@@ -15,7 +15,7 @@ nvector
    :target: https://landscape.io/github/pbrod/Nvector/master
    :alt: Code Health
 
-.. image:: https://coveralls.io/repos/pbrod/Nvector/badge.svg?branch=master&service=github 
+.. image:: https://coveralls.io/repos/pbrod/Nvector/badge.svg?branch=master&service=github
    :target: https://coveralls.io/github/pbrod/Nvector?branch=master
 
 .. image:: https://img.shields.io/pypi/pyversions/Nvector.svg

@@ -1,8 +1,8 @@
-'''
+"""
 Created on 9. des. 2015
 
 @author: pab
-'''
+"""
 from mpl_toolkits.basemap import Basemap  # @UnresolvedImport
 import matplotlib.pyplot as plt
 import numpy as np
