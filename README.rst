@@ -160,6 +160,7 @@ The functional solutions to the remaining problems can be found
 
 Example 1: "A and B to delta"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. image:: http://www.navlab.net/images/ex1img.png
 
 Given two positions, A and B as latitudes, longitudes and depths relative to
 Earth, E.
@@ -228,6 +229,7 @@ Step5: Also find the direction (azimuth) to B, relative to north:
 
 Example 2: "B and delta to C"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. image:: http://www.navlab.net/images/ex2img.png
 
 A radar or sonar attached to a vehicle B (Body coordinate frame) measures the
 distance and direction to an object C. We assume that the distance and two
@@ -268,6 +270,7 @@ Step 4: Find point C by adding delta BC to EB
 
 Example 3: "ECEF-vector to geodetic latitude"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. image:: http://www.navlab.net/images/ex3img.png
 
 Position B is given as an "ECEF-vector" p_EB_E (i.e. a vector from E, the
 center of the Earth, to B, decomposed in E).
@@ -289,6 +292,8 @@ Solution:
 
 Example 4: "Geodetic latitude to ECEF-vector"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. image:: http://www.navlab.net/images/ex4img.png
+
 Solution:
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
@@ -301,6 +306,8 @@ Solution:
 
 Example 5: "Surface distance"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. image:: http://www.navlab.net/images/ex5img.png
+
 Find the surface distance sAB (i.e. great circle distance) between two positions A and B. 
 The heights of A and B are ignored, i.e. if 
 they don't have zero height, we seek the distance between the points that are at the 
@@ -344,6 +351,7 @@ Exact solution for the WGS84 ellipsoid:
 
 Example 7: "Mean position"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. image:: http://www.navlab.net/images/ex7img.png
 
 Three positions A, B, and C are given as n-vectors n_EA_E, n_EB_E, and n_EC_E.
 Find the mean position, M, given as n_EM_E.
@@ -364,6 +372,8 @@ Solution:
 
 Example 8: "A and azimuth/distance to B"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. image:: http://www.navlab.net/images/ex8img.png
+
 We have an initial position A, direction of travel given as an azimuth
 (bearing) relative to north (clockwise), and finally the
 distance to travel along a great circle given as sAB.
@@ -389,6 +399,8 @@ Solution:
 
 Example 9: "Intersection of two paths"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. image:: http://www.navlab.net/images/ex9img.png
+
 Define a path from two given positions (at the surface of a spherical Earth),
 as the great circle that goes through the two points.
 
@@ -415,6 +427,8 @@ Solution:
 
 Example 10: "Cross track distance"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. image:: http://www.navlab.net/images/ex10img.png
+
 Path A is given by the two positions A1 and A2 (similar to the previous
 example).
 
