@@ -28,7 +28,7 @@ Nvector is a suite of tools to solve geographical position calculations like:
 
 * Convert positions given in one reference frame into another reference frame.
 
-* Find the destination point given start position, azimuth/bearing and distance.
+* Find the destination point given start point, azimuth/bearing and distance.
 
 * Find the mean position (center/midpoint) of several geographical positions.
 
@@ -53,7 +53,8 @@ using the provided functions.
 
 n_E is n-vector in the program code, while in documents we use nE. E denotes
 an Earth-fixed coordinate frame, and it indicates that the three components of
-n-vector are along the three axes of E. More details about the notation and reference frames can be found here:  
+n-vector are along the three axes of E. More details about the notation and
+reference frames can be found here:
 
 http://www.navlab.net/nvector/
 
@@ -65,37 +66,42 @@ Methods
 
 The core functions provided are:
 
-- **lat_lon2n_E:** Converts latitude and longitude to n-vector.
-
-- **n_E2lat_lon:** Converts n-vector to latitude and longitude.
-
-- **n_EB_E2p_EB_E:** Converts n-vector to Cartesian position vector in meters.
-
-- **p_EB_E2n_EB_E:** Converts Cartesian position vector in meters to n-vector.
-
-- **n_EA_E_and_n_EB_E2p_AB_E:** From two positions A and B, finds the delta position.
-
-- **n_EA_E_and_p_AB_E2n_EB_E:** From position A and delta, finds position B.
+- **lat_lon2n_E:**
+    Converts latitude and longitude to n-vector.
+- **n_E2lat_lon:**
+    Converts n-vector to latitude and longitude.
+- **n_EB_E2p_EB_E:**
+    Converts n-vector to Cartesian position vector in meters.
+- **p_EB_E2n_EB_E:**
+    Converts Cartesian position vector in meters to n-vector.
+- **n_EA_E_and_n_EB_E2p_AB_E:**
+    From two positions A and B, finds the delta position.
+- **n_EA_E_and_p_AB_E2n_EB_E:** 
+    From position A and delta, finds position B.
 
 
 Nvector also provide an object oriented interface.
 
-- **FrameE:**  z-axis -> North, x-axis -> Latitude=Longitude=0. Origo = Earth's centre.
-    frame of reference rotates and moves with the Earth.
-        
-- **FrameN:** x-axis -> North, y-axis -> East, z-axis -> down. Origo = Beneath/above Body at Earth's surface.
-
-- **FrameL:** x-axis, y-axis -> wander azimuth, z-axis -> down. Origo = Beneath/above Body at Earth's surface.
-
-- **FrameB:** x-axis -> forward, y-axis -> starboard, z-axis -> body down. Origo = Body's centre.
-
-- **ECEFvector:** Geographical position given as Cartesian position vector in frame E
-
-- **GeoPoint:** Geographical position given as latitude, longitude, depth in frame E
-
-- **Nvector:** Geographical position given as n-vector and depth in frame E
-
-- **GeoPath:** Geodesic path between two points in Frame E
+- **FrameE:**
+    z-axis -> North, x-axis -> Latitude=Longitude=0.
+    Origo = Earth's centre.
+- **FrameN:**
+    x-axis -> North, y-axis -> East, z-axis -> down.
+    Origo = Beneath/above Body at Earth's surface.
+- **FrameL:**
+    x-axis, y-axis -> wander azimuth, z-axis -> down.
+    Origo = Beneath/above Body at Earth's surface.
+- **FrameB:**
+    x-axis -> forward, y-axis -> starboard, z-axis -> body down.
+    Origo = Body's centre.
+- **ECEFvector:**
+    Geographical position given as Cartesian position vector in frame E
+- **GeoPoint:**
+    Geographical position given as latitude, longitude, depth in frame E
+- **Nvector:**
+    Geographical position given as n-vector and depth in frame E
+- **GeoPath:**
+    Geodesic path between two points in Frame E
 
 
 
@@ -119,7 +125,7 @@ with pip
 
 with easy_install
 
-    $ easy_install nvector 
+    $ easy_install nvector
 
 or
 
@@ -139,14 +145,20 @@ python session::
 
 Acknowledgement
 ===============
-
-Written by the navigation group at FFI (The Norwegian Defence Research Establishment). 
+The nvector package for `Python <https://www.python.org/>`_ was written 
+by Per A. Brodtkorb at FFI (The Norwegian Defence Research Establishment) 
+based on the `Matlab <http://www.mathworks.com>`_ toolbox with the same 
+name written by the navigation group at FFI.
 
 Most of the content is based on the following article:
 
-`Kenneth Gade (2010): A Nonsingular Horizontal Position Representation, The Journal of Navigation, Volume 63, Issue 03, pp 395-417, July 2010. <www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf>`_
+*Kenneth Gade (2010):*
+    `A Nonsingular Horizontal Position Representation,
+    The Journal of Navigation, Volume 63, Issue 03, pp 395-417, July 2010.
+    <http://www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf>`_
 
-Thus this article should be cited in publications using this page or the downloaded program code.
+Thus this article should be cited in publications using this page or the
+downloaded program code.
 
 
 Getting Started
@@ -154,7 +166,7 @@ Getting Started
 
 Below the object-oriented solution to some common geodesic problems are given.
 In the first example the functional solution is also given.
-The functional solutions to the remaining problems can be found 
+The functional solutions to the remaining problems can be found
 `here <https://github.com/pbrod/nvector/blob/master/nvector/tests/test_nvector.py>`_.
 
 
@@ -182,7 +194,7 @@ Solution:
     >>> pointB = wgs84.GeoPoint(latitude=4, longitude=5, z=6, degrees=True)
 
 Step 1: Find p_AB_E (delta decomposed in E).
-    >>> p_AB_E = diff_positions(pointA, pointB)
+    >>> p_AB_E = nv.diff_positions(pointA, pointB)
 
 Step 2: Find p_AB_N (delta decomposed in N).
     >>> frame_N = nv.FrameN(pointA)
@@ -217,11 +229,12 @@ Step3: Find R_EN for position A:
 
 Step4: Find p_AB_N (delta decomposed in N).
     >>> p_AB_N = np.dot(R_EN.T, p_AB_E).ravel()
-    >>> 'delta north, east, down = {0:8.2f}, {1:8.2f}, {2:8.2f}'.format(*p_AB_N)
-    'delta north, east, down = 331730.23, 332997.87, 17404.27'
+    >>> valtxt = '{0:8.2f}, {1:8.2f}, {2:8.2f}'.format(*p_AB_N)
+    >>> 'Ex1: delta north, east, down = {}'.format(valtxt)
+    'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
 
 Step5: Also find the direction (azimuth) to B, relative to north:
-    >>> azimuth = np.arctan2(p_AB_N[1], p_AB_N[0]) # positive angle about down-axis
+    >>> azimuth = np.arctan2(p_AB_N[1], p_AB_N[0])
     >>> 'azimuth = {0:4.2f} deg'.format(deg(azimuth))
     'azimuth = 45.11 deg'
 
@@ -263,9 +276,9 @@ Step 4: Find point C by adding delta BC to EB
     >>> pointC = p_EC_E.to_geo_point()
 
     >>> lat, lon, z = pointC.latitude_deg, pointC.longitude_deg, pointC.z
-    >>> msg = 'Ex2: Pos C: lat, lon = {:4.2f}, {:4.2f} deg,  height = {:4.2f} m'
+    >>> msg = 'Ex2: PosC: lat, lon = {:4.2f}, {:4.2f} deg,  height = {:4.2f} m'
     >>> msg.format(lat[0], lon[0], -z[0])
-    'Ex2: Pos C: lat, lon = 53.33, 63.47 deg,  height = 406.01 m'
+    'Ex2: PosC: lat, lon = 53.33, 63.47 deg,  height = 406.01 m'
 
 
 Example 3: "ECEF-vector to geodetic latitude"
@@ -308,11 +321,11 @@ Example 5: "Surface distance"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. image:: http://www.navlab.net/images/ex5img.png
 
-Find the surface distance sAB (i.e. great circle distance) between two positions A and B. 
-The heights of A and B are ignored, i.e. if 
-they don't have zero height, we seek the distance between the points that are at the 
-surface of the Earth, directly above/below A and B. The Euclidean distance (chord length)
-dAB should also be found. Use Earth radius 6371e3 m. 
+Find the surface distance sAB (i.e. great circle distance) between two
+positions A and B. The heights of A and B are ignored, i.e. if they don't have
+zero height, we seek the distance between the points that are at the surface of
+the Earth, directly above/below A and B. The Euclidean distance (chord length)
+dAB should also be found. Use Earth radius 6371e3 m.
 Compare the results with exact calculations for the WGS-84 ellipsoid.
 
 Great circle solution:
@@ -325,7 +338,8 @@ Great circle solution:
     >>> p_AB_E = positionB.to_ecef_vector() - positionA.to_ecef_vector()
     >>> d_AB = np.linalg.norm(p_AB_E.pvector, axis=0)[0]
 
-    >>> msg = 'Ex5: Great circle and Euclidean distance = {:5.2f} km, {:5.2f} km'
+    >>> msg = 'Ex5: Great circle and Euclidean distance = {}'
+    >>> msg = msg.format('{:5.2f} km, {:5.2f} km')
     >>> msg.format(s_AB / 1000, d_AB / 1000)
     'Ex5: Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
@@ -355,11 +369,13 @@ Example 6 "Interpolated position"
 
 Given the position of B at time t0 and t1, n_EB_B(t0) and n_EB_E(t1).
 
-Find an interpolated position at time ti, n_EB_E(ti). All positions are given as n-vectors.
+Find an interpolated position at time ti, n_EB_E(ti). All positions are given
+as n-vectors.
 
 Solution:
-    >>> wgs84 = FrameE(name='WGS84')
-    >>> path = nv.GeoPath(wgs84.GeoPoint(89, 0, degrees=True),  
+    >>> import nvector as nv
+    >>> wgs84 = nv.FrameE(name='WGS84')
+    >>> path = nv.GeoPath(wgs84.GeoPoint(89, 0, degrees=True),
     ...                   wgs84.GeoPoint(89, 180, degrees=True))
 
     >>> t0 = 10.
@@ -418,9 +434,10 @@ Solution:
     >>> pointA = frame.GeoPoint(latitude=80, longitude=-90, degrees=True)
     >>> pointB, _azimuthb = pointA.geo_point(distance=1000, azimuth=200,
     ...                                      degrees=True)
-    >>> latB, lonB = pointB.latitude_deg, pointB.longitude_deg
+    >>> lat, lon = pointB.latitude_deg, pointB.longitude_deg
 
-    >>> 'Ex8, Destination: lat, lon = {:4.2f} deg, {:4.2f} deg'.format(latB, lonB)
+    >>> msg = 'Ex8, Destination: lat, lon = {:4.2f} deg, {:4.2f} deg'
+    >>> msg.format(lat, lon)
     'Ex8, Destination: lat, lon = 79.99 deg, -90.02 deg'
 
 
@@ -478,9 +495,8 @@ Solution:
     >>> s_xt = pathA.cross_track_distance(pointB, method='greatcircle').ravel()
     >>> d_xt = pathA.cross_track_distance(pointB, method='euclidean').ravel()
     >>> val_txt = '{:4.2f} km, {:4.2f} km'.format(s_xt[0]/1000, d_xt[0]/1000)
-    >>> msg = 'cross track distance from path A to position B'
-    >>> '{}, s_xt, d_xt = {}'.format(msg, val_txt)
-    'cross track distance from path A to position B, s_xt, d_xt = 11.12 km, 11.12 km'
+    >>> 'Ex10: Cross track distance: s_xt, d_xt = {}'.format(val_txt)
+    'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 
 
 See also
