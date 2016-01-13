@@ -1,6 +1,6 @@
 import pkg_resources
 from .info import __doc__  # @UnresolvedImport
-from numpy.testing import Tester
+from numpy.testing import Tester  # @UnresolvedImport
 from ._core import *
 from .objects import *
 

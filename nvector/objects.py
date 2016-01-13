@@ -474,6 +474,36 @@ class Nvector(object):
         return (np.allclose(self.normal, other.normal) and
                 self.frame == other.frame)
 
+    def __add__(self, other):
+        _check_frames(self, other)
+        return self.frame.Nvector(self.normal + other.normal,
+                                  self.z + other.z)
+
+    def __sub__(self, other):
+        _check_frames(self, other)
+        return self.frame.Nvector(self.normal - other.normal,
+                                  self.z - other.z)
+
+    def __neg__(self):
+        return self.frame.Nvector(-self.normal, -self.z)
+
+    def __mul__(self, scalar):
+        """elementwise multiplication"""
+
+        if not isinstance(scalar, Nvector):
+            return self.frame.Nvector(self.normal*scalar, self.z*scalar)
+        raise NotImplementedError('Only scalar multiplication is implemented')
+
+    def __div__(self, scalar):
+        """elementwise division"""
+        if not isinstance(scalar, Nvector):
+            return self.frame.Nvector(self.normal/scalar, self.z/scalar)
+        raise NotImplementedError('Only scalar division is implemented')
+
+    __truediv__ = __div__
+    __radd__ = __add__
+    __rmul__ = __mul__
+
 
 def diff_positions(pointA, pointB):
     """
@@ -732,6 +762,27 @@ class GeoPath(object):
 
         lat_EC, long_EC = n_E2lat_lon(n_EC_E, frame.R_Ee)
         return GeoPoint(lat_EC, long_EC, frame=frame)
+
+    def interpolate(self, ti):
+        """
+        Return the interpolated point along the path
+
+        Parameters
+        ----------
+        ti: real scalar
+            interpolation time assuming point1 is at t0=0 and point2 is at t1=1
+
+        Returns
+        -------
+        point: Nvector
+            point of interpolation along path
+        """
+        n_EB_E_t0, n_EB_E_t1 = self._nvectors()
+
+        n_EB_E_ti = unit(n_EB_E_t0 + ti * (n_EB_E_t1 - n_EB_E_t0))
+        zi = self.point1.z + ti * (self.point2.z-self.point1.z)
+        frame = self.point1.frame
+        return frame.Nvector(n_EB_E_ti, zi)
 
 if __name__ == '__main__':
     pass

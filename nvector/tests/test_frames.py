@@ -5,7 +5,7 @@ Created on 18. des. 2015
 '''
 import unittest
 import numpy as np
-from numpy.testing import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal  # @UnresolvedImport
 from nvector import (FrameB, FrameE, FrameN, FrameL, GeoPoint, GeoPath, unit,
                      diff_positions)
 
@@ -199,9 +199,6 @@ class TestExamples(unittest.TestCase):
         pointB = wgs84.GeoPoint(latitude=89, longitude=-170, degrees=True)
         s_AB, _azia, _azib = pointA.distance_and_azimuth(pointB)
 
-        #path = GeoPath(pointA, pointB)
-        #s_AB = path.track_distance(method='greatcircle', radius=6381e+3)
-        #t1 = np.linalg.norm(pointB.to_ecef_vector().pvector, axis=0)
         p_AB_E = pointB.to_ecef_vector() - pointA.to_ecef_vector()
         # The Euclidean distance is given by:
         d_AB = np.linalg.norm(p_AB_E.pvector, axis=0)
@@ -211,6 +208,47 @@ class TestExamples(unittest.TestCase):
 
         assert_array_almost_equal(s_AB / 1000, 333.94750946834665)
         assert_array_almost_equal(d_AB / 1000, 333.90962112)
+
+    def test_Ex6_interpolated_position(self):
+
+        # Position B at time t0 and t2 is given as n_EB_E_t0 and n_EB_E_t1:
+        # Enter elements as lat/long in deg:
+        wgs84 = FrameE(name='WGS84')
+        n_EB_E_t0 = wgs84.GeoPoint(89, 0, degrees=True).to_nvector()
+        n_EB_E_t1 = wgs84.GeoPoint(89, 180, degrees=True).to_nvector()
+
+        # The times are given as:
+        t0 = 10.
+        t1 = 20.
+        ti = 16.  # time of interpolation
+
+        # Find the interpolated position at time ti, n_EB_E_ti
+
+        # SOLUTION:
+        # Using standard interpolation:
+        ti_n = (ti - t0) / (t1 - t0)
+        n_EB_E_ti = n_EB_E_t0 + ti_n * (n_EB_E_t1 - n_EB_E_t0)
+
+        # When displaying the resulting position for humans, it is more
+        # convenient to see lat, long:
+        g_EB_E_ti = n_EB_E_ti.to_geo_point()
+        lat_ti, lon_ti = g_EB_E_ti.latitude_deg, g_EB_E_ti.longitude_deg
+        msg = 'Ex6, Interpolated position: lat, long = {} deg, {} deg'
+        print(msg.format(lat_ti, lon_ti))
+
+        assert_array_almost_equal(lat_ti, 89.7999805)
+        assert_array_almost_equal(lon_ti, 180.)
+
+        # Alternative solution
+        path = GeoPath(n_EB_E_t0, n_EB_E_t1)
+
+        g_EB_E_ti = path.interpolate(ti_n).to_geo_point()
+        lat_ti, lon_ti = g_EB_E_ti.latitude_deg, g_EB_E_ti.longitude_deg
+        msg = 'Ex6, Interpolated position: lat, long = {} deg, {} deg'
+        print(msg.format(lat_ti, lon_ti))
+
+        assert_array_almost_equal(lat_ti, 89.7999805)
+        assert_array_almost_equal(lon_ti, 180.)
 
     def test_Ex7_mean_position(self):
 
