@@ -51,6 +51,14 @@ position calculations can be solved with simple vector algebra
 Converting between n-vector and latitude/longitude is unambiguous and easy
 using the provided functions.
 
+n_E is n-vector in the program code, while in documents we use nE. E denotes
+an Earth-fixed coordinate frame, and it indicates that the three components of
+n-vector are along the three axes of E. More details about the notation and reference frames can be found here:  
+
+http://www.navlab.net/nvector/
+
+http://www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf
+
 
 Methods
 ~~~~~~~
@@ -71,21 +79,17 @@ The core functions provided are:
 
 Nvector also provide an object oriented interface.
 
-- **FrameE:**
-    z-axis -> North, x-axis -> Latitude=Longitude=0
+- **FrameE:** z-axis -> North, x-axis -> Latitude=Longitude=0.
     Origo = Earth's centre.
     frame of reference rotates and moves with the Earth.
         
-- **FrameN:**
-    x-axis -> North, y-axis -> East, z-axis -> down
+- **FrameN:** x-axis -> North, y-axis -> East, z-axis -> down.
     Origo = Beneath/above Body at Earth's surface.
 
-- **FrameL:**
-    x-axis, y-axis -> wander azimuth, z-axis -> down
+- **FrameL:** x-axis, y-axis -> wander azimuth, z-axis -> down.
     Origo = Beneath/above Body at Earth's surface.
 
-- **FrameB:**
-    x-axis -> forward, y-axis -> starboard, z-axis -> body down    
+- **FrameB:** x-axis -> forward, y-axis -> starboard, z-axis -> body down,
     Origo = Body's centre.
 
 - **ECEFvector:** Geographical position given as Cartesian position vector in frame E
@@ -96,14 +100,6 @@ Nvector also provide an object oriented interface.
 
 - **GeoPath:** Geodesic path between two points in Frame E
 
-
-n_E is n-vector in the program code, while in documents we use nE. E denotes
-an Earth-fixed coordinate frame, and it indicates that the three components of
-n-vector are along the three axes of E. More details about the notation and reference frames can be found here:  
-
-http://www.navlab.net/nvector/
-
-www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf
 
 
 Documentation and code
