@@ -727,7 +727,7 @@ class GeoPath(object):
         # product between n_EC_E_tmp and n_EA1_E:
         n_EC_E = np.sign(dot(n_EC_E_tmp.T, n_EA1_E)) * n_EC_E_tmp
         if np.any(np.isnan(n_EC_E)):
-            warnings.warn('Paths are parallell. No intersection point. '
+            warnings.warn('Paths are Equal. Intersection point undefined. '
                           'NaN returned.')
 
         lat_EC, long_EC = n_E2lat_lon(n_EC_E, frame.R_Ee)

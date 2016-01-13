@@ -77,20 +77,17 @@ The core functions provided are:
 
 - **n_EA_E_and_p_AB_E2n_EB_E:** From position A and delta, finds position B.
 
+
 Nvector also provide an object oriented interface.
 
-- **FrameE:** z-axis -> North, x-axis -> Latitude=Longitude=0.
-    Origo = Earth's centre.
+- **FrameE:**  z-axis -> North, x-axis -> Latitude=Longitude=0. Origo = Earth's centre.
     frame of reference rotates and moves with the Earth.
         
-- **FrameN:** x-axis -> North, y-axis -> East, z-axis -> down.
-    Origo = Beneath/above Body at Earth's surface.
+- **FrameN:** x-axis -> North, y-axis -> East, z-axis -> down. Origo = Beneath/above Body at Earth's surface.
 
-- **FrameL:** x-axis, y-axis -> wander azimuth, z-axis -> down.
-    Origo = Beneath/above Body at Earth's surface.
+- **FrameL:** x-axis, y-axis -> wander azimuth, z-axis -> down. Origo = Beneath/above Body at Earth's surface.
 
-- **FrameB:** x-axis -> forward, y-axis -> starboard, z-axis -> body down,
-    Origo = Body's centre.
+- **FrameB:** x-axis -> forward, y-axis -> starboard, z-axis -> body down. Origo = Body's centre.
 
 - **ECEFvector:** Geographical position given as Cartesian position vector in frame E
 
@@ -147,7 +144,7 @@ Written by the navigation group at FFI (The Norwegian Defence Research Establish
 
 Most of the content is based on the following article:
 
-Kenneth Gade (2010): A Nonsingular Horizontal Position Representation, The Journal of Navigation, Volume 63, Issue 03, pp 395-417, July 2010. www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf
+`Kenneth Gade (2010): A Nonsingular Horizontal Position Representation, The Journal of Navigation, Volume 63, Issue 03, pp 395-417, July 2010. <www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf>`_
 
 Thus this article should be cited in publications using this page or the downloaded program code.
 
