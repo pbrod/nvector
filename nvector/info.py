@@ -127,9 +127,9 @@ python session::
 Acknowledgement
 ===============
 The nvector package for `Python <https://www.python.org/>`_ was written 
-by Per A. Brodtkorb at FFI (The Norwegian Defence Research Establishment) 
+by Per A. Brodtkorb at `FFI (The Norwegian Defence Research Establishment) <http://www.ffi.no/en>`_ 
 based on the `Matlab <http://www.mathworks.com>`_ toolbox with the same 
-name written by the navigation group at FFI.
+name written by the navigation group at `FFI <http://www.ffi.no/en>`_.
 
 Most of the content is based on the following article:
 
