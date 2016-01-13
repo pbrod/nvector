@@ -283,6 +283,7 @@ Solution:
 
 Example 4: "Geodetic latitude to ECEF-vector"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Solution:
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
@@ -295,6 +296,7 @@ Solution:
 
 Example 5: "Surface distance"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Find the surface distance sAB (i.e. great circle distance) between two
 positions A and B. The heights of A and B are ignored, i.e. if they don't have
 zero height, we seek the distance between the points that are at the surface of
@@ -387,6 +389,7 @@ Solution:
 
 Example 8: "A and azimuth/distance to B"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 We have an initial position A, direction of travel given as an azimuth
 (bearing) relative to north (clockwise), and finally the
 distance to travel along a great circle given as sAB.
@@ -413,6 +416,7 @@ Solution:
 
 Example 9: "Intersection of two paths"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Define a path from two given positions (at the surface of a spherical Earth),
 as the great circle that goes through the two points.
 
@@ -439,6 +443,7 @@ Solution:
 
 Example 10: "Cross track distance"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Path A is given by the two positions A1 and A2 (similar to the previous
 example).
 
