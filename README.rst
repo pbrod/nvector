@@ -51,63 +51,92 @@ position calculations can be solved with simple vector algebra
 Converting between n-vector and latitude/longitude is unambiguous and easy
 using the provided functions.
 
-n_E is n-vector in the program code, while in documents we use nE. E denotes
-an Earth-fixed coordinate frame, and it indicates that the three components of
-n-vector are along the three axes of E. More details about the notation used
-are found here:  http://www.navlab.net/nvector/
+
+Methods
+~~~~~~~
 
 The core functions provided are:
 
-*lat_lon2n_E:*
-    Converts latitude and longitude to n-vector.
+- **lat_lon2n_E:** Converts latitude and longitude to n-vector.
 
-*n_E2lat_lon:*
-    Converts n-vector to latitude and longitude.
+- **n_E2lat_lon:** Converts n-vector to latitude and longitude.
 
-*n_EB_E2p_EB_E:*
-    Converts n-vector to Cartesian position vector in meters.
+- **n_EB_E2p_EB_E:** Converts n-vector to Cartesian position vector in meters.
 
-*p_EB_E2n_EB_E:*
-    Converts Cartesian position vector in meters to n-vector.
+- **p_EB_E2n_EB_E:** Converts Cartesian position vector in meters to n-vector.
 
-*n_EA_E_and_n_EB_E2p_AB_E:*
-    From two positions A and B, finds the delta position.
+- **n_EA_E_and_n_EB_E2p_AB_E:** From two positions A and B, finds the delta position.
 
+- **n_EA_E_and_p_AB_E2n_EB_E:** From position A and delta, finds position B.
 
 Nvector also provide an object oriented interface.
 
-*FrameE:*
-    frame of reference rotates and moves with the Earth.
+- **FrameE:**
+    z-axis -> North, x-axis -> Latitude=Longitude=0
     Origo = Earth's centre.
-    z-axis->North, x-axis->Latitude=Longitude=0
-*FrameB:*
-    frame of reference rotates and moves with Body.
-    Origo = Body's centre.
-    x-axis -> forward, y-axis -> starboard, z-axis -> down
-*FrameN:*
-    frame of reference moves with Body and rotates with Earth.
-    Origo = Beneath/above Body at Earth's surface.
+    frame of reference rotates and moves with the Earth.
+        
+- **FrameN:**
     x-axis -> North, y-axis -> East, z-axis -> down
-*FrameL:*
-    frame of reference moves with Body, but does not rotate with Earth.
     Origo = Beneath/above Body at Earth's surface.
 
-*ECEFvector:*
-    Geographical position given as Cartesian position vector in frame E
-*GeoPoint:*
-    Geographical position given as latitude, longitude, depth in frame E
-*Nvector:*
-    Geographical position given as N-vector and depth in frame E
-*GeoPath:*
-    Geodesic path between two points in Frame E
+- **FrameL:**
+    x-axis, y-axis -> wander azimuth, z-axis -> down
+    Origo = Beneath/above Body at Earth's surface.
+
+- **FrameB:**
+    x-axis -> forward, y-axis -> starboard, z-axis -> body down    
+    Origo = Body's centre.
+
+- **ECEFvector:** Geographical position given as Cartesian position vector in frame E
+
+- **GeoPoint:** Geographical position given as latitude, longitude, depth in frame E
+
+- **Nvector:** Geographical position given as n-vector and depth in frame E
+
+- **GeoPath:** Geodesic path between two points in Frame E
 
 
-Documentation is at: http://www.navlab.net/nvector/
+n_E is n-vector in the program code, while in documents we use nE. E denotes
+an Earth-fixed coordinate frame, and it indicates that the three components of
+n-vector are along the three axes of E. More details about the notation and reference frames can be found here:  
 
-Code and issue tracker is at https://github.com/pbrod/nvector.
+http://www.navlab.net/nvector/
 
-Latest stable release is at http://pypi.python.org/pypi/Nvector.
+www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf
 
+
+Documentation and code
+======================
+
+Official documentation: http://www.navlab.net/nvector/
+
+Bleeding edge: https://github.com/pbrod/nvector.
+
+Official releases available at: http://pypi.python.org/pypi/nvector.
+
+
+Installation and upgrade:
+=========================
+
+with pip
+
+    $ pip install nvector
+
+
+with easy_install
+
+    $ easy_install nvector 
+
+or
+
+    $ easy_install upgrade nvector
+
+to upgrade to the newest version
+
+
+Unit tests
+===========
 To test if the toolbox is working paste the following in an interactive
 python session::
 
@@ -115,8 +144,27 @@ python session::
    nv.test(coverage=True, doctests=True)
 
 
+Acknowledgement
+===============
+
+Written by the navigation group at FFI (The Norwegian Defence Research Establishment). 
+
+Most of the content is based on the following article:
+
+Kenneth Gade (2010): A Nonsingular Horizontal Position Representation, The Journal of Navigation, Volume 63, Issue 03, pp 395-417, July 2010. www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf
+
+Thus this article should be cited in publications using this page or the downloaded program code.
+
+
 Getting Started
 ---------------
+
+Below the object-oriented solution to some common geodesic problems are given.
+In the first example the functional solution is also given.
+The functional solutions to the remaining problems can be found 
+`here <https://github.com/pbrod/nvector/blob/master/nvector/tests/test_nvector.py>`_.
+
+
 Example 1: "A and B to delta"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -140,15 +188,15 @@ Solution:
     >>> pointB = wgs84.GeoPoint(latitude=4, longitude=5, z=6, degrees=True)
 
 Step 1: Find p_AB_E (delta decomposed in E).
-    >>> p_AB_E = diff_positions(pointA, pointB)  # (delta decomposed in E).
+    >>> p_AB_E = diff_positions(pointA, pointB)
 
 Step 2: Find p_AB_N (delta decomposed in N).
     >>> frame_N = nv.FrameN(pointA)
     >>> p_AB_N = p_AB_E.change_frame(frame_N)
     >>> p_AB_N = p_AB_N.pvector.ravel()
     >>> valtxt = '{0:8.2f}, {1:8.2f}, {2:8.2f}'.format(*p_AB_N)
-    >>> 'delta north, east, down = {}'.format(valtxt)
-    'delta north, east, down = 331730.23, 332997.87, 17404.27'
+    >>> 'Ex1: delta north, east, down = {}'.format(valtxt)
+    'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
 
 Step3: Also find the direction (azimuth) to B, relative to north:
     >>> azimuth = np.arctan2(p_AB_N[1], p_AB_N[0])
@@ -220,9 +268,9 @@ Step 4: Find point C by adding delta BC to EB
     >>> pointC = p_EC_E.to_geo_point()
 
     >>> lat, lon, z = pointC.latitude_deg, pointC.longitude_deg, pointC.z
-    >>> msg = 'Pos C: lat, lon = {:4.2f}, {:4.2f} deg,  height = {:4.2f} m'
+    >>> msg = 'Ex2: Pos C: lat, lon = {:4.2f}, {:4.2f} deg,  height = {:4.2f} m'
     >>> msg.format(lat[0], lon[0], -z[0])
-    'Pos C: lat, lon = 53.33, 63.47 deg,  height = 406.01 m'
+    'Ex2: Pos C: lat, lon = 53.33, 63.47 deg,  height = 406.01 m'
 
 
 Example 3: "ECEF-vector to geodetic latitude"
@@ -238,35 +286,34 @@ Solution:
     >>> wgs84 = nv.FrameE(name='WGS84')
     >>> position_B = 6371e3 * np.vstack((0.9, -1, 1.1))  # m
     >>> p_EB_E = wgs84.ECEFvector(position_B)
-
-Step 1: Find position B as geodetic latitude, longitude and depth
     >>> pointB = p_EB_E.to_geo_point()
 
-Step 2: Extract latitude and longitude in degrees
     >>> lat, lon, h = pointB.latitude_deg, pointB.longitude_deg, -pointB.z
-    >>> msg = 'Pos B: lat, lon = {:4.2f}, {:4.2f} deg, height = {:9.2f} m'
+    >>> msg = 'Ex3: Pos B: lat, lon = {:4.2f}, {:4.2f} deg, height = {:9.2f} m'
     >>> msg.format(lat[0], lon[0], h[0])
-    'Pos B: lat, lon = 39.38, -48.01 deg, height = 4702059.83 m'
+    'Ex3: Pos B: lat, lon = 39.38, -48.01 deg, height = 4702059.83 m'
 
 
 Example 4: "Geodetic latitude to ECEF-vector"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Solution:
+    >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
     >>> pointB = wgs84.GeoPoint(latitude=1, longitude=2, z=-3, degrees=True)
     >>> p_EB_E = pointB.to_ecef_vector()
+
     >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel())
     'Ex4: p_EB_E = [ 6373290.27721828   222560.20067474   110568.82718179] m'
 
 
 Example 5: "Surface distance"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Find the surface distance sAB (i.e. great circle-, Euclidean- and exact ellipsoidal 
-distance) between two positions A and B. The heights of A and B are ignored, i.e. if 
+Find the surface distance sAB (i.e. great circle distance) between two positions A and B. 
+The heights of A and B are ignored, i.e. if 
 they don't have zero height, we seek the distance between the points that are at the 
 surface of the Earth, directly above/below A and B. The Euclidean distance (chord length)
-dAB should also be found. Use Earth radius 6371e3 m.
+dAB should also be found. Use Earth radius 6371e3 m. 
+Compare the results with exact calculations for the WGS-84 ellipsoid.
 
 Great circle solution:
     >>> import nvector as nv
@@ -278,16 +325,16 @@ Great circle solution:
     >>> p_AB_E = positionB.to_ecef_vector() - positionA.to_ecef_vector()
     >>> d_AB = np.linalg.norm(p_AB_E.pvector, axis=0)[0]
 
-    >>> msg = 'Great circle and Euclidean distance = {:5.2f} km, {:5.2f} km'
+    >>> msg = 'Ex5: Great circle and Euclidean distance = {:5.2f} km, {:5.2f} km'
     >>> msg.format(s_AB / 1000, d_AB / 1000)
-    'Great circle and Euclidean distance = 332.46 km, 332.42 km'
+    'Ex5: Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
 Alternative great circle solution:
     >>> path = nv.GeoPath(positionA, positionB)
     >>> s_AB2 = path.track_distance(method='greatcircle').ravel()
     >>> d_AB2 = path.track_distance(method='euclidean').ravel()
     >>> msg.format(s_AB2[0] / 1000, d_AB2[0] / 1000)
-    'Great circle and Euclidean distance = 332.46 km, 332.42 km'
+    'Ex5: Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
 Exact solution for the WGS84 ellipsoid:
     >>> wgs84 = nv.FrameE(name='WGS84')
@@ -317,9 +364,9 @@ Solution:
     >>> n_EM_E = nvectors.mean_horizontal_position()
     >>> g_EM_E = n_EM_E.to_geo_point()
     >>> lat, lon = g_EM_E.latitude_deg, g_EM_E.longitude_deg
-    >>> msg = 'Pos M: lat, lon = {:4.2f}, {:4.2f} deg'
+    >>> msg = 'Ex7: Pos M: lat, lon = {:4.2f}, {:4.2f} deg'
     >>> msg.format(lat[0], lon[0])
-    'Pos M: lat, lon = 67.24, -6.92 deg'
+    'Ex7: Pos M: lat, lon = 67.24, -6.92 deg'
 
 
 Example 8: "A and azimuth/distance to B"
@@ -343,8 +390,8 @@ Solution:
     ...                                      degrees=True)
     >>> latB, lonB = pointB.latitude_deg, pointB.longitude_deg
 
-    >>> 'Ex8, Destination: lat, lon = {:4.2f}, {:4.2f} deg'.format(latB, lonB)
-    'Ex8, Destination: lat, lon = 79.99, -90.02 deg'
+    >>> 'Ex8, Destination: lat, lon = {:4.2f} deg, {:4.2f} deg'.format(latB, lonB)
+    'Ex8, Destination: lat, lon = 79.99 deg, -90.02 deg'
 
 
 Example 9: "Intersection of two paths"

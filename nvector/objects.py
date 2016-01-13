@@ -386,7 +386,7 @@ class GeoPoint(object):
 class Nvector(object):
 
     """
-    Geographical position given as N-vector and depth in frame E
+    Geographical position given as n-vector and depth in frame E
 
     Parameters
     ----------
