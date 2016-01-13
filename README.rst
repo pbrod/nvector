@@ -157,7 +157,7 @@ Thus this article should be cited in publications using this page or the downloa
 
 
 Getting Started
----------------
+===============
 
 Below the object-oriented solution to some common geodesic problems are given.
 In the first example the functional solution is also given.
