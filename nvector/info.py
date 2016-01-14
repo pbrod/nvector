@@ -128,7 +128,7 @@ Acknowledgement
 ===============
 The nvector package for `Python <https://www.python.org/>`_ was written 
 by Per A. Brodtkorb at `FFI (The Norwegian Defence Research Establishment) <http://www.ffi.no/en>`_ 
-based on the `nvector toolbox<http://www.navlab.net/nvector/#download>`_ for 
+based on the `nvector toolbox <http://www.navlab.net/nvector/#download>`_ for 
 `Matlab <http://www.mathworks.com>`_ written by the navigation group at `FFI <http://www.ffi.no/en>`_.
 
 Most of the content is based on the following article:
