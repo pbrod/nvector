@@ -64,7 +64,7 @@ The core functions provided are:
 Nvector also provide an object oriented interface.
 
 - **FrameE:**
-    z-axis -> North, x-axis -> Latitude=Longitude=0.
+    z-axis -> North Pole, x-axis -> Latitude=Longitude=0.
     Origo = Earth's centre.
 - **FrameN:**
     x-axis -> North, y-axis -> East, z-axis -> down.
@@ -128,8 +128,8 @@ Acknowledgement
 ===============
 The nvector package for `Python <https://www.python.org/>`_ was written 
 by Per A. Brodtkorb at `FFI (The Norwegian Defence Research Establishment) <http://www.ffi.no/en>`_ 
-based on the `Matlab <http://www.mathworks.com>`_ toolbox with the same 
-name written by the navigation group at `FFI <http://www.ffi.no/en>`_.
+based on the `nvector toolbox<http://www.navlab.net/nvector/#download>`_ for 
+`Matlab <http://www.mathworks.com>`_ written by the navigation group at `FFI <http://www.ffi.no/en>`_.
 
 Most of the content is based on the following article:
 
@@ -218,6 +218,7 @@ Step5: Also find the direction (azimuth) to B, relative to north:
     >>> 'azimuth = {0:4.2f} deg'.format(deg(azimuth))
     'azimuth = 45.11 deg'
 
+See also `Example 1 at www.navlab.net <http://www.navlab.net/nvector/#example_1>`_ 
 
 
 Example 2: "B and delta to C"
@@ -259,6 +260,8 @@ Step 4: Find point C by adding delta BC to EB
     >>> msg.format(lat[0], lon[0], -z[0])
     'Ex2: PosC: lat, lon = 53.33, 63.47 deg,  height = 406.01 m'
 
+See also `Example 2 at www.navlab.net <http://www.navlab.net/nvector/#example_2>`_ 
+
 
 Example 3: "ECEF-vector to geodetic latitude"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -280,9 +283,13 @@ Solution:
     >>> msg.format(lat[0], lon[0], h[0])
     'Ex3: Pos B: lat, lon = 39.38, -48.01 deg, height = 4702059.83 m'
 
+See also `Example 3 at www.navlab.net <http://www.navlab.net/nvector/#example_3>`_ 
+
 
 Example 4: "Geodetic latitude to ECEF-vector"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Geodetic latitude, longitude and height are given for position B as latEB, longEB and hEB, find the ECEF-vector for this position, p_EB_E.
 
 Solution:
     >>> import nvector as nv
@@ -292,6 +299,8 @@ Solution:
 
     >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel())
     'Ex4: p_EB_E = [ 6373290.27721828   222560.20067474   110568.82718179] m'
+
+See also `Example 4 at www.navlab.net <http://www.navlab.net/nvector/#example_4>`_ 
 
 
 Example 5: "Surface distance"
@@ -338,11 +347,13 @@ Exact solution for the WGS84 ellipsoid:
     >>> msg.format(s_12 / 1000, d_12 / 1000)
     'Ellipsoidal and Euclidean distance = 333.95 km, 333.91 km'
 
+See also `Example 5 at www.navlab.net <http://www.navlab.net/nvector/#example_5>`_ 
+
 
 Example 6 "Interpolated position"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Given the position of B at time t0 and t1, n_EB_B(t0) and n_EB_E(t1).
+Given the position of B at time t0 and t1, n_EB_E(t0) and n_EB_E(t1).
 
 Find an interpolated position at time ti, n_EB_E(ti). All positions are given
 as n-vectors.
@@ -365,6 +376,7 @@ Solution:
     >>> msg.format(lat_ti, lon_ti)
     'Ex6, Interpolated position: lat, long = [ 89.7999805] deg, [ 180.] deg'
 
+See also `Example 6 at www.navlab.net <http://www.navlab.net/nvector/#example_6>`_ 
 
 
 Example 7: "Mean position"
@@ -385,6 +397,8 @@ Solution:
     >>> msg = 'Ex7: Pos M: lat, lon = {:4.2f}, {:4.2f} deg'
     >>> msg.format(lat[0], lon[0])
     'Ex7: Pos M: lat, lon = 67.24, -6.92 deg'
+
+See also `Example 7 at www.navlab.net <http://www.navlab.net/nvector/#example_7>`_ 
 
 
 Example 8: "A and azimuth/distance to B"
@@ -413,6 +427,8 @@ Solution:
     >>> msg.format(lat, lon)
     'Ex8, Destination: lat, lon = 79.99 deg, -90.02 deg'
 
+See also `Example 8 at www.navlab.net <http://www.navlab.net/nvector/#example_8>`_ 
+
 
 Example 9: "Intersection of two paths"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -439,6 +455,8 @@ Solution:
     >>> msg = 'Ex9, Intersection: lat, long = {:4.2f}, {:4.2f} deg'
     >>> msg.format(lat[0], lon[0])
     'Ex9, Intersection: lat, long = 40.32, 55.90 deg'
+
+See also `Example 9 at www.navlab.net <http://www.navlab.net/nvector/#example_9>`_ 
 
 
 Example 10: "Cross track distance"
