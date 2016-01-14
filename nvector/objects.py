@@ -8,10 +8,11 @@ import numpy as np
 from numpy import pi, arccos, cross, dot
 from numpy.linalg import norm
 from geographiclib.geodesic import Geodesic as _Geodesic
-from nvector._core import (select_ellipsoid, NORTH_POLE, rad, deg, zyx2R,
+from nvector._core import (select_ellipsoid, rad, deg, zyx2R,
                            lat_lon2n_E, n_E2lat_lon, n_E2R_EN, n_E_and_wa2R_EL,
                            n_EB_E2p_EB_E, p_EB_E2n_EB_E, unit,
-                           great_circle_distance, mean_horizontal_position)
+                           great_circle_distance, mean_horizontal_position,
+                           E_rotation)
 import warnings
 
 __all__ = ['FrameE', 'FrameB', 'FrameL', 'FrameN', 'GeoPoint', 'GeoPath',
@@ -32,32 +33,33 @@ class FrameE(_BaseFrame):
 
     """
     E frame
-    -------
-    Name:
-        Earth
-    Position:
-        The origin coincides with Earth's centre (geometrical centre of
-        ellipsoid model).
-    Orientation:
-        The x-axis is along the Earth's rotation axis, pointing north
-        (the yz-plane coincides with the equatorial plane), the y-axis points
-        towards longitude +90x (east).
-    Comments:
-        The frame is Earth-fixed (rotates and moves with the Earth). The choice
-        of axis directions ensures that at zero latitude and longitude, N
-        (described below) has the same orientation as E. If roll/pitch/yaw are
-        zero, also B (described below) has this orientation. Note that these
-        properties are not valid for another common choice of the axis
-        directions, denoted e (lower case), which has z pointing north and x
-        pointing to latitude=longitude=0.
+
+    Parameters
+    ----------
+    a: real scalar, default WGS-84 ellipsoid.
+        Semi-major axis of the Earth ellipsoid given in [m].
+    f: real scalar, default WGS-84 ellipsoid.
+        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+        Earth with radius a is used in stead of WGS-84.
+    name: string
+        defining the default ellipsoid.
+    axes: 'e' or 'E'
+        defines axes orientation of E frame. Default is axes='e' which means
+        that the orientation of the axis is such that:
+        z-axis -> North Pole, x-axis -> Latitude=Longitude=0.
+
+    The frame is Earth-fixed (rotates and moves with the Earth) where the
+    origin coincides with Earth's centre (geometrical centre of ellipsoid
+    model).
+
     """
-    def __init__(self, a=None, f=None, name='WGS84', north='z'):
+    def __init__(self, a=None, f=None, name='WGS84', axes='e'):
         if a is None or f is None:
             a, f, _full_name = select_ellipsoid(name)
         self.a = a
         self.f = f
         self.name = name
-        self.R_Ee = NORTH_POLE['z']
+        self.R_Ee = E_rotation(axes)
 
     def _is_equal_to(self, other):
         return (np.allclose(self.a, other.a) and
@@ -110,22 +112,24 @@ class FrameN(_BaseFrame):
 
     """
     N frame
-    -------
-    Name:
-        North-East-Down (local level)
-    Position:
-        The origin is directly beneath or above the vehicle (B), at Earth's
-        surface (surface of ellipsoid model).
-    Orientation:
-        The x-axis points towards north, the y-axis points towards east
-        (both are horizontal), and the z-axis is pointing down.
-    Comments:
-        When moving relative to the Earth, the frame rotates about its z-axis
-        to allow the x-axis to always point towards north. When getting close
-        to the poles this rotation rate will increase, being infinite at the
-        poles. The poles are thus singularities and the direction of the
-        x- and y-axes are not defined here. Hence, this coordinate frame is
-        NOT SUITABLE for general calculations.
+
+    Parameter
+    ---------
+    position: ECEFvector, GeoPoint or Nvector object
+        position of the vehicle (B) which also defines the origin of the local
+        frame N. The origin is directly beneath or above the vehicle (B), at
+        Earth's surface (surface of ellipsoid model).
+
+    The Cartesian frame is local and oriented North-East-Down, i.e.,
+    the x-axis points towards north, the y-axis points towards east (both are
+    horizontal), and the z-axis is pointing down.
+
+    When moving relative to the Earth, the frame rotates about its z-axis
+    to allow the x-axis to always point towards north. When getting close
+    to the poles this rotation rate will increase, being infinite at the
+    poles. The poles are thus singularities and the direction of the
+    x- and y-axes are not defined here. Hence, this coordinate frame is
+    NOT SUITABLE for general calculations.
     """
     def __init__(self, position):
         nvector = position.to_nvector()
@@ -144,28 +148,32 @@ class FrameN(_BaseFrame):
 class FrameL(FrameN):
 
     """
-    L frame
-    -------
-    Name:
-        Local level, Wander azimuth
-    Position:
-        The origin is directly beneath or above the vehicle (B), at Earth's
-        surface (surface of ellipsoid model).
-    Orientation:
-        The z-axis is pointing down. Initially, the x-axis points towards
-        north, and the y-axis points towards east, but as the vehicle moves
-        they are not rotating about the z-axis (their angular velocity relative
-        to the Earth has zero component along the z-axis).
-        (Note: Any initial horizontal direction of the x- and y-axes is valid
-        for L, but if the initial position is outside the poles, north and east
-        are usually chosen for convenience.)
-    Comments:
-        The L-frame is equal to the N-frame except for the rotation about the
-        z-axis, which is always zero for this frame (relative to E). Hence, at
-        a given time, the only difference between the frames is an angle
-        between the x-axis of L and the north direction; this angle is called
-        the wander azimuth angle. The L-frame is well suited for general
-        calculations, as it is non-singular.
+    Local level, Wander azimuth frame
+
+    Parameters
+    ----------
+    position: ECEFvector, GeoPoint or Nvector object
+        position of the vehicle (B) which also defines the origin of the local
+        frame L. The origin is directly beneath or above the vehicle (B), at
+        Earth's surface (surface of ellipsoid model).
+    wander_azimuth: real scalar
+
+    The Cartesian frame is local and oriented Wander-azimuth-Down. This means
+    that the z-axis is pointing down. Initially, the x-axis points towards
+    north, and the y-axis points towards east, but as the vehicle moves they
+    are not rotating about the z-axis (their angular velocity relative to the
+    Earth has zero component along the z-axis).
+
+    (Note: Any initial horizontal direction of the x- and y-axes is valid
+    for L, but if the initial position is outside the poles, north and east
+    are usually chosen for convenience.)
+
+    The L-frame is equal to the N-frame except for the rotation about the
+    z-axis, which is always zero for this frame (relative to E). Hence, at
+    a given time, the only difference between the frames is an angle
+    between the x-axis of L and the north direction; this angle is called
+    the wander azimuth angle. The L-frame is well suited for general
+    calculations, as it is non-singular.
     """
     def __init__(self, position, wander_azimuth=0):
         nvector = position.to_nvector()
@@ -179,16 +187,20 @@ class FrameB(FrameN):
 
     """
     B frame
-    -------
-    Name:
-        Body (typically of a vehicle)
-    Position:
-        The origin is in the vehicle's reference point.
-    Orientation:
-        The x-axis points forward, the y-axis to the right (starboard) and the
-        z-axis in the vehicle's down direction.
-    Comments:
-        The frame is fixed to the vehicle.
+
+    Parameters
+    ----------
+    position: ECEFvector, GeoPoint or Nvector object
+        position of the the vehicle's reference point which also coincides with
+        the origin of the frame B.
+    yaw, pitch, roll: real scalars
+        defining the orientation of frame B in [deg] or [rad].
+    degrees : bool
+        if True yaw, pitch, roll are given in degrees otherwise in radians
+
+    The frame is fixed to the vehicle where the x-axis points forward, the
+    y-axis to the right (starboard) and the z-axis in the vehicle's down
+    direction.
     """
     def __init__(self, position, yaw=0, pitch=0, roll=0, degrees=False):
         nvector = position.to_nvector()
@@ -212,15 +224,6 @@ class FrameB(FrameN):
                 np.allclose(self.roll, other.roll) and
                 np.allclose(self.R_EN, other.R_EN) and
                 self.nvector == other.nvector)
-
-
-def frame_definitions():
-    """
-    Coordinate frame definitions
-    ----------------------------
-
-    """ + FrameE.__doc__ + FrameB.__doc__ + FrameN.__doc__ + FrameL.__doc__
-    pass
 
 
 def _check_frames(self, other):

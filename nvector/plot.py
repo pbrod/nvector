@@ -6,11 +6,7 @@ Created on 9. des. 2015
 from mpl_toolkits.basemap import Basemap  # @UnresolvedImport
 import matplotlib.pyplot as plt
 import numpy as np
-from nvector import (set_north_pole_axis_for_E_frame, rad, deg, lat_lon2n_E,
-                     unit, n_E2lat_lon)
-
-
-R_Ee = set_north_pole_axis_for_E_frame(axis='z')
+from nvector import rad, deg, lat_lon2n_E, unit, n_E2lat_lon
 
 
 def plot_mean_position():

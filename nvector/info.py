@@ -82,7 +82,7 @@ Nvector also provide an object oriented interface.
 - **Nvector:**
     Geographical position given as n-vector and depth in frame E
 - **GeoPath:**
-    Geodesic path between two points in Frame E
+    Geodesic path between two points in frame E
 
 
 

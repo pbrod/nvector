@@ -46,7 +46,7 @@ __all__ = ['unit', 'deg', 'rad', 'lat_lon2n_E', 'n_E2lat_lon',
            'n_EA_E_and_n_EB_E2p_AB_E', 'n_EA_E_and_p_AB_E2n_EB_E',
            'p_EB_E2n_EB_E', 'n_EB_E2p_EB_E',
            'set_north_pole_axis_for_E_frame',
-           'get_north_pole_axis_for_E_frame',
+           'R_Ee',
            'great_circle_distance', 'euclidean_distance',
            'n_EA_E_distance_and_azimuth2n_EB_E',
            'n_EA_E_and_n_EB_E2azimuth',
@@ -54,11 +54,11 @@ __all__ = ['unit', 'deg', 'rad', 'lat_lon2n_E', 'n_E2lat_lon',
            'R2xyz', 'xyz2R', 'R2zyx', 'zyx2R',
            'n_E_and_wa2R_EL', 'n_E2R_EN', 'R_EL2n_E', 'R_EN2n_E']
 
-NORTH_POLE = dict(z=array([[0, 0, 1],
-                           [0, 1, 0],
-                           [-1, 0, 0]]),
-                  x=np.eye(3))
-R_Ee = NORTH_POLE['z']
+E_ROTATION_MATRIX = dict(e=array([[0, 0, 1],
+                                  [0, 1, 0],
+                                  [-1, 0, 0]]),
+                         E=np.eye(3))
+
 _EPS = np.finfo(float).eps  # machine precision (machine epsilon)
 
 
@@ -126,52 +126,52 @@ def select_ellipsoid(name):
     return ELLIPSOID[option]
 
 
-def get_north_pole_axis_for_E_frame(axis='z'):
+def E_rotation(axes='e'):
     """
-    Selects axes of the coordinate frame E.
+    Return rotation matrix R_Ee defining the axes of the coordinate frame E.
+
+    Parameter
+    ---------
+    axes : 'e' or 'E'
+        defines the axes of the coordinate frame E. Options are:
+        'e': z-axis points to the North Pole and
+             x-axis points to the point where latitude = longitude = 0.
+             This choice is very common in many fields.
+
+        'E': x-axis points to the North Pole along the Earth's rotation axis,
+             y-axis points towards longitude +90deg (east) and latitude = 0.
+             (the yz-plane coincides with the equatorial plane).
+
+             This choice of axis ensures that at zero latitude and longitude,
+             frame N (North-East-Down) has the same orientation as frame E.
+             If roll/pitch/yaw are zero, also frame B (forward-starboard-down)
+             has this orientation. In this manner, the axes of frame E is
+             chosen to correspond with the axes of frame N and B.
+             The functions in this library originally used this option.
+
+    Returns
+    -------
+    R_Ee : 2d array
+        rotation matrix defining the axes of the coordinate frame E as
+        described in Table 2 in Gade (2010):
+        R_Ee=[0 0 1
+              0 1 0
+             -1 0 0]        for axes=='e'
+
+        R_Ee=[1 0 0
+              0 1 0
+              0 0 1]        for axes=='E'
 
     R_Ee controls the axes of the coordinate frame E (Earth-Centred,
     Earth-Fixed, ECEF) used by the other functions in this library
 
-    There are two choices of E-axes that are described in Table 2 in Gade
-    (2010):
-
-    * e: z-axis points to the North Pole and
-         x-axis points to the point where latitude = longitude = 0.
-         This choice is very common in many fields.
-
-    * E: x-axis points to the North Pole,
-         y-axis points towards longitude +90deg (east) and latitude = 0.
-         This choice of axis directions ensures that at zero latitude and
-         longitude, N (North-East-Down) has the same orientation as E.
-         If roll/pitch/yaw are zero, also B (Body, forward, starboard, down)
-         has this orientation. In this manner, the axes of E is chosen to
-         correspond with the axes of N and B.
-
-    Based on this we get:
-    R_Ee=[0 0 1
-          0 1 0
-         -1 0 0]
-
-    The above R_Ee should be returned from this function when using z-axis to
-    the North pole (which is most common). When using x-axis to the North
-    pole, R_Ee should be set to I (identity matrix) (since the functions in
-    this library are originally written for this option).
-
     Reference
     ---------
-    Gade, K. (2010). A Nonsingular Horizontal Position Representation,
+    Gade, K. (2010). `A Nonsingular Horizontal Position Representation,
     The Journal of Navigation, Volume 63, Issue 03, pp 395-417, July 2010.
-    www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf
+    <www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf>`_
     """
-    R_Ee = NORTH_POLE[axis]
-    return R_Ee
-
-
-def set_north_pole_axis_for_E_frame(axis='z'):
-    __doc__ = get_north_pole_axis_for_E_frame.__doc__  # @ReservedAssignment
-    global R_Ee
-    R_Ee = get_north_pole_axis_for_E_frame(axis)
+    R_Ee = E_ROTATION_MATRIX[axes]
     return R_Ee
 
 
@@ -257,6 +257,8 @@ def lat_lon2n_E(latitude, longitude, R_Ee=None):
     ----------
     latitude, longitude: real scalars or vectors of length n.
         Geodetic latitude and longitude given in [rad]
+    R_Ee : 2d array
+        rotation matrix defining the axes of the coordinate frame E.
 
     Returns
     -------
@@ -268,7 +270,7 @@ def lat_lon2n_E(latitude, longitude, R_Ee=None):
     n_E2lat_lon.
     """
     if R_Ee is None:
-        R_Ee = get_north_pole_axis_for_E_frame()
+        R_Ee = E_rotation()
     # Equation (3) from Gade (2010):
     nvec = np.vstack((sin(latitude),
                       sin(longitude) * cos(latitude),
@@ -285,6 +287,8 @@ def n_E2lat_lon(n_E, R_Ee=None):
     ----------
     n_E: 3 x n array
         n-vector [no unit] decomposed in E.
+    R_Ee : 2d array
+        rotation matrix defining the axes of the coordinate frame E.
 
     Returns
     -------
@@ -296,7 +300,7 @@ def n_E2lat_lon(n_E, R_Ee=None):
     lat_lon2n_E.
     """
     if R_Ee is None:
-        R_Ee = get_north_pole_axis_for_E_frame()
+        R_Ee = E_rotation()
     _check_length_deviation(n_E)
     n_E = np.dot(R_Ee, n_E)
 
@@ -341,6 +345,8 @@ def n_E2R_EN(n_E, R_Ee=None):
     ----------
     n_E: 3 x 1 array
         n-vector [no unit] decomposed in E
+    R_Ee : 2d array
+        rotation matrix defining the axes of the coordinate frame E.
 
     Returns
     -------
@@ -352,7 +358,7 @@ def n_E2R_EN(n_E, R_Ee=None):
     R_EN2n_E, n_E_and_wa2R_EL, R_EL2n_E.
     """
     if R_Ee is None:
-        R_Ee = get_north_pole_axis_for_E_frame()
+        R_Ee = E_rotation()
     _check_length_deviation(n_E)
     n_E = unit(np.dot(R_Ee, n_E))
 
@@ -396,6 +402,8 @@ def n_E_and_wa2R_EL(n_E, wander_azimuth, R_Ee=None):
         n-vector [no unit] decomposed in E
     wander_azimuth: real scalar
         Angle [rad] between L's x-axis and north, positive about L's z-axis.
+    R_Ee : 2d array
+        rotation matrix defining the axes of the coordinate frame E.
 
     Returns
     -------
@@ -407,7 +415,7 @@ def n_E_and_wa2R_EL(n_E, wander_azimuth, R_Ee=None):
     R_EL2n_E, R_EN2n_E, n_E2R_EN.
     """
     if R_Ee is None:
-        R_Ee = get_north_pole_axis_for_E_frame()
+        R_Ee = E_rotation()
     latitude, longitude = n_E2lat_lon(n_E, R_Ee)
 
     # Reference: See start of Section 5.2 in Gade (2010):
@@ -430,6 +438,8 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0/298.257223563, R_Ee=None):
     f: real scalar, default WGS-84 ellipsoid.
         Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
         Earth with radius a is used in stead of WGS-84.
+    R_Ee : 2d array
+        rotation matrix defining the axes of the coordinate frame E.
 
     Returns
     -------
@@ -450,7 +460,7 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0/298.257223563, R_Ee=None):
     p_EB_E2n_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E.
     """
     if R_Ee is None:
-        R_Ee = get_north_pole_axis_for_E_frame()
+        R_Ee = E_rotation()
     _check_length_deviation(n_EB_E)
 
     n_EB_E = unit(dot(R_Ee, n_EB_E))
@@ -488,6 +498,8 @@ def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0/298.257223563, R_Ee=None):
     f: real scalar, default WGS-84 ellipsoid.
         Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
         Earth with radius a is used in stead of WGS-84.
+    R_Ee : 2d array
+        rotation matrix defining the axes of the coordinate frame E.
 
     Returns
     -------
@@ -511,7 +523,7 @@ def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0/298.257223563, R_Ee=None):
     n_EB_E2p_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E.
     """
     if R_Ee is None:
-        R_Ee = get_north_pole_axis_for_E_frame()
+        R_Ee = E_rotation()
     p_EB_E = dot(R_Ee, p_EB_E)
     # R_Ee selects correct E-axes, see R_Ee.m for details
 
@@ -569,6 +581,8 @@ def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
     f: real scalar, default WGS-84 ellipsoid.
         Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
         Earth with radius a is used in stead of WGS-84.
+    R_Ee : 2d array
+        rotation matrix defining the axes of the coordinate frame E.
 
     Returns
     -------
@@ -613,6 +627,8 @@ def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137,
     f: real scalar, default WGS-84 ellipsoid.
         Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
         Earth with radius a is used in stead of WGS-84.
+    R_Ee : 2d array
+        rotation matrix defining the axes of the coordinate frame E.
 
     Returns
     -------
@@ -636,7 +652,7 @@ def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137,
     n_EA_E_and_n_EB_E2p_AB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E.
     """
     if R_Ee is None:
-        R_Ee = get_north_pole_axis_for_E_frame()
+        R_Ee = E_rotation()
 
     # Function 2. in Section 5.4 in Gade (2010):
     p_EA_E = n_EB_E2p_EB_E(n_EA_E, z_EA, a, f, R_Ee)
@@ -981,7 +997,7 @@ def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth,
 
     """
     if R_Ee is None:
-        R_Ee = get_north_pole_axis_for_E_frame()
+        R_Ee = E_rotation()
     # Step1: Find unit vectors for north and east:
     k_east_E = unit(cross(dot(R_Ee.T, [[1], [0], [0]]), n_EA_E, axis=0))
     k_north_E = cross(n_EA_E, k_east_E, axis=0)
