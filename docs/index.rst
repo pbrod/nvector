@@ -28,22 +28,6 @@ Official releases are available at: http://pypi.python.org/pypi/nvector.
 
 Official homepage are available at: http://www.navlab.net/nvector/
 
-
-Nvector is a suite of tools to solve geographical position calculations like:
-
-* Calculate the surface distance between two geographical positions.
-
-* Convert positions given in one reference frame into another reference frame.
-
-* Find the destination point given start point, azimuth/bearing and distance.
-
-* Find the mean position (center/midpoint) of several geographical positions.
-
-* Find the intersection between two paths.
-
-* Find the cross track distance between a path and a position.
-
-
    
 Contents
 ========

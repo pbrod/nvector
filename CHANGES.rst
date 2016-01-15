@@ -2,9 +2,9 @@
 Changelog
 =========
 
-Created with gitcommand: git shortlog v0.3.1..v0.4.1
+Created with gitcommand: git shortlog v0.1.3..v0.4.1
 
-Version 0.4.1, Januar 14, 2016
+Version 0.4.1, Januar 15, 2016
 ==============================
 
 pbrod (63):
@@ -31,7 +31,7 @@ pbrod (63):
       * updated __all__ variable
 
 
-Version 0.3.1, Januar 1, 2016
+Version 0.1.3, Januar 1, 2016
 =============================
 
 pbrod (31):

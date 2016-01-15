@@ -22,7 +22,8 @@ nvector
    :target: https://github.com/pbrod/Nvector
 
 
-Nvector is a suite of tools to solve geographical position calculations like:
+Nvector is a suite of tools written in Python to solve geographical position
+calculations like:
 
 * Calculate the surface distance between two geographical positions.
 
