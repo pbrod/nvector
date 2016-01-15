@@ -1,36 +1,57 @@
 =======
 nvector
 =======
+.. image:: https://badge.fury.io/py/Nvector.png
+    :target: https://pypi.python.org/pypi/Nvector/
 
-This is the documentation of **nvector**.
+.. image:: https://travis-ci.org/pbrod/Nvector.svg?branch=master
+    :target: https://travis-ci.org/pbrod/Nvector
 
-.. note::
+.. image:: https://readthedocs.org/projects/pip/badge/?version=latest
+    :target: http://Nvector.readthedocs.org/en/latest/
 
-    This is the main page of your project's `Sphinx <http://sphinx-doc.org/>`_
-    documentation. It is formatted in `reStructuredText
-    <http://sphinx-doc.org/rest.html>`__. Add additional pages by creating
-    rst-files in ``docs`` and adding them to the `toctree
-    <http://sphinx-doc.org/markup/toctree.html>`_ below. Use then
-    `references <http://sphinx-doc.org/markup/inline.html>`__ in order to link
-    them from this page, e.g. :ref:`authors <authors>` and :ref:`changes`.
-    It is also possible to refer to the documentation of other Python packages
-    with the `Python domain syntax
-    <http://sphinx-doc.org/domains.html#the-python-domain>`__. By default you
-    can reference the documentation of `Sphinx <http://sphinx.pocoo.org>`__,
-    `Python <http://docs.python.org/>`__, `matplotlib
-    <http://matplotlib.sourceforge.net>`__, `NumPy
-    <http://docs.scipy.org/doc/numpy>`__, `Scikit-Learn
-    <http://scikit-learn.org/stable>`__, `Pandas
-    <http://pandas.pydata.org/pandas-docs/stable>`__, `SciPy
-    <http://docs.scipy.org/doc/scipy/reference/>`__. You can add more by
-    extending the ``intersphinx_mapping`` in your Sphinx's ``conf.py``.
+.. image:: https://landscape.io/github/pbrod/Nvector/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/pbrod/Nvector/master
+   :alt: Code Health
 
+.. image:: https://coveralls.io/repos/pbrod/Nvector/badge.svg?branch=master&service=github
+   :target: https://coveralls.io/github/pbrod/Nvector?branch=master
+
+.. image:: https://img.shields.io/pypi/pyversions/Nvector.svg
+   :target: https://github.com/pbrod/Nvector
+
+This is the documentation of **nvector** |version| for Python.
+
+Bleeding edge available at: https://github.com/pbrod/nvector.
+
+Official releases are available at: http://pypi.python.org/pypi/nvector.
+
+Official homepage are available at: http://www.navlab.net/nvector/
+
+
+Nvector is a suite of tools to solve geographical position calculations like:
+
+* Calculate the surface distance between two geographical positions.
+
+* Convert positions given in one reference frame into another reference frame.
+
+* Find the destination point given start point, azimuth/bearing and distance.
+
+* Find the mean position (center/midpoint) of several geographical positions.
+
+* Find the intersection between two paths.
+
+* Find the cross track distance between a path and a position.
+
+
+   
 Contents
 ========
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
 
+	Introduction <src/overview>
    License <license>
    Authors <authors>
    Changelog <changes>
