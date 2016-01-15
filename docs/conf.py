@@ -66,7 +66,7 @@ copyright = u'2015, Norwegian Defence Research Establishment (FFI)'
 #
 
 # The full version, including alpha/beta/rc tags.
-release = '0.9.14'  # Is set by calling `setup.py docs`
+release = '0.4.1'  # Is set by calling `setup.py docs`
 # The short X.Y version.
 version = release.split('-', 1)[0]  # Is set by calling `setup.py docs`
 
