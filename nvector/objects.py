@@ -157,6 +157,7 @@ class FrameL(FrameN):
         frame L. The origin is directly beneath or above the vehicle (B), at
         Earth's surface (surface of ellipsoid model).
     wander_azimuth: real scalar
+        Angle between the x-axis of L and the north direction.
 
     The Cartesian frame is local and oriented Wander-azimuth-Down. This means
     that the z-axis is pointing down. Initially, the x-axis points towards
@@ -191,7 +192,7 @@ class FrameB(FrameN):
     Parameters
     ----------
     position: ECEFvector, GeoPoint or Nvector object
-        position of the the vehicle's reference point which also coincides with
+        position of the vehicle's reference point which also coincides with
         the origin of the frame B.
     yaw, pitch, roll: real scalars
         defining the orientation of frame B in [deg] or [rad].
