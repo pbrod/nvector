@@ -220,7 +220,7 @@ def deg(rad_angle):
 
 def rad(deg_angle):
     """
-    rad Converts angle in degrees to radians.
+    Converts angle in degrees to radians.
 
     Parameters
     ----------
