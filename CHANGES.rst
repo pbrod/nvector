@@ -7,7 +7,7 @@ Created with gitcommand: git shortlog v0.1.3..v0.4.1
 Version 0.4.1, Januar 15, 2016
 ==============================
 
-pbrod (63):
+pbrod (37):
 
       * Cosmetic updates
       * Updated README.rst
@@ -29,6 +29,10 @@ pbrod (63):
       * Added link to nvector on  pypi
       * Updated documentation fro FrameB, FrameE, FrameL and FrameN.
       * updated __all__ variable
+      * Added missing R_Ee to function n_EA_E_and_n_EB_E2azimuth + updated documentation
+      * Updated CHANGES.rst
+      * Updated conf.py
+      * Renamed info.py to _info.py
 
 
 Version 0.1.3, Januar 1, 2016
