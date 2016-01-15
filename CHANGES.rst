@@ -2,14 +2,14 @@
 Changelog
 =========
 
-Created with gitcommand: git shortlog v0.0.0..v0.1.1
+Created with gitcommand: git shortlog v0.3.1..v0.4.1
 
 Version 0.4.1, Januar 14, 2016
 ==============================
 
 pbrod (63):
 
-		* Cosmetic updates
+      * Cosmetic updates
       * Updated README.rst
       * updated docs and removed unused code
       * updated README.rst and .coveragerc
@@ -36,11 +36,10 @@ Version 0.3.1, Januar 1, 2016
 
 pbrod (31):
 
- 		* Refactored
+      * Refactored
       * Updated tests
       * Updated docs
       * Moved tests to nvector/tests
-      * Merge https://github.com/pbrod/Nvector
       * Updated .coverage     Added travis.yml, .landscape.yml
       * Deleted obsolete LICENSE
       * Updated README.rst
