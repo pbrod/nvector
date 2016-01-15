@@ -93,7 +93,20 @@ ELLIPSOID_IX = {'airy1858': 1, 'airymodified': 2, 'australiannational': 3,
 
 
 def select_ellipsoid(name):
+    """
+    Return semi-major axis (a), flattening (f) and name of ellipsoid
 
+    Parameter
+    ---------
+    name : string
+        name of ellipsoid. Valid options are:
+        'airy1858', 'airymodified', 'australiannational', 'everest1830',
+        'everestmodified', 'krassovsky', 'krassovsky1938', 'fisher1968',
+        'fisher1960', 'international', 'hayford', 'clarke1866', 'nad27',
+        'bessel', 'bessel1841', 'grs80', 'wgs84', 'nad83',
+        'sovietgeod.system1985', 'wgs72', 'hough1956', 'hough', 'nwl-9d',
+        'wgs66', 'southamerican1969',  'clarke1880'.
+    """
     msg = """
     Other Ellipsoids.'
     -----------------'
@@ -114,10 +127,12 @@ def select_ellipsoid(name):
     14) South American 1969
     15) Soviet Geod. System 1985
     16) WGS 72
-    17) User defined.
+    17) Clarke 1866    (NAD27)
+    18) GRS80 / WGS84  (NAD83)
     '
     Enter choice :
     """
+
     if name:
         option = ELLIPSOID_IX.get(name.lower().replace(' ', ''), name)
     else:
@@ -132,9 +147,9 @@ def E_rotation(axes='e'):
     Parameter
     ---------
     axes : 'e' or 'E'
-        defines the axes of the coordinate frame E. Options are:
-        'e': z-axis points to the North Pole and
-             x-axis points to the point where latitude = longitude = 0.
+        defines orientation of the axes of the coordinate frame E. Options are:
+        'e': z-axis points to the North Pole along the Earth's rotation axis,
+             x-axis points towards the point where latitude = longitude = 0.
              This choice is very common in many fields.
 
         'E': x-axis points to the North Pole along the Earth's rotation axis,
@@ -170,8 +185,7 @@ def E_rotation(axes='e'):
     The Journal of Navigation, Volume 63, Issue 03, pp 395-417, July 2010.
     <www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf>`_
     """
-    R_Ee = E_ROTATION_MATRIX[axes]
-    return R_Ee
+    return E_ROTATION_MATRIX[axes]
 
 
 def nthroot(x, n):
@@ -935,7 +949,8 @@ def euclidean_distance(n_EA_E, n_EB_E, radius=6371009.0):
     return d_AB
 
 
-def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0/298.257223563):
+def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0/298.257223563,
+                              R_Ee=None):
     """
     Return direction (azimuth) from A to B, relative to North:
 
@@ -949,17 +964,22 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0/298.257223563):
     f: real scalar, default WGS-84 ellipsoid.
         Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
         Earth with radius a is used in stead of WGS-84.
+    R_Ee : 2d array
+        rotation matrix defining the axes of the coordinate frame E.
 
     Returns
     -------
     azimuth: n, array
         Angle [rad] the line makes with a meridian, taken clockwise from north.
     """
+    if R_Ee is None:
+        R_Ee = E_rotation()
     # Step2: Find p_AB_E (delta decomposed in E).
-    p_AB_E = n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=a, f=f)
+    p_AB_E = n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=a, f=f,
+                                      R_Ee=R_Ee)
 
     # Step3: Find R_EN for position A:
-    R_EN = n_E2R_EN(n_EA_E)
+    R_EN = n_E2R_EN(n_EA_E, R_Ee=R_Ee)
 
     # Step4: Find p_AB_N
     p_AB_N = dot(R_EN.T, p_AB_E)
@@ -1036,4 +1056,3 @@ def test_docstrings():
 
 if __name__ == "__main__":
     test_docstrings()
-    # print('{:15.15f}'.format(nthroot(27., 3.)-0.0))

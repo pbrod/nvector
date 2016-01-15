@@ -16,14 +16,15 @@ pbrod (63):
       * Refactored out _check_frames
       * Refactored out _default_frame
       * Updated .coveragerc
-      
       * Added link to geographiclib
       * Updated external link
       * Updated documentation
       * Added figures to examples
       * Added GeoPath.interpolate + interpolation example 6
-      *Added links to FFI homepage.
-      * Updated documentation:     Added link to nvector toolbox for matlab     For each example added links to the more detailed explanation on the homepage
+      * Added links to FFI homepage.
+      * Updated documentation:    
+          - Added link to nvector toolbox for matlab     
+          - For each example added links to the more detailed explanation on the homepage
       * Updated link to nvector toolbox for matlab
       * Added link to nvector on  pypi
       * Updated documentation fro FrameB, FrameE, FrameL and FrameN.

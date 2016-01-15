@@ -258,7 +258,8 @@ class TestNvector(unittest.TestCase):
         # Step1: Convert distance in meter into distance in [rad]:
         distance_rad = s_AB / r_Earth
         # Step2: Find n_EB_E:
-        n_EB_E = n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth)
+        n_EB_E = n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad,
+                                                    azimuth)
 
         # When displaying the resulting position for humans, it is more
         # convenient to see lat, long:
