@@ -161,8 +161,8 @@ Most of the content is based on the following article:
 Thus this article should be cited in publications using this page or the
 downloaded program code.
 
+.. include:: ../docs/getting_started.rst
 
-.. include:: ./docs/getting_started.rst
 
 Note
 ====
