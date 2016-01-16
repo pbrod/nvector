@@ -1,2 +1,2 @@
-.. automodule:: nvector.info
+.. automodule:: nvector._info
    :members: __doc__

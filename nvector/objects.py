@@ -16,7 +16,98 @@ from nvector._core import (select_ellipsoid, rad, deg, zyx2R,
 import warnings
 
 __all__ = ['FrameE', 'FrameB', 'FrameL', 'FrameN', 'GeoPoint', 'GeoPath',
-           'Nvector', 'Pvector', 'ECEFvector', 'diff_positions']
+           'Nvector', 'ECEFvector', 'Pvector', 'diff_positions']
+
+
+_GEO_POINT_DOC = """
+    Geographical position given as latitude, longitude, depth in frame E
+
+    Parameters
+    ----------
+    latitude, longitude: real scalars or vectors of length n.
+        Geodetic latitude and longitude given in [rad or deg]
+    z: real scalar or vector of length n.
+        Depth(s) [m]  relative to the ellipsoid (depth = -height)
+    frame: FrameE object
+        reference ellipsoid. The default ellipsoid model used is WGS84, but
+        other ellipsoids/spheres might be specified.
+    degrees: bool
+        True if input are given in degrees otherwise radians are assumed.
+
+    Examples
+    --------
+    Solve geodesic problems.
+
+    The following illustrates its use
+
+        >>> import nvector as nv
+        >>> wgs84 = nv.FrameE(name='WGS84')
+
+    The geodesic inverse problem
+
+        >>> point1 = wgs84.GeoPoint(-41.32, 174.81, degrees=True))
+        >>> point2 = wgs84.GeoPoint(40.96, -5.50, degrees=True)
+        >>> s12, az1, az2 = point1.distance_and_azimuth(point2, degrees=True)
+        >>> 's12 = {:5.2f}, az1 = {:5.2f}, az2 = {:5.2f}'.format(s12, az1, az2)
+        's12 = 19959679.27, az1 = 161.07, az2 = 18.83'
+
+    The geodesic direct problem
+
+        >>> point1 = wgs84.GeoPoint(40.6, -73.8, degrees=True)
+        >>> az1, distance = 45, 10000e3
+        >>> point2, az2 = point1.geo_point(distance, az1, degrees=True)
+        >>> lat2, lon2 = point2.latitude_deg, point2.longitude_deg
+        >>> msg = 'lat2 = {:5.2f}, lon2 = {:5.2f}, az2 = {:5.2f}'
+        >>> msg.format(lat2, lon2, az2)
+        'lat2 = 32.64, lon2 = 49.01, az2 = 140.37'
+
+    """
+
+_NVECTOR_DOC = """
+    Geographical position given as n-vector and depth in frame E
+
+    Parameters
+    ----------
+    normal: 3 x n array
+        n-vector(s) [no unit] decomposed in E.
+    z: real scalar or vector of length n.
+        Depth(s) [m]  relative to the ellipsoid (depth = -height)
+    frame: FrameE object
+        reference ellipsoid. The default ellipsoid model used is WGS84, but
+        other ellipsoids/spheres might be specified.
+
+    Notes
+    -----
+    The position of B (typically body) relative to E (typically Earth) is
+    given into this function as n-vector, n_EB_E and a depth, z relative to the
+    ellipsiod.
+
+    See also
+    --------
+    GeoPoint, ECEFvector, Pvector
+    """
+
+_ECEFVECTOR_DOC = """
+    Geographical position given as Cartesian position vector in frame E
+
+    Parameters
+    ----------
+    pvector: 3 x n array
+        Cartesian position vector(s) [m] from E to B, decomposed in E.
+    frame: FrameE object
+        reference ellipsoid. The default ellipsoid model used is WGS84, but
+        other ellipsoids/spheres might be specified.
+
+    Notes
+    -----
+    The position of B (typically body) relative to E (typically Earth) is
+    given into this function as p-vector, p_EB_E relative to the center of the
+    frame.
+
+    See also
+    --------
+    GeoPoint, ECEFvector, Pvector
+    """
 
 
 class _BaseFrame(object):
@@ -32,7 +123,7 @@ class _BaseFrame(object):
 class FrameE(_BaseFrame):
 
     """
-    E frame
+    Earth-fixed frame
 
     Parameters
     ----------
@@ -48,9 +139,13 @@ class FrameE(_BaseFrame):
         that the orientation of the axis is such that:
         z-axis -> North Pole, x-axis -> Latitude=Longitude=0.
 
+    Notes
+    -----
     The frame is Earth-fixed (rotates and moves with the Earth) where the
     origin coincides with Earth's centre (geometrical centre of ellipsoid
     model).
+
+    Example
 
     """
     def __init__(self, a=None, f=None, name='WGS84', axes='e'):
@@ -68,6 +163,35 @@ class FrameE(_BaseFrame):
 
     def inverse(self, lat_a, lon_a, lat_b, lon_b, z=0, long_unroll=False,
                 degrees=False):
+        """
+        Return ellipsoidal distance between positions as well as the direction.
+
+        Parameters
+        ----------
+        lat_a, lon_a:  real scalars
+            Latitude and longitude of position a.
+        lat_b, lon_b:  real scalars
+            Latitude and longitude of position b.
+        z : real scalar
+            depth relative to Earth ellipsoid.
+        degrees: bool
+            angles are given in degrees if True otherwise in radians.
+
+        Returns
+        -------
+        s_ab: real scalar
+            ellipsoidal distance [m] between position A and B.
+        azimuth_a, azimuth_b
+            direction [rad or deg] of line at position A and B relative to
+            North, respectively.
+
+        References
+        ----------
+        C. F. F. Karney, Algorithms for geodesics, J. Geodesy 87(1), 43-55
+
+        `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
+
+        """
 
         outmask = _Geodesic.STANDARD
         if long_unroll:
@@ -83,6 +207,36 @@ class FrameE(_BaseFrame):
 
     def direct(self, lat_a, lon_a, azimuth, distance, z=0, long_unroll=False,
                degrees=False):
+        """
+        Return position B computed from position A, distance and azimuth.
+
+        Parameters
+        ----------
+        lat_a, lon_a:  real scalars
+            Latitude and longitude [rad or deg] of position a.
+        azimuth_a:
+            azimuth [rad or deg] of line at position A.
+        distance: real scalar
+            ellipsoidal distance [m] between position A and B.
+        z : real scalar
+            depth relative to Earth ellipsoid.
+        degrees: bool
+            angles are given in degrees if True otherwise in radians.
+
+        Returns
+        -------
+        lat_b, lon_b:  real scalars
+            Latitude and longitude of position b.
+        azimuth_b
+            azimuth [rad or deg] of line at position B.
+
+        References
+        ----------
+        C. F. F. Karney, Algorithms for geodesics, J. Geodesy 87(1), 43-55
+
+        `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
+        """
+
         geo = _Geodesic(self.a-z, self.f)
         outmask = _Geodesic.STANDARD
         if long_unroll:
@@ -96,14 +250,17 @@ class FrameE(_BaseFrame):
         return latb, lonb, azimuth_b
 
     def GeoPoint(self, *args, **kwds):
+        __doc__ = _GEO_POINT_DOC  # @ReservedAssignment
         kwds.pop('frame', None)
         return GeoPoint(*args, frame=self, **kwds)
 
     def Nvector(self, *args, **kwds):
+        __doc__ = _NVECTOR_DOC  # @ReservedAssignment
         kwds.pop('frame', None)
         return Nvector(*args, frame=self, **kwds)
 
     def ECEFvector(self, *args, **kwds):
+        __doc__ = _ECEFVECTOR_DOC  # @UndefinedVariable
         kwds.pop('frame', None)
         return ECEFvector(*args, frame=self, **kwds)
 
@@ -111,15 +268,17 @@ class FrameE(_BaseFrame):
 class FrameN(_BaseFrame):
 
     """
-    N frame
+    North-East-Down frame
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     position: ECEFvector, GeoPoint or Nvector object
         position of the vehicle (B) which also defines the origin of the local
         frame N. The origin is directly beneath or above the vehicle (B), at
         Earth's surface (surface of ellipsoid model).
 
+    Notes
+    -----
     The Cartesian frame is local and oriented North-East-Down, i.e.,
     the x-axis points towards north, the y-axis points towards east (both are
     horizontal), and the z-axis is pointing down.
@@ -130,6 +289,38 @@ class FrameN(_BaseFrame):
     poles. The poles are thus singularities and the direction of the
     x- and y-axes are not defined here. Hence, this coordinate frame is
     NOT SUITABLE for general calculations.
+
+    Examples
+    --------
+    .. image:: http://www.navlab.net/images/ex1img.png
+
+    Given two positions, A and B as latitudes, longitudes and depths relative
+    to Earth, E.
+
+    Find the exact vector between the two positions, given in meters north,
+    east, and down.
+
+    Solution:
+        >>> import numpy as np
+        >>> import nvector as nv
+        >>> wgs84 = nv.FrameE(name='WGS84')
+        >>> pointA = wgs84.GeoPoint(latitude=1, longitude=2, z=3, degrees=True)
+        >>> pointB = wgs84.GeoPoint(latitude=4, longitude=5, z=6, degrees=True)
+
+    Step 1: Find p_AB_E (delta decomposed in E).
+        >>> p_AB_E = nv.diff_positions(pointA, pointB)
+
+    Step 2: Find p_AB_N (delta decomposed in N).
+        >>> frame_N = nv.FrameN(pointA)
+        >>> p_AB_N = p_AB_E.change_frame(frame_N)
+        >>> p_AB_N = p_AB_N.pvector.ravel()
+        >>> valtxt = '{0:8.2f}, {1:8.2f}, {2:8.2f}'.format(*p_AB_N)
+        >>> 'Ex1: delta north, east, down = {}'.format(valtxt)
+        'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
+
+    See also
+    --------
+    Example 1 at http://www.navlab.net/nvector/#example_1
     """
     def __init__(self, position):
         nvector = position.to_nvector()
@@ -159,6 +350,8 @@ class FrameL(FrameN):
     wander_azimuth: real scalar
         Angle between the x-axis of L and the north direction.
 
+    Notes
+    -----
     The Cartesian frame is local and oriented Wander-azimuth-Down. This means
     that the z-axis is pointing down. Initially, the x-axis points towards
     north, and the y-axis points towards east, but as the vehicle moves they
@@ -187,7 +380,7 @@ class FrameL(FrameN):
 class FrameB(FrameN):
 
     """
-    B frame
+    Body frame
 
     Parameters
     ----------
@@ -199,6 +392,8 @@ class FrameB(FrameN):
     degrees : bool
         if True yaw, pitch, roll are given in degrees otherwise in radians
 
+    Notes
+    -----
     The frame is fixed to the vehicle where the x-axis points forward, the
     y-axis to the right (starboard) and the z-axis in the vehicle's down
     direction.
@@ -239,48 +434,7 @@ def _default_frame(frame):
 
 
 class GeoPoint(object):
-
-    """
-    Geographical position given as latitude, longitude, depth in frame E
-
-    Parameters
-    ----------
-    latitude, longitude: real scalars or vectors of length n.
-        Geodetic latitude and longitude given in [rad or deg]
-    z: real scalar or vector of length n.
-        Depth(s) [m]  relative to the ellipsoid (depth = -height)
-    frame: FrameE object
-        reference ellipsoid. The default ellipsoid model used is WGS84, but
-        other ellipsoids/spheres might be specified.
-    degrees: bool
-        True if input are given in degrees otherwise radians are assumed.
-
-    Examples
-    --------
-    Solve geodesic problems.
-
-    The following illustrates its use
-
-
-    >>> import nvector as nv
-    >>> wgs84 = nv.FrameE(name='WGS84')
-
-    # The geodesic inverse problem
-    >>> point1 = wgs84.GeoPoint(-41.32, 174.81, degrees=True))
-    >>> point2 = wgs84.GeoPoint(40.96, -5.50, degrees=True)
-    >>> s12, az1, az2 = point1.distance_and_azimuth(point2, degrees=True)
-    >>> 's12 = {:5.2f}, az1 = {:5.2f}, az2 = {:5.2f}'.format(s12, az1, az2)
-    's12 = 19959679.27, az1 = 161.07, az2 = 18.83'
-
-    # The geodesic direct problem
-    >>> point1 = wgs84.GeoPoint(40.6, -73.8, degrees=True)
-    >>> az1, distance = 45, 10000e3
-    >>> point2, az2 = point1.geo_point(distance, az1, degrees=True)
-    >>> lat2, lon2 = point2.latitude_deg, point2.longitude_deg
-    >>> 'lat2 = {:5.2f}, lon2 = {:5.2f}, az2 = {:5.2f}'.format(lat2, lon2, az2)
-    'lat2 = 32.64, lon2 = 49.01, az2 = 140.37'
-
-    """
+    __doc__ = _GEO_POINT_DOC
 
     def __init__(self, latitude, longitude, z=0, frame=None, degrees=False):
         if degrees:
@@ -321,6 +475,9 @@ class GeoPoint(object):
         return Nvector(n_E, self.z, self.frame)
 
     def to_ecef_vector(self):
+        """
+        Converts latitude and longitude to ECEF-vector.
+        """
         return self.to_nvector().to_ecef_vector()
 
     def geo_point(self, distance, azimuth, long_unroll=False, degrees=False):
@@ -388,28 +545,8 @@ class GeoPoint(object):
 
 
 class Nvector(object):
+    __doc__ = _NVECTOR_DOC
 
-    """
-    Geographical position given as n-vector and depth in frame E
-
-    Parameters
-    ----------
-    normal: 3 x n array
-        n-vector(s) [no unit] decomposed in E.
-    z: real scalar or vector of length n.
-        Depth(s) [m]  relative to the ellipsoid (depth = -height)
-    frame: FrameE object
-        reference ellipsoid. The default ellipsoid model used is WGS84, but
-        other ellipsoids/spheres might be specified.
-
-    The position of B (typically body) relative to E (typically Earth) is
-    given into this function as n-vector, n_EB_E and a depth, z relative to the
-    ellipsiod.
-
-    See also
-    --------
-    GeoPoint, ECEFvector, Pvector
-    """
     def __init__(self, normal, z=0, frame=None):
         self.normal = normal
         self.z = z
@@ -455,7 +592,7 @@ class Nvector(object):
 
     def mean_horizontal_position(self):
         """
-        Return the n-vector of the horizontal mean position.
+        Return horizontal mean position of the n-vectors.
 
         Returns
         -------
@@ -511,7 +648,7 @@ class Nvector(object):
 
 def diff_positions(pointA, pointB):
     """
-    Return delta position from two positions A and B.
+    Return delta vector from positions A to B.
 
     Parameters
     ----------
@@ -523,9 +660,39 @@ def diff_positions(pointA, pointB):
     p_AB_E:  ECEFvector
         Cartesian position vector(s) from A to B, decomposed in E.
 
+    Notes
+    -----
     The calculation is excact, taking the ellipsity of the Earth into account.
     It is also non-singular as both n-vector and p-vector are non-singular
     (except for the center of the Earth).
+
+    Examples
+    --------
+    .. image:: http://www.navlab.net/images/ex1img.png
+
+    Given two positions, A and B as latitudes, longitudes and depths relative
+    to Earth, E.
+
+    Find the exact vector between the two positions, given in meters north,
+    east, and down.
+
+    Solution:
+        >>> import numpy as np
+        >>> import nvector as nv
+        >>> wgs84 = nv.FrameE(name='WGS84')
+        >>> pointA = wgs84.GeoPoint(latitude=1, longitude=2, z=3, degrees=True)
+        >>> pointB = wgs84.GeoPoint(latitude=4, longitude=5, z=6, degrees=True)
+
+    Step 1: Find p_AB_E (delta decomposed in E).
+        >>> p_AB_E = nv.diff_positions(pointA, pointB)
+
+    Step 2: Find p_AB_N (delta decomposed in N).
+        >>> frame_N = nv.FrameN(pointA)
+        >>> p_AB_N = p_AB_E.change_frame(frame_N)
+        >>> p_AB_N = p_AB_N.pvector.ravel()
+        >>> valtxt = '{0:8.2f}, {1:8.2f}, {2:8.2f}'.format(*p_AB_N)
+        >>> 'Ex1: delta north, east, down = {}'.format(valtxt)
+        'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
 
     See also
     --------
@@ -557,25 +724,8 @@ class Pvector(object):
 
 
 class ECEFvector(object):
-    """
-    Geographical position given as Cartesian position vector in frame E
+    __doc__ = _ECEFVECTOR_DOC
 
-    Parameters
-    ----------
-    pvector: 3 x n array
-        Cartesian position vector(s) [m] from E to B, decomposed in E.
-    frame: FrameE object
-        reference ellipsoid. The default ellipsoid model used is WGS84, but
-        other ellipsoids/spheres might be specified.
-
-    The position of B (typically body) relative to E (typically Earth) is
-    given into this function as p-vector, p_EB_E relative to the center of the
-    frame.
-
-    See also
-    --------
-    GeoPoint, ECEFvector, Pvector
-    """
     def __init__(self, pvector, frame=None):
         self.pvector = pvector
         self.frame = _default_frame(frame)
@@ -629,6 +779,8 @@ class ECEFvector(object):
         n_EB_E:  Nvector object
             n-vector(s) [no unit] of position B, decomposed in E.
 
+        Notes
+        -----
         The calculation is excact, taking the ellipsity of the Earth into
         account. It is also non-singular as both n-vector and p-vector are
         non-singular (except for the center of the Earth).
@@ -659,6 +811,111 @@ class GeoPath(object):
     """
     Geographical path between two points in Frame E
 
+    Parameters
+    ----------
+     point1, point2: Nvector, GeoPoint or ECEFvector objects
+        The path is defined by the line between position 1 and 2, decomposed
+        in E.
+
+    Examples
+    --------
+
+    **Example 5 "Surface distance"**
+
+    .. image http://www.navlab.net/images/ex5img.png
+
+    Find the surface distance sAB (i.e. great circle distance) between
+    positions A and B. Use Earth radius 6371e3 m.
+
+    Great circle solution:
+        >>> import nvector as nv
+        >>> frame_E = nv.FrameE(a=6371e3, f=0)
+        >>> positionA = frame_E.GeoPoint(88, 0, degrees=True)
+        >>> positionB = frame_E.GeoPoint(89, -170, degrees=True)
+
+        >>> path = nv.GeoPath(positionA, positionB)
+        >>> s_AB2 = path.track_distance(method='greatcircle').ravel()
+        >>> d_AB2 = path.track_distance(method='euclidean').ravel()
+        >>> msg.format(s_AB2[0] / 1000, d_AB2[0] / 1000)
+        'Ex5: Great circle and Euclidean distance = 332.46 km, 332.42 km'
+
+    See also Example 5 at http://www.navlab.net/nvector/#example_5
+
+    **Example 6 "Interpolated position"**
+
+    .. image http://www.navlab.net/images/ex6img.png
+
+    Given the position of B at time t0 and t1, n_EB_E(t0) and n_EB_E(t1).
+
+    Find an interpolated position at time ti, n_EB_E(ti).
+
+    Solution:
+        >>> import nvector as nv
+        >>> wgs84 = nv.FrameE(name='WGS84')
+        >>> path = nv.GeoPath(wgs84.GeoPoint(89, 0, degrees=True),
+        ...                   wgs84.GeoPoint(89, 180, degrees=True))
+        >>> t0 = 10.
+        >>> t1 = 20.
+        >>> ti = 16.  # time of interpolation
+        >>> ti_n = (ti - t0) / (t1 - t0) # normalized time of interpolation
+        >>> g_EB_E_ti = path.interpolate(ti_n).to_geo_point()
+        >>> lat_ti, lon_ti = g_EB_E_ti.latitude_deg, g_EB_E_ti.longitude_deg
+        >>> msg = 'Ex6, Interpolated position: lat, long = {} deg, {} deg'
+        >>> msg.format(lat_ti, lon_ti)
+        'Ex6, Interpolated position: lat, long = [ 89.7999805] deg, [ 180.] deg'
+
+    See also Example 6 at http://www.navlab.net/nvector/#example_6
+
+    **Example 9 "Intersection of two paths"**
+
+    Define a path from two given positions (at the surface of a spherical
+    Earth), as the great circle that goes through the two points.
+
+    Find the position C where the two paths A and B intersect.
+
+    Solution:
+        >>> import nvector as nv~
+        >>> pointA1 = nv.GeoPoint(10, 20, degrees=True)
+        >>> pointA2 = nv.GeoPoint(30, 40, degrees=True)
+        >>> pointB1 = nv.GeoPoint(50, 60, degrees=True)
+        >>> pointB2 = nv.GeoPoint(70, 80, degrees=True)
+        >>> pathA = nv.GeoPath(pointA1, pointA2)
+        >>> pathB = nv.GeoPath(pointB1, pointB2)
+        >>> pointC = pathA.intersection(pathB)
+        >>> lat, lon = pointC.latitude_deg, pointC.longitude_deg
+        >>> msg = 'Ex9, Intersection: lat, long = {:4.2f}, {:4.2f} deg'
+        >>> msg.format(lat[0], lon[0])
+        'Ex9, Intersection: lat, long = 40.32, 55.90 deg'
+
+    See also Example 9 at http://www.navlab.net/nvector/#example_9
+
+    **Example 10: "Cross track distance"**
+
+    .. image http://www.navlab.net/images/ex10img.png
+
+    Path A is given by the two positions A1 and A2.
+
+    Find the cross track distance sxt between the path A (i.e. the great circle
+    through A1 and A2) and the position B (i.e. the shortest distance at the
+    surface, between the great circle and B).
+
+    Also find the Euclidean distance dxt between B and the plane defined by the
+    great circle. Use Earth radius 6371e3.
+
+    Solution:
+        >>> import nvector as nv
+        >>> frame = nv.FrameE(a=6371e3, f=0)
+        >>> pointA1 = frame.GeoPoint(0, 0, degrees=True)
+        >>> pointA2 = frame.GeoPoint(10, 0, degrees=True)
+        >>> pointB = frame.GeoPoint(1, 0.1, degrees=True)
+        >>> pathA = nv.GeoPath(pointA1, pointA2)
+        >>> s_xt = pathA.cross_track_distance(pointB, method='greatcircle').ravel()
+        >>> d_xt = pathA.cross_track_distance(pointB, method='euclidean').ravel()
+        >>> val_txt = '{:4.2f} km, {:4.2f} km'.format(s_xt[0]/1000, d_xt[0]/1000)
+        >>> 'Ex10: Cross track distance: s_xt, d_xt = {}'.format(val_txt)
+        'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
+
+    See also Example 10 at http://www.navlab.net/nvector/#example_10
     """
     def __init__(self, point1, point2):
         self.point1 = point1
@@ -682,11 +939,11 @@ class GeoPath(object):
         return cross(n_EA1_E, n_EA2_E, axis=0)
 
     def _get_average_radius(self):
-#        n1 = self.point1.to_nvector()
-#        n2 = self.point2.to_nvector()
-#         n_EM_E = mean_horizontal_position(np.hstack((n1.normal, n2.normal)))
-#         p_EM_E = n1.frame.Nvector(n_EM_E).to_ecef_vector()
-#         radius = norm(p_EM_E.pvector, axis=0)
+        # n1 = self.point1.to_nvector()
+        # n2 = self.point2.to_nvector()
+        # n_EM_E = mean_horizontal_position(np.hstack((n1.normal, n2.normal)))
+        # p_EM_E = n1.frame.Nvector(n_EM_E).to_ecef_vector()
+        # radius = norm(p_EM_E.pvector, axis=0)
         p_E1_E = self.point1.to_ecef_vector()
         p_E2_E = self.point2.to_ecef_vector()
         radius = (norm(p_E1_E.pvector, axis=0) +
@@ -724,6 +981,14 @@ class GeoPath(object):
     def track_distance(self, method='greatcircle', radius=None):
         """
         Return the distance of the path.
+
+        Parameters
+        ----------
+        method: string
+            'greatcircle':
+            'euclidean'
+        radius: real scalar
+            radius of sphere
         """
         if radius is None:
             radius = self._get_average_radius()

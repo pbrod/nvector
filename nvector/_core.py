@@ -42,16 +42,18 @@ from numpy import rad2deg, deg2rad, arctan2, sin, cos, array, cross, dot, sqrt
 from numpy.linalg import norm
 import warnings
 
-__all__ = ['unit', 'deg', 'rad', 'lat_lon2n_E', 'n_E2lat_lon',
+__all__ = ['select_ellipsoid', 'E_rotation',
+           'unit', 'deg', 'rad', 'nthroot',
+           'lat_lon2n_E', 'n_E2lat_lon',
            'n_EA_E_and_n_EB_E2p_AB_E', 'n_EA_E_and_p_AB_E2n_EB_E',
            'p_EB_E2n_EB_E', 'n_EB_E2p_EB_E',
-           'E_rotation',
-           'great_circle_distance', 'euclidean_distance',
            'n_EA_E_distance_and_azimuth2n_EB_E',
            'n_EA_E_and_n_EB_E2azimuth',
+           'great_circle_distance', 'euclidean_distance',
            'mean_horizontal_position',
            'R2xyz', 'xyz2R', 'R2zyx', 'zyx2R',
-           'n_E_and_wa2R_EL', 'n_E2R_EN', 'R_EL2n_E', 'R_EN2n_E']
+           'n_E_and_wa2R_EL', 'n_E2R_EN', 'R_EL2n_E', 'R_EN2n_E'
+           ]
 
 E_ROTATION_MATRIX = dict(e=array([[0, 0, 1],
                                   [0, 1, 0],
@@ -96,8 +98,8 @@ def select_ellipsoid(name):
     """
     Return semi-major axis (a), flattening (f) and name of ellipsoid
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     name : string
         name of ellipsoid. Valid options are:
         'airy1858', 'airymodified', 'australiannational', 'everest1830',
@@ -106,6 +108,12 @@ def select_ellipsoid(name):
         'bessel', 'bessel1841', 'grs80', 'wgs84', 'nad83',
         'sovietgeod.system1985', 'wgs72', 'hough1956', 'hough', 'nwl-9d',
         'wgs66', 'southamerican1969',  'clarke1880'.
+
+    Examples
+    --------
+    >>> import nvector as nv
+    >>> nv.select_ellipsoid(name='wgs84')
+    (6378137.0, 0.0033528106647474805, 'GRS80 / WGS84  (NAD83)')
     """
     msg = """
     Other Ellipsoids.'
@@ -144,18 +152,16 @@ def E_rotation(axes='e'):
     """
     Return rotation matrix R_Ee defining the axes of the coordinate frame E.
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     axes : 'e' or 'E'
         defines orientation of the axes of the coordinate frame E. Options are:
         'e': z-axis points to the North Pole along the Earth's rotation axis,
              x-axis points towards the point where latitude = longitude = 0.
              This choice is very common in many fields.
-
         'E': x-axis points to the North Pole along the Earth's rotation axis,
              y-axis points towards longitude +90deg (east) and latitude = 0.
              (the yz-plane coincides with the equatorial plane).
-
              This choice of axis ensures that at zero latitude and longitude,
              frame N (North-East-Down) has the same orientation as frame E.
              If roll/pitch/yaw are zero, also frame B (forward-starboard-down)
@@ -167,17 +173,22 @@ def E_rotation(axes='e'):
     -------
     R_Ee : 2d array
         rotation matrix defining the axes of the coordinate frame E as
-        described in Table 2 in Gade (2010):
-        R_Ee=[0 0 1
-              0 1 0
-             -1 0 0]        for axes=='e'
-
-        R_Ee=[1 0 0
-              0 1 0
-              0 0 1]        for axes=='E'
+        described in Table 2 in Gade (2010)
 
     R_Ee controls the axes of the coordinate frame E (Earth-Centred,
     Earth-Fixed, ECEF) used by the other functions in this library
+
+    Examples
+    --------
+    >>> import nvector as nv
+    >>> nv.E_rotation(axes='e')
+    array([[ 0,  0,  1],
+           [ 0,  1,  0],
+           [-1,  0,  0]])
+    >>> nv.E_rotation(axes='E')
+    array([[ 1.,  0.,  0.],
+           [ 0.,  1.,  0.],
+           [ 0.,  0.,  1.]])
 
     Reference
     ---------
@@ -191,6 +202,16 @@ def E_rotation(axes='e'):
 def nthroot(x, n):
     """
     Return the n'th root of x to machine precision
+
+    Parameters
+    x, n
+
+    Examples
+    --------
+    >>> import nvector as nv
+    >>> nv.nthroot(27.0, 3)
+    array(3.0)
+
     """
     y = x**(1./n)
     return np.where((x != 0) & (_EPS * np.abs(x) < 1),
@@ -241,7 +262,7 @@ def rad(deg_angle):
 
 def unit(vector, norm_zero_vector=1):
     """
-    Return input vector of unit length, i.e. norm==1.
+    Convert input vector to a vector of unit length.
 
     Parameters
     ----------
@@ -252,6 +273,15 @@ def unit(vector, norm_zero_vector=1):
     -------
     unitvector : 3 x m array
         normalized unitvector(s) along axis==0.
+
+    Examples
+    --------
+    >>> import nvector as nv
+    >>> nv.unit([[1],[1],[1]])
+    array([[ 0.57735027],
+           [ 0.57735027],
+           [ 0.57735027]])
+
     """
     current_norm = norm(vector, axis=0)
     unit_vector = vector / current_norm
@@ -459,6 +489,8 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0/298.257223563, R_Ee=None):
     p_EB_E:  3 x n array
         Cartesian position vector(s) from E to B, decomposed in E.
 
+    Notes
+    -----
     The position of B (typically body) relative to E (typically Earth) is
     given into this function as n-vector, n_EB_E. The function converts
     to cartesian position vector ("ECEF-vector"), p_EB_E, in meters.
@@ -521,6 +553,9 @@ def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0/298.257223563, R_Ee=None):
     depth:  1 x n array
         Depth(s) [m] of system B, relative to the ellipsoid (depth = -height)
 
+
+    Notes
+    -----
     The position of B (typically body) relative to E (typically Earth) is
     given into this function as cartesian position vector p_EB_E, in meters.
     ("ECEF-vector"). The function converts to n-vector, n_EB_E and its
@@ -580,7 +615,7 @@ def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0/298.257223563, R_Ee=None):
 def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
                              f=1.0/298.257223563, R_Ee=None):
     """
-    From two positions A and B, finds the delta position.
+    Return the delta vector from position A to B.
 
     Parameters
     ----------
@@ -602,6 +637,8 @@ def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
     p_AB_E:  3 x n array
         Cartesian position vector(s) from A to B, decomposed in E.
 
+    Notes
+    -----
     The n-vectors for positions A (n_EA_E) and B (n_EB_E) are given. The
     output is the delta vector from A to B (p_AB_E).
     The calculation is excact, taking the ellipsity of the Earth into account.
@@ -625,7 +662,7 @@ def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
 def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137,
                              f=1.0/298.257223563, R_Ee=None):
     """
-    From position A and delta, finds position B.
+    Return position B from position A and delta.
 
     Parameters
     ----------
@@ -651,6 +688,8 @@ def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137,
         Depth(s) [m] of system B, relative to the ellipsoid.
         (z_EB = -height)
 
+    Notes
+    -----
     The n-vector for position A (n_EA_E) and the position-vector from position
     A to position B (p_AB_E) are given. The output is the n-vector of position
     B (n_EB_E) and depth of B (z_EB).
@@ -690,6 +729,8 @@ def R2xyz(R_AB):
     x, y, z: real scalars
         Angles [rad] of rotation about new axes.
 
+    Notes
+    -----
     The x, y, z angles are called Euler angles or Tait-Bryan angles and are
     defined by the following procedure of successive rotations:
     Given two arbitrary coordinate frames A and B. Consider a temporary frame
@@ -737,6 +778,8 @@ def R2zyx(R_AB):
     z, y, x: real scalars
         Angles [rad] of rotation about new axes.
 
+    Notes
+    -----
     The z, x, y angles are called Euler angles or Tait-Bryan angles and are
     defined by the following procedure of successive rotations:
     Given two arbitrary coordinate frames A and B. Consider a temporary frame
@@ -834,6 +877,8 @@ def xyz2R(x, y, z):
         relation between a vector v decomposed in A and B is given by:
         v_A = np.dot(R_AB, v_B)
 
+    Notes
+    -----
     The rotation matrix R_AB is created based on 3 angles x,y,z about new axes
     (intrinsic) in the order x-y-z. The angles are called Euler angles or
     Tait-Bryan angles and are defined by the following procedure of successive
@@ -879,6 +924,8 @@ def zyx2R(z, y, x):
         relation between a vector v decomposed in A and B is given by:
         v_A = np.dot(R_AB, v_B)
 
+    Notes
+    -----
     The rotation matrix R_AB is created based on 3 angles
     z,y,x about new axes (intrinsic) in the order z-y-x. The angles are called
     Euler angles or Tait-Bryan angles and are defined by the following
@@ -952,7 +999,7 @@ def euclidean_distance(n_EA_E, n_EB_E, radius=6371009.0):
 def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0/298.257223563,
                               R_Ee=None):
     """
-    Return direction (azimuth) from A to B, relative to North:
+    Return azimuth from A to B, relative to North:
 
     Parameters
     ----------
@@ -998,7 +1045,7 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0/298.257223563,
 def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth,
                                        R_Ee=None):
     """
-    Return position B from direction (azimuth) and distance from position A
+    Return position B from azimuth and distance from position A
 
     Parameters
     ----------
