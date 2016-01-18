@@ -1,176 +1,15 @@
-=======
-nvector
-=======
+'''
+Created on 18. jan. 2016
 
-.. image:: https://badge.fury.io/py/Nvector.png
-    :target: https://pypi.python.org/pypi/Nvector/
+@author: pab
+'''
 
-.. image:: https://travis-ci.org/pbrod/Nvector.svg?branch=master
-    :target: https://travis-ci.org/pbrod/Nvector
-
-.. image:: https://readthedocs.org/projects/pip/badge/?version=latest
-    :target: http://Nvector.readthedocs.org/en/latest/
-
-.. image:: https://landscape.io/github/pbrod/Nvector/master/landscape.svg?style=flat
-   :target: https://landscape.io/github/pbrod/Nvector/master
-   :alt: Code Health
-
-.. image:: https://coveralls.io/repos/pbrod/Nvector/badge.svg?branch=master&service=github
-   :target: https://coveralls.io/github/pbrod/Nvector?branch=master
-
-.. image:: https://img.shields.io/pypi/pyversions/Nvector.svg
-   :target: https://github.com/pbrod/Nvector
+see_example_at_navlab = """See also `Example {0} at www.navlab.net
+    <http://www.navlab.net/nvector/#example_{0}>`_
+"""
 
 
-Nvector is a suite of tools written in Python to solve geographical position
-calculations like:
-
-* Calculate the surface distance between two geographical positions.
-
-* Convert positions given in one reference frame into another reference frame.
-
-* Find the destination point given start point, azimuth/bearing and distance.
-
-* Find the mean position (center/midpoint) of several geographical positions.
-
-* Find the intersection between two paths.
-
-* Find the cross track distance between a path and a position.
-
-
-Description
-===========
-
-In this library, we represent position with an "n-vector",  which
-is the normal vector to the Earth model (the same reference ellipsoid that is
-used for latitude and longitude). When using n-vector, all Earth-positions are
-treated equally, and there is no need to worry about singularities or
-discontinuities. An additional benefit with using n-vector is that many
-position calculations can be solved with simple vector algebra
-(e.g. dot product and cross product).
-
-Converting between n-vector and latitude/longitude is unambiguous and easy
-using the provided functions.
-
-n_E is n-vector in the program code, while in documents we use nE. E denotes
-an Earth-fixed coordinate frame, and it indicates that the three components of
-n-vector are along the three axes of E. More details about the notation and
-reference frames can be found here:
-
-http://www.navlab.net/nvector/
-
-http://www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf
-
-
-Methods
-~~~~~~~
-
-The core functions provided are:
-
-- **lat_lon2n_E:**
-    Converts latitude and longitude to n-vector.
-- **n_E2lat_lon:**
-    Converts n-vector to latitude and longitude.
-- **n_EB_E2p_EB_E:**
-    Converts n-vector to Cartesian position vector in meters.
-- **p_EB_E2n_EB_E:**
-    Converts Cartesian position vector in meters to n-vector.
-- **n_EA_E_and_n_EB_E2p_AB_E:**
-    From two positions A and B, finds the delta position.
-- **n_EA_E_and_p_AB_E2n_EB_E:** 
-    From position A and delta, finds position B.
-
-
-Nvector also provide an object oriented interface.
-
-- **FrameE:**
-    z-axis -> North Pole, x-axis -> Latitude=Longitude=0.
-    Origo = Earth's centre.
-- **FrameN:**
-    x-axis -> North, y-axis -> East, z-axis -> down.
-    Origo = Beneath/above Body at Earth's surface.
-- **FrameL:**
-    x-axis, y-axis -> wander azimuth, z-axis -> down.
-    Origo = Beneath/above Body at Earth's surface.
-- **FrameB:**
-    x-axis -> forward, y-axis -> starboard, z-axis -> body down.
-    Origo = Body's centre.
-- **ECEFvector:**
-    Geographical position given as Cartesian position vector in frame E
-- **GeoPoint:**
-    Geographical position given as latitude, longitude, depth in frame E
-- **Nvector:**
-    Geographical position given as n-vector and depth in frame E
-- **GeoPath:**
-    Geodesic path between two points in frame E
-
-
-
-Documentation and code
-======================
-
-Official documentation: http://www.navlab.net/nvector/
-
-Bleeding edge: https://github.com/pbrod/nvector.
-
-Official releases available at: http://pypi.python.org/pypi/nvector.
-
-
-Installation and upgrade:
-=========================
-
-with pip
-
-    $ pip install nvector
-
-
-with easy_install
-
-    $ easy_install nvector
-
-or
-
-    $ easy_install upgrade nvector
-
-to upgrade to the newest version
-
-
-Unit tests
-===========
-To test if the toolbox is working paste the following in an interactive
-python session::
-
-   import nvector as nv
-   nv.test(coverage=True, doctests=True)
-
-
-Acknowledgement
-===============
-The `nvector package <http://pypi.python.org/pypi/nvector/>`_ for `Python <https://www.python.org/>`_ 
-was written by Per A. Brodtkorb at `FFI (The Norwegian Defence Research Establishment) <http://www.ffi.no/en>`_ 
-based on the `nvector toolbox <http://www.navlab.net/nvector/#download>`_ for 
-`Matlab <http://www.mathworks.com>`_ written by the navigation group at `FFI <http://www.ffi.no/en>`_.
-
-Most of the content is based on the following article:
-
-*Kenneth Gade (2010):*
-    `A Nonsingular Horizontal Position Representation,
-    The Journal of Navigation, Volume 63, Issue 03, pp 395-417, July 2010.
-    <http://www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf>`_
-
-Thus this article should be cited in publications using this page or the
-downloaded program code.
-
-
-Getting Started
-===============
-
-Below the object-oriented solution to some common geodesic problems are given.
-In the first example the functional solution is also given.
-The functional solutions to the remaining problems can be found
-`here <https://github.com/pbrod/nvector/blob/master/nvector/tests/test_nvector.py>`_.
-
-
+example_1_txt = """
 Example 1: "A and B to delta"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. image:: http://www.navlab.net/images/ex1img.png
@@ -186,7 +25,9 @@ Use position A to define north, east, and down directions.
 the north, east, and down directions will change (relative to Earth) for
 different places.  A must be outside the poles for the north and east
 directions to be defined.)
+"""
 
+example_1_obj_solution = """
 Solution:
     >>> import numpy as np
     >>> import nvector as nv
@@ -209,7 +50,9 @@ Step3: Also find the direction (azimuth) to B, relative to north:
     >>> azimuth = np.arctan2(p_AB_N[1], p_AB_N[0])
     >>> 'azimuth = {0:4.2f} deg'.format(np.rad2deg(azimuth))
     'azimuth = 45.11 deg'
+"""
 
+example_1_fun_solution = """
 Functional solution:
     >>> import numpy as np
     >>> import nvector as nv
@@ -239,9 +82,9 @@ Step5: Also find the direction (azimuth) to B, relative to north:
     >>> 'azimuth = {0:4.2f} deg'.format(deg(azimuth))
     'azimuth = 45.11 deg'
 
-See also `Example 1 at www.navlab.net <http://www.navlab.net/nvector/#example_1>`_ 
+"""
 
-
+example_2_txt = """
 Example 2: "B and delta to C"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. image:: http://www.navlab.net/images/ex2img.png
@@ -256,7 +99,9 @@ as R_NB (this rotation matrix can be found from roll/pitch/yaw by using zyx2R).
 Find the exact position of object C as n-vector and depth ( n_EC_E and z_EC ),
 assuming Earth ellipsoid with semi-major axis a and flattening f. For WGS-72,
 use a = 6 378 135 m and f = 1/298.26.
+"""
 
+example_2_obj_solution = """
 Solution:
     >>> import nvector as nv
     >>> wgs72 = nv.FrameE(name='WGS72')
@@ -282,9 +127,50 @@ Step 4: Find point C by adding delta BC to EB
     >>> msg.format(lat[0], lon[0], -z[0])
     'Ex2: PosC: lat, lon = 53.33, 63.47 deg,  height = 406.01 m'
 
-See also `Example 2 at www.navlab.net <http://www.navlab.net/nvector/#example_2>`_ 
+See also `Example 2 at www.navlab.net
+    <http://www.navlab.net/nvector/#example_2>`_
 
+"""
 
+example_2_fun_solution = """
+Solution:
+    >>> import numpy as np
+    >>> import nvector as nv
+    >>> from nvector import rad, deg
+
+A custom reference ellipsoid is given (replacing WGS-84):
+    >>> wgs72 = dict(a=6378135, f=1.0/298.26)
+
+Step 1 Position and orientation of B is 400m above E:
+    >>> n_EB_E = nv.unit([[1], [2], [3]])  # unit to get unit length of vector
+    >>> z_EB = -400
+
+Step 2: Delta BC decomposed in B
+    >>> p_BC_B = np.r_[3000, 2000, 100].reshape((-1, 1))
+
+    >>> yaw, pitch, roll = rad(10), rad(20), rad(30)
+    >>> R_NB = nv.zyx2R(yaw, pitch, roll)
+
+Step 3: Find R_EN:
+    >>> R_EN = nv.n_E2R_EN(n_EB_E)
+
+Step 4: Find R_EB, from R_EN and R_NB:
+    R_EB = np.dot(R_EN, R_NB)  # Note: closest frames cancel
+
+Step 5: Decompose the delta BC vector in E:
+    p_BC_E = np.dot(R_EB, p_BC_B)
+
+Step 6: Find the position of C, using the functions that goes from one
+    >>> n_EC_E, z_EC = n_EA_E_and_p_AB_E2n_EB_E(n_EB_E, p_BC_E, z_EB, **wgs72)
+
+    >>> lat_EC, long_EC = n_E2lat_lon(n_EC_E)
+    >>> lat, lon = deg(lat_EC), deg(lon_EC)
+    >>> msg = 'Ex2: PosC: lat, lon = {:4.2f}, {:4.2f} deg,  height = {:4.2f} m'
+    >>> msg.format(lat[0], lon[0], -z[0])
+    'Ex2: PosC: lat, lon = 53.33, 63.47 deg,  height = 406.01 m'
+"""
+
+example_3_txt = """
 Example 3: "ECEF-vector to geodetic latitude"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. image:: http://www.navlab.net/images/ex3img.png
@@ -293,7 +179,9 @@ Position B is given as an "ECEF-vector" p_EB_E (i.e. a vector from E, the
 center of the Earth, to B, decomposed in E).
 Find the geodetic latitude, longitude and height (latEB, lonEB and hEB),
 assuming WGS-84 ellipsoid.
+"""
 
+example_3_obj_solution = """
 Solution:
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
@@ -306,15 +194,45 @@ Solution:
     >>> msg.format(lat[0], lon[0], h[0])
     'Ex3: Pos B: lat, lon = 39.38, -48.01 deg, height = 4702059.83 m'
 
-See also `Example 3 at www.navlab.net <http://www.navlab.net/nvector/#example_3>`_ 
+See also `Example 3 at www.navlab.net
+    <http://www.navlab.net/nvector/#example_3>`_
+
+"""
+
+example_3_fun_solution = """
+Solution:
+    >>> import numpy as np
+    >>> import nvector as nv
+    >>> from nvector import deg
+    >>> wgs84 = dict(a=6378137.0, f=1.0/298.257223563)
+    >>> p_EB_E = 6371e3 * np.vstack((0.9, -1, 1.1))  # m
+
+    >>> n_EB_E, z_EB = nv.p_EB_E2n_EB_E(p_EB_E, **wgs84)
+
+    >>> lat_EB, lon_EB = nv.n_E2lat_lon(n_EB_E)
+    >>> h = -z_EB
+    >>> lat, lon = deg(lat_EB), deg(lon_EB)
+
+    >>> msg = 'Ex3: Pos B: lat, lon = {:4.2f}, {:4.2f} deg, height = {:9.2f} m'
+    >>> msg.format(lat[0], lon[0], h[0])
+    'Ex3: Pos B: lat, lon = 39.38, -48.01 deg, height = 4702059.83 m'
+
+See also `Example 3 at www.navlab.net
+    <http://www.navlab.net/nvector/#example_3>`_
+
+"""
 
 
+example_4_txt = """
 Example 4: "Geodetic latitude to ECEF-vector"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. image:: http://www.navlab.net/images/ex4img.png
 
-Geodetic latitude, longitude and height are given for position B as latEB, longEB and hEB, find the ECEF-vector for this position, p_EB_E.
+Geodetic latitude, longitude and height are given for position B as latEB,
+longEB and hEB, find the ECEF-vector for this position, p_EB_E.
+"""
 
+example_4_obj_solution = """
 Solution:
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
@@ -324,9 +242,32 @@ Solution:
     >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel())
     'Ex4: p_EB_E = [ 6373290.27721828   222560.20067474   110568.82718179] m'
 
-See also `Example 4 at www.navlab.net <http://www.navlab.net/nvector/#example_4>`_ 
+See also `Example 4 at www.navlab.net
+    <http://www.navlab.net/nvector/#example_4>`_
+
+"""
 
 
+example_4_fun_solution = """
+Solution:
+    >>> import nvector as nv
+    >>> from nvector import rad
+    >>> wgs84 = dict(a=6378137.0, f=1.0/298.257223563)
+    >>> lat_EB, lon_EB = rad(1), rad(2)
+    >>> h_EB = 3
+    >>> n_EB_E = lat_lon2n_E(lat_EB, lon_EB)
+    >>> p_EB_E = n_EB_E2p_EB_E(n_EB_E, -h_EB, **wgs84)
+
+    >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel())
+    'Ex4: p_EB_E = [ 6373290.27721828   222560.20067474   110568.82718179] m'
+
+See also `Example 4 at www.navlab.net
+    <http://www.navlab.net/nvector/#example_4>`_
+
+"""
+
+
+example_5_txt = """
 Example 5: "Surface distance"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. image:: http://www.navlab.net/images/ex5img.png
@@ -337,7 +278,9 @@ zero height, we seek the distance between the points that are at the surface of
 the Earth, directly above/below A and B. The Euclidean distance (chord length)
 dAB should also be found. Use Earth radius 6371e3 m.
 Compare the results with exact calculations for the WGS-84 ellipsoid.
+"""
 
+example_5_obj_solution = """
 Great circle solution:
     >>> import nvector as nv
     >>> frame_E = nv.FrameE(a=6371e3, f=0)
@@ -372,9 +315,45 @@ Exact solution for the WGS84 ellipsoid:
     >>> msg.format(s_12 / 1000, d_12 / 1000)
     'Ellipsoidal and Euclidean distance = 333.95 km, 333.91 km'
 
-See also `Example 5 at www.navlab.net <http://www.navlab.net/nvector/#example_5>`_ 
+See also `Example 5 at www.navlab.net
+    <http://www.navlab.net/nvector/#example_5>`_
+"""
+
+example_5_fun_solution = """
+Great circle solution:
+    >>> import nvector as nv
+    >>> from nvector import rad
+
+    >>> n_EA_E = lat_lon2n_E(rad(88), rad(0))
+    >>> n_EB_E = lat_lon2n_E(rad(89), rad(-170))
+
+    >>>  r_Earth = 6371e3  # m, mean Earth radius
+    >>> s_AB = nv.great_circle_distance(n_EA_E, n_EB_E, radius=r_Earth)
+    >>> d_AB = nv.euclidean_distance(n_EA_E, n_EB_E, radius=r_Earth)
+
+    >>> msg = 'Ex5: Great circle and Euclidean distance = {}'
+    >>> msg = msg.format('{:5.2f} km, {:5.2f} km')
+    >>> msg.format(s_AB / 1000, d_AB / 1000)
+    'Ex5: Great circle and Euclidean distance = 332.46 km, 332.42 km'
+
+Exact solution for the WGS84 ellipsoid:
+    >>> wgs84 = nv.FrameE(name='WGS84')
+    >>> point1 = wgs84.GeoPoint(latitude=88, longitude=0, degrees=True)
+    >>> point2 = wgs84.GeoPoint(latitude=89, longitude=-170, degrees=True)
+    >>> s_12, _azi1, _azi2 = point1.distance_and_azimuth(point2)
+
+    >>> p_12_E = point2.to_ecef_vector() - point1.to_ecef_vector()
+    >>> d_12 = np.linalg.norm(p_12_E.pvector, axis=0)[0]
+    >>> msg = 'Ellipsoidal and Euclidean distance = {:5.2f} km, {:5.2f} km'
+    >>> msg.format(s_12 / 1000, d_12 / 1000)
+    'Ellipsoidal and Euclidean distance = 333.95 km, 333.91 km'
+
+See also `Example 5 at www.navlab.net
+    <http://www.navlab.net/nvector/#example_5>`_
+"""
 
 
+example_6_txt = """
 Example 6 "Interpolated position"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. image:: http://www.navlab.net/images/ex6img.png
@@ -383,7 +362,9 @@ Given the position of B at time t0 and t1, n_EB_E(t0) and n_EB_E(t1).
 
 Find an interpolated position at time ti, n_EB_E(ti). All positions are given
 as n-vectors.
+"""
 
+example_6_obj_solution = """
 Solution:
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
@@ -402,9 +383,38 @@ Solution:
     >>> msg.format(lat_ti, lon_ti)
     'Ex6, Interpolated position: lat, long = [ 89.7999805] deg, [ 180.] deg'
 
-See also `Example 6 at www.navlab.net <http://www.navlab.net/nvector/#example_6>`_ 
+See also `Example 6 at
+    www.navlab.net <http://www.navlab.net/nvector/#example_6>`_
+
+"""
 
 
+example_6_fun_solution = """
+Solution:
+    >>> import nvector as nv
+    >>> from nvector import rad, deg
+    >>> n_EB_E_t0 = nv.lat_lon2n_E(rad(89), rad(0))
+    >>> n_EB_E_t1 = nv.lat_lon2n_E(rad(89), rad(180))
+
+    >>> t0 = 10.
+    >>> t1 = 20.
+    >>> ti = 16.  # time of interpolation
+    >>> ti_n = (ti - t0) / (t1 - t0) # normalized time of interpolation
+
+    >>> n_EB_E_ti = nv.unit(n_EB_E_t0 + ti_n * (n_EB_E_t1 - n_EB_E_t0))
+    >>> lat_EB_ti, lon_EB_ti = n_E2lat_lon(n_EB_E_ti)
+
+    >>> lat_ti, lon_ti = deg(lat_EB_ti), deg(lon_EB_ti)
+    >>> msg = 'Ex6, Interpolated position: lat, long = {} deg, {} deg'
+    >>> msg.format(lat_ti, lon_ti)
+    'Ex6, Interpolated position: lat, long = [ 89.7999805] deg, [ 180.] deg'
+
+See also `Example 6 at
+    www.navlab.net <http://www.navlab.net/nvector/#example_6>`_
+
+"""
+
+example_7_txt = """
 Example 7: "Mean position"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. image:: http://www.navlab.net/images/ex7img.png
@@ -412,7 +422,9 @@ Example 7: "Mean position"
 Three positions A, B, and C are given as n-vectors n_EA_E, n_EB_E, and n_EC_E.
 Find the mean position, M, given as n_EM_E.
 Note that the calculation is independent of the depths of the positions.
+"""
 
+example_7_obj_solution = """
 Solution:
     >>> import nvector as nv
     >>> points = nv.GeoPoint(latitude=[90, 60, 50],
@@ -425,9 +437,12 @@ Solution:
     >>> msg.format(lat[0], lon[0])
     'Ex7: Pos M: lat, lon = 67.24, -6.92 deg'
 
-See also `Example 7 at www.navlab.net <http://www.navlab.net/nvector/#example_7>`_ 
+See also `Example 7 at www.navlab.net
+    <http://www.navlab.net/nvector/#example_7>`_
 
+"""
 
+example_8_txt = """
 Example 8: "A and azimuth/distance to B"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. image:: http://www.navlab.net/images/ex8img.png
@@ -442,7 +457,9 @@ In geodesy this is known as "The first geodetic problem" or
 Example 2, but now the delta is given as an azimuth and a great circle
 distance. ("The second/inverse geodetic problem" for a sphere is already
 solved in Examples 1 and 5.)
+"""
 
+example_8_obj_solution = """
 Solution:
     >>> import nvector as nv
     >>> frame = nv.FrameE(a=6371e3, f=0)
@@ -455,9 +472,13 @@ Solution:
     >>> msg.format(lat, lon)
     'Ex8, Destination: lat, lon = 79.99 deg, -90.02 deg'
 
-See also `Example 8 at www.navlab.net <http://www.navlab.net/nvector/#example_8>`_ 
+See also `Example 8 at www.navlab.net
+    <http://www.navlab.net/nvector/#example_8>`_
+
+"""
 
 
+example_9_txt = """
 Example 9: "Intersection of two paths"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. image:: http://www.navlab.net/images/ex9img.png
@@ -468,7 +489,9 @@ as the great circle that goes through the two points.
 Path A is given by A1 and A2, while path B is given by B1 and B2.
 
 Find the position C where the two paths intersect.
+"""
 
+example_9_obj_solution = """
 Solution:
     >>> import nvector as nv
     >>> pointA1 = nv.GeoPoint(10, 20, degrees=True)
@@ -485,9 +508,12 @@ Solution:
     >>> msg.format(lat[0], lon[0])
     'Ex9, Intersection: lat, long = 40.32, 55.90 deg'
 
-See also `Example 9 at www.navlab.net <http://www.navlab.net/nvector/#example_9>`_ 
+See also `Example 9 at www.navlab.net
+    <http://www.navlab.net/nvector/#example_9>`_
 
+"""
 
+example_10_txt = """
 Example 10: "Cross track distance"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. image:: http://www.navlab.net/images/ex10img.png
@@ -501,7 +527,9 @@ surface, between the great circle and B).
 
 Also find the Euclidean distance dxt between B and the plane defined by the
 great circle. Use Earth radius 6371e3.
+"""
 
+example_10_obj_solution = """
 Solution:
     >>> import nvector as nv
     >>> frame = nv.FrameE(a=6371e3, f=0)
@@ -517,15 +545,22 @@ Solution:
     >>> 'Ex10: Cross track distance: s_xt, d_xt = {}'.format(val_txt)
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 
-See also `Example 10 at www.navlab.net <http://www.navlab.net/nvector/#example_10>`_ 
+See also `Example 10 at www.navlab.net
+    <http://www.navlab.net/nvector/#example_10>`_
 
 See also
 --------
 `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
 
+"""
 
-Note
-====
 
-This project has been set up using PyScaffold 2.4.4. For details and usage
-information on PyScaffold see http://pyscaffold.readthedocs.org/.
+def test_docstrings():
+    import doctest
+    print('Testing docstrings in %s' % __file__)
+    doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE)
+    print('Docstrings tested')
+
+
+if __name__ == "__main__":
+    test_docstrings()
