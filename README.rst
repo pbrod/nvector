@@ -77,7 +77,7 @@ The core functions provided are:
     Converts Cartesian position vector in meters to n-vector.
 - **n_EA_E_and_n_EB_E2p_AB_E:**
     From two positions A and B, finds the delta position.
-- **n_EA_E_and_p_AB_E2n_EB_E:** 
+- **n_EA_E_and_p_AB_E2n_EB_E:**
     From position A and delta, finds position B.
 
 
@@ -146,10 +146,12 @@ python session::
 
 Acknowledgement
 ===============
-The `nvector package <http://pypi.python.org/pypi/nvector/>`_ for `Python <https://www.python.org/>`_ 
-was written by Per A. Brodtkorb at `FFI (The Norwegian Defence Research Establishment) <http://www.ffi.no/en>`_ 
-based on the `nvector toolbox <http://www.navlab.net/nvector/#download>`_ for 
-`Matlab <http://www.mathworks.com>`_ written by the navigation group at `FFI <http://www.ffi.no/en>`_.
+The `nvector package <http://pypi.python.org/pypi/nvector/>`_ for
+`Python <https://www.python.org/>`_ was written by Per A. Brodtkorb at
+`FFI (The Norwegian Defence Research Establishment) <http://www.ffi.no/en>`_
+based on the `nvector toolbox <http://www.navlab.net/nvector/#download>`_ for
+`Matlab <http://www.mathworks.com>`_ written by the navigation group at
+`FFI <http://www.ffi.no/en>`_.
 
 Most of the content is based on the following article:
 
@@ -168,11 +170,12 @@ Getting Started
 Below the object-oriented solution to some common geodesic problems are given.
 In the first example the functional solution is also given.
 The functional solutions to the remaining problems can be found
-`here <https://github.com/pbrod/nvector/blob/master/nvector/tests/test_nvector.py>`_.
+`here
+<https://github.com/pbrod/nvector/blob/master/nvector/tests/test_nvector.py>`_.
 
 
-Example 1: "A and B to delta"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 1: "A and B to delta"**
+
 .. image:: http://www.navlab.net/images/ex1img.png
 
 Given two positions, A and B as latitudes, longitudes and depths relative to
@@ -239,11 +242,12 @@ Step5: Also find the direction (azimuth) to B, relative to north:
     >>> 'azimuth = {0:4.2f} deg'.format(deg(azimuth))
     'azimuth = 45.11 deg'
 
-See also `Example 1 at www.navlab.net <http://www.navlab.net/nvector/#example_1>`_ 
+See also
+    `Example 1 at www.navlab.net <http://www.navlab.net/nvector/#example_1>`_
 
 
-Example 2: "B and delta to C"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 2: "B and delta to C"**
+
 .. image:: http://www.navlab.net/images/ex2img.png
 
 A radar or sonar attached to a vehicle B (Body coordinate frame) measures the
@@ -282,11 +286,12 @@ Step 4: Find point C by adding delta BC to EB
     >>> msg.format(lat[0], lon[0], -z[0])
     'Ex2: PosC: lat, lon = 53.33, 63.47 deg,  height = 406.01 m'
 
-See also `Example 2 at www.navlab.net <http://www.navlab.net/nvector/#example_2>`_ 
+See also
+    `Example 2 at www.navlab.net <http://www.navlab.net/nvector/#example_2>`_
 
 
-Example 3: "ECEF-vector to geodetic latitude"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 3: "ECEF-vector to geodetic latitude"**
+
 .. image:: http://www.navlab.net/images/ex3img.png
 
 Position B is given as an "ECEF-vector" p_EB_E (i.e. a vector from E, the
@@ -306,14 +311,16 @@ Solution:
     >>> msg.format(lat[0], lon[0], h[0])
     'Ex3: Pos B: lat, lon = 39.38, -48.01 deg, height = 4702059.83 m'
 
-See also `Example 3 at www.navlab.net <http://www.navlab.net/nvector/#example_3>`_ 
+See also
+    `Example 3 at www.navlab.net <http://www.navlab.net/nvector/#example_3>`_
 
 
-Example 4: "Geodetic latitude to ECEF-vector"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 4: "Geodetic latitude to ECEF-vector"**
+
 .. image:: http://www.navlab.net/images/ex4img.png
 
-Geodetic latitude, longitude and height are given for position B as latEB, longEB and hEB, find the ECEF-vector for this position, p_EB_E.
+Geodetic latitude, longitude and height are given for position B as latEB,
+longEB and hEB, find the ECEF-vector for this position, p_EB_E.
 
 Solution:
     >>> import nvector as nv
@@ -324,11 +331,12 @@ Solution:
     >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel())
     'Ex4: p_EB_E = [ 6373290.27721828   222560.20067474   110568.82718179] m'
 
-See also `Example 4 at www.navlab.net <http://www.navlab.net/nvector/#example_4>`_ 
+See also
+    `Example 4 at www.navlab.net <http://www.navlab.net/nvector/#example_4>`_
 
 
-Example 5: "Surface distance"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 5: "Surface distance"**
+
 .. image:: http://www.navlab.net/images/ex5img.png
 
 Find the surface distance sAB (i.e. great circle distance) between two
@@ -372,11 +380,12 @@ Exact solution for the WGS84 ellipsoid:
     >>> msg.format(s_12 / 1000, d_12 / 1000)
     'Ellipsoidal and Euclidean distance = 333.95 km, 333.91 km'
 
-See also `Example 5 at www.navlab.net <http://www.navlab.net/nvector/#example_5>`_ 
+See also
+    `Example 5 at www.navlab.net <http://www.navlab.net/nvector/#example_5>`_
 
 
-Example 6 "Interpolated position"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 6 "Interpolated position"**
+
 .. image:: http://www.navlab.net/images/ex6img.png
 
 Given the position of B at time t0 and t1, n_EB_E(t0) and n_EB_E(t1).
@@ -387,11 +396,12 @@ as n-vectors.
 Solution:
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
-    >>> path = nv.GeoPath(wgs84.GeoPoint(89, 0, degrees=True),
-    ...                   wgs84.GeoPoint(89, 180, degrees=True))
+    >>> positionB0 = wgs84.GeoPoint(89, 0, degrees=True)
+    >>> positionB1 = wgs84.GeoPoint(89, 180, degrees=True)
+    >>> path = nv.GeoPath(positionB0, positionB1)
 
-    >>> t0 = 10.
-    >>> t1 = 20.
+    >>> t0 = 10.  # time at position B0
+    >>> t1 = 20.  # time at position B1
     >>> ti = 16.  # time of interpolation
     >>> ti_n = (ti - t0) / (t1 - t0) # normalized time of interpolation
 
@@ -402,11 +412,12 @@ Solution:
     >>> msg.format(lat_ti, lon_ti)
     'Ex6, Interpolated position: lat, long = [ 89.7999805] deg, [ 180.] deg'
 
-See also `Example 6 at www.navlab.net <http://www.navlab.net/nvector/#example_6>`_ 
+See also
+    `Example 6 at www.navlab.net <http://www.navlab.net/nvector/#example_6>`_
 
 
-Example 7: "Mean position"
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 7: "Mean position"**
+
 .. image:: http://www.navlab.net/images/ex7img.png
 
 Three positions A, B, and C are given as n-vectors n_EA_E, n_EB_E, and n_EC_E.
@@ -425,11 +436,12 @@ Solution:
     >>> msg.format(lat[0], lon[0])
     'Ex7: Pos M: lat, lon = 67.24, -6.92 deg'
 
-See also `Example 7 at www.navlab.net <http://www.navlab.net/nvector/#example_7>`_ 
+See also
+    `Example 7 at www.navlab.net <http://www.navlab.net/nvector/#example_7>`_
 
 
-Example 8: "A and azimuth/distance to B"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 8: "A and azimuth/distance to B"**
+
 .. image:: http://www.navlab.net/images/ex8img.png
 
 We have an initial position A, direction of travel given as an azimuth
@@ -455,11 +467,12 @@ Solution:
     >>> msg.format(lat, lon)
     'Ex8, Destination: lat, lon = 79.99 deg, -90.02 deg'
 
-See also `Example 8 at www.navlab.net <http://www.navlab.net/nvector/#example_8>`_ 
+See also
+    `Example 8 at www.navlab.net <http://www.navlab.net/nvector/#example_8>`_
 
 
-Example 9: "Intersection of two paths"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 9: "Intersection of two paths"**
+
 .. image:: http://www.navlab.net/images/ex9img.png
 
 Define a path from two given positions (at the surface of a spherical Earth),
@@ -485,11 +498,12 @@ Solution:
     >>> msg.format(lat[0], lon[0])
     'Ex9, Intersection: lat, long = 40.32, 55.90 deg'
 
-See also `Example 9 at www.navlab.net <http://www.navlab.net/nvector/#example_9>`_ 
+See also
+    `Example 9 at www.navlab.net <http://www.navlab.net/nvector/#example_9>`_
 
 
-Example 10: "Cross track distance"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 10: "Cross track distance"**
+
 .. image:: http://www.navlab.net/images/ex10img.png
 
 Path A is given by the two positions A1 and A2 (similar to the previous
@@ -517,7 +531,8 @@ Solution:
     >>> 'Ex10: Cross track distance: s_xt, d_xt = {}'.format(val_txt)
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 
-See also `Example 10 at www.navlab.net <http://www.navlab.net/nvector/#example_10>`_ 
+See also
+    `Example 10 at www.navlab.net <http://www.navlab.net/nvector/#example_10>`_
 
 See also
 --------

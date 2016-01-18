@@ -295,6 +295,7 @@ class FrameN(_BaseFrame):
     --------
 
     **Example 1: "A and B to delta"**
+
     .. image:: http://www.navlab.net/images/ex1img.png
 
     Given two positions, A and B as latitudes, longitudes and depths relative
@@ -321,8 +322,8 @@ class FrameN(_BaseFrame):
         >>> 'Ex1: delta north, east, down = {}'.format(valtxt)
         'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
 
-    See also `Example 1 at www.navlab.net
-        <http://www.navlab.net/nvector/#example_1>`_
+    See also
+    `Example 1 at www.navlab.net <http://www.navlab.net/nvector/#example_1>`_
 
     See also
     --------

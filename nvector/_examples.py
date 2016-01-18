@@ -368,11 +368,12 @@ example_6_obj_solution = """
 Solution:
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
-    >>> path = nv.GeoPath(wgs84.GeoPoint(89, 0, degrees=True),
-    ...                   wgs84.GeoPoint(89, 180, degrees=True))
+    >>> positionB0 = wgs84.GeoPoint(89, 0, degrees=True)
+    >>> positionB1 = wgs84.GeoPoint(89, 180, degrees=True)
+    >>> path = nv.GeoPath(positionB0, positionB1)
 
-    >>> t0 = 10.
-    >>> t1 = 20.
+    >>> t0 = 10.  # time at position B0
+    >>> t1 = 20.  # time at position B1
     >>> ti = 16.  # time of interpolation
     >>> ti_n = (ti - t0) / (t1 - t0) # normalized time of interpolation
 
