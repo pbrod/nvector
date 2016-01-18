@@ -145,8 +145,9 @@ class FrameE(_BaseFrame):
     origin coincides with Earth's centre (geometrical centre of ellipsoid
     model).
 
-    Example
-
+    See also
+    --------
+    FrameN, FrameL, FrameB
     """
     def __init__(self, a=None, f=None, name='WGS84', axes='e'):
         if a is None or f is None:
@@ -260,7 +261,7 @@ class FrameE(_BaseFrame):
         return Nvector(*args, frame=self, **kwds)
 
     def ECEFvector(self, *args, **kwds):
-        __doc__ = _ECEFVECTOR_DOC  # @UndefinedVariable
+        __doc__ = _ECEFVECTOR_DOC  # @ReservedAssignment
         kwds.pop('frame', None)
         return ECEFvector(*args, frame=self, **kwds)
 
@@ -292,6 +293,8 @@ class FrameN(_BaseFrame):
 
     Examples
     --------
+
+    **Example 1: "A and B to delta"**
     .. image:: http://www.navlab.net/images/ex1img.png
 
     Given two positions, A and B as latitudes, longitudes and depths relative
@@ -318,9 +321,12 @@ class FrameN(_BaseFrame):
         >>> 'Ex1: delta north, east, down = {}'.format(valtxt)
         'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
 
+    See also `Example 1 at www.navlab.net
+        <http://www.navlab.net/nvector/#example_1>`_
+
     See also
     --------
-    Example 1 at http://www.navlab.net/nvector/#example_1
+    FrameE, FrameL, FrameB
     """
     def __init__(self, position):
         nvector = position.to_nvector()
@@ -368,6 +374,10 @@ class FrameL(FrameN):
     between the x-axis of L and the north direction; this angle is called
     the wander azimuth angle. The L-frame is well suited for general
     calculations, as it is non-singular.
+
+    See also
+    --------
+    FrameE, FrameN, FrameB
     """
     def __init__(self, position, wander_azimuth=0):
         nvector = position.to_nvector()
@@ -397,6 +407,10 @@ class FrameB(FrameN):
     The frame is fixed to the vehicle where the x-axis points forward, the
     y-axis to the right (starboard) and the z-axis in the vehicle's down
     direction.
+
+    See also
+    --------
+    FrameE, FrameL, FrameN
     """
     def __init__(self, position, yaw=0, pitch=0, roll=0, degrees=False):
         nvector = position.to_nvector()
@@ -668,6 +682,8 @@ def diff_positions(pointA, pointB):
 
     Examples
     --------
+
+    **Example 1 "A and B to delta"**
     .. image:: http://www.navlab.net/images/ex1img.png
 
     Given two positions, A and B as latitudes, longitudes and depths relative
@@ -772,7 +788,7 @@ class ECEFvector(object):
 
     def to_nvector(self):
         """
-        Converts Cartesian position vector to n-vector.
+        Converts ECEF-vector to n-vector.
 
         Returns
         -------
@@ -852,10 +868,12 @@ class GeoPath(object):
     Solution:
         >>> import nvector as nv
         >>> wgs84 = nv.FrameE(name='WGS84')
-        >>> path = nv.GeoPath(wgs84.GeoPoint(89, 0, degrees=True),
-        ...                   wgs84.GeoPoint(89, 180, degrees=True))
-        >>> t0 = 10.
-        >>> t1 = 20.
+        >>> positionB0 = wgs84.GeoPoint(89, 0, degrees=True)
+        >>> positionB1 = wgs84.GeoPoint(89, 180, degrees=True)
+        >>> path = nv.GeoPath(positionB0, positionB1)
+
+        >>> t0 = 10.  # time at position B0
+        >>> t1 = 20.  # time at position B1
         >>> ti = 16.  # time of interpolation
         >>> ti_n = (ti - t0) / (t1 - t0) # normalized time of interpolation
         >>> g_EB_E_ti = path.interpolate(ti_n).to_geo_point()
