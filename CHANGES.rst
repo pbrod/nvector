@@ -7,7 +7,7 @@ Created with gitcommand: git shortlog v0.1.3..v0.4.1
 Version 0.4.1, Januar 15, 2016
 ==============================
 
-pbrod (37):
+pbrod (46):
 
       * Cosmetic updates
       * Updated README.rst
@@ -33,6 +33,7 @@ pbrod (37):
       * Updated CHANGES.rst
       * Updated conf.py
       * Renamed info.py to _info.py
+      * All examples are now generated from _examples.py.
 
 
 Version 0.1.3, Januar 1, 2016
