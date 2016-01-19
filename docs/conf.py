@@ -131,6 +131,72 @@ import glob
 autosummary_generate = glob.glob("api/*.rst")
 
 
+# -----------------------------------------------------------------------------
+# Source code links
+# -----------------------------------------------------------------------------
+
+import inspect
+from os.path import relpath, dirname
+
+for name in ['sphinx.ext.linkcode', 'numpydoc.linkcode']:
+    try:
+        __import__(name)
+        extensions.append(name)
+        break
+    except ImportError:
+        pass
+else:
+    print("NOTE: linkcode extension not found -- no links to source generated")
+
+def linkcode_resolve(domain, info):
+    """
+    Determine the URL corresponding to Python object
+    """
+    if domain != 'py':
+        return None
+
+    modname = info['module']
+    fullname = info['fullname']
+
+    submod = sys.modules.get(modname)
+    if submod is None:
+        return None
+
+    obj = submod
+    for part in fullname.split('.'):
+        try:
+            obj = getattr(obj, part)
+        except:
+            return None
+
+    try:
+        fn = inspect.getsourcefile(obj)
+    except:
+        fn = None
+    if not fn:
+        return None
+
+    try:
+        source, lineno = inspect.getsourcelines(obj)
+    except:
+        lineno = None
+
+    if lineno:
+        linespec = "#L%d-L%d" % (lineno, lineno + len(source) - 1)
+    else:
+        linespec = ""
+
+    fn = relpath(fn, start=dirname(nvector.__file__))
+
+    if 'dev' in nvector.__version__:
+        return "http://github.com/pbrod/nvector/blob/master/nvector/%s%s" % (
+           fn, linespec)
+    else:
+        return "http://github.com/pbrod/nvector/blob/v%s/nvector/%s%s" % (
+           nvector.__version__, fn, linespec)
+
+
+
 # -- Options for HTML output ---------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for

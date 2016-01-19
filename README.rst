@@ -396,12 +396,12 @@ as n-vectors.
 Solution:
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
-    >>> positionB0 = wgs84.GeoPoint(89, 0, degrees=True)
-    >>> positionB1 = wgs84.GeoPoint(89, 180, degrees=True)
-    >>> path = nv.GeoPath(positionB0, positionB1)
+    >>> n_EB_E_t0 = wgs84.GeoPoint(89, 0, degrees=True).to_nvector()
+    >>> n_EB_E_t1 = wgs84.GeoPoint(89, 180, degrees=True).to_nvector()
+    >>> path = nv.GeoPath(n_EB_E_t0, n_EB_E_t1)
 
-    >>> t0 = 10.  # time at position B0
-    >>> t1 = 20.  # time at position B1
+    >>> t0 = 10.
+    >>> t1 = 20.
     >>> ti = 16.  # time of interpolation
     >>> ti_n = (ti - t0) / (t1 - t0) # normalized time of interpolation
 

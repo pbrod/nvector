@@ -36,6 +36,7 @@ Contents
    :maxdepth: 4
 
 	Introduction <src/overview>
+	Functional examples <src/getting_started_functional>
    License <license>
    Authors <authors>
    Changelog <changes>

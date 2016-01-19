@@ -41,6 +41,9 @@ import numpy as np
 from numpy import rad2deg, deg2rad, arctan2, sin, cos, array, cross, dot, sqrt
 from numpy.linalg import norm
 import warnings
+from nvector import _examples
+from nvector._examples import use_docstring_from
+
 
 __all__ = ['select_ellipsoid', 'E_rotation',
            'unit', 'deg', 'rad', 'nthroot',
@@ -63,24 +66,26 @@ E_ROTATION_MATRIX = dict(e=array([[0, 0, 1],
 _EPS = np.finfo(float).eps  # machine precision (machine epsilon)
 
 
-ELLIPSOID = {1: (6377563.3960, 1.0/299.3249646, 'Airy 1858'),
-             2: (6377340.189, 1.0/299.3249646, 'Airy Modified'),
-             3: (6378160, 1.0/298.25, 'Australian National'),
-             4: (6377397.155, 1.0/299.1528128, 'Bessel 1841'),
-             5: (6378249.145, 1.0/293.465, 'Clarke 1880'),
-             6: (6377276.345, 1.0/300.8017, 'Everest 1830'),
-             7: (6377304.063, 1.0/300.8017, 'Everest Modified'),
-             8: (6378166.0, 1.0/298.3, 'Fisher 1960'),
-             9: (6378150.0, 1.0/298.3, 'Fisher 1968'),
-             10: (6378270.0, 1.0/297, 'Hough 1956'),
-             11: (6378388.0, 1.0/297, 'International (Hayford)'),
-             12: (6378245.0, 1.0/298.3, 'Krassovsky 1938'),
-             13: (6378145., 1.0/298.25, 'NWL-9D  (WGS 66)'),
-             14: (6378160., 1.0/298.25, 'South American 1969'),
-             15: (6378136, 1.0/298.257, 'Soviet Geod. System 1985'),
-             16: (6378135., 1.0/298.26, 'WGS 72'),
-             17: (6378206.4, 1.0/294.9786982138, 'Clarke 1866    (NAD27)'),
-             18: (6378137.0, 1.0/298.257223563,
+ELLIPSOID = {1: ({'a': 6377563.3960, 'f': 1.0/299.3249646}, 'Airy 1858'),
+             2: ({'a': 6377340.189, 'f': 1.0/299.3249646}, 'Airy Modified'),
+             3: ({'a': 6378160, 'f': 1.0/298.25}, 'Australian National'),
+             4: ({'a': 6377397.155, 'f': 1.0/299.1528128}, 'Bessel 1841'),
+             5: ({'a': 6378249.145, 'f': 1.0/293.465}, 'Clarke 1880'),
+             6: ({'a': 6377276.345, 'f': 1.0/300.8017}, 'Everest 1830'),
+             7: ({'a': 6377304.063, 'f': 1.0/300.8017}, 'Everest Modified'),
+             8: ({'a': 6378166.0, 'f': 1.0/298.3}, 'Fisher 1960'),
+             9: ({'a': 6378150.0, 'f': 1.0/298.3}, 'Fisher 1968'),
+             10: ({'a': 6378270.0, 'f': 1.0/297}, 'Hough 1956'),
+             11: ({'a': 6378388.0, 'f': 1.0/297}, 'International (Hayford)'),
+             12: ({'a': 6378245.0, 'f': 1.0/298.3}, 'Krassovsky 1938'),
+             13: ({'a': 6378145., 'f': 1.0/298.25}, 'NWL-9D  (WGS 66)'),
+             14: ({'a': 6378160., 'f': 1.0/298.25}, 'South American 1969'),
+             15: ({'a': 6378136, 'f': 1.0/298.257},
+                  'Soviet Geod. System 1985'),
+             16: ({'a': 6378135., 'f': 1.0/298.26}, 'WGS 72'),
+             17: ({'a': 6378206.4, 'f': 1.0/294.9786982138},
+                  'Clarke 1866    (NAD27)'),
+             18: ({'a': 6378137.0, 'f': 1.0/298.257223563},
                   'GRS80 / WGS84  (NAD83)')}
 
 ELLIPSOID_IX = {'airy1858': 1, 'airymodified': 2, 'australiannational': 3,
@@ -145,7 +150,8 @@ def select_ellipsoid(name):
         option = ELLIPSOID_IX.get(name.lower().replace(' ', ''), name)
     else:
         option = input(msg)
-    return ELLIPSOID[option]
+    ellipsoid, fullname = ELLIPSOID[option]
+    return ellipsoid['a'], ellipsoid['f'], fullname
 
 
 def E_rotation(axes='e'):
@@ -310,7 +316,7 @@ def lat_lon2n_E(latitude, longitude, R_Ee=None):
 
     See also
     --------
-    n_E2lat_lon.
+    n_E2lat_lon
     """
     if R_Ee is None:
         R_Ee = E_rotation()
@@ -340,7 +346,7 @@ def n_E2lat_lon(n_E, R_Ee=None):
 
     See also
     --------
-    lat_lon2n_E.
+    lat_lon2n_E
     """
     if R_Ee is None:
         R_Ee = E_rotation()
@@ -398,7 +404,7 @@ def n_E2R_EN(n_E, R_Ee=None):
 
     See also
     --------
-    R_EN2n_E, n_E_and_wa2R_EL, R_EL2n_E.
+    R_EN2n_E, n_E_and_wa2R_EL, R_EL2n_E
     """
     if R_Ee is None:
         R_Ee = E_rotation()
@@ -455,7 +461,7 @@ def n_E_and_wa2R_EL(n_E, wander_azimuth, R_Ee=None):
 
     See also
     --------
-    R_EL2n_E, R_EN2n_E, n_E2R_EN.
+    R_EL2n_E, R_EN2n_E, n_E2R_EN
     """
     if R_Ee is None:
         R_Ee = E_rotation()
@@ -466,8 +472,8 @@ def n_E_and_wa2R_EL(n_E, wander_azimuth, R_Ee=None):
     return R_EL
 
 
-def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0/298.257223563, R_Ee=None):
-    """
+class _Nvector2ECEFvector(object):
+    __doc__ = """
     Converts n-vector to Cartesian position vector in meters.
 
     Parameters
@@ -500,10 +506,20 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0/298.257223563, R_Ee=None):
     The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
     might be specified.
 
+    Examples
+    --------
+
+    {}
+
     See also
     --------
-    p_EB_E2n_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E.
-    """
+    p_EB_E2n_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E
+    """.format(_examples.get_examples([4], OO=False))
+    pass
+
+
+@use_docstring_from(_Nvector2ECEFvector)
+def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0/298.257223563, R_Ee=None):
     if R_Ee is None:
         R_Ee = E_rotation()
     _check_length_deviation(n_EB_E)
@@ -530,8 +546,8 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0/298.257223563, R_Ee=None):
     return p_EB_E
 
 
-def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0/298.257223563, R_Ee=None):
-    """
+class _ECEFvector2Nvector(object):
+    __doc__ = """
     Converts Cartesian position vector in meters to n-vector.
 
     Parameters
@@ -566,10 +582,20 @@ def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0/298.257223563, R_Ee=None):
     The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
     might be specified.
 
+    Examples
+    --------
+
+    {}
+
     See also
     --------
-    n_EB_E2p_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E.
-    """
+    n_EB_E2p_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E
+
+    """.format(_examples.get_examples([3], OO=False))
+
+
+@use_docstring_from(_ECEFvector2Nvector)
+def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0/298.257223563, R_Ee=None):
     if R_Ee is None:
         R_Ee = E_rotation()
     p_EB_E = dot(R_Ee, p_EB_E)
@@ -612,9 +638,8 @@ def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0/298.257223563, R_Ee=None):
     return n_EB_E, depth
 
 
-def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
-                             f=1.0/298.257223563, R_Ee=None):
-    """
+class _DeltaFromPositionAtoB(object):
+    __doc__ = """
     Return the delta vector from position A to B.
 
     Parameters
@@ -647,10 +672,23 @@ def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
     The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
     might be specified.
 
+    Examples
+    --------
+
+    {}
+
+
     See also
     --------
-    n_EA_E_and_p_AB_E2n_EB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E.
-    """
+    n_EA_E_and_p_AB_E2n_EB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E
+
+    """.format(_examples.get_examples([1], False))
+    pass
+
+
+@use_docstring_from(_DeltaFromPositionAtoB)
+def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
+                             f=1.0/298.257223563, R_Ee=None):
 
     # Function 1. in Section 5.4 in Gade (2010):
     p_EA_E = n_EB_E2p_EB_E(n_EA_E, z_EA, a, f, R_Ee)
@@ -701,7 +739,7 @@ def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137,
 
     See also
     --------
-    n_EA_E_and_n_EB_E2p_AB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E.
+    n_EA_E_and_n_EB_E2p_AB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E
     """
     if R_Ee is None:
         R_Ee = E_rotation()
@@ -745,7 +783,7 @@ def R2xyz(R_AB):
 
     See also
     --------
-    xyz2R, R2zyx, xyz2R.
+    xyz2R, R2zyx, xyz2R
     """
     z = arctan2(-R_AB[0, 1], R_AB[0, 0])  # atan2: [-pi pi]
     x = arctan2(-R_AB[1, 2], R_AB[2, 2])
@@ -797,7 +835,7 @@ def R2zyx(R_AB):
 
     See also
     --------
-    zyx2R, xyz2R, R2xyz.
+    zyx2R, xyz2R, R2xyz
     """
 
     z = arctan2(R_AB[1, 0], R_AB[0, 0])  # atan2: [-pi pi]
@@ -829,7 +867,9 @@ def R_EL2n_E(R_EL):
     n_E: 3 x 1 array
         n-vector [no unit] decomposed in E.
 
-    See also R_EN2n_E, n_E_and_wa2R_EL, n_E2R_EN.
+    See also
+    --------
+    R_EN2n_E, n_E_and_wa2R_EL, n_E2R_EN
     """
     # n-vector equals minus the last column of R_EL and R_EN, see Section 5.5
     # in Gade (2010)
@@ -853,7 +893,7 @@ def R_EN2n_E(R_EN):
 
     See also
     --------
-    n_E2R_EN, R_EL2n_E, n_E_and_wa2R_EL.
+    n_E2R_EN, R_EL2n_E, n_E_and_wa2R_EL
     """
     # n-vector equals minus the last column of R_EL and R_EN, see Section 5.5
     # in Gade (2010)
@@ -895,7 +935,7 @@ def xyz2R(x, y, z):
 
     See also
     --------
-    R2xyz, zyx2R, R2zyx.
+    R2xyz, zyx2R, R2zyx
     """
     cz, sz = cos(z), sin(z)
     cy, sy = cos(y), sin(y)
@@ -945,7 +985,7 @@ def zyx2R(z, y, x):
 
     See also
     --------
-    R2zyx, xyz2R, R2xyz.
+    R2zyx, xyz2R, R2xyz
     """
     cz, sz = cos(z), sin(z)
     cy, sy = cos(y), sin(y)
@@ -958,8 +998,8 @@ def zyx2R(z, y, x):
     return np.squeeze(R_AB)
 
 
-def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
-    """ Return great circle distance between two positions
+class _GreatCircleDistance(object):
+    __doc__ = """ Return great circle distance between two positions
 
     Parameters
     ----------
@@ -970,7 +1010,19 @@ def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
 
     Formulae is given by equation (16) in Gade (2010) and is well
     conditioned for all angles.
-    """
+
+    Examples
+    --------
+
+    {}
+
+    """.format(_examples.get_examples([5], OO=False))
+    pass
+
+
+@use_docstring_from(_GreatCircleDistance)
+def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
+
     s_AB = np.arctan2(norm(np.cross(n_EA_E, n_EB_E, axis=0), axis=0),
                       dot(n_EA_E.T, n_EB_E)) * radius
 
@@ -979,11 +1031,11 @@ def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
 
     # ill-conditioned for angles near pi/2 (and not valid above pi/2)
     # s_AB_version2 = arcsin(norm(cross(n_EA_E,n_EB_E)))*radius
-    return s_AB
+    return s_AB.ravel()
 
 
-def euclidean_distance(n_EA_E, n_EB_E, radius=6371009.0):
-    """Return Euclidean distance between two positions
+class _EuclideanDistance(object):
+    __doc__ = """Return Euclidean distance between two positions
 
     Parameters
     ----------
@@ -991,9 +1043,18 @@ def euclidean_distance(n_EA_E, n_EB_E, radius=6371009.0):
         n-vector(s) [no unit] of position A and B, decomposed in E.
     radius: real scalar
         radius of sphere.
-    """
+
+    Examples
+    --------
+
+    {}
+    """.format(_examples.get_examples([5], OO=False))
+
+
+@use_docstring_from(_EuclideanDistance)
+def euclidean_distance(n_EA_E, n_EB_E, radius=6371009.0):
     d_AB = norm(n_EB_E - n_EA_E, axis=0) * radius
-    return d_AB
+    return d_AB.ravel()
 
 
 def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0/298.257223563,
@@ -1042,9 +1103,8 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0/298.257223563,
     return arctan2(p_AB_N[1], p_AB_N[0])
 
 
-def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth,
-                                       R_Ee=None):
-    """
+class _PositionBFromAzimuthAndDistanceFromPositionA(object):
+    __doc__ = """
     Return position B from azimuth and distance from position A
 
     Parameters
@@ -1061,7 +1121,19 @@ def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth,
     n_EB_E:  3 x n array
         n-vector(s) [no unit] of position B decomposed in E.
 
-    """
+    Examples
+    --------
+
+    {}
+
+    """.format(_examples.get_examples([8], OO=False))
+    pass
+
+
+@use_docstring_from(_PositionBFromAzimuthAndDistanceFromPositionA)
+def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth,
+                                       R_Ee=None):
+
     if R_Ee is None:
         R_Ee = E_rotation()
     # Step1: Find unit vectors for north and east:
@@ -1076,8 +1148,8 @@ def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth,
     return n_EB_E
 
 
-def mean_horizontal_position(n_EB_E):
-    """
+class _MeanHorizontalPosition(object):
+    __doc__ = """
     Return the n-vector of the horizontal mean position.
 
     Parameters
@@ -1089,7 +1161,17 @@ def mean_horizontal_position(n_EB_E):
     -------
     p_EM_E:  3 x 1 array
         n-vector [no unit] of the mean positions of all Bi, decomposed in E.
-    """
+
+    Examples
+    --------
+
+    {}
+
+    """.format(_examples.get_examples([7], OO=False))
+
+
+@use_docstring_from(_MeanHorizontalPosition)
+def mean_horizontal_position(n_EB_E):
     n_EM_E = unit(np.sum(n_EB_E, axis=1).reshape((3, 1)))
     return n_EM_E
 

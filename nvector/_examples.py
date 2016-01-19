@@ -4,14 +4,33 @@ Created on 18. jan. 2016
 @author: pab
 '''
 
-see_example_at_navlab = """See also `Example {0} at www.navlab.net
-    <http://www.navlab.net/nvector/#example_{0}>`_
-"""
+
+def use_docstring_from(cls):
+    """
+    This decorator modifies the decorated function's docstring by
+    replacing it with the docstring from the class `cls`.
+    """
+    def _doc(func):
+        cls_docstring = cls.__doc__
+        func_docstring = func.__doc__
+        if func_docstring is None:
+            func.__doc__ = cls_docstring
+        else:
+            new_docstring = func_docstring % dict(super=cls_docstring)
+            func.__doc__ = new_docstring
+        return func
+    return _doc
+
+
+def see_also(number):
+    link = "<http://www.navlab.net/nvector/#example_{0}>".format(number)
+    return "See\n`Example {} at www.navlab.net  {}`_\n\n".format(number,
+                                                                      link)
 
 
 example_1_txt = """
-Example 1: "A and B to delta"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 1: "A and B to delta"**
+
 .. image:: http://www.navlab.net/images/ex1img.png
 
 Given two positions, A and B as latitudes, longitudes and depths relative to
@@ -25,10 +44,11 @@ Use position A to define north, east, and down directions.
 the north, east, and down directions will change (relative to Earth) for
 different places.  A must be outside the poles for the north and east
 directions to be defined.)
+
 """
 
-example_1_obj_solution = """
-Solution:
+
+example_1_obj_solution = """Solution:
     >>> import numpy as np
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
@@ -52,8 +72,7 @@ Step3: Also find the direction (azimuth) to B, relative to north:
     'azimuth = 45.11 deg'
 """
 
-example_1_fun_solution = """
-Functional solution:
+example_1_fun_solution = """Solution:
     >>> import numpy as np
     >>> import nvector as nv
     >>> from nvector import rad, deg
@@ -85,8 +104,8 @@ Step5: Also find the direction (azimuth) to B, relative to north:
 """
 
 example_2_txt = """
-Example 2: "B and delta to C"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 2: "B and delta to C"**
+
 .. image:: http://www.navlab.net/images/ex2img.png
 
 A radar or sonar attached to a vehicle B (Body coordinate frame) measures the
@@ -99,6 +118,7 @@ as R_NB (this rotation matrix can be found from roll/pitch/yaw by using zyx2R).
 Find the exact position of object C as n-vector and depth ( n_EC_E and z_EC ),
 assuming Earth ellipsoid with semi-major axis a and flattening f. For WGS-72,
 use a = 6 378 135 m and f = 1/298.26.
+
 """
 
 example_2_obj_solution = """
@@ -126,9 +146,6 @@ Step 4: Find point C by adding delta BC to EB
     >>> msg = 'Ex2: PosC: lat, lon = {:4.2f}, {:4.2f} deg,  height = {:4.2f} m'
     >>> msg.format(lat[0], lon[0], -z[0])
     'Ex2: PosC: lat, lon = 53.33, 63.47 deg,  height = 406.01 m'
-
-See also `Example 2 at www.navlab.net
-    <http://www.navlab.net/nvector/#example_2>`_
 
 """
 
@@ -171,18 +188,20 @@ Step 6: Find the position of C, using the functions that goes from one
 """
 
 example_3_txt = """
-Example 3: "ECEF-vector to geodetic latitude"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 3: "ECEF-vector to geodetic latitude"**
+
 .. image:: http://www.navlab.net/images/ex3img.png
 
 Position B is given as an "ECEF-vector" p_EB_E (i.e. a vector from E, the
 center of the Earth, to B, decomposed in E).
 Find the geodetic latitude, longitude and height (latEB, lonEB and hEB),
 assuming WGS-84 ellipsoid.
+
 """
 
 example_3_obj_solution = """
 Solution:
+    >>> import numpy as np
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
     >>> position_B = 6371e3 * np.vstack((0.9, -1, 1.1))  # m
@@ -193,9 +212,6 @@ Solution:
     >>> msg = 'Ex3: Pos B: lat, lon = {:4.2f}, {:4.2f} deg, height = {:9.2f} m'
     >>> msg.format(lat[0], lon[0], h[0])
     'Ex3: Pos B: lat, lon = 39.38, -48.01 deg, height = 4702059.83 m'
-
-See also `Example 3 at www.navlab.net
-    <http://www.navlab.net/nvector/#example_3>`_
 
 """
 
@@ -217,19 +233,17 @@ Solution:
     >>> msg.format(lat[0], lon[0], h[0])
     'Ex3: Pos B: lat, lon = 39.38, -48.01 deg, height = 4702059.83 m'
 
-See also `Example 3 at www.navlab.net
-    <http://www.navlab.net/nvector/#example_3>`_
-
 """
 
 
 example_4_txt = """
-Example 4: "Geodetic latitude to ECEF-vector"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 4: "Geodetic latitude to ECEF-vector"**
+
 .. image:: http://www.navlab.net/images/ex4img.png
 
 Geodetic latitude, longitude and height are given for position B as latEB,
 longEB and hEB, find the ECEF-vector for this position, p_EB_E.
+
 """
 
 example_4_obj_solution = """
@@ -241,9 +255,6 @@ Solution:
 
     >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel())
     'Ex4: p_EB_E = [ 6373290.27721828   222560.20067474   110568.82718179] m'
-
-See also `Example 4 at www.navlab.net
-    <http://www.navlab.net/nvector/#example_4>`_
 
 """
 
@@ -258,18 +269,15 @@ Solution:
     >>> n_EB_E = lat_lon2n_E(lat_EB, lon_EB)
     >>> p_EB_E = n_EB_E2p_EB_E(n_EB_E, -h_EB, **wgs84)
 
-    >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel())
+    >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.ravel())
     'Ex4: p_EB_E = [ 6373290.27721828   222560.20067474   110568.82718179] m'
-
-See also `Example 4 at www.navlab.net
-    <http://www.navlab.net/nvector/#example_4>`_
 
 """
 
 
 example_5_txt = """
-Example 5: "Surface distance"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 5: "Surface distance"**
+
 .. image:: http://www.navlab.net/images/ex5img.png
 
 Find the surface distance sAB (i.e. great circle distance) between two
@@ -278,10 +286,12 @@ zero height, we seek the distance between the points that are at the surface of
 the Earth, directly above/below A and B. The Euclidean distance (chord length)
 dAB should also be found. Use Earth radius 6371e3 m.
 Compare the results with exact calculations for the WGS-84 ellipsoid.
+
 """
 
 example_5_obj_solution = """
-Great circle solution:
+Solution for a sphere:
+    >>> import numpy as np
     >>> import nvector as nv
     >>> frame_E = nv.FrameE(a=6371e3, f=0)
     >>> positionA = frame_E.GeoPoint(latitude=88, longitude=0, degrees=True)
@@ -296,7 +306,7 @@ Great circle solution:
     >>> msg.format(s_AB / 1000, d_AB / 1000)
     'Ex5: Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
-Alternative great circle solution:
+Alternative sphere solution:
     >>> path = nv.GeoPath(positionA, positionB)
     >>> s_AB2 = path.track_distance(method='greatcircle').ravel()
     >>> d_AB2 = path.track_distance(method='euclidean').ravel()
@@ -315,21 +325,20 @@ Exact solution for the WGS84 ellipsoid:
     >>> msg.format(s_12 / 1000, d_12 / 1000)
     'Ellipsoidal and Euclidean distance = 333.95 km, 333.91 km'
 
-See also `Example 5 at www.navlab.net
-    <http://www.navlab.net/nvector/#example_5>`_
 """
 
 example_5_fun_solution = """
-Great circle solution:
+Solution for a sphere:
+    >>> import numpy as np
     >>> import nvector as nv
     >>> from nvector import rad
 
-    >>> n_EA_E = lat_lon2n_E(rad(88), rad(0))
-    >>> n_EB_E = lat_lon2n_E(rad(89), rad(-170))
+    >>> n_EA_E = nv.lat_lon2n_E(rad(88), rad(0))
+    >>> n_EB_E = nv.lat_lon2n_E(rad(89), rad(-170))
 
-    >>>  r_Earth = 6371e3  # m, mean Earth radius
-    >>> s_AB = nv.great_circle_distance(n_EA_E, n_EB_E, radius=r_Earth)
-    >>> d_AB = nv.euclidean_distance(n_EA_E, n_EB_E, radius=r_Earth)
+    >>> r_Earth = 6371e3  # m, mean Earth radius
+    >>> s_AB = nv.great_circle_distance(n_EA_E, n_EB_E, radius=r_Earth)[0]
+    >>> d_AB = nv.euclidean_distance(n_EA_E, n_EB_E, radius=r_Earth)[0]
 
     >>> msg = 'Ex5: Great circle and Euclidean distance = {}'
     >>> msg = msg.format('{:5.2f} km, {:5.2f} km')
@@ -348,32 +357,31 @@ Exact solution for the WGS84 ellipsoid:
     >>> msg.format(s_12 / 1000, d_12 / 1000)
     'Ellipsoidal and Euclidean distance = 333.95 km, 333.91 km'
 
-See also `Example 5 at www.navlab.net
-    <http://www.navlab.net/nvector/#example_5>`_
 """
 
 
 example_6_txt = """
-Example 6 "Interpolated position"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 6 "Interpolated position"**
+
 .. image:: http://www.navlab.net/images/ex6img.png
 
 Given the position of B at time t0 and t1, n_EB_E(t0) and n_EB_E(t1).
 
 Find an interpolated position at time ti, n_EB_E(ti). All positions are given
 as n-vectors.
+
 """
 
 example_6_obj_solution = """
 Solution:
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
-    >>> positionB0 = wgs84.GeoPoint(89, 0, degrees=True)
-    >>> positionB1 = wgs84.GeoPoint(89, 180, degrees=True)
-    >>> path = nv.GeoPath(positionB0, positionB1)
+    >>> n_EB_E_t0 = wgs84.GeoPoint(89, 0, degrees=True).to_nvector()
+    >>> n_EB_E_t1 = wgs84.GeoPoint(89, 180, degrees=True).to_nvector()
+    >>> path = nv.GeoPath(n_EB_E_t0, n_EB_E_t1)
 
-    >>> t0 = 10.  # time at position B0
-    >>> t1 = 20.  # time at position B1
+    >>> t0 = 10.
+    >>> t1 = 20.
     >>> ti = 16.  # time of interpolation
     >>> ti_n = (ti - t0) / (t1 - t0) # normalized time of interpolation
 
@@ -383,9 +391,6 @@ Solution:
     >>> msg = 'Ex6, Interpolated position: lat, long = {} deg, {} deg'
     >>> msg.format(lat_ti, lon_ti)
     'Ex6, Interpolated position: lat, long = [ 89.7999805] deg, [ 180.] deg'
-
-See also `Example 6 at
-    www.navlab.net <http://www.navlab.net/nvector/#example_6>`_
 
 """
 
@@ -410,19 +415,17 @@ Solution:
     >>> msg.format(lat_ti, lon_ti)
     'Ex6, Interpolated position: lat, long = [ 89.7999805] deg, [ 180.] deg'
 
-See also `Example 6 at
-    www.navlab.net <http://www.navlab.net/nvector/#example_6>`_
-
 """
 
 example_7_txt = """
-Example 7: "Mean position"
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 7: "Mean position"**
+
 .. image:: http://www.navlab.net/images/ex7img.png
 
 Three positions A, B, and C are given as n-vectors n_EA_E, n_EB_E, and n_EC_E.
 Find the mean position, M, given as n_EM_E.
 Note that the calculation is independent of the depths of the positions.
+
 """
 
 example_7_obj_solution = """
@@ -438,14 +441,36 @@ Solution:
     >>> msg.format(lat[0], lon[0])
     'Ex7: Pos M: lat, lon = 67.24, -6.92 deg'
 
-See also `Example 7 at www.navlab.net
-    <http://www.navlab.net/nvector/#example_7>`_
+"""
+
+
+example_7_fun_solution = """
+Solution:
+    >>> import numpy as np
+    >>> import nvector as nv
+    >>> from nvector import rad, deg
+
+    >>> n_EA_E = lat_lon2n_E(rad(90), rad(0))
+    >>> n_EB_E = lat_lon2n_E(rad(60), rad(10))
+    >>> n_EC_E = lat_lon2n_E(rad(50), rad(-20))
+
+    >>> n_EM_E = unit(n_EA_E + n_EB_E + n_EC_E)
+
+or
+    >>> n_EM_E = nv.mean_horizontal_position(np.hstack((n_EA_E, n_EB_E, n_EC_E)))
+
+    >>> lat, lon = nv.n_E2lat_lon(n_EM_E)
+    >>> lat, lon = deg(lat), deg(lon)
+    >>> msg = 'Ex7: Pos M: lat, lon = {:4.2f}, {:4.2f} deg'
+    >>> msg.format(lat[0], lon[0])
+    'Ex7: Pos M: lat, lon = 67.24, -6.92 deg'
 
 """
 
+
 example_8_txt = """
-Example 8: "A and azimuth/distance to B"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 8: "A and azimuth/distance to B"**
+
 .. image:: http://www.navlab.net/images/ex8img.png
 
 We have an initial position A, direction of travel given as an azimuth
@@ -455,9 +480,12 @@ Use Earth radius 6371e3 m to find the destination point B.
 
 In geodesy this is known as "The first geodetic problem" or
 "The direct geodetic problem" for a sphere, and we see that this is similar to
-Example 2, but now the delta is given as an azimuth and a great circle
-distance. ("The second/inverse geodetic problem" for a sphere is already
-solved in Examples 1 and 5.)
+`Example 2 <http://www.navlab.net/nvector/#example_2>`_, but now the delta is
+given as an azimuth and a great circle distance. ("The second/inverse geodetic
+problem" for a sphere is already solved in Examples
+`1 <http://www.navlab.net/nvector/#example_1>`_ and
+`5 <http://www.navlab.net/nvector/#example_5>`_.)
+
 """
 
 example_8_obj_solution = """
@@ -473,15 +501,35 @@ Solution:
     >>> msg.format(lat, lon)
     'Ex8, Destination: lat, lon = 79.99 deg, -90.02 deg'
 
-See also `Example 8 at www.navlab.net
-    <http://www.navlab.net/nvector/#example_8>`_
+"""
+
+
+example_8_fun_solution = """
+Solution:
+    >>> import nvector as nv
+    >>> from nvector import rad, deg
+    >>> lat, lon = rad(80), rad(-90)
+
+    >>> n_EA_E = nv.lat_lon2n_E(lat, lon)
+    >>> azimuth = rad(200)
+    >>> s_AB = 1000.0  # m
+    >>> r_Earth = 6371e3  # m, mean Earth radius
+
+    >>> distance_rad = s_AB / r_Earth
+    >>> n_EB_E = nv.n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad,
+    ...                                                azimuth)
+    >>> lat_EB, lon_EB = nv.n_E2lat_lon(n_EB_E)
+    >>> lat, lon = deg(lat_EB), deg(lon_EB)
+    >>> msg = 'Ex8, Destination: lat, lon = {:4.2f} deg, {:4.2f} deg'
+    >>> msg.format(lat[0], lon[0])
+    'Ex8, Destination: lat, lon = 79.99 deg, -90.02 deg'
 
 """
 
 
 example_9_txt = """
-Example 9: "Intersection of two paths"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 9: "Intersection of two paths"**
+
 .. image:: http://www.navlab.net/images/ex9img.png
 
 Define a path from two given positions (at the surface of a spherical Earth),
@@ -490,7 +538,9 @@ as the great circle that goes through the two points.
 Path A is given by A1 and A2, while path B is given by B1 and B2.
 
 Find the position C where the two paths intersect.
+
 """
+
 
 example_9_obj_solution = """
 Solution:
@@ -509,14 +559,37 @@ Solution:
     >>> msg.format(lat[0], lon[0])
     'Ex9, Intersection: lat, long = 40.32, 55.90 deg'
 
-See also `Example 9 at www.navlab.net
-    <http://www.navlab.net/nvector/#example_9>`_
+"""
+
+
+example_9_fun_solution = """
+Solution:
+    >>> import numpy as np
+    >>> import nvector as nv
+    >>> from nvector import rad, deg
+
+    >>> n_EA1_E = lat_lon2n_E(rad(10), rad(20))
+    >>> n_EA2_E = lat_lon2n_E(rad(30), rad(40))
+    >>> n_EB1_E = lat_lon2n_E(rad(50), rad(60))
+    >>> n_EB2_E = lat_lon2n_E(rad(70), rad(80))
+
+    >>> n_EC_E_tmp = unit(np.cross(np.cross(n_EA1_E, n_EA2_E, axis=0),
+    ...                            np.cross(n_EB1_E, n_EB2_E, axis=0), axis=0))
+
+    >>> n_EC_E = np.sign(np.dot(n_EC_E_tmp.T, n_EA1_E)) * n_EC_E_tmp
+    >>> lat_EC, lon_EC = n_E2lat_lon(n_EC_E)
+
+    >>> lat, lon = deg(lat_EC), deg(lon_EC)
+    >>> msg = 'Ex9, Intersection: lat, lon = {:4.2f}, {:4.2f} deg'
+    >>> msg.format(lat[0], lon[0])
+    'Ex9, Intersection: lat, lon = 40.32, 55.90 deg'
 
 """
 
+
 example_10_txt = """
-Example 10: "Cross track distance"
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+**Example 10: "Cross track distance"**
+
 .. image:: http://www.navlab.net/images/ex10img.png
 
 Path A is given by the two positions A1 and A2 (similar to the previous
@@ -528,6 +601,7 @@ surface, between the great circle and B).
 
 Also find the Euclidean distance dxt between B and the plane defined by the
 great circle. Use Earth radius 6371e3.
+
 """
 
 example_10_obj_solution = """
@@ -546,22 +620,82 @@ Solution:
     >>> 'Ex10: Cross track distance: s_xt, d_xt = {}'.format(val_txt)
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 
-See also `Example 10 at www.navlab.net
-    <http://www.navlab.net/nvector/#example_10>`_
+"""
 
-See also
---------
-`geographiclib <https://pypi.python.org/pypi/geographiclib>`_
+
+example_10_fun_solution = """
+Solution:
+    >>> import numpy as np
+    >>> import nvector as nv
+    >>> n_EA1_E = lat_lon2n_E(rad(0), rad(0))
+    >>> n_EA2_E = lat_lon2n_E(rad(10), rad(0))
+    >>> n_EB_E = lat_lon2n_E(rad(1), rad(0.1))
+
+    >>> r_Earth = 6371e3  # m, mean Earth radius
+
+Find the unit normal to the great circle:
+    >>> c_E = unit(np.cross(n_EA1_E, n_EA2_E, axis=0))
+
+Find the great circle cross track distance:
+    >>> s_xt = (np.arccos(np.dot(c_E.T, n_EB_E)) - np.pi / 2) * r_Earth
+
+Find the Euclidean cross track distance:
+    >>> d_xt = -np.dot(c_E.T, n_EB_E) * r_Earth
+
+    >>> val_txt = '{:4.2f} km, {:4.2f} km'.format(s_xt[0]/1000, d_xt[0]/1000)
+    >>> 'Ex10: Cross track distance: s_xt, d_xt = {}'.format(val_txt)
+    'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 
 """
 
 
+def get_examples(indices, OO=True):
+    d = dict(globals())
+    txt = 'example_{}_txt'
+    sol = 'example_{}_obj_solution' if OO else 'example_{}_fun_solution'
+    return ''.join((d[txt.format(i)]+d[sol.format(i)] + see_also(i)
+                    for i in indices))
+
+
+getting_started = ("""
+Getting Started
+===============
+
+Below the object-oriented solution to some common geodesic problems are given.
+In the first example the functional solution is also given.
+The functional solutions to the remaining problems can be found
+`here
+<https://github.com/pbrod/nvector/blob/master/nvector/tests/test_nvector.py>`_.
+
+""" + example_1_txt + example_1_obj_solution + 'Functional ' +
+example_1_fun_solution + see_also(1) + get_examples(range(2,11), OO=True))
+
+
+getting_started_functional = ("""
+Functional examples
+===================
+
+Below the functional solution to some common geodesic problems are given.
+In the first example the object-oriented solution is also given.
+The object-oriented solutions to the remaining problems can be found
+`here
+<https://github.com/pbrod/nvector/blob/master/nvector/tests/test_frames.py>`_.
+
+""" + example_1_txt + example_1_fun_solution + 'OO-' + example_1_obj_solution +
+see_also(1) + get_examples(range(2,11), OO=False))
+
+
+class _TestDocStrings(object):
+    __doc__ = getting_started
+    pass
+
+
 def test_docstrings():
     import doctest
-    print('Testing docstrings in %s' % __file__)
     doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE)
-    print('Docstrings tested')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
+
+    # print(getting_started)
     test_docstrings()
