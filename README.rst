@@ -2,25 +2,8 @@
 nvector
 =======
 
-.. image:: https://badge.fury.io/py/Nvector.png
-    :target: https://pypi.python.org/pypi/Nvector/
 
-.. image:: https://travis-ci.org/pbrod/Nvector.svg?branch=master
-    :target: https://travis-ci.org/pbrod/Nvector
-
-.. image:: https://readthedocs.org/projects/pip/badge/?version=latest
-    :target: http://Nvector.readthedocs.org/en/latest/
-
-.. image:: https://landscape.io/github/pbrod/Nvector/master/landscape.svg?style=flat
-   :target: https://landscape.io/github/pbrod/Nvector/master
-   :alt: Code Health
-
-.. image:: https://coveralls.io/repos/pbrod/Nvector/badge.svg?branch=master&service=github
-   :target: https://coveralls.io/github/pbrod/Nvector?branch=master
-
-.. image:: https://img.shields.io/pypi/pyversions/Nvector.svg
-   :target: https://github.com/pbrod/Nvector
-
+|nvector_img| |tests_img| |docs_img| |health_img| |coverage_img| |versions_img|
 
 Nvector is a suite of tools written in Python to solve geographical position
 calculations like:
@@ -57,59 +40,16 @@ an Earth-fixed coordinate frame, and it indicates that the three components of
 n-vector are along the three axes of E. More details about the notation and
 reference frames can be found here:
 
-http://www.navlab.net/nvector/
-
-http://www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf
-
-
-Methods
-~~~~~~~
-
-The core functions provided are:
-
-- **lat_lon2n_E:**
-    Converts latitude and longitude to n-vector.
-- **n_E2lat_lon:**
-    Converts n-vector to latitude and longitude.
-- **n_EB_E2p_EB_E:**
-    Converts n-vector to Cartesian position vector in meters.
-- **p_EB_E2n_EB_E:**
-    Converts Cartesian position vector in meters to n-vector.
-- **n_EA_E_and_n_EB_E2p_AB_E:**
-    From two positions A and B, finds the delta position.
-- **n_EA_E_and_p_AB_E2n_EB_E:**
-    From position A and delta, finds position B.
-
-
-Nvector also provide an object oriented interface.
-
-- **FrameE:**
-    z-axis -> North Pole, x-axis -> Latitude=Longitude=0.
-    Origo = Earth's centre.
-- **FrameN:**
-    x-axis -> North, y-axis -> East, z-axis -> down.
-    Origo = Beneath/above Body at Earth's surface.
-- **FrameL:**
-    x-axis, y-axis -> wander azimuth, z-axis -> down.
-    Origo = Beneath/above Body at Earth's surface.
-- **FrameB:**
-    x-axis -> forward, y-axis -> starboard, z-axis -> body down.
-    Origo = Body's centre.
-- **ECEFvector:**
-    Geographical position given as Cartesian position vector in frame E
-- **GeoPoint:**
-    Geographical position given as latitude, longitude, depth in frame E
-- **Nvector:**
-    Geographical position given as n-vector and depth in frame E
-- **GeoPath:**
-    Geodesic path between two points in frame E
-
-
-
 Documentation and code
 ======================
 
 Official documentation: http://www.navlab.net/nvector/
+
+*Kenneth Gade (2010):*
+    `A Nonsingular Horizontal Position Representation,
+    The Journal of Navigation, Volume 63, Issue 03, pp 395-417, July 2010.
+    <http://www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf>`_
+
 
 Bleeding edge: https://github.com/pbrod/nvector.
 
@@ -213,7 +153,7 @@ Step3: Also find the direction (azimuth) to B, relative to north:
     >>> 'azimuth = {0:4.2f} deg'.format(np.rad2deg(azimuth))
     'azimuth = 45.11 deg'
 
-Functional solution:
+Functional Solution:
     >>> import numpy as np
     >>> import nvector as nv
     >>> from nvector import rad, deg
@@ -261,6 +201,7 @@ Find the exact position of object C as n-vector and depth ( n_EC_E and z_EC ),
 assuming Earth ellipsoid with semi-major axis a and flattening f. For WGS-72,
 use a = 6 378 135 m and f = 1/298.26.
 
+
 Solution:
     >>> import nvector as nv
     >>> wgs72 = nv.FrameE(name='WGS72')
@@ -299,7 +240,9 @@ center of the Earth, to B, decomposed in E).
 Find the geodetic latitude, longitude and height (latEB, lonEB and hEB),
 assuming WGS-84 ellipsoid.
 
+
 Solution:
+    >>> import numpy as np
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
     >>> position_B = 6371e3 * np.vstack((0.9, -1, 1.1))  # m
@@ -321,6 +264,7 @@ See also
 
 Geodetic latitude, longitude and height are given for position B as latEB,
 longEB and hEB, find the ECEF-vector for this position, p_EB_E.
+
 
 Solution:
     >>> import nvector as nv
@@ -346,7 +290,9 @@ the Earth, directly above/below A and B. The Euclidean distance (chord length)
 dAB should also be found. Use Earth radius 6371e3 m.
 Compare the results with exact calculations for the WGS-84 ellipsoid.
 
-Great circle solution:
+
+Solution for a sphere:
+    >>> import numpy as np
     >>> import nvector as nv
     >>> frame_E = nv.FrameE(a=6371e3, f=0)
     >>> positionA = frame_E.GeoPoint(latitude=88, longitude=0, degrees=True)
@@ -361,7 +307,7 @@ Great circle solution:
     >>> msg.format(s_AB / 1000, d_AB / 1000)
     'Ex5: Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
-Alternative great circle solution:
+Alternative sphere solution:
     >>> path = nv.GeoPath(positionA, positionB)
     >>> s_AB2 = path.track_distance(method='greatcircle').ravel()
     >>> d_AB2 = path.track_distance(method='euclidean').ravel()
@@ -392,6 +338,7 @@ Given the position of B at time t0 and t1, n_EB_E(t0) and n_EB_E(t1).
 
 Find an interpolated position at time ti, n_EB_E(ti). All positions are given
 as n-vectors.
+
 
 Solution:
     >>> import nvector as nv
@@ -424,6 +371,7 @@ Three positions A, B, and C are given as n-vectors n_EA_E, n_EB_E, and n_EC_E.
 Find the mean position, M, given as n_EM_E.
 Note that the calculation is independent of the depths of the positions.
 
+
 Solution:
     >>> import nvector as nv
     >>> points = nv.GeoPoint(latitude=[90, 60, 50],
@@ -451,9 +399,12 @@ Use Earth radius 6371e3 m to find the destination point B.
 
 In geodesy this is known as "The first geodetic problem" or
 "The direct geodetic problem" for a sphere, and we see that this is similar to
-Example 2, but now the delta is given as an azimuth and a great circle
-distance. ("The second/inverse geodetic problem" for a sphere is already
-solved in Examples 1 and 5.)
+`Example 2 <http://www.navlab.net/nvector/#example_2>`_, but now the delta is
+given as an azimuth and a great circle distance. ("The second/inverse geodetic
+problem" for a sphere is already solved in Examples
+`1 <http://www.navlab.net/nvector/#example_1>`_ and
+`5 <http://www.navlab.net/nvector/#example_5>`_.)
+
 
 Solution:
     >>> import nvector as nv
@@ -481,6 +432,7 @@ as the great circle that goes through the two points.
 Path A is given by A1 and A2, while path B is given by B1 and B2.
 
 Find the position C where the two paths intersect.
+
 
 Solution:
     >>> import nvector as nv
@@ -516,6 +468,7 @@ surface, between the great circle and B).
 Also find the Euclidean distance dxt between B and the plane defined by the
 great circle. Use Earth radius 6371e3.
 
+
 Solution:
     >>> import nvector as nv
     >>> frame = nv.FrameE(a=6371e3, f=0)
@@ -534,10 +487,24 @@ Solution:
 See also
     `Example 10 at www.navlab.net <http://www.navlab.net/nvector/#example_10>`_
 
+
+
 See also
---------
+========
 `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
 
+.. |nvector_img| image:: https://badge.fury.io/py/Nvector.png
+   :target: https://pypi.python.org/pypi/Nvector/
+.. |tests_img| image:: https://travis-ci.org/pbrod/Nvector.svg?branch=master
+   :target: https://travis-ci.org/pbrod/Nvector
+.. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=latest
+   :target: http://Nvector.readthedocs.org/en/latest/
+.. |health_img| image:: https://landscape.io/github/pbrod/Nvector/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/pbrod/Nvector/master
+.. |coverage_img| image:: https://coveralls.io/repos/pbrod/Nvector/badge.svg?branch=master&service=github
+   :target: https://coveralls.io/github/pbrod/Nvector?branch=master
+.. |versions_img| image:: https://img.shields.io/pypi/pyversions/Nvector.svg
+   :target: https://github.com/pbrod/Nvector
 
 Note
 ====

@@ -3,6 +3,8 @@ __doc__ = """
 Introduction to Nvector
 =======================
 
+|nvector_img| |tests_img| |docs_img| |health_img| |coverage_img| |versions_img|
+
 Nvector is a suite of tools written in Python to solve geographical position
 calculations like:
 
@@ -107,6 +109,19 @@ See also
 ========
 `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
 
+.. |nvector_img| image:: https://badge.fury.io/py/Nvector.png
+   :target: https://pypi.python.org/pypi/Nvector/
+.. |tests_img| image:: https://travis-ci.org/pbrod/Nvector.svg?branch=master
+   :target: https://travis-ci.org/pbrod/Nvector
+.. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=latest
+   :target: http://Nvector.readthedocs.org/en/latest/
+.. |health_img| image:: https://landscape.io/github/pbrod/Nvector/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/pbrod/Nvector/master
+.. |coverage_img| image:: https://coveralls.io/repos/pbrod/Nvector/badge.svg?branch=master&service=github
+   :target: https://coveralls.io/github/pbrod/Nvector?branch=master
+.. |versions_img| image:: https://img.shields.io/pypi/pyversions/Nvector.svg
+   :target: https://github.com/pbrod/Nvector
+
 """
 
 
@@ -115,5 +130,14 @@ def test_docstrings():
     doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE)
 
 
+def save_info(doc):
+
+    with open('readme.txt', 'w') as fid:
+        fid.write(doc)
+
+
 if __name__ == '__main__':
-    test_docstrings()
+    # test_docstrings()
+
+    save_info(__doc__)
+

@@ -24,8 +24,8 @@ def use_docstring_from(cls):
 
 def see_also(number):
     link = "<http://www.navlab.net/nvector/#example_{0}>".format(number)
-    return "See\n`Example {} at www.navlab.net  {}`_\n\n".format(number,
-                                                                      link)
+    return """See also
+    `Example {} at www.navlab.net {}`_\n\n""".format(number, link)
 
 
 example_1_txt = """
@@ -70,6 +70,7 @@ Step3: Also find the direction (azimuth) to B, relative to north:
     >>> azimuth = np.arctan2(p_AB_N[1], p_AB_N[0])
     >>> 'azimuth = {0:4.2f} deg'.format(np.rad2deg(azimuth))
     'azimuth = 45.11 deg'
+
 """
 
 example_1_fun_solution = """Solution:
@@ -185,6 +186,7 @@ Step 6: Find the position of C, using the functions that goes from one
     >>> msg = 'Ex2: PosC: lat, lon = {:4.2f}, {:4.2f} deg,  height = {:4.2f} m'
     >>> msg.format(lat[0], lon[0], -z[0])
     'Ex2: PosC: lat, lon = 53.33, 63.47 deg,  height = 406.01 m'
+
 """
 
 example_3_txt = """
