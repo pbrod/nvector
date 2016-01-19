@@ -56,24 +56,15 @@ Bleeding edge: https://github.com/pbrod/nvector.
 Official releases available at: http://pypi.python.org/pypi/nvector.
 
 
-Installation and upgrade:
-=========================
+Installation
+============
 
-with pip
+If you have pip installed, then simply type:
 
     $ pip install nvector
 
-
-with easy_install
-
-    $ easy_install nvector
-
-or
-
-    $ easy_install upgrade nvector
-
-to upgrade to the newest version
-
+to get the lastest stable version. Using pip also has the advantage that all
+requirements are automatically installed.
 
 Unit tests
 ===========
