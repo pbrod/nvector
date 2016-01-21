@@ -691,7 +691,6 @@ see_also(1) + get_examples(range(2, 11), OO=False))
 
 class _TestDocStrings(object):
     __doc__ = getting_started
-    pass
 
 
 def test_docstrings():
