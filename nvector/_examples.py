@@ -125,6 +125,7 @@ use a = 6 378 135 m and f = 1/298.26.
 example_2_obj_solution = """
 Solution:
     >>> import nvector as nv
+    >>> import numpy as np
     >>> wgs72 = nv.FrameE(name='WGS72')
     >>> wgs72 = nv.FrameE(a=6378135, f=1.0/298.26)
 
@@ -173,16 +174,16 @@ Step 3: Find R_EN:
     >>> R_EN = nv.n_E2R_EN(n_EB_E)
 
 Step 4: Find R_EB, from R_EN and R_NB:
-    R_EB = np.dot(R_EN, R_NB)  # Note: closest frames cancel
+    >>> R_EB = np.dot(R_EN, R_NB)  # Note: closest frames cancel
 
 Step 5: Decompose the delta BC vector in E:
-    p_BC_E = np.dot(R_EB, p_BC_B)
+    >>> p_BC_E = np.dot(R_EB, p_BC_B)
 
 Step 6: Find the position of C, using the functions that goes from one
-    >>> n_EC_E, z_EC = n_EA_E_and_p_AB_E2n_EB_E(n_EB_E, p_BC_E, z_EB, **wgs72)
+    >>> n_EC_E, z_EC = nv.n_EA_E_and_p_AB_E2n_EB_E(n_EB_E, p_BC_E, z_EB, **wgs72)
 
-    >>> lat_EC, long_EC = n_E2lat_lon(n_EC_E)
-    >>> lat, lon = deg(lat_EC), deg(lon_EC)
+    >>> lat_EC, lon_EC = nv.n_E2lat_lon(n_EC_E)
+    >>> lat, lon, z = deg(lat_EC), deg(lon_EC), z_EC
     >>> msg = 'Ex2: PosC: lat, lon = {:4.2f}, {:4.2f} deg,  height = {:4.2f} m'
     >>> msg.format(lat[0], lon[0], -z[0])
     'Ex2: PosC: lat, lon = 53.33, 63.47 deg,  height = 406.01 m'
@@ -268,8 +269,8 @@ Solution:
     >>> wgs84 = dict(a=6378137.0, f=1.0/298.257223563)
     >>> lat_EB, lon_EB = rad(1), rad(2)
     >>> h_EB = 3
-    >>> n_EB_E = lat_lon2n_E(lat_EB, lon_EB)
-    >>> p_EB_E = n_EB_E2p_EB_E(n_EB_E, -h_EB, **wgs84)
+    >>> n_EB_E = nv.lat_lon2n_E(lat_EB, lon_EB)
+    >>> p_EB_E = nv.n_EB_E2p_EB_E(n_EB_E, -h_EB, **wgs84)
 
     >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.ravel())
     'Ex4: p_EB_E = [ 6373290.27721828   222560.20067474   110568.82718179] m'
@@ -410,7 +411,7 @@ Solution:
     >>> ti_n = (ti - t0) / (t1 - t0) # normalized time of interpolation
 
     >>> n_EB_E_ti = nv.unit(n_EB_E_t0 + ti_n * (n_EB_E_t1 - n_EB_E_t0))
-    >>> lat_EB_ti, lon_EB_ti = n_E2lat_lon(n_EB_E_ti)
+    >>> lat_EB_ti, lon_EB_ti = nv.n_E2lat_lon(n_EB_E_ti)
 
     >>> lat_ti, lon_ti = deg(lat_EB_ti), deg(lon_EB_ti)
     >>> msg = 'Ex6, Interpolated position: lat, long = {} deg, {} deg'
@@ -580,7 +581,7 @@ Solution:
     ...                               axis=0))
 
     >>> n_EC_E = np.sign(np.dot(n_EC_E_tmp.T, n_EA1_E)) * n_EC_E_tmp
-    >>> lat_EC, lon_EC = n_E2lat_lon(n_EC_E)
+    >>> lat_EC, lon_EC = nv.n_E2lat_lon(n_EC_E)
 
     >>> lat, lon = deg(lat_EC), deg(lon_EC)
     >>> msg = 'Ex9, Intersection: lat, lon = {:4.2f}, {:4.2f} deg'
@@ -640,13 +641,13 @@ Find the unit normal to the great circle:
     >>> c_E = nv.unit(np.cross(n_EA1_E, n_EA2_E, axis=0))
 
 Find the great circle cross track distance:
-    >>> s_xt = (np.arccos(np.dot(c_E.T, n_EB_E)) - np.pi / 2) * r_Earth
+    >>> s_xt = (np.arccos(np.dot(c_E.T, n_EB_E)) - np.pi / 2).ravel() * r_Earth
 
 Find the Euclidean cross track distance:
-    >>> d_xt = -np.dot(c_E.T, n_EB_E) * r_Earth
+    >>> d_xt = -np.dot(c_E.T, n_EB_E).ravel() * r_Earth
 
     >>> val_txt = '{:4.2f} km, {:4.2f} km'.format(s_xt[0]/1000, d_xt[0]/1000)
-    >>> 'Ex10: Cross track distance: s_xt, d_xt = {}'.format(val_txt)
+    >>> 'Ex10: Cross track distance: s_xt, d_xt = {0}'.format(val_txt)
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 
 """
@@ -671,7 +672,7 @@ The functional solutions to the remaining problems can be found
 <https://github.com/pbrod/nvector/blob/master/nvector/tests/test_nvector.py>`_.
 
 """ + example_1_txt + example_1_obj_solution + 'Functional ' +
-example_1_fun_solution + see_also(1) + get_examples(range(2,11), OO=True))
+example_1_fun_solution + see_also(1) + get_examples(range(2, 11), OO=True))
 
 
 getting_started_functional = ("""
@@ -685,7 +686,7 @@ The object-oriented solutions to the remaining problems can be found
 <https://github.com/pbrod/nvector/blob/master/nvector/tests/test_frames.py>`_.
 
 """ + example_1_txt + example_1_fun_solution + 'OO-' + example_1_obj_solution +
-see_also(1) + get_examples(range(2,11), OO=False))
+see_also(1) + get_examples(range(2, 11), OO=False))
 
 
 class _TestDocStrings(object):
