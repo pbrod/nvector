@@ -21,7 +21,7 @@ def plot_mean_position():
     n_EM_E = unit(np.sum(nvecs, axis=1).reshape((3, 1)))
     lat, lon = n_E2lat_lon(n_EM_E)
     lat, lon = deg(lat), deg(lon)
-    print('Ex7, Average lat={}, lon={}'.format(lat, lon))
+    print('Ex7, Average lat={0}, lon={1}'.format(lat, lon))
 
     map1 = Basemap(projection='ortho', lat_0=int(lat), lon_0=int(lon),
                    resolution='l')

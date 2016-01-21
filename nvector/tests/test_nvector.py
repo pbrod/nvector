@@ -74,10 +74,10 @@ class TestNvector(unittest.TestCase):
         azimuth = np.arctan2(p_AB_N[1], p_AB_N[0])
         # positive angle about down-axis
 
-        print('Ex1, delta north, east, down = {}, {}, {}'.format(p_AB_N[0],
+        print('Ex1, delta north, east, down = {0}, {1}, {2}'.format(p_AB_N[0],
                                                                  p_AB_N[1],
                                                                  p_AB_N[2]))
-        print('Ex1, azimuth = {} deg'.format(deg(azimuth)))
+        print('Ex1, azimuth = {0} deg'.format(deg(azimuth)))
 
         assert_array_almost_equal(p_AB_N[0], 331730.23478089)
         assert_array_almost_equal(p_AB_N[1], 332997.87498927)
@@ -162,7 +162,7 @@ class TestNvector(unittest.TestCase):
         # Step2: Find the ECEF-vector p_EB_E:
         p_EB_E = n_EB_E2p_EB_E(n_EB_E, -h_EB)
 
-        print('Ex4: p_EB_E = {} m'.format(p_EB_E.ravel()))
+        print('Ex4: p_EB_E = {0} m'.format(p_EB_E.ravel()))
 
         assert_array_almost_equal(p_EB_E.ravel(),
                                   [6373290.27721828, 222560.20067474,
@@ -264,7 +264,7 @@ class TestNvector(unittest.TestCase):
         # When displaying the resulting position for humans, it is more
         # convenient to see lat, long:
         lat_EB, long_EB = n_E2lat_lon(n_EB_E)
-        print('Ex8, Destination: lat, long = {} {} deg'.format(deg(lat_EB),
+        print('Ex8, Destination: lat, long = {0} {1} deg'.format(deg(lat_EB),
                                                                deg(long_EB)))
 
         assert_array_almost_equal(deg(lat_EB), 79.99154867)

@@ -25,7 +25,7 @@ def use_docstring_from(cls):
 def see_also(number):
     link = "<http://www.navlab.net/nvector/#example_{0}>".format(number)
     return """See also
-    `Example {} at www.navlab.net {}`_\n\n""".format(number, link)
+    `Example {0} at www.navlab.net {1}`_\n\n""".format(number, link)
 
 
 example_1_txt = """
