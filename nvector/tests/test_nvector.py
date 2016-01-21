@@ -38,8 +38,8 @@ from numpy.testing import assert_array_almost_equal
 
 
 class TestNvector(unittest.TestCase):
-
-    def test_Ex1_A_and_B_to_delta_in_frame_N(self):
+    @staticmethod
+    def test_Ex1_A_and_B_to_delta_in_frame_N():
 
         # Positions A and B are given in (decimal) degrees and depths:
         lat_EA, lon_EA, z_EA = rad(1), rad(2), 3
@@ -84,7 +84,8 @@ class TestNvector(unittest.TestCase):
         assert_array_almost_equal(p_AB_N[2], 17404.27136194)
         assert_array_almost_equal(deg(azimuth), 45.10926324)
 
-    def test_Ex2_B_and_delta_in_frame_B_to_C_in_frame_E(self):
+    @staticmethod
+    def test_Ex2_B_and_delta_in_frame_B_to_C_in_frame_E():
         # delta vector from B to C, decomposed in B is given:
         p_BC_B = np.r_[3000, 2000, 100].reshape((-1, 1))
 
@@ -124,7 +125,8 @@ class TestNvector(unittest.TestCase):
         assert_array_almost_equal(deg(long_EC), 63.46812344)
         assert_array_almost_equal(z_EC, -406.00719607)
 
-    def test_Ex3_ECEF_vector_to_geodetic_latitude(self):
+    @staticmethod
+    def test_Ex3_ECEF_vector_to_geodetic_latitude():
 
         # Position B is given as p_EB_E ("ECEF-vector")
 
@@ -146,7 +148,8 @@ class TestNvector(unittest.TestCase):
         assert_array_almost_equal(deg(long_EB), -48.0127875)
         assert_array_almost_equal(h_EB, 4702059.83429485)
 
-    def test_Ex4_geodetic_latitude_to_ECEF_vector(self):
+    @staticmethod
+    def test_Ex4_geodetic_latitude_to_ECEF_vector():
 
         # Position B is given with lat, long and height:
         lat_EB_deg = 1
@@ -168,7 +171,8 @@ class TestNvector(unittest.TestCase):
                                   [6373290.27721828, 222560.20067474,
                                    110568.82718179])
 
-    def test_Ex5_great_circle_distance(self):
+    @staticmethod
+    def test_Ex5_great_circle_distance():
 
         # Position A and B are given as n_EA_E and n_EB_E:
         # Enter elements as lat/long in deg:
@@ -187,7 +191,8 @@ class TestNvector(unittest.TestCase):
         assert_array_almost_equal(s_AB / 1000, 332.45644411)
         assert_array_almost_equal(d_AB / 1000, 332.41872486)
 
-    def test_Ex6_interpolated_position(self):
+    @staticmethod
+    def test_Ex6_interpolated_position():
 
         # Position B at time t0 and t2 is given as n_EB_E_t0 and n_EB_E_t1:
         # Enter elements as lat/long in deg:
@@ -215,7 +220,8 @@ class TestNvector(unittest.TestCase):
         assert_array_almost_equal(deg(lat_EB_ti), 89.7999805)
         assert_array_almost_equal(deg(long_EB_ti), 180.)
 
-    def test_Ex7_mean_position(self):
+    @staticmethod
+    def test_Ex7_mean_position():
 
         # Three positions A, B and C are given:
         # Enter elements as lat/long in deg:
@@ -237,7 +243,8 @@ class TestNvector(unittest.TestCase):
         assert_array_almost_equal(n_EM_E.ravel(),
                                   [0.384117, -0.046602, 0.922107])
 
-    def test_Ex8_position_A_and_azimuth_and_distance_to_B(self):
+    @staticmethod
+    def test_Ex8_position_A_and_azimuth_and_distance_to_B():
 
         # Position A is given as n_EA_E:
         # Enter elements as lat/long in deg:
@@ -272,7 +279,8 @@ class TestNvector(unittest.TestCase):
         azimuth1 = n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=r_Earth, f=0)
         assert_array_almost_equal(azimuth, azimuth1+2*np.pi)
 
-    def test_Ex9_intersection(self):
+    @staticmethod
+    def test_Ex9_intersection():
 
         # Two paths A and B are given by two pairs of positions:
         # Enter elements as lat/long in deg:
@@ -298,7 +306,8 @@ class TestNvector(unittest.TestCase):
         assert_array_almost_equal(deg(lat_EC), 40.31864307)
         assert_array_almost_equal(deg(long_EC), 55.90186788)
 
-    def test_Ex10_cross_track_distance(self):
+    @staticmethod
+    def test_Ex10_cross_track_distance():
 
         # Position A1 and A2 and B are given as n_EA1_E, n_EA2_E, and n_EB_E:
         # Enter elements as lat/long in deg:
@@ -325,7 +334,8 @@ class TestNvector(unittest.TestCase):
         assert_array_almost_equal(s_xt, 11117.79911015)
         assert_array_almost_equal(d_xt, 11117.79346741)
 
-    def test_R2xyz(self):
+    @staticmethod
+    def test_R2xyz():
         x, y, z = rad((10, 20, 30))
         R_AB1 = xyz2R(x, y, z)
         R_AB = [[0.81379768, -0.46984631,  0.34202014],
@@ -335,7 +345,8 @@ class TestNvector(unittest.TestCase):
         x1, y1, z1 = R2xyz(R_AB1)
         assert_array_almost_equal((x, y, z), (x1, y1, z1))
 
-    def test_R2zxy(self):
+    @staticmethod
+    def test_R2zxy():
         x, y, z = rad((10, 20, 30))
         R_AB1 = zyx2R(z, y, x)
         R_AB = [[0.813798, -0.44097, 0.378522],
@@ -346,7 +357,8 @@ class TestNvector(unittest.TestCase):
         z1, y1, x1 = R2zyx(R_AB1)
         assert_array_almost_equal((x, y, z), (x1, y1, z1))
 
-    def test_n_E_and_wa2R_EL(self):
+    @staticmethod
+    def test_n_E_and_wa2R_EL():
         n_E = np.array([[0], [0], [1]])
         R_EL = n_E_and_wa2R_EL(n_E, wander_azimuth=np.pi/2)
         R_EL1 = [[0, 1.0, 0],

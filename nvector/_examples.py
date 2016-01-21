@@ -452,11 +452,11 @@ Solution:
     >>> import nvector as nv
     >>> from nvector import rad, deg
 
-    >>> n_EA_E = lat_lon2n_E(rad(90), rad(0))
-    >>> n_EB_E = lat_lon2n_E(rad(60), rad(10))
-    >>> n_EC_E = lat_lon2n_E(rad(50), rad(-20))
+    >>> n_EA_E = nv.lat_lon2n_E(rad(90), rad(0))
+    >>> n_EB_E = nv.lat_lon2n_E(rad(60), rad(10))
+    >>> n_EC_E = nv.lat_lon2n_E(rad(50), rad(-20))
 
-    >>> n_EM_E = unit(n_EA_E + n_EB_E + n_EC_E)
+    >>> n_EM_E = nv.unit(n_EA_E + n_EB_E + n_EC_E)
 
 or
     >>> n_EM_E = nv.mean_horizontal_position(np.hstack((n_EA_E, n_EB_E, n_EC_E)))
@@ -570,13 +570,14 @@ Solution:
     >>> import nvector as nv
     >>> from nvector import rad, deg
 
-    >>> n_EA1_E = lat_lon2n_E(rad(10), rad(20))
-    >>> n_EA2_E = lat_lon2n_E(rad(30), rad(40))
-    >>> n_EB1_E = lat_lon2n_E(rad(50), rad(60))
-    >>> n_EB2_E = lat_lon2n_E(rad(70), rad(80))
+    >>> n_EA1_E = nv.lat_lon2n_E(rad(10), rad(20))
+    >>> n_EA2_E = nv.lat_lon2n_E(rad(30), rad(40))
+    >>> n_EB1_E = nv.lat_lon2n_E(rad(50), rad(60))
+    >>> n_EB2_E = nv.lat_lon2n_E(rad(70), rad(80))
 
-    >>> n_EC_E_tmp = unit(np.cross(np.cross(n_EA1_E, n_EA2_E, axis=0),
-    ...                            np.cross(n_EB1_E, n_EB2_E, axis=0), axis=0))
+    >>> n_EC_E_tmp = nv.unit(np.cross(np.cross(n_EA1_E, n_EA2_E, axis=0),
+    ...                               np.cross(n_EB1_E, n_EB2_E, axis=0),
+    ...                               axis=0))
 
     >>> n_EC_E = np.sign(np.dot(n_EC_E_tmp.T, n_EA1_E)) * n_EC_E_tmp
     >>> lat_EC, lon_EC = n_E2lat_lon(n_EC_E)
@@ -629,14 +630,14 @@ example_10_fun_solution = """
 Solution:
     >>> import numpy as np
     >>> import nvector as nv
-    >>> n_EA1_E = lat_lon2n_E(rad(0), rad(0))
-    >>> n_EA2_E = lat_lon2n_E(rad(10), rad(0))
-    >>> n_EB_E = lat_lon2n_E(rad(1), rad(0.1))
+    >>> n_EA1_E = nv.lat_lon2n_E(rad(0), rad(0))
+    >>> n_EA2_E = nv.lat_lon2n_E(rad(10), rad(0))
+    >>> n_EB_E = nv.lat_lon2n_E(rad(1), rad(0.1))
 
     >>> r_Earth = 6371e3  # m, mean Earth radius
 
 Find the unit normal to the great circle:
-    >>> c_E = unit(np.cross(n_EA1_E, n_EA2_E, axis=0))
+    >>> c_E = nv.unit(np.cross(n_EA1_E, n_EA2_E, axis=0))
 
 Find the great circle cross track distance:
     >>> s_xt = (np.arccos(np.dot(c_E.T, n_EB_E)) - np.pi / 2) * r_Earth

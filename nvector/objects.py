@@ -48,7 +48,7 @@ class GeoPoint(object):
 
     The geodesic inverse problem
 
-        >>> positionA = wgs84.GeoPoint(-41.32, 174.81, degrees=True))
+        >>> positionA = wgs84.GeoPoint(-41.32, 174.81, degrees=True)
         >>> positionB = wgs84.GeoPoint(40.96, -5.50, degrees=True)
         >>> s12, az1, az2 = positionA.distance_and_azimuth(positionB, degrees=True)
         >>> 's12 = {:5.2f}, az1 = {:5.2f}, az2 = {:5.2f}'.format(s12, az1, az2)
@@ -321,13 +321,12 @@ class _DiffPos(object):
     Examples
     --------
 
-    {}
+    {0}
 
     See also
     --------
     n_EA_E_and_p_AB_E2n_EB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E.
     """.format(_examples.get_examples([1]))
-    pass
 
 
 @use_docstring_from(_DiffPos)
@@ -377,6 +376,8 @@ class ECEFvector(object):
 
     Examples
     --------
+
+    {0}
 
     See also
     --------
@@ -476,16 +477,20 @@ class GeoPath(object):
 
     Examples
     --------
-    """ + _examples.get_examples([5, 6, 9, 10])
+
+    {0}
+    """.format(_examples.get_examples([5, 6, 9, 10]))
 
     def __init__(self, positionA, positionB):
         self.positionA = positionA
         self.positionB = positionB
 
-    def _euclidean_cross_track_distance(self, cos_angle, radius=1):
+    @staticmethod
+    def _euclidean_cross_track_distance(cos_angle, radius=1):
         return -cos_angle * radius
 
-    def _great_circle_cross_track_distance(self, cos_angle, radius=1):
+    @staticmethod
+    def _great_circle_cross_track_distance(cos_angle, radius=1):
         return (arccos(cos_angle) - pi / 2) * radius
 
     def nvectors(self):
@@ -800,7 +805,7 @@ class FrameN(_BaseFrame):
     Examples
     --------
 
-   {}
+    {0}
 
     See also
     --------
@@ -889,7 +894,7 @@ class FrameB(FrameN):
     Examples
     --------
 
-    {}
+    {0}
 
     See also
     --------
@@ -931,5 +936,12 @@ def _default_frame(frame):
     return frame
 
 
-if __name__ == '__main__':
-    pass
+def test_docstrings():
+    import doctest
+    print('Testing docstrings in %s' % __file__)
+    doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE)
+    print('Docstrings tested')
+
+
+if __name__ == "__main__":
+    test_docstrings()

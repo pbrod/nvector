@@ -515,7 +515,6 @@ class _Nvector2ECEFvector(object):
     --------
     p_EB_E2n_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E
     """.format(_examples.get_examples([4], OO=False))
-    pass
 
 
 @use_docstring_from(_Nvector2ECEFvector)
@@ -683,7 +682,6 @@ class _DeltaFromPositionAtoB(object):
     n_EA_E_and_p_AB_E2n_EB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E
 
     """.format(_examples.get_examples([1], False))
-    pass
 
 
 @use_docstring_from(_DeltaFromPositionAtoB)
@@ -1017,7 +1015,6 @@ class _GreatCircleDistance(object):
     {}
 
     """.format(_examples.get_examples([5], OO=False))
-    pass
 
 
 @use_docstring_from(_GreatCircleDistance)
@@ -1127,7 +1124,6 @@ class _PositionBFromAzimuthAndDistanceFromPositionA(object):
     {}
 
     """.format(_examples.get_examples([8], OO=False))
-    pass
 
 
 @use_docstring_from(_PositionBFromAzimuthAndDistanceFromPositionA)
