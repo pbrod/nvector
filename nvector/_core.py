@@ -509,7 +509,7 @@ class _Nvector2ECEFvector(object):
     Examples
     --------
 
-    {}
+    {0}
 
     See also
     --------
@@ -584,7 +584,7 @@ class _ECEFvector2Nvector(object):
     Examples
     --------
 
-    {}
+    {0}
 
     See also
     --------
@@ -674,7 +674,7 @@ class _DeltaFromPositionAtoB(object):
     Examples
     --------
 
-    {}
+    {0}
 
 
     See also
@@ -1012,7 +1012,7 @@ class _GreatCircleDistance(object):
     Examples
     --------
 
-    {}
+    {0}
 
     """.format(_examples.get_examples([5], OO=False))
 
@@ -1044,7 +1044,7 @@ class _EuclideanDistance(object):
     Examples
     --------
 
-    {}
+    {0}
     """.format(_examples.get_examples([5], OO=False))
 
 
@@ -1121,7 +1121,7 @@ class _PositionBFromAzimuthAndDistanceFromPositionA(object):
     Examples
     --------
 
-    {}
+    {0}
 
     """.format(_examples.get_examples([8], OO=False))
 
@@ -1161,7 +1161,7 @@ class _MeanHorizontalPosition(object):
     Examples
     --------
 
-    {}
+    {0}
 
     """.format(_examples.get_examples([7], OO=False))
 
@@ -1174,7 +1174,7 @@ def mean_horizontal_position(n_EB_E):
 
 def test_docstrings():
     import doctest
-    print('Testing docstrings in %s' % __file__)
+    print('Testing docstrings in {0!s}'.format(__file__))
     doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE)
     print('Docstrings tested')
 
