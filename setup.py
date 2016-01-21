@@ -45,7 +45,7 @@ def print_version():
             fid.write(__version__)
     except pkg_resources.DistributionNotFound:
         __version__ = 'unknown'
-    print("Version: {}".format(__version__))
+    print("Version: {0}".format(__version__))
 
 
 def setup_package():

@@ -321,7 +321,7 @@ class _DiffPos(object):
     Examples
     --------
 
-    {}
+    {0}
 
     See also
     --------
@@ -800,7 +800,7 @@ class FrameN(_BaseFrame):
     Examples
     --------
 
-   {}
+   {0}
 
     See also
     --------
@@ -889,7 +889,7 @@ class FrameB(FrameN):
     Examples
     --------
 
-    {}
+    {0}
 
     See also
     --------
