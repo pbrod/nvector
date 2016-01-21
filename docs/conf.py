@@ -73,7 +73,7 @@ release = nvector.__version__
 # The short X.Y version (including .devXXXX, rcX, b1 suffixes if present)
 version = re.sub(r'(\d+\.\d+)\.\d+(.*)', r'\1\2', release)
 version = re.sub(r'(\.dev\d+).*?$', r'\1', version)
-print("%s %s" % (version, release))
+print("{0!s} {1!s}".format(version, release))
 
 # The full version, including alpha/beta/rc tags.
 #release = '0.4.1'  # Is set by calling `setup.py docs`
@@ -182,17 +182,17 @@ def linkcode_resolve(domain, info):
         lineno = None
 
     if lineno:
-        linespec = "#L%d-L%d" % (lineno, lineno + len(source) - 1)
+        linespec = "#L{0:d}-L{1:d}".format(lineno, lineno + len(source) - 1)
     else:
         linespec = ""
 
     fn = relpath(fn, start=dirname(nvector.__file__))
 
     if 'dev' in nvector.__version__:
-        return "http://github.com/pbrod/nvector/blob/master/nvector/%s%s" % (
+        return "http://github.com/pbrod/nvector/blob/master/nvector/{0!s}{1!s}".format(
            fn, linespec)
     else:
-        return "http://github.com/pbrod/nvector/blob/v%s/nvector/%s%s" % (
+        return "http://github.com/pbrod/nvector/blob/v{0!s}/nvector/{1!s}{2!s}".format(
            nvector.__version__, fn, linespec)
 
 
