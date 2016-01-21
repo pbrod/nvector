@@ -195,6 +195,7 @@ use a = 6 378 135 m and f = 1/298.26.
 
 Solution:
     >>> import nvector as nv
+    >>> import numpy as np
     >>> wgs72 = nv.FrameE(name='WGS72')
     >>> wgs72 = nv.FrameE(a=6378135, f=1.0/298.26)
 
