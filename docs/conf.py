@@ -17,7 +17,7 @@ import sphinx_rtd_theme
 
 path0 = os.path.abspath(os.path.pardir)
 
-print('min path: {}'.format(path0))
+print('min path: {0}'.format(path0))
 sys.path.insert(0, path0)
 
 __location__ = os.path.join(os.getcwd(), os.path.dirname(

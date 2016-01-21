@@ -95,11 +95,11 @@ class TestExamples(unittest.TestCase):
         azimuth = np.rad2deg(np.arctan2(p_AB_N[1], p_AB_N[0]))
         # positive angle about down-axis
 
-        print('Ex1, delta north, east, down = {}, {}, {}'.format(p_AB_N[0],
+        print('Ex1, delta north, east, down = {0}, {1}, {2}'.format(p_AB_N[0],
                                                                  p_AB_N[1],
                                                                  p_AB_N[2]))
 
-        print('Ex1, azimuth = {} deg'.format(azimuth))
+        print('Ex1, azimuth = {0} deg'.format(azimuth))
 
         assert_array_almost_equal(p_AB_N[0], 331730.23478089)
         assert_array_almost_equal(p_AB_N[1], 332997.87498927)
@@ -156,7 +156,7 @@ class TestExamples(unittest.TestCase):
         pointB = wgs84.GeoPoint(latitude=1, longitude=2, z=-3, degrees=True)
 
         p_EB_E = pointB.to_ecef_vector()
-        print('Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel()))
+        print('Ex4: p_EB_E = {0} m'.format(p_EB_E.pvector.ravel()))
 
         assert_array_almost_equal(p_EB_E.pvector.ravel(),
                                   [6373290.27721828, 222560.20067474,
@@ -275,7 +275,7 @@ class TestExamples(unittest.TestCase):
 
         lat_B, lon_B = pointB.latitude_deg, pointB.longitude_deg
 
-        print('Ex8, Destination: lat, long = {} {} deg'.format(lat_B, lon_B))
+        print('Ex8, Destination: lat, long = {0} {1} deg'.format(lat_B, lon_B))
         assert_array_almost_equal(lat_B, 79.99154867)
         assert_array_almost_equal(lon_B, -90.01769837)
 
