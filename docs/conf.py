@@ -156,9 +156,16 @@ else:
 
 
 def _get_linespec(obj):
+    """Return starting and ending line number for an object.
+
+    The argument may be a module, class, method, function, traceback, frame,
+    or code object.  The source code is returned as a list of the lines
+    corresponding to the object and the line number indicates where in the
+    original source file the first line of code was found.  None is
+    returned if the source code cannot be retrieved."""
     try:
         source, lineno = inspect.getsourcelines(obj)
-    except:
+    except IOError:
         lineno = None
     if lineno:
         linespec = "#L{0:d}-L{1:d}".format(lineno, lineno + len(source) - 1)
@@ -167,16 +174,19 @@ def _get_linespec(obj):
     return linespec
 
 
-def _get_function(obj):
+def _get_fullfile(obj):
+    """Return the filename that can be used to locate an object's source.
+    Return None if no way can be identified to get the source.
+    """
     try:
         fn = inspect.getsourcefile(obj)
-        fn = relpath(fn, start=_PACKAGE_PATH)
-    except:
+    except AttributeError or IOError:
         fn = None
-    return fn
+    return relpath(fn, start=_PACKAGE_PATH)
 
 
 def _get_obj(info):
+    """ Return object if possible otherwise None"""
     fullname = info['fullname']
 
     modname = info['module']
@@ -203,7 +213,7 @@ def linkcode_resolve(domain, info):
     obj = _get_obj(info)
     if not obj:
         return None
-    fn = _get_function(obj)
+    fn = _get_fullfile(obj)
     if not fn:
         return None
 
