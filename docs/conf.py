@@ -28,6 +28,11 @@ __location__ = os.path.join(os.getcwd(), os.path.dirname(
 
 import nvector
 _VERSION = nvector.__version__
+_PACKAGE_PATH = dirname(nvector.__file__)
+if 'dev' in _VERSION:
+    _PKG_URL = "http://github.com/pbrod/nvector/blob/master/nvector/{1!s}{2!s}"
+else:
+    _PKG_URL = "http://github.com/pbrod/nvector/blob/v{0!s}/nvector/{1!s}{2!s}"
 
 # package = "nvector"
 # namespace = []
@@ -145,9 +150,47 @@ for name in ['sphinx.ext.linkcode', 'numpydoc.linkcode']:
         extensions.append(name)
         break
     except ImportError:
-        pass
+        print(str(ImportError))
 else:
     print("NOTE: linkcode extension not found -- no links to source generated")
+
+
+def _get_linespec(obj):
+    try:
+        source, lineno = inspect.getsourcelines(obj)
+    except:
+        lineno = None
+    if lineno:
+        linespec = "#L{0:d}-L{1:d}".format(lineno, lineno + len(source) - 1)
+    else:
+        linespec = ""
+    return linespec
+
+
+def _get_function(obj):
+    try:
+        fn = inspect.getsourcefile(obj)
+        fn = relpath(fn, start=_PACKAGE_PATH)
+    except:
+        fn = None
+    return fn
+
+
+def _get_obj(info):
+    fullname = info['fullname']
+
+    modname = info['module']
+    submod = sys.modules.get(modname)
+    if submod is None:
+        return None
+
+    obj = submod
+    for part in fullname.split('.'):
+        try:
+            obj = getattr(obj, part)
+        except AttributeError:
+            return None
+    return obj
 
 
 def linkcode_resolve(domain, info):
@@ -157,45 +200,15 @@ def linkcode_resolve(domain, info):
     if domain != 'py':
         return None
 
-    modname = info['module']
-    fullname = info['fullname']
-
-    submod = sys.modules.get(modname)
-    if submod is None:
+    obj = _get_obj(info)
+    if not obj:
         return None
-
-    obj = submod
-    for part in fullname.split('.'):
-        try:
-            obj = getattr(obj, part)
-        except:
-            return None
-
-    try:
-        fn = inspect.getsourcefile(obj)
-    except:
-        fn = None
+    fn = _get_function(obj)
     if not fn:
         return None
 
-    try:
-        source, lineno = inspect.getsourcelines(obj)
-    except:
-        lineno = None
-
-    if lineno:
-        linespec = "#L{0:d}-L{1:d}".format(lineno, lineno + len(source) - 1)
-    else:
-        linespec = ""
-
-    fn = relpath(fn, start=dirname(nvector.__file__))
-
-    if 'dev' in _VERSION:
-        return "http://github.com/pbrod/nvector/blob/master/nvector/{0!s}{1!s}".format(
-           fn, linespec)
-    else:
-        return "http://github.com/pbrod/nvector/blob/v{0!s}/nvector/{1!s}{2!s}".format(
-           _VERSION, fn, linespec)
+    linespec = _get_linespec(obj)
+    return _PKG_URL.format(_VERSION, fn, linespec)
 
 
 # -- Options for HTML output

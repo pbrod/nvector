@@ -498,12 +498,12 @@ class GeoPath(object):
         """
         return self.positionA.to_nvector(), self.positionB.to_nvector()
 
-    def _nvectors(self):
+    def nvector_normals(self):
         n_EA_E, n_EB_E = self.nvectors()
         return n_EA_E.normal, n_EB_E.normal
 
     def _normal_to_great_circle(self):
-        n_EA1_E, n_EA2_E = self._nvectors()
+        n_EA1_E, n_EA2_E = self.nvector_normals()
         return cross(n_EA1_E, n_EA2_E, axis=0)
 
     def _get_average_radius(self):
@@ -560,7 +560,7 @@ class GeoPath(object):
         """
         if radius is None:
             radius = self._get_average_radius()
-        n_EA_E, n_EB_E = self._nvectors()
+        n_EA_E, n_EB_E = self.nvector_normals()
 
         if method[0] == "e":  # Euclidean distance:
             return norm(n_EB_E - n_EA_E, axis=0) * radius
@@ -581,8 +581,8 @@ class GeoPath(object):
             point of intersection between paths
         """
         frame = self.positionA.frame
-        n_EA1_E, n_EA2_E = self._nvectors()
-        n_EB1_E, n_EB2_E = path._nvectors()
+        n_EA1_E, n_EA2_E = self.nvector_normals()
+        n_EB1_E, n_EB2_E = path.nvector_normals()
 
         # Find the intersection between the two paths, n_EC_E:
         n_EC_E_tmp = unit(cross(cross(n_EA1_E, n_EA2_E, axis=0),
@@ -615,7 +615,7 @@ class GeoPath(object):
         point: Nvector
             point of interpolation along path
         """
-        n_EB_E_t0, n_EB_E_t1 = self._nvectors()
+        n_EB_E_t0, n_EB_E_t1 = self.nvector_normals()
 
         n_EB_E_ti = unit(n_EB_E_t0 + ti * (n_EB_E_t1 - n_EB_E_t0))
         zi = self.positionA.z + ti * (self.positionB.z-self.positionA.z)

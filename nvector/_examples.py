@@ -661,7 +661,7 @@ def get_examples(indices, OO=True):
                     for i in indices))
 
 
-getting_started = ("""
+getting_started = """
 Getting Started
 ===============
 
@@ -671,11 +671,14 @@ The functional solutions to the remaining problems can be found
 `here
 <https://github.com/pbrod/nvector/blob/master/nvector/tests/test_nvector.py>`_.
 
-""" + example_1_txt + example_1_obj_solution + 'Functional ' +
-example_1_fun_solution + see_also(1) + get_examples(range(2, 11), OO=True))
+{0}{1}
+{2}{3}{4}{5}
+""".format(example_1_txt, example_1_obj_solution, 'Functional ',
+           example_1_fun_solution, see_also(1),
+           get_examples(range(2, 11), OO=True))
 
 
-getting_started_functional = ("""
+getting_started_functional = """
 Functional examples
 ===================
 
@@ -685,8 +688,11 @@ The object-oriented solutions to the remaining problems can be found
 `here
 <https://github.com/pbrod/nvector/blob/master/nvector/tests/test_frames.py>`_.
 
-""" + example_1_txt + example_1_fun_solution + 'OO-' + example_1_obj_solution +
-see_also(1) + get_examples(range(2, 11), OO=False))
+{0}{1}
+{2}{3}{4}{5}
+""".format(example_1_txt, example_1_fun_solution,
+           'OO-', example_1_obj_solution, see_also(1),
+           get_examples(range(2, 11), OO=False))
 
 
 class _TestDocStrings(object):
