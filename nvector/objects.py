@@ -14,7 +14,7 @@ from nvector._core import (select_ellipsoid, rad, deg, zyx2R,
                            great_circle_distance, mean_horizontal_position,
                            E_rotation)
 from nvector import _examples
-from nvector._examples import use_docstring_from
+from nvector._common import test_docstrings, use_docstring_from
 import warnings
 
 __all__ = ['FrameE', 'FrameB', 'FrameL', 'FrameN', 'GeoPoint', 'GeoPath',
@@ -174,7 +174,17 @@ class GeoPoint(object):
                                   long_unroll=long_unroll, degrees=degrees)
 
 
-class Nvector(object):
+class _Common(object):
+    def __eq__(self, other):
+        try:
+            if self is other:
+                return True
+            return self._is_equal_to(other)
+        except AttributeError:
+            return False
+
+
+class Nvector(_Common):
     """
     Geographical position given as n-vector and depth in frame E
 
@@ -254,14 +264,6 @@ class Nvector(object):
         n_EB_E = self.normal
         n_EM_E = mean_horizontal_position(n_EB_E)
         return self.frame.Nvector(n_EM_E)
-
-    def __eq__(self, other):
-        try:
-            if self is other:
-                return True
-            return self._is_equal_to(other)
-        except AttributeError:
-            return False
 
     def _is_equal_to(self, other):
         return (np.allclose(self.normal, other.normal) and
@@ -622,17 +624,8 @@ class GeoPath(object):
         frame = self.positionA.frame
         return frame.Nvector(n_EB_E_ti, zi)
 
-class _BaseFrame(object):
-    def __eq__(self, other):
-        try:
-            if self is other:
-                return True
-            return self._is_equal_to(other)
-        except AttributeError:
-            return False
 
-
-class FrameE(_BaseFrame):
+class FrameE(_Common):
 
     """
     Earth-fixed frame
@@ -778,7 +771,7 @@ class FrameE(_BaseFrame):
         return ECEFvector(*args, frame=self, **kwds)
 
 
-class FrameN(_BaseFrame):
+class FrameN(_Common):
     __doc__ = """
     North-East-Down frame
 
@@ -936,12 +929,5 @@ def _default_frame(frame):
     return frame
 
 
-def test_docstrings():
-    import doctest
-    print('Testing docstrings in {0!s}'.format(__file__))
-    doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE)
-    print('Docstrings tested')
-
-
 if __name__ == "__main__":
-    test_docstrings()
+    test_docstrings(__file__)

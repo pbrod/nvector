@@ -42,7 +42,7 @@ from numpy import rad2deg, deg2rad, arctan2, sin, cos, array, cross, dot, sqrt
 from numpy.linalg import norm
 import warnings
 from nvector import _examples
-from nvector._examples import use_docstring_from
+from nvector._common import test_docstrings, use_docstring_from
 
 
 __all__ = ['select_ellipsoid', 'E_rotation',
@@ -1170,13 +1170,6 @@ class _MeanHorizontalPosition(object):
 def mean_horizontal_position(n_EB_E):
     n_EM_E = unit(np.sum(n_EB_E, axis=1).reshape((3, 1)))
     return n_EM_E
-
-
-def test_docstrings():
-    import doctest
-    print('Testing docstrings in {0!s}'.format(__file__))
-    doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE)
-    print('Docstrings tested')
 
 
 if __name__ == "__main__":
