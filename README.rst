@@ -503,3 +503,7 @@ Note
 
 This project has been set up using PyScaffold 2.4.4. For details and usage
 information on PyScaffold see http://pyscaffold.readthedocs.org/.
+
+.. image:: https://api.codacy.com/project/badge/Grade/f9376a27815242698649c410115a28a5
+   :alt: Codacy Badge
+   :target: https://www.codacy.com/app/per-andreas-brodtkorb/Nvector?utm_source=github.com&utm_medium=referral&utm_content=pbrod/Nvector&utm_campaign=badger
