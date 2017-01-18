@@ -43,26 +43,26 @@ class GeoPoint(object):
 
     The following illustrates its use
 
-        >>> import nvector as nv
-        >>> wgs84 = nv.FrameE(name='WGS84')
+    >>> import nvector as nv
+    >>> wgs84 = nv.FrameE(name='WGS84')
 
     The geodesic inverse problem
 
-        >>> positionA = wgs84.GeoPoint(-41.32, 174.81, degrees=True)
-        >>> positionB = wgs84.GeoPoint(40.96, -5.50, degrees=True)
-        >>> s12, az1, az2 = positionA.distance_and_azimuth(positionB, degrees=True)
-        >>> 's12 = {:5.2f}, az1 = {:5.2f}, az2 = {:5.2f}'.format(s12, az1, az2)
-        's12 = 19959679.27, az1 = 161.07, az2 = 18.83'
+    >>> positionA = wgs84.GeoPoint(-41.32, 174.81, degrees=True)
+    >>> positionB = wgs84.GeoPoint(40.96, -5.50, degrees=True)
+    >>> s12, az1, az2 = positionA.distance_and_azimuth(positionB, degrees=True)
+    >>> 's12 = {:5.2f}, az1 = {:5.2f}, az2 = {:5.2f}'.format(s12, az1, az2)
+    's12 = 19959679.27, az1 = 161.07, az2 = 18.83'
 
     The geodesic direct problem
 
-        >>> positionA = wgs84.GeoPoint(40.6, -73.8, degrees=True)
-        >>> az1, distance = 45, 10000e3
-        >>> positionB, az2 = positionA.geo_point(distance, az1, degrees=True)
-        >>> lat2, lon2 = positionB.latitude_deg, positionB.longitude_deg
-        >>> msg = 'lat2 = {:5.2f}, lon2 = {:5.2f}, az2 = {:5.2f}'
-        >>> msg.format(lat2, lon2, az2)
-        'lat2 = 32.64, lon2 = 49.01, az2 = 140.37'
+    >>> positionA = wgs84.GeoPoint(40.6, -73.8, degrees=True)
+    >>> az1, distance = 45, 10000e3
+    >>> positionB, az2 = positionA.geo_point(distance, az1, degrees=True)
+    >>> lat2, lon2 = positionB.latitude_deg, positionB.longitude_deg
+    >>> msg = 'lat2 = {:5.2f}, lon2 = {:5.2f}, az2 = {:5.2f}'
+    >>> msg.format(lat2, lon2, az2)
+    'lat2 = 32.64, lon2 = 49.01, az2 = 140.37'
 
     """
 

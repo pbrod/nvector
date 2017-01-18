@@ -1173,4 +1173,4 @@ def mean_horizontal_position(n_EB_E):
 
 
 if __name__ == "__main__":
-    test_docstrings()
+    test_docstrings(__file__)
