@@ -688,6 +688,5 @@ def test_docstrings():
 
 
 if __name__ == '__main__':
-
     # print(getting_started)
     test_docstrings()
