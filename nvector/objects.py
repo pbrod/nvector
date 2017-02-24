@@ -570,7 +570,7 @@ class GeoPath(object):
 
     def intersection(self, path):
         """
-        Return the intersection between the paths
+        Return the intersection between the great circles of the two paths
 
         Parameters
         ----------
@@ -601,6 +601,38 @@ class GeoPath(object):
 
         lat_EC, long_EC = n_E2lat_lon(n_EC_E, frame.R_Ee)
         return GeoPoint(lat_EC, long_EC, frame=frame)
+
+    def on_path(self, point, path_width=1e-6):
+        """
+        Return True if point is on the path
+
+        Examples
+        --------
+        >>> import nvector as nv
+        >>> wgs84 = nv.FrameE(name='WGS84')
+        >>> pointA = wgs84.GeoPoint(89, 0, degrees=True)
+        >>> pointB = wgs84.GeoPoint(89, 180, degrees=True)
+        >>> path = nv.GeoPath(pointA, pointB)
+        >>> t0 = 10.
+        >>> t1 = 20.
+        >>> ti = 16.  # time of interpolation
+        >>> ti_n = (ti - t0) / (t1 - t0) # normalized time of interpolation
+        >>> pointC = path.interpolate(ti_n)  #.to_geo_point()
+        >>> path.on_path(pointC)
+        True
+        >>> pointD = path.interpolate(1.000000001)
+        >>> path.on_path(pointD)
+        False
+        >>> pointE = wgs84.GeoPoint(50, 0.00000001, degrees=True)
+        >>> path.on_path(pointE)
+        False
+
+        """
+        pointC = point.to_nvector().normal
+        pointA, pointB = self.nvector_normals()
+
+        ti = norm(pointC-pointA) / norm(pointB - pointA)
+        return ti <= 1 and np.all(self.cross_track_distance(point) <= path_width)
 
     def interpolate(self, ti):
         """

@@ -264,7 +264,7 @@ See also
 .. image:: http://www.navlab.net/images/ex4img.png
 
 Geodetic latitude, longitude and height are given for position B as latEB,
-longEB and hEB, find the ECEF-vector for this position, p_EB_E.
+lonEB and hEB, find the ECEF-vector for this position, p_EB_E.
 
 
 Solution:
@@ -356,9 +356,9 @@ Solution:
     >>> g_EB_E_ti = path.interpolate(ti_n).to_geo_point()
 
     >>> lat_ti, lon_ti = g_EB_E_ti.latitude_deg, g_EB_E_ti.longitude_deg
-    >>> msg = 'Ex6, Interpolated position: lat, long = {} deg, {} deg'
+    >>> msg = 'Ex6, Interpolated position: lat, lon = {} deg, {} deg'
     >>> msg.format(lat_ti, lon_ti)
-    'Ex6, Interpolated position: lat, long = [ 89.7999805] deg, [ 180.] deg'
+    'Ex6, Interpolated position: lat, lon = [ 89.7999805] deg, [ 180.] deg'
 
 See also
     `Example 6 at www.navlab.net <http://www.navlab.net/nvector/#example_6>`_
@@ -432,7 +432,7 @@ as the great circle that goes through the two points.
 
 Path A is given by A1 and A2, while path B is given by B1 and B2.
 
-Find the position C where the two paths intersect.
+Find the position C where the two great circles intersect.
 
 
 Solution:
@@ -447,9 +447,9 @@ Solution:
     >>> pointC = pathA.intersection(pathB)
 
     >>> lat, lon = pointC.latitude_deg, pointC.longitude_deg
-    >>> msg = 'Ex9, Intersection: lat, long = {:4.2f}, {:4.2f} deg'
+    >>> msg = 'Ex9, Intersection: lat, lon = {:4.2f}, {:4.2f} deg'
     >>> msg.format(lat[0], lon[0])
-    'Ex9, Intersection: lat, long = 40.32, 55.90 deg'
+    'Ex9, Intersection: lat, lon = 40.32, 55.90 deg'
 
 See also
     `Example 9 at www.navlab.net <http://www.navlab.net/nvector/#example_9>`_
