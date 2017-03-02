@@ -12,7 +12,7 @@ from nvector._core import (select_ellipsoid, rad, deg, zyx2R,
                            lat_lon2n_E, n_E2lat_lon, n_E2R_EN, n_E_and_wa2R_EL,
                            n_EB_E2p_EB_E, p_EB_E2n_EB_E, unit,
                            great_circle_distance, euclidean_distance,
-                           cross_track_distance,
+                           cross_track_distance, intersect,
                            mean_horizontal_position,
                            E_rotation)
 from nvector import _examples
@@ -583,24 +583,10 @@ class GeoPath(object):
             point of intersection between paths
         """
         frame = self.positionA.frame
-        n_EA1_E, n_EA2_E = self.nvector_normals()
-        n_EB1_E, n_EB2_E = path.nvector_normals()
-
-        # Find the intersection between the two paths, n_EC_E:
-        n_EC_E_tmp = unit(cross(cross(n_EA1_E, n_EA2_E, axis=0),
-                                cross(n_EB1_E, n_EB2_E, axis=0), axis=0),
-                          norm_zero_vector=np.nan)
-
-        # n_EC_E_tmp is one of two solutions, the other is -n_EC_E_tmp. Select
-        # the one that is closet to n_EA1_E, by selecting sign from the dot
-        # product between n_EC_E_tmp and n_EA1_E:
-        n_EC_E = np.sign(dot(n_EC_E_tmp.T, n_EA1_E)) * n_EC_E_tmp
-        if np.any(np.isnan(n_EC_E)):
-            warnings.warn('Paths are Equal. Intersection point undefined. '
-                          'NaN returned.')
-
-        lat_EC, lon_EC = n_E2lat_lon(n_EC_E, frame.R_Ee)
-        return GeoPoint(lat_EC, lon_EC, frame=frame)
+        path_a = self.nvector_normals()
+        path_b = path.nvector_normals()
+        n_EC_E = intersect(path_a, path_b)
+        return frame.Nvector(n_EC_E)
 
     def _on_ellipsoid_path(self, point, rtol=1e-6, atol=1e-8):
         point_a, point_b = self.positionA, self.positionB
@@ -623,12 +609,12 @@ class GeoPath(object):
         return (np.all(ti1 <= 1) and np.all(ti2 <= 1) and
                 self.on_great_circle(point, rtol, atol))
 
-        p_ba = pointB - pointA
-        p_ca = pointC - pointA
-        is_parallell = np.allclose(np.cross(p_ba.T, p_ca.T), 0, rtol, atol)
-        same_direction = (np.all(np.sign(np.dot(p_ba.T, p_ca)) == 1) and
-                          np.all(np.sign(p_ba) == np.sign(p_ca)))
-        return is_parallell and same_direction and norm(p_ba) >= norm(p_ca)
+#         p_ba = pointB - pointA
+#         p_ca = pointC - pointA
+#         is_parallell = np.allclose(np.cross(p_ba.T, p_ca.T), 0, rtol, atol)
+#         same_direction = (np.all(np.sign(np.dot(p_ba.T, p_ca)) == 1) and
+#                           np.all(np.sign(p_ba) == np.sign(p_ca)))
+#         return is_parallell and same_direction and norm(p_ba) >= norm(p_ca)
 
     def on_path(self, point, method='greatcircle', rtol=1e-6, atol=1e-8):
         """
