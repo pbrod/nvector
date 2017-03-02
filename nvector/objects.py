@@ -618,7 +618,15 @@ class GeoPath(object):
 
     def on_path(self, point, method='greatcircle', rtol=1e-6, atol=1e-8):
         """
-        Return True if point is on the path (i.e. on the great circle between A and B)
+        Return True if point is on the path between A and B
+
+        Parameters
+        ----------
+        point : Nvector, GeoPoint or ECEFvector
+            point to test
+        method: string
+            'greatcircle':
+            'exact'
 
         Examples
         --------
@@ -643,9 +651,9 @@ class GeoPath(object):
         >>> path = nv.GeoPath(pointC, pointA)
 
         """
-        if method == 'greatcircle':
-            return self._on_great_circle_path(point, rtol, atol)
-        return self._on_ellipsoid_path(point, rtol, atol)
+        if method == 'exact':
+            return self._on_ellipsoid_path(point, rtol, atol)
+        return self._on_great_circle_path(point, rtol, atol)
 
     def closest_point_on_great_circle(self, point):
         n0 = point.to_nvector().normal
@@ -720,9 +728,9 @@ class GeoPath(object):
         point: Nvector
             point of interpolation along path
         """
-        point_a, point_b = self.positionA.to_nvector(), self.positionB.to_nvector()
+        point_a, point_b = self.nvectors()
         point_c = point_a + ti * (point_b-point_a)
-        point_c.normal = unit(point_c.normal)
+        point_c.normal = unit(point_c.normal, norm_zero_vector=np.nan)
         return point_c
 
 
