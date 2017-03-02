@@ -304,7 +304,7 @@ class TestExamples(unittest.TestCase):
         pathA = GeoPath(pointA1, pointA2)
         pathB = GeoPath(pointB1, pointB2)
 
-        pointC = pathA.intersect(pathB)
+        pointC = pathA.intersect(pathB).to_geo_point()
 
         lat, lon = pointC.latitude_deg, pointC.longitude_deg
         msg = 'Ex9, Intersection: lat, long = {} {} deg'
@@ -322,7 +322,7 @@ class TestExamples(unittest.TestCase):
         pathA = GeoPath(pointA1, pointA2)
         pathB = GeoPath(pointB1, pointB2)
 
-        pointC = pathA.intersection(pathB)
+        pointC = pathA.intersect(pathB).to_geo_point()
 
         lat, lon = pointC.latitude_deg, pointC.longitude_deg
         msg = 'Ex9, Intersection: lat, long = {} {} deg'

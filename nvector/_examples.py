@@ -537,7 +537,7 @@ Solution:
     >>> pathA = nv.GeoPath(pointA1, pointA2)
     >>> pathB = nv.GeoPath(pointB1, pointB2)
 
-    >>> pointC = pathA.intersect(pathB)
+    >>> pointC = pathA.intersect(pathB).to_geo_point()
     >>> pathA.on_path(pointC), pathB.on_path(pointC)
     (False, False)
     >>> pathA.on_great_circle(pointC), pathB.on_great_circle(pointC)
