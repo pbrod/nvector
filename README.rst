@@ -210,9 +210,9 @@ Solution:
 
 Step 1: Position and orientation of B is given 400m above E:
     >>> n_EB_E = wgs72.Nvector(nv.unit([[1], [2], [3]]), z=-400)
+    >>> frame_B = nv.FrameB(n_EB_E, yaw=10, pitch=20, roll=30, degrees=True)
 
 Step 2: Delta BC decomposed in B
-    >>> frame_B = nv.FrameB(n_EB_E, yaw=10, pitch=20, roll=30, degrees=True)
     >>> p_BC_B = frame_B.Pvector(np.r_[3000, 2000, 100].reshape((-1, 1)))
 
 Step 3: Decompose delta BC in E

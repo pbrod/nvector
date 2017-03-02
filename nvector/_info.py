@@ -59,7 +59,7 @@ Official releases available at: http://pypi.python.org/pypi/nvector.
 Installation
 ============
 
-If you have pip installed, then simply type:
+If you have pip installed and are online, then simply type:
 
     $ pip install nvector
 
