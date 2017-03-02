@@ -1,4 +1,4 @@
-'''
+"""
 This file contains solutions to the examples given at
 www.navlab.net/nvector
 
@@ -21,7 +21,7 @@ in degrees, the variable name has the following ending: _deg
 here to make the code more readable for those unfamiliar with
 Matlab. In Matlab one would normally write x'*y (i.e. x transposed
 times y)
-'''
+"""
 import numpy as np
 
 import unittest
@@ -75,8 +75,8 @@ class TestNvector(unittest.TestCase):
         # positive angle about down-axis
 
         print('Ex1, delta north, east, down = {0}, {1}, {2}'.format(p_AB_N[0],
-                                                                 p_AB_N[1],
-                                                                 p_AB_N[2]))
+                                                                    p_AB_N[1],
+                                                                    p_AB_N[2]))
         print('Ex1, azimuth = {0} deg'.format(deg(azimuth)))
 
         assert_array_almost_equal(p_AB_N[0], 331730.23478089)
@@ -272,7 +272,7 @@ class TestNvector(unittest.TestCase):
         # convenient to see lat, long:
         lat_EB, long_EB = n_E2lat_lon(n_EB_E)
         print('Ex8, Destination: lat, long = {0} {1} deg'.format(deg(lat_EB),
-                                                               deg(long_EB)))
+                                                                 deg(long_EB)))
 
         assert_array_almost_equal(deg(lat_EB), 79.99154867)
         assert_array_almost_equal(deg(long_EB), -90.01769837)
@@ -280,7 +280,7 @@ class TestNvector(unittest.TestCase):
         assert_array_almost_equal(azimuth, azimuth1+2*np.pi)
 
     @staticmethod
-    def test_Ex9_intersection():
+    def test_Ex9_intersect():
 
         # Two paths A and B are given by two pairs of positions:
         # Enter elements as lat/long in deg:
@@ -324,7 +324,7 @@ class TestNvector(unittest.TestCase):
         c_E = unit(np.cross(n_EA1_E, n_EA2_E, axis=0))
 
         # Find the great circle cross track distance:
-        s_xt = (np.arccos(np.dot(c_E.T, n_EB_E)) - np.pi / 2) * r_Earth
+        s_xt = -np.arcsin(np.dot(c_E.T, n_EB_E)) * r_Earth
 
         # Find the Euclidean cross track distance:
         d_xt = -np.dot(c_E.T, n_EB_E) * r_Earth

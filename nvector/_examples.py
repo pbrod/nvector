@@ -1,8 +1,8 @@
-'''
+"""
 Created on 18. jan. 2016
 
 @author: pab
-'''
+"""
 
 
 def see_also(number):
@@ -114,9 +114,9 @@ Solution:
 
 Step 1: Position and orientation of B is given 400m above E:
     >>> n_EB_E = wgs72.Nvector(nv.unit([[1], [2], [3]]), z=-400)
+    >>> frame_B = nv.FrameB(n_EB_E, yaw=10, pitch=20, roll=30, degrees=True)
 
 Step 2: Delta BC decomposed in B
-    >>> frame_B = nv.FrameB(n_EB_E, yaw=10, pitch=20, roll=30, degrees=True)
     >>> p_BC_B = frame_B.Pvector(np.r_[3000, 2000, 100].reshape((-1, 1)))
 
 Step 3: Decompose delta BC in E
@@ -146,12 +146,11 @@ A custom reference ellipsoid is given (replacing WGS-84):
 Step 1 Position and orientation of B is 400m above E:
     >>> n_EB_E = nv.unit([[1], [2], [3]])  # unit to get unit length of vector
     >>> z_EB = -400
+    >>> yaw, pitch, roll = rad(10), rad(20), rad(30)
+    >>> R_NB = nv.zyx2R(yaw, pitch, roll)
 
 Step 2: Delta BC decomposed in B
     >>> p_BC_B = np.r_[3000, 2000, 100].reshape((-1, 1))
-
-    >>> yaw, pitch, roll = rad(10), rad(20), rad(30)
-    >>> R_NB = nv.zyx2R(yaw, pitch, roll)
 
 Step 3: Find R_EN:
     >>> R_EN = nv.n_E2R_EN(n_EB_E)
@@ -498,10 +497,10 @@ Solution:
 
     >>> n_EA_E = nv.lat_lon2n_E(lat, lon)
     >>> azimuth = rad(200)
-    >>> s_AB = 1000.0  # m
-    >>> r_Earth = 6371e3  # m, mean Earth radius
+    >>> s_AB = 1000.0  # [m]
+    >>> r_earth = 6371e3  # [m], mean earth radius
 
-    >>> distance_rad = s_AB / r_Earth
+    >>> distance_rad = s_AB / r_earth
     >>> n_EB_E = nv.n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad,
     ...                                                azimuth)
     >>> lat_EB, lon_EB = nv.n_E2lat_lon(n_EB_E)
@@ -538,8 +537,11 @@ Solution:
     >>> pathA = nv.GeoPath(pointA1, pointA2)
     >>> pathB = nv.GeoPath(pointB1, pointB2)
 
-    >>> pointC = pathA.intersection(pathB)
-
+    >>> pointC = pathA.intersect(pathB)
+    >>> pathA.on_path(pointC), pathB.on_path(pointC)
+    (False, False)
+    >>> pathA.on_great_circle(pointC), pathB.on_great_circle(pointC)
+    (True, True)
     >>> lat, lon = pointC.latitude_deg, pointC.longitude_deg
     >>> msg = 'Ex9, Intersection: lat, lon = {:4.2f}, {:4.2f} deg'
     >>> msg.format(lat[0], lon[0])
@@ -559,11 +561,15 @@ Solution:
     >>> n_EB1_E = nv.lat_lon2n_E(rad(50), rad(60))
     >>> n_EB2_E = nv.lat_lon2n_E(rad(70), rad(80))
 
-    >>> n_EC_E_tmp = nv.unit(np.cross(np.cross(n_EA1_E, n_EA2_E, axis=0),
-    ...                               np.cross(n_EB1_E, n_EB2_E, axis=0),
-    ...                               axis=0))
+    >>> n_EC_E = nv.unit(np.cross(np.cross(n_EA1_E, n_EA2_E, axis=0),
+    ...                           np.cross(n_EB1_E, n_EB2_E, axis=0),
+    ...                           axis=0))
+    >>> n_EC_E *= np.sign(np.dot(n_EC_E_tmp.T, n_EA1_E))
 
-    >>> n_EC_E = np.sign(np.dot(n_EC_E_tmp.T, n_EA1_E)) * n_EC_E_tmp
+or alternatively
+    >>> path_a, path_b = (n_EA1_E, n_EA2_E), (n_EB1_E, n_EB2_E)
+    >>> n_EC_E = nv.intersect(path_a, path_b)
+
     >>> lat_EC, lon_EC = nv.n_E2lat_lon(n_EC_E)
 
     >>> lat, lon = deg(lat_EC), deg(lon_EC)
@@ -618,21 +624,30 @@ Solution:
     >>> n_EA2_E = nv.lat_lon2n_E(rad(10), rad(0))
     >>> n_EB_E = nv.lat_lon2n_E(rad(1), rad(0.1))
 
-    >>> r_Earth = 6371e3  # m, mean Earth radius
+    >>> radius = 6371e3  # mean earth radius [m]
 
 Find the unit normal to the great circle:
-    >>> c_E = nv.unit(np.cross(n_EA1_E, n_EA2_E, axis=0))
+    >>> c_E = nv.great_circle_normal(n_EA1_E, n_EA2_E)
 
 Find the great circle cross track distance:
-    >>> s_xt = (np.arccos(np.dot(c_E.T, n_EB_E)) - np.pi / 2).ravel() * r_Earth
+    >>> sin_theta = -np.dot(c_E.T, n_EB_E).ravel()
+    >>> s_xt = np.arcsin(sin_theta) * radius
 
 Find the Euclidean cross track distance:
-    >>> d_xt = -np.dot(c_E.T, n_EB_E).ravel() * r_Earth
+    >>> d_xt = sin_theta * radius
 
     >>> val_txt = '{:4.2f} km, {:4.2f} km'.format(s_xt[0]/1000, d_xt[0]/1000)
     >>> 'Ex10: Cross track distance: s_xt, d_xt = {0}'.format(val_txt)
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 
+Alternative solution:
+    >>> path = (n_EA1_E, n_EA2_E)
+    >>> s_xt = nv.cross_track_distance(path, n_EB_E)
+    >>> d_xt = nv.cross_track_distance(path, n_EB_E, method='euclidean')
+
+    >>> val_txt = '{:4.2f} km, {:4.2f} km'.format(s_xt[0]/1000, d_xt[0]/1000)
+    >>> 'Ex10: Cross track distance: s_xt, d_xt = {0}'.format(val_txt)
+    'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 """
 
 

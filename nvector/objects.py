@@ -5,13 +5,15 @@ Created on 29. des. 2015
 """
 from __future__ import division, print_function
 import numpy as np
-from numpy import pi, arccos, cross, dot
+from numpy import cross, dot, deprecate
 from numpy.linalg import norm
 from geographiclib.geodesic import Geodesic as _Geodesic
 from nvector._core import (select_ellipsoid, rad, deg, zyx2R,
                            lat_lon2n_E, n_E2lat_lon, n_E2R_EN, n_E_and_wa2R_EL,
                            n_EB_E2p_EB_E, p_EB_E2n_EB_E, unit,
-                           great_circle_distance, mean_horizontal_position,
+                           great_circle_distance, euclidean_distance,
+                           cross_track_distance,
+                           mean_horizontal_position,
                            E_rotation)
 from nvector import _examples
 from nvector._common import test_docstrings, use_docstring_from
@@ -110,6 +112,10 @@ class GeoPoint(object):
         """
         return self.to_nvector().to_ecef_vector()
 
+    def to_geo_point(self):
+        """Return geo-point"""
+        return self
+
     def geo_point(self, distance, azimuth, long_unroll=False, degrees=False):
         """
         Return position B computed from current position, distance and azimuth.
@@ -176,12 +182,7 @@ class GeoPoint(object):
 
 class _Common(object):
     def __eq__(self, other):
-        try:
-            if self is other:
-                return True
-            return self._is_equal_to(other)
-        except AttributeError:
-            return False
+        return self is other or self._is_equal_to(other)
 
 
 class Nvector(_Common):
@@ -487,14 +488,6 @@ class GeoPath(object):
         self.positionA = positionA
         self.positionB = positionB
 
-    @staticmethod
-    def _euclidean_cross_track_distance(cos_angle, radius=1):
-        return -cos_angle * radius
-
-    @staticmethod
-    def _great_circle_cross_track_distance(cos_angle, radius=1):
-        return (arccos(cos_angle) - pi / 2) * radius
-
     def nvectors(self):
         """ Return positionA and positionB as n-vectors
         """
@@ -503,10 +496,6 @@ class GeoPath(object):
     def nvector_normals(self):
         n_EA_E, n_EB_E = self.nvectors()
         return n_EA_E.normal, n_EB_E.normal
-
-    def _normal_to_great_circle(self):
-        n_EA1_E, n_EA2_E = self.nvector_normals()
-        return cross(n_EA1_E, n_EA2_E, axis=0)
 
     def _get_average_radius(self):
         # n1 = self.positionA.to_nvector()
@@ -522,7 +511,7 @@ class GeoPath(object):
 
     def cross_track_distance(self, point, method='greatcircle', radius=None):
         """
-        Return cross track distance from the path to a point.
+        Return cross track distance from path to point.
 
         Parameters
         ----------
@@ -541,12 +530,9 @@ class GeoPath(object):
         """
         if radius is None:
             radius = self._get_average_radius()
-        c_E = unit(self._normal_to_great_circle())
-        n_EB_E = point.to_nvector()
-        cos_angle = dot(c_E.T, n_EB_E.normal)
-        if method[0].lower() == 'e':
-            return self._euclidean_cross_track_distance(cos_angle, radius)
-        return self._great_circle_cross_track_distance(cos_angle, radius)
+        path = self.nvector_normals()
+        n_c = point.to_nvector().normal
+        return cross_track_distance(path, n_c, method=method, radius=radius)
 
     def track_distance(self, method='greatcircle', radius=None):
         """
@@ -557,20 +543,31 @@ class GeoPath(object):
         method: string
             'greatcircle':
             'euclidean'
+            'exact'
         radius: real scalar
             radius of sphere
         """
+        if method == 'exact':
+            s_ab, _angle = self.positionA.distance_and_azimuth(self.positionB)
+            return s_ab
         if radius is None:
             radius = self._get_average_radius()
         n_EA_E, n_EB_E = self.nvector_normals()
 
-        if method[0] == "e":  # Euclidean distance:
-            return norm(n_EB_E - n_EA_E, axis=0) * radius
+        if method[0] == "e":
+            return euclidean_distance(n_EA_E, n_EB_E, radius)
         return great_circle_distance(n_EA_E, n_EB_E, radius)
 
+    @deprecate
     def intersection(self, path):
         """
-        Return the intersection between the great circles of the two paths
+        Deprecated use intersect instead
+        """
+        return self.intersect(path)
+
+    def intersect(self, path):
+        """
+        Return the intersection(s) between the great circles of the two paths
 
         Parameters
         ----------
@@ -599,40 +596,125 @@ class GeoPath(object):
             warnings.warn('Paths are Equal. Intersection point undefined. '
                           'NaN returned.')
 
-        lat_EC, long_EC = n_E2lat_lon(n_EC_E, frame.R_Ee)
-        return GeoPoint(lat_EC, long_EC, frame=frame)
+        lat_EC, lon_EC = n_E2lat_lon(n_EC_E, frame.R_Ee)
+        return GeoPoint(lat_EC, lon_EC, frame=frame)
 
-    def on_path(self, point, path_width=1e-6):
+    def _on_ellipsoid_path(self, point, rtol=1e-6, atol=1e-8):
+        point_a, point_b = self.positionA, self.positionB
+        distanceAB, azimuth_ab, _azi_ba = point_a.distance_and_azimuth(point_b)
+        distanceAC, azimuth_ac, _azi_ca = point_a.distance_and_azimuth(point)
+        return distanceAB >= distanceAC and np.allclose(azimuth_ab, azimuth_ac,
+                                                        rtol=rtol, atol=atol)
+
+    def on_great_circle(self, point, rtol=1e-6, atol=1e-8):
+        distance = np.abs(self.cross_track_distance(point))
+        return np.allclose(distance, 0, rtol, atol)
+
+    def _on_great_circle_path(self, point, rtol=1e-6, atol=1e-8):
+        pointC = point.to_nvector().normal
+        pointA, pointB = self.nvector_normals()
+
+        scale = norm(pointB - pointA, axis=0)
+        ti1 = norm(pointC-pointA, axis=0) / scale
+        ti2 = norm(pointC-pointB, axis=0) / scale
+        return (np.all(ti1 <= 1) and np.all(ti2 <= 1) and
+                self.on_great_circle(point, rtol, atol))
+
+        p_ba = pointB - pointA
+        p_ca = pointC - pointA
+        is_parallell = np.allclose(np.cross(p_ba.T, p_ca.T), 0, rtol, atol)
+        same_direction = (np.all(np.sign(np.dot(p_ba.T, p_ca)) == 1) and
+                          np.all(np.sign(p_ba) == np.sign(p_ca)))
+        return is_parallell and same_direction and norm(p_ba) >= norm(p_ca)
+
+    def on_path(self, point, method='greatcircle', rtol=1e-6, atol=1e-8):
         """
-        Return True if point is on the path
+        Return True if point is on the path (i.e. on the great circle between A and B)
 
         Examples
         --------
         >>> import nvector as nv
         >>> wgs84 = nv.FrameE(name='WGS84')
         >>> pointA = wgs84.GeoPoint(89, 0, degrees=True)
-        >>> pointB = wgs84.GeoPoint(89, 180, degrees=True)
+        >>> pointB = wgs84.GeoPoint(80, 0, degrees=True)
         >>> path = nv.GeoPath(pointA, pointB)
-        >>> t0 = 10.
-        >>> t1 = 20.
-        >>> ti = 16.  # time of interpolation
-        >>> ti_n = (ti - t0) / (t1 - t0) # normalized time of interpolation
-        >>> pointC = path.interpolate(ti_n)  #.to_geo_point()
+        >>> pointC = path.interpolate(0.6).to_geo_point()
         >>> path.on_path(pointC)
         True
-        >>> pointD = path.interpolate(1.000000001)
+
+        >>> pointD = path.interpolate(1.000000001).to_geo_point()
         >>> path.on_path(pointD)
         False
-        >>> pointE = wgs84.GeoPoint(50, 0.00000001, degrees=True)
+        >>> pointE = wgs84.GeoPoint(85, 0.0001, degrees=True)
         >>> path.on_path(pointE)
         False
+        >>> pointC = path.interpolate(-2).to_geo_point()
+        >>> path.on_path(pointC)
+        False
+        >>> path = nv.GeoPath(pointC, pointA)
 
         """
-        pointC = point.to_nvector().normal
-        pointA, pointB = self.nvector_normals()
+        if method == 'greatcircle':
+            return self._on_great_circle_path(point, rtol, atol)
+        return self._on_ellipsoid_path(point, rtol, atol)
 
-        ti = norm(pointC-pointA) / norm(pointB - pointA)
-        return ti <= 1 and np.all(self.cross_track_distance(point) <= path_width)
+    def closest_point_on_great_circle(self, point):
+        n0 = point.to_nvector().normal
+        n1, n2 = self.nvector_normals()
+
+        c1 = np.cross(n1, n2, axis=0)  # vector representing great circle through p1, p2
+        c2 = np.cross(n0, c1, axis=0)  # vector representing great circle through p0 normal to c1
+        n = np.cross(c1, c2, axis=0)    # nearest point on c1 to n0
+        frame = self.positionA.frame
+        return frame.Nvector(unit(n), self.positionA.z).to_geo_point()
+
+    def closest_point_on_path(self, point):
+        """
+        Returns closest point on great circle path segment to the point.
+
+        If the point is within the extent of the segment, the point returned is on the segment path
+        otherwise, it is the closest endpoint defining the path segment.
+
+        Parameters
+        ----------
+        point: GeoPoint
+            point of intersection between paths
+
+        Returns
+        -------
+        closest_point: GeoPoint
+            closest point on path segment.
+
+        Example
+        -------
+        >>> import nvector as nv
+        >>> wgs84 = nv.FrameE(name='WGS84')
+        >>> pointA = wgs84.GeoPoint(51., 1., degrees=True)
+        >>> pointB = wgs84.GeoPoint(51., 2., degrees=True)
+        >>> pointC = wgs84.GeoPoint(51., 1.9, degrees=True)
+        >>> path = nv.GeoPath(pointA, pointB)
+        >>> point = path.closest_point_on_path(pointC)
+        >>> np.allclose((point.latitude_deg, point.longitude_deg),
+        ...             ([51.00038411380564], [1.900003311624411]))
+        True
+        >>> np.allclose(GeoPath(pointC, point).track_distance(),  42.67368351)
+        True
+        >>> pointD = wgs84.GeoPoint(51.0, 2.1, degrees=True)
+        >>> pointE = path.closest_point_on_path(pointD) # 51.0000, 002.0000
+        >>> pointE.latitude_deg, pointE.longitude_deg
+        (51.0, 2.0)
+        """
+        point_c = self.closest_point_on_great_circle(point)
+        if self.on_path(point_c):
+            return point_c
+        n0 = point.to_nvector().normal
+        n1, n2 = self.nvector_normals()
+        radius = self._get_average_radius()
+        d1 = great_circle_distance(n1, n0, radius)
+        d2 = great_circle_distance(n2, n0, radius)
+        if d1 < d2:
+            return self.positionA.to_geo_point()
+        return self.positionB.to_geo_point()
 
     def interpolate(self, ti):
         """
@@ -649,12 +731,10 @@ class GeoPath(object):
         point: Nvector
             point of interpolation along path
         """
-        n_EB_E_t0, n_EB_E_t1 = self.nvector_normals()
-
-        n_EB_E_ti = unit(n_EB_E_t0 + ti * (n_EB_E_t1 - n_EB_E_t0))
-        zi = self.positionA.z + ti * (self.positionB.z-self.positionA.z)
-        frame = self.positionA.frame
-        return frame.Nvector(n_EB_E_ti, zi)
+        point_a, point_b = self.positionA.to_nvector(), self.positionB.to_nvector()
+        point_c = point_a + ti * (point_b-point_a)
+        point_c.normal = unit(point_c.normal)
+        return point_c
 
 
 class FrameE(_Common):

@@ -1,8 +1,8 @@
-'''
+"""
 Created on 18. des. 2015
 
 @author: pab
-'''
+"""
 import unittest
 import numpy as np
 from numpy.testing import assert_array_almost_equal  # @UnresolvedImport
@@ -40,25 +40,29 @@ class TestFrames(unittest.TestCase):
         B4 = FrameB(n_EC_E, yaw=10, pitch=20, roll=30, degrees=True)
         self.assertNotEqual(B, B4)
 
-        # n_ED_E = E2.Nvector(unit([[1], [2], [3]]), z=-400)
-        # B5 = FrameB(n_ED_E, yaw=10, pitch=20, roll=30, degrees=True)
-        # self.assertTrue(B != B5)
+        n_ED_E = E2.Nvector(unit([[1], [2], [3]]), z=-400)
+        B5 = FrameB(n_ED_E, yaw=10, pitch=20, roll=30, degrees=True)
+        self.assertNotEqual(B, B5)
 
     def test_compare_N_frames(self):
         wgs84 = FrameE(name='WGS84')
-        # wgs72 = FrameE(name='WGS72')
+        wgs72 = FrameE(name='WGS72')
         pointA = wgs84.GeoPoint(latitude=1, longitude=2, z=3, degrees=True)
-        # pointB = wgs72.GeoPoint(latitude=1, longitude=2, z=6, degrees=True)
+        pointB = wgs72.GeoPoint(latitude=1, longitude=2, z=6, degrees=True)
 
         frame_N = FrameN(pointA)
-        frame_N1 = FrameL(pointA, wander_azimuth=0)
-        # frame_N2 = FrameL(pointB, wander_azimuth=0)
+        frame_L1 = FrameL(pointA, wander_azimuth=0)
+        frame_L2 = FrameL(pointA, wander_azimuth=0)
+        frame_L3 = FrameL(pointB, wander_azimuth=0)
 
         self.assertEqual(frame_N, frame_N)
+        # TODO: tests are fishy: both frame_N == frame_L1 and frame_N != frame_L1 returns True
+        self.assertEqual(frame_N, frame_L1)
+        self.assertNotEqual(frame_N, frame_L1)
 
-        self.assertEqual(frame_N, frame_N1)
-        # self.assertTrue(frame_N != frame_N2)
-        # self.assertTrue(frame_N1 != frame_N2)
+        self.assertNotEqual(frame_N, frame_L2)
+        self.assertTrue(frame_N != frame_L3)
+        self.assertTrue(frame_L1 != frame_L3)
 
     def test_compare_L_frames(self):
         wgs84 = FrameE(name='WGS84')
@@ -97,8 +101,8 @@ class TestExamples(unittest.TestCase):
         # positive angle about down-axis
 
         print('Ex1, delta north, east, down = {0}, {1}, {2}'.format(p_AB_N[0],
-                                                                 p_AB_N[1],
-                                                                 p_AB_N[2]))
+                                                                    p_AB_N[1],
+                                                                    p_AB_N[2]))
 
         print('Ex1, azimuth = {0} deg'.format(azimuth))
 
@@ -290,7 +294,7 @@ class TestExamples(unittest.TestCase):
         assert_array_almost_equal(lon_B, -90.01769837)
 
     @staticmethod
-    def test_Ex9_intersection():
+    def test_Ex9_intersect():
 
         # Two paths A and B are given by two pairs of positions:
         pointA1 = GeoPoint(10, 20, degrees=True)
@@ -300,7 +304,7 @@ class TestExamples(unittest.TestCase):
         pathA = GeoPath(pointA1, pointA2)
         pathB = GeoPath(pointB1, pointB2)
 
-        pointC = pathA.intersection(pathB)
+        pointC = pathA.intersect(pathB)
 
         lat, lon = pointC.latitude_deg, pointC.longitude_deg
         msg = 'Ex9, Intersection: lat, long = {} {} deg'

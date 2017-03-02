@@ -53,6 +53,8 @@ __all__ = ['select_ellipsoid', 'E_rotation',
            'n_EA_E_distance_and_azimuth2n_EB_E',
            'n_EA_E_and_n_EB_E2azimuth',
            'great_circle_distance', 'euclidean_distance',
+           'great_circle_normal', 'cross_track_distance',
+           'intersect',
            'mean_horizontal_position',
            'R2xyz', 'xyz2R', 'R2zyx', 'zyx2R',
            'n_E_and_wa2R_EL', 'n_E2R_EN', 'R_EL2n_E', 'R_EN2n_E'
@@ -596,9 +598,9 @@ class _ECEFvector2Nvector(object):
 @use_docstring_from(_ECEFvector2Nvector)
 def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0/298.257223563, R_Ee=None):
     if R_Ee is None:
+        # R_Ee selects correct E-axes, see E_rotation for details
         R_Ee = E_rotation()
     p_EB_E = dot(R_Ee, p_EB_E)
-    # R_Ee selects correct E-axes, see R_Ee.m for details
 
     # e_2 = eccentricity**2
     e_2 = 2 * f - f**2  # = 1-b**2/a**2
@@ -631,7 +633,7 @@ def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0/298.257223563, R_Ee=None):
     n_EB_E_z = temp * k / (k + e_2) * p_EB_E[2, :]
 
     n_EB_E = np.vstack((n_EB_E_x, n_EB_E_y, n_EB_E_z))
-    n_EB_E = unit(dot(R_Ee.T, n_EB_E))  # Ensure unit length:
+    n_EB_E = unit(dot(R_Ee.T, n_EB_E))  # Ensure unit length
 
     depth = -height
     return n_EB_E, depth
@@ -835,20 +837,8 @@ def R2zyx(R_AB):
     --------
     zyx2R, xyz2R, R2xyz
     """
-
-    z = arctan2(R_AB[1, 0], R_AB[0, 0])  # atan2: [-pi pi]
-    x = arctan2(R_AB[2, 1], R_AB[2, 2])
-
-    sin_y = -R_AB[2, 0]
-
-    # cos_y is based on as many elements as possible, to average out
-    # numerical errors. It is selected as the positive square root since
-    # y: [-pi/2 pi/2]
-    cos_y = sqrt((R_AB[0, 0]**2 + R_AB[1, 0]**2 +
-                  R_AB[2, 1]**2 + R_AB[2, 2]**2)/2)
-
-    y = arctan2(sin_y, cos_y)
-    return z, y, x
+    x, y, z = R2xyz(np.transpose(R_AB))
+    return -z, -y, -x
 
 
 def R_EL2n_E(R_EL):
@@ -994,6 +984,137 @@ def zyx2R(z, y, x):
                   [-sy, cy * sx, cy * cx]])
 
     return np.squeeze(R_AB)
+
+
+def interpolate(path, ti):
+    """
+    Return the interpolated point along the path
+
+    Parameters
+    ----------
+    path: tuple of n-vectors (positionA, po)
+
+    ti: real scalar
+        interpolation time assuming position A and B is at t0=0 and t1=1,
+        respectively.
+
+    Returns
+    -------
+    point: Nvector
+        point of interpolation along path
+    """
+
+    n_EB_E_t0, n_EB_E_t1 = path
+    n_EB_E_ti = unit(n_EB_E_t0 + ti * (n_EB_E_t1 - n_EB_E_t0))
+    return n_EB_E_ti
+
+
+class _Intersect(object):
+    __doc__ = """Return the intersection(s) between the great circles of the two paths
+
+    Parameters
+    ----------
+    path_a, path_b: tuple of 2 n-vectors
+        defining path A and path B, respectively.
+        Path A and B has shape 2 x 3 x n and 2 x 3 x m, respectively.
+
+    Returns
+    -------
+    n_EC_E : array of shape 3 x max(n, m)
+        n-vector(s) [no unit] of position C decomposed in E.
+        point(s) of intersection between paths.
+
+    Examples
+    --------
+
+    {0}
+
+    """.format(_examples.get_examples([9], OO=False))
+
+
+@use_docstring_from(_Intersect)
+def intersect(path_a, path_b):
+    n_EA1_E, n_EA2_E = path_a
+    n_EB1_E, n_EB2_E = path_b
+    # Find the intersection between the two paths, n_EC_E:
+    n_EC_E_tmp = unit(cross(cross(n_EA1_E, n_EA2_E, axis=0),
+                            cross(n_EB1_E, n_EB2_E, axis=0), axis=0),
+                      norm_zero_vector=np.nan)
+
+    # n_EC_E_tmp is one of two solutions, the other is -n_EC_E_tmp. Select
+    # the one that is closet to n_EA1_E, by selecting sign from the dot
+    # product between n_EC_E_tmp and n_EA1_E:
+    n_EC_E = np.sign(dot(n_EC_E_tmp.T, n_EA1_E)) * n_EC_E_tmp
+    if np.any(np.isnan(n_EC_E)):
+        warnings.warn('Paths are Equal. Intersection point undefined. '
+                      'NaN returned.')
+    return n_EC_E
+
+
+def great_circle_normal(n_EA_E, n_EB_E):
+    """
+    Return the unit normal(s) to the great circle(s)
+
+    Parameters
+    ----------
+    n_EA_E, n_EB_E:  3 x n array
+        n-vector(s) [no unit] of position A and B, decomposed in E.
+
+    """
+    return unit(np.cross(n_EA_E, n_EB_E, axis=0))
+
+
+def _euclidean_cross_track_distance(sin_theta, radius=1):
+    return sin_theta * radius
+
+
+def _great_circle_cross_track_distance(sin_theta, radius=1):
+    return np.arcsin(sin_theta) * radius
+    # ill conditioned for small angles:
+    # return (np.arccos(-sin_theta) - np.pi / 2) * radius
+    #
+    # well conditioned, but more complex:
+    # return np.where(np.abs(sin_theta) > 0.5,
+    #                 np.arccos(-sin_theta) - np.pi / 2,
+    #                 np.arcsin(sin_theta)) * radius
+
+
+class _CrossTrackDistance(object):
+    __doc__ = """ Return  cross track distance between path A and position B.
+
+    Parameters
+    ----------
+    path: tuple of 2 n-vectors
+        2 n-vectors of positions defining path A, decomposed in E.
+    n_EB_E:  3 x m array
+        n-vector(s) of position B to measure the cross track distance to.
+    method: string
+        defining distance calculated. Options are: 'greatcircle' or 'euclidean'
+    radius: real scalar
+        radius of sphere. (default 6371009.0)
+
+    Returns
+    -------
+    distance : array of length max(n, m)
+        cross track distance(s)
+
+    Examples
+    --------
+
+    {0}
+
+    """.format(_examples.get_examples([10], OO=False))
+
+
+@use_docstring_from(_CrossTrackDistance)
+def cross_track_distance(path, n_EB_E, method='greatcircle',
+                         radius=6371009.0):
+
+    c_E = great_circle_normal(path[0], path[1])
+    sin_theta = -np.dot(c_E.T, n_EB_E).ravel()
+    if method[0].lower() == 'e':
+        return _euclidean_cross_track_distance(sin_theta, radius)
+    return _great_circle_cross_track_distance(sin_theta, radius)
 
 
 class _GreatCircleDistance(object):
