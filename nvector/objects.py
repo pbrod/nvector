@@ -182,7 +182,10 @@ class GeoPoint(object):
 
 class _Common(object):
     def __eq__(self, other):
-        return self is other or self._is_equal_to(other)
+        try:
+            return self is other or self._is_equal_to(other)
+        except AttributeError:
+            return False
 
 
 class Nvector(_Common):
