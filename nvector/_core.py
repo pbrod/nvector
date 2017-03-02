@@ -1005,7 +1005,8 @@ def interpolate(path, ti):
     """
 
     n_EB_E_t0, n_EB_E_t1 = path
-    n_EB_E_ti = unit(n_EB_E_t0 + ti * (n_EB_E_t1 - n_EB_E_t0))
+    n_EB_E_ti = unit(n_EB_E_t0 + ti * (n_EB_E_t1 - n_EB_E_t0),
+                     norm_zero_vector=np.nan)
     return n_EB_E_ti
 
 
