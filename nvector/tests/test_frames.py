@@ -56,9 +56,9 @@ class TestFrames(unittest.TestCase):
         frame_L3 = FrameL(pointB, wander_azimuth=0)
 
         self.assertEqual(frame_N, frame_N)
-        # TODO: tests are fishy: both frame_N == frame_L1 and frame_N != frame_L1 returns True
+
         self.assertEqual(frame_N, frame_L1)
-        self.assertNotEqual(frame_N, frame_L1)
+        # self.assertNotEqual(frame_N, frame_L1)   # TODO: frame_N != frame_L1 returns True on python 2.7
 
         self.assertNotEqual(frame_N, frame_L2)
         self.assertTrue(frame_N != frame_L3)
