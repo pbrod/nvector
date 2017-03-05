@@ -33,7 +33,7 @@ Contents
 ========
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 5
 
 	Introduction <src/overview>
 	Functional examples <src/getting_started_functional>
