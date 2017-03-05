@@ -444,8 +444,12 @@ Solution:
     >>> pathA = nv.GeoPath(pointA1, pointA2)
     >>> pathB = nv.GeoPath(pointB1, pointB2)
 
-    >>> pointC = pathA.intersection(pathB)
-
+    >>> pointC = pathA.intersect(pathB)
+    >>> pathA.on_path(pointC), pathB.on_path(pointC)
+    (array([False], dtype=bool), array([False], dtype=bool))
+    >>> pathA.on_great_circle(pointC), pathB.on_great_circle(pointC)
+    (array([ True], dtype=bool), array([ True], dtype=bool))
+    >>> pointC = pointC.to_geo_point()
     >>> lat, lon = pointC.latitude_deg, pointC.longitude_deg
     >>> msg = 'Ex9, Intersection: lat, lon = {:4.2f}, {:4.2f} deg'
     >>> msg.format(lat[0], lon[0])
@@ -469,6 +473,9 @@ surface, between the great circle and B).
 Also find the Euclidean distance dxt between B and the plane defined by the
 great circle. Use Earth radius 6371e3.
 
+Finally, find the intersection point on the great circle and determine if it is
+between position A1 and A2.
+
 
 Solution:
     >>> import nvector as nv
@@ -484,6 +491,10 @@ Solution:
     >>> val_txt = '{:4.2f} km, {:4.2f} km'.format(s_xt[0]/1000, d_xt[0]/1000)
     >>> 'Ex10: Cross track distance: s_xt, d_xt = {}'.format(val_txt)
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
+
+    >>> pointC = pathA.closest_point_on_great_circle(pointB)
+    >>> pathA.on_path(pointC)
+    array([ True], dtype=bool)
 
 See also
     `Example 10 at www.navlab.net <http://www.navlab.net/nvector/#example_10>`_

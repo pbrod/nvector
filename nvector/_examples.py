@@ -13,6 +13,7 @@ def see_also(number):
 
 example_1_txt = """
 **Example 1: "A and B to delta"**
+---------------------------------
 
 .. image:: http://www.navlab.net/images/ex1img.png
 
@@ -89,6 +90,7 @@ Step5: Also find the direction (azimuth) to B, relative to north:
 
 example_2_txt = """
 **Example 2: "B and delta to C"**
+---------------------------------
 
 .. image:: http://www.navlab.net/images/ex2img.png
 
@@ -174,6 +176,7 @@ Step 6: Find the position of C, using the functions that goes from one
 
 example_3_txt = """
 **Example 3: "ECEF-vector to geodetic latitude"**
+-------------------------------------------------
 
 .. image:: http://www.navlab.net/images/ex3img.png
 
@@ -223,6 +226,7 @@ Solution:
 
 example_4_txt = """
 **Example 4: "Geodetic latitude to ECEF-vector"**
+-------------------------------------------------
 
 .. image:: http://www.navlab.net/images/ex4img.png
 
@@ -262,6 +266,7 @@ Solution:
 
 example_5_txt = """
 **Example 5: "Surface distance"**
+---------------------------------
 
 .. image:: http://www.navlab.net/images/ex5img.png
 
@@ -347,6 +352,7 @@ Exact solution for the WGS84 ellipsoid:
 
 example_6_txt = """
 **Example 6 "Interpolated position"**
+-------------------------------------
 
 .. image:: http://www.navlab.net/images/ex6img.png
 
@@ -404,6 +410,7 @@ Solution:
 
 example_7_txt = """
 **Example 7: "Mean position"**
+------------------------------
 
 .. image:: http://www.navlab.net/images/ex7img.png
 
@@ -455,6 +462,7 @@ or
 
 example_8_txt = """
 **Example 8: "A and azimuth/distance to B"**
+--------------------------------------------
 
 .. image:: http://www.navlab.net/images/ex8img.png
 
@@ -514,6 +522,7 @@ Solution:
 
 example_9_txt = """
 **Example 9: "Intersection of two paths"**
+------------------------------------------
 
 .. image:: http://www.navlab.net/images/ex9img.png
 
@@ -537,11 +546,12 @@ Solution:
     >>> pathA = nv.GeoPath(pointA1, pointA2)
     >>> pathB = nv.GeoPath(pointB1, pointB2)
 
-    >>> pointC = pathA.intersect(pathB).to_geo_point()
+    >>> pointC = pathA.intersect(pathB)
     >>> pathA.on_path(pointC), pathB.on_path(pointC)
-    (False, False)
+    (array([False], dtype=bool), array([False], dtype=bool))
     >>> pathA.on_great_circle(pointC), pathB.on_great_circle(pointC)
-    (True, True)
+    (array([ True], dtype=bool), array([ True], dtype=bool))
+    >>> pointC = pointC.to_geo_point()
     >>> lat, lon = pointC.latitude_deg, pointC.longitude_deg
     >>> msg = 'Ex9, Intersection: lat, lon = {:4.2f}, {:4.2f} deg'
     >>> msg.format(lat[0], lon[0])
@@ -564,7 +574,7 @@ Solution:
     >>> n_EC_E = nv.unit(np.cross(np.cross(n_EA1_E, n_EA2_E, axis=0),
     ...                           np.cross(n_EB1_E, n_EB2_E, axis=0),
     ...                           axis=0))
-    >>> n_EC_E *= np.sign(np.dot(n_EC_E_tmp.T, n_EA1_E))
+    >>> n_EC_E *= np.sign(np.dot(n_EC_E.T, n_EA1_E))
 
 or alternatively
     >>> path_a, path_b = (n_EA1_E, n_EA2_E), (n_EB1_E, n_EB2_E)
@@ -577,11 +587,17 @@ or alternatively
     >>> msg.format(lat[0], lon[0])
     'Ex9, Intersection: lat, lon = 40.32, 55.90 deg'
 
+    >>> nv.on_great_circle_path(path_a, n_EC_E), nv.on_great_circle_path(path_b, n_EC_E)
+    (array([False], dtype=bool), array([False], dtype=bool))
+    >>> nv.on_great_circle(path_a, n_EC_E), nv.on_great_circle(path_b, n_EC_E)
+    (array([ True], dtype=bool), array([ True], dtype=bool))
+
 """
 
 
 example_10_txt = """
 **Example 10: "Cross track distance"**
+--------------------------------------
 
 .. image:: http://www.navlab.net/images/ex10img.png
 
@@ -594,6 +610,9 @@ surface, between the great circle and B).
 
 Also find the Euclidean distance dxt between B and the plane defined by the
 great circle. Use Earth radius 6371e3.
+
+Finally, find the intersection point on the great circle and determine if it is
+between position A1 and A2.
 
 """
 
@@ -613,6 +632,10 @@ Solution:
     >>> 'Ex10: Cross track distance: s_xt, d_xt = {}'.format(val_txt)
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 
+    >>> pointC = pathA.closest_point_on_great_circle(pointB)
+    >>> pathA.on_path(pointC)
+    array([ True], dtype=bool)
+
 """
 
 
@@ -623,31 +646,35 @@ Solution:
     >>> n_EA1_E = nv.lat_lon2n_E(rad(0), rad(0))
     >>> n_EA2_E = nv.lat_lon2n_E(rad(10), rad(0))
     >>> n_EB_E = nv.lat_lon2n_E(rad(1), rad(0.1))
-
-    >>> radius = 6371e3  # mean earth radius [m]
-
-Find the unit normal to the great circle:
-    >>> c_E = nv.great_circle_normal(n_EA1_E, n_EA2_E)
-
-Find the great circle cross track distance:
-    >>> sin_theta = -np.dot(c_E.T, n_EB_E).ravel()
-    >>> s_xt = np.arcsin(sin_theta) * radius
-
-Find the Euclidean cross track distance:
-    >>> d_xt = sin_theta * radius
-
-    >>> val_txt = '{:4.2f} km, {:4.2f} km'.format(s_xt[0]/1000, d_xt[0]/1000)
-    >>> 'Ex10: Cross track distance: s_xt, d_xt = {0}'.format(val_txt)
-    'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
-
-Alternative solution:
     >>> path = (n_EA1_E, n_EA2_E)
-    >>> s_xt = nv.cross_track_distance(path, n_EB_E)
-    >>> d_xt = nv.cross_track_distance(path, n_EB_E, method='euclidean')
+    >>> radius = 6371e3  # mean earth radius [m]
+    >>> s_xt = nv.cross_track_distance(path, n_EB_E, radius=radius)
+    >>> d_xt = nv.cross_track_distance(path, n_EB_E, method='euclidean',
+    ...                                radius=radius)
 
     >>> val_txt = '{:4.2f} km, {:4.2f} km'.format(s_xt[0]/1000, d_xt[0]/1000)
     >>> 'Ex10: Cross track distance: s_xt, d_xt = {0}'.format(val_txt)
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
+
+    >>> n_EC_E = nv.closest_point_on_great_circle(path, n_EB_E)
+    >>> nv.on_great_circle_path(path, n_EC_E, radius)
+    array([ True], dtype=bool)
+
+Alternative cross track distance solutions:
+Solution 2:
+    >>> s_xt2 = nv.great_circle_distance(n_EB_E, n_EC_E, radius)
+    >>> d_xt2 = nv.euclidean_distance(n_EB_E, n_EC_E, radius)
+    >>> np.allclose(s_xt, s_xt2), np.allclose(d_xt, d_xt2)
+    (True, True)
+
+Solution 3:
+    >>> c_E = nv.great_circle_normal(n_EA1_E, n_EA2_E)
+    >>> sin_theta = -np.dot(c_E.T, n_EB_E).ravel()
+    >>> s_xt3 = np.arcsin(sin_theta) * radius
+    >>> d_xt3 = sin_theta * radius
+    >>> np.allclose(s_xt, s_xt3), np.allclose(d_xt, d_xt3)
+    (True, True)
+
 """
 
 

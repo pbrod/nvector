@@ -18,15 +18,20 @@ Geodesic functions
     n_EA_E_distance_and_azimuth2n_EB_E
     great_circle_distance
     euclidean_distance
+    cross_track_distance
+    closest_point_on_great_circle
+    intersect
     mean_horizontal_position
-
+    on_great_circle
+    on_great_circle_path
 
 
 Rotation matrices and angles
 ----------------------------
 .. autosummary::
    :toctree: generated/
-
+	
+    E_rotation
     n_E2R_EN
     n_E_and_wa2R_EL
     R_EL2n_E
@@ -46,6 +51,7 @@ Misc functions
    nthroot
    deg
    rad
+   select_ellipsoid
    unit
 
 .. currentmodule:: nvector.objects

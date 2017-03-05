@@ -125,15 +125,14 @@ See also
 """
 
 
+def write_readme(doc):
+    with open('readme.txt', 'w') as fid:
+        fid.write(doc)
+
+
 def test_docstrings():
     import doctest
     doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE)
-
-
-def write_readme(doc):
-
-    with open('readme.txt', 'w') as fid:
-        fid.write(doc)
 
 
 if __name__ == '__main__':

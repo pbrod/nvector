@@ -8,5 +8,12 @@ def write_readme(doc):
         fid.write(doc)
 
 
+def test_docstrings():
+    import doctest
+    doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE)
+
+
 if __name__ == '__main__':
-    write_readme(__doc__)
+    test_docstrings()
+
+    # write_readme(__doc__)
