@@ -29,7 +29,17 @@ Build
   python setup.py sdist
 
 PyPi upload:
-  twine upload dist/*
+  git pull origin
+  git tag v0.5.1 master
+  git shortlog v0.4.1..v0.5.1 > log.txt  # update Changes.rst
+  git commit
+  git tag v0.5.1 master
+  python setup.py sdist
+  python setup.py bdist_wheel --universal
+  python setup.py egg_info
+  git push --tags
+  twine -p PASSWORD upload dist/*
+
 
 """
 

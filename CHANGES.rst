@@ -2,7 +2,44 @@
 Changelog
 =========
 
-Created with gitcommand: git shortlog v0.1.3..v0.4.1
+Created with gitcommand: git shortlog v0.4.1..v0.5.1
+
+Version 0.5.1, Mars 5, 2017
+==============================
+
+
+Cody (4):
+     * Explicitely numbered replacement fields
+     * Migrated `%` string formating
+     
+
+Per A Brodtkorb (29):
+     * pep8
+     * Updated failing examples
+     * Updated README.rst
+     * Removed obsolete pass statement
+     * Documented functions
+     * added .checkignore for quantifycode
+     * moved test_docstrings and use_docstring_from into _common.py
+     * Added .codeclimate.yml
+     * Updated installation information in _info.py
+     * Added GeoPath.on_path method. Clearified intersection example
+     * Added great_circle_normal, cross_track_distance Renamed intersection to intersect (Intersection is deprecated.)            
+     * Simplified R2zyx with a call to R2xyz Improved accuracy for great circle cross track distance for small distances. 
+     * Added on_great_circle, _on_great_circle_path, _on_ellipsoid_path, closest_point_on_great_circle and closest_point_on_path to GeoPath
+     * made __eq__ more robust for frames
+     * Removed duplicated code
+     * Updated tests
+     * Removed fishy test
+     * replaced zero n-vector with nan
+     * Commented out failing test.
+     * Added example 10 image
+      Added 'closest_point_on_great_circle', 'on_great_circle','on_great_circle_path'. 
+     * Updated examples + documentation
+     * Updated index depth
+     * Updated README.rst and classifier in setup.cfg
+
+
 
 Version 0.4.1, Januar 19, 2016
 ==============================
