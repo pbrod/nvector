@@ -23,5 +23,8 @@ def test_docstrings(filename):
     print('Docstrings tested')
 
 
-if __name__ == '__main__':
-    pass
+def write_readme(doc):
+
+    with open('readme.txt', 'w') as fid:
+        fid.write(doc)
+

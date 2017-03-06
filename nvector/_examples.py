@@ -724,11 +724,7 @@ class _TestDocStrings(object):
     __doc__ = getting_started
 
 
-def test_docstrings():
-    import doctest
-    doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE)
-
-
 if __name__ == '__main__':
+    from nvector._common import test_docstrings
     # print(getting_started)
-    test_docstrings()
+    test_docstrings(__file__)

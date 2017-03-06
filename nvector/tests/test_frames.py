@@ -40,10 +40,9 @@ class TestFrames(unittest.TestCase):
         B4 = FrameB(n_EC_E, yaw=10, pitch=20, roll=30, degrees=True)
         self.assertNotEqual(B, B4)
 
-# TODO: This test fails on python>2.7
-#         n_ED_E = E2.Nvector(unit([[1], [2], [3]]), z=-400)
-#         B5 = FrameB(n_ED_E, yaw=10, pitch=20, roll=30, degrees=True)
-#         self.assertNotEqual(B, B5)
+        n_ED_E = E2.Nvector(unit([[1], [2], [3]]), z=-400)
+        B5 = FrameB(n_ED_E, yaw=10, pitch=20, roll=30, degrees=True)
+        self.assertNotEqual(B, B5)
 
     def test_compare_N_frames(self):
         wgs84 = FrameE(name='WGS84')
@@ -60,29 +59,27 @@ class TestFrames(unittest.TestCase):
 
         self.assertEqual(frame_N, frame_L1)
 
-        # TODO: frame_N != frame_L1 returns True on python 2.7:
-        # self.assertNotEqual(frame_N, frame_L1)
+        self.assertTrue((frame_N != frame_L1) == False)
 
         self.assertEqual(frame_N, frame_L2)
 
-        # TODO: Fails for python > 2.7
-        # self.assertTrue(frame_N != frame_L3)
-        # self.assertTrue(frame_L1 != frame_L3)
+        self.assertTrue(frame_N != frame_L3)
+        self.assertTrue(frame_L1 != frame_L3)
 
     def test_compare_L_frames(self):
         wgs84 = FrameE(name='WGS84')
-        # wgs72 = FrameE(name='WGS72')
+        wgs72 = FrameE(name='WGS72')
         pointA = wgs84.GeoPoint(latitude=1, longitude=2, z=3, degrees=True)
-        # pointB = wgs72.GeoPoint(latitude=1, longitude=2, z=6, degrees=True)
+        pointB = wgs72.GeoPoint(latitude=1, longitude=2, z=6, degrees=True)
 
         frame_N = FrameL(pointA)
         frame_N1 = FrameL(pointA, wander_azimuth=10)
-        # frame_N2 = FrameL(pointB, wander_azimuth=10)
+        frame_N2 = FrameL(pointB, wander_azimuth=10)
 
         self.assertEqual(frame_N, frame_N)
         self.assertNotEqual(frame_N, frame_N1)
-        # self.assertNotEqual(frame_N, frame_N2)
-        # self.assertNotEqual(frame_N1, frame_N2)
+        self.assertNotEqual(frame_N, frame_N2)
+        self.assertNotEqual(frame_N1, frame_N2)
 
 
 class TestExamples(unittest.TestCase):

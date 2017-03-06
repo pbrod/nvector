@@ -10,6 +10,11 @@ from nvector import rad, deg, lat_lon2n_E, unit, n_E2lat_lon
 
 
 def plot_mean_position():
+    """
+    Example
+    -------
+    >>> plot_mean_position()
+    """
     positions = np.array([(90, 0),
                           (60, 10),
                           (50, -20),
@@ -30,7 +35,7 @@ def plot_mean_position():
     map1.scatter(x, y, linewidth=5, marker='o', color='r')
 
     x1, y1 = map1(lons, lats)
-    print(len(lons), x1, y1)
+    # print(len(lons), x1, y1)
     map1.scatter(x1, y1, linewidth=5, marker='o', color='k')
 
     plt.title('Figure of mean position (red dot) compared to positions '

@@ -189,9 +189,13 @@ class GeoPoint(object):
 class _Common(object):
     def __eq__(self, other):
         try:
-            return self is other or self._is_equal_to(other)
+            return self is other or self._is_equal_to(other, rtol=1e-12,
+                                                      atol=1e-14)
         except AttributeError:
             return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
 class Nvector(_Common):
@@ -278,8 +282,8 @@ class Nvector(_Common):
         n_EM_E = mean_horizontal_position(n_EB_E)
         return self.frame.Nvector(n_EM_E)
 
-    def _is_equal_to(self, other):
-        return (np.allclose(self.normal, other.normal) and
+    def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
+        return (np.allclose(self.normal, other.normal, rtol=rtol, atol=atol) and
                 self.frame == other.frame)
 
     def __add__(self, other):
@@ -786,10 +790,10 @@ class FrameE(_Common):
         self.name = name
         self.R_Ee = E_rotation(axes)
 
-    def _is_equal_to(self, other):
-        return (np.allclose(self.a, other.a) and
-                np.allclose(self.f, other.f) and
-                np.allclose(self.R_Ee, other.R_Ee))
+    def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
+        return (np.allclose(self.a, other.a, rtol=rtol, atol=atol) and
+                np.allclose(self.f, other.f, rtol=rtol, atol=atol) and
+                np.allclose(self.R_Ee, other.R_Ee, rtol=rtol, atol=atol))
 
     def inverse(self, lat_a, lon_a, lat_b, lon_b, z=0, long_unroll=False,
                 degrees=False):
@@ -935,8 +939,8 @@ class FrameN(_Common):
         self.nvector = Nvector(n_EA_E, z=0, frame=nvector.frame)
         self.R_EN = n_E2R_EN(n_EA_E, nvector.frame.R_Ee)
 
-    def _is_equal_to(self, other):
-        return (np.allclose(self.R_EN, other.R_EN) and
+    def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
+        return (np.allclose(self.R_EN, other.R_EN, rtol=rtol, atol=atol) and
                 self.nvector == other.nvector)
 
     def Pvector(self, pvector):
@@ -1034,11 +1038,11 @@ class FrameB(FrameN):
         R_EN = n_E2R_EN(n_EB_E, self.nvector.frame.R_Ee)
         return np.dot(R_EN, R_NB)  # rotation matrix
 
-    def _is_equal_to(self, other):
-        return (np.allclose(self.yaw, other.yaw) and
-                np.allclose(self.pitch, other.pitch) and
-                np.allclose(self.roll, other.roll) and
-                np.allclose(self.R_EN, other.R_EN) and
+    def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
+        return (np.allclose(self.yaw, other.yaw, rtol=rtol, atol=atol) and
+                np.allclose(self.pitch, other.pitch, rtol=rtol, atol=atol) and
+                np.allclose(self.roll, other.roll, rtol=rtol, atol=atol) and
+                np.allclose(self.R_EN, other.R_EN, rtol=rtol, atol=atol) and
                 self.nvector == other.nvector)
 
 
