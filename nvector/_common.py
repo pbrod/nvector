@@ -27,4 +27,3 @@ def write_readme(doc):
 
     with open('readme.txt', 'w') as fid:
         fid.write(doc)
-

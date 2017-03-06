@@ -14,6 +14,7 @@ def plot_mean_position():
     Example
     -------
     >>> plot_mean_position()
+    Ex7, Average lat=[ 67.23615295], lon=[-6.91751117]
     """
     positions = np.array([(90, 0),
                           (60, 10),
@@ -58,5 +59,7 @@ def plot_world(map1):
 
 
 if __name__ == '__main__':
-    plot_mean_position()
+    from nvector._common import test_docstrings
+    test_docstrings(__file__)
+    # plot_mean_position()
     plt.show('hold')
