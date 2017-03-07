@@ -623,11 +623,11 @@ Solution:
     >>> pointA1 = frame.GeoPoint(0, 0, degrees=True)
     >>> pointA2 = frame.GeoPoint(10, 0, degrees=True)
     >>> pointB = frame.GeoPoint(1, 0.1, degrees=True)
-
     >>> pathA = nv.GeoPath(pointA1, pointA2)
 
     >>> s_xt = pathA.cross_track_distance(pointB, method='greatcircle').ravel()
     >>> d_xt = pathA.cross_track_distance(pointB, method='euclidean').ravel()
+
     >>> val_txt = '{:4.2f} km, {:4.2f} km'.format(s_xt[0]/1000, d_xt[0]/1000)
     >>> 'Ex10: Cross track distance: s_xt, d_xt = {}'.format(val_txt)
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
@@ -660,14 +660,13 @@ Solution:
     >>> nv.on_great_circle_path(path, n_EC_E, radius)
     array([ True], dtype=bool)
 
-Alternative cross track distance solutions:
-Solution 2:
+Alternative solution 2:
     >>> s_xt2 = nv.great_circle_distance(n_EB_E, n_EC_E, radius)
     >>> d_xt2 = nv.euclidean_distance(n_EB_E, n_EC_E, radius)
     >>> np.allclose(s_xt, s_xt2), np.allclose(d_xt, d_xt2)
     (True, True)
 
-Solution 3:
+Alternative solution 3:
     >>> c_E = nv.great_circle_normal(n_EA1_E, n_EA2_E)
     >>> sin_theta = -np.dot(c_E.T, n_EB_E).ravel()
     >>> s_xt3 = np.arcsin(sin_theta) * radius

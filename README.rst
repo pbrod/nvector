@@ -497,11 +497,11 @@ Solution:
     >>> pointA1 = frame.GeoPoint(0, 0, degrees=True)
     >>> pointA2 = frame.GeoPoint(10, 0, degrees=True)
     >>> pointB = frame.GeoPoint(1, 0.1, degrees=True)
-
     >>> pathA = nv.GeoPath(pointA1, pointA2)
 
     >>> s_xt = pathA.cross_track_distance(pointB, method='greatcircle').ravel()
     >>> d_xt = pathA.cross_track_distance(pointB, method='euclidean').ravel()
+
     >>> val_txt = '{:4.2f} km, {:4.2f} km'.format(s_xt[0]/1000, d_xt[0]/1000)
     >>> 'Ex10: Cross track distance: s_xt, d_xt = {}'.format(val_txt)
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
