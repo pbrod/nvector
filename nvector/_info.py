@@ -44,6 +44,7 @@ Documentation and code
 ======================
 
 Official documentation: http://www.navlab.net/nvector/
+                        http://nvector.readthedocs.io/en/latest/
 
 *Kenneth Gade (2010):*
     `A Nonsingular Horizontal Position Representation,
@@ -104,7 +105,6 @@ Thus this article should be cited in publications using this page or the
 downloaded program code.
 
 """ + getting_started + """
-
 See also
 ========
 `geographiclib <https://pypi.python.org/pypi/geographiclib>`_

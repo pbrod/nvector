@@ -44,6 +44,7 @@ Documentation and code
 ======================
 
 Official documentation: http://www.navlab.net/nvector/
+                        http://nvector.readthedocs.io/en/latest/
 
 *Kenneth Gade (2010):*
     `A Nonsingular Horizontal Position Representation,
@@ -115,6 +116,7 @@ The functional solutions to the remaining problems can be found
 
 
 **Example 1: "A and B to delta"**
+---------------------------------
 
 .. image:: http://www.navlab.net/images/ex1img.png
 
@@ -187,6 +189,7 @@ See also
 
 
 **Example 2: "B and delta to C"**
+---------------------------------
 
 .. image:: http://www.navlab.net/images/ex2img.png
 
@@ -233,6 +236,7 @@ See also
 
 
 **Example 3: "ECEF-vector to geodetic latitude"**
+-------------------------------------------------
 
 .. image:: http://www.navlab.net/images/ex3img.png
 
@@ -260,6 +264,7 @@ See also
 
 
 **Example 4: "Geodetic latitude to ECEF-vector"**
+-------------------------------------------------
 
 .. image:: http://www.navlab.net/images/ex4img.png
 
@@ -281,6 +286,7 @@ See also
 
 
 **Example 5: "Surface distance"**
+---------------------------------
 
 .. image:: http://www.navlab.net/images/ex5img.png
 
@@ -332,6 +338,7 @@ See also
 
 
 **Example 6 "Interpolated position"**
+-------------------------------------
 
 .. image:: http://www.navlab.net/images/ex6img.png
 
@@ -365,6 +372,7 @@ See also
 
 
 **Example 7: "Mean position"**
+------------------------------
 
 .. image:: http://www.navlab.net/images/ex7img.png
 
@@ -390,6 +398,7 @@ See also
 
 
 **Example 8: "A and azimuth/distance to B"**
+--------------------------------------------
 
 .. image:: http://www.navlab.net/images/ex8img.png
 
@@ -424,6 +433,7 @@ See also
 
 
 **Example 9: "Intersection of two paths"**
+------------------------------------------
 
 .. image:: http://www.navlab.net/images/ex9img.png
 
@@ -460,8 +470,9 @@ See also
 
 
 **Example 10: "Cross track distance"**
+--------------------------------------
 
-.. image:: http://www.navlab.net/images/ex10img.png
+.. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/ex10img.png
 
 Path A is given by the two positions A1 and A2 (similar to the previous
 example).

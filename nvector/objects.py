@@ -284,6 +284,7 @@ class Nvector(_Common):
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
         return (np.allclose(self.normal, other.normal, rtol=rtol, atol=atol) and
+                np.allclose(self.z, other.z, rtol=rtol, atol=atol) and
                 self.frame == other.frame)
 
     def __add__(self, other):

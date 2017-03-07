@@ -1074,11 +1074,6 @@ def _great_circle_cross_track_distance(sin_theta, radius=1):
     return np.arcsin(sin_theta) * radius
     # ill conditioned for small angles:
     # return (np.arccos(-sin_theta) - np.pi / 2) * radius
-    #
-    # well conditioned, but more complex:
-    # return np.where(np.abs(sin_theta) > 0.5,
-    #                 np.arccos(-sin_theta) - np.pi / 2,
-    #                 np.arcsin(sin_theta)) * radius
 
 
 class _CrossTrackDistance(object):

@@ -31,6 +31,7 @@ from nvector import (unit, deg, rad, lat_lon2n_E, n_E2lat_lon,
                      p_EB_E2n_EB_E, n_EB_E2p_EB_E,
                      mean_horizontal_position,
                      great_circle_distance, euclidean_distance,
+                     closest_point_on_great_circle,
                      n_EA_E_distance_and_azimuth2n_EB_E,
                      n_EA_E_and_n_EB_E2azimuth,
                      n_E_and_wa2R_EL, n_E2R_EN, R_EL2n_E, R_EN2n_E)
@@ -315,7 +316,37 @@ class TestNvector(unittest.TestCase):
         n_EA2_E = lat_lon2n_E(rad(10), rad(0))
         n_EB_E = lat_lon2n_E(rad(1), rad(0.1))
 
-        r_Earth = 6371e3  # m, mean Earth radius
+        radius = 6371e3  # m, mean Earth radius
+
+        # Find the cross track distance from path A to position B.
+
+        # SOLUTION:
+        # Find the unit normal to the great circle:
+        c_E = unit(np.cross(n_EA1_E, n_EA2_E, axis=0))
+        # Find the great circle cross track distance:
+        s_xt = -np.arcsin(np.dot(c_E.T, n_EB_E)) * radius
+
+        # Find the Euclidean cross track distance:
+        d_xt = -np.dot(c_E.T, n_EB_E) * radius
+        msg = 'Ex10, Cross track distance = {} m, Euclidean = {} m'
+        print(msg.format(s_xt, d_xt))
+
+        assert_array_almost_equal(s_xt, 11117.79911015)
+        assert_array_almost_equal(d_xt, 11117.79346741)
+
+    @staticmethod
+    def test_small_cross_track_distance():
+        radius = 6371e3  # m, mean Earth radius
+        n_EA1_E = lat_lon2n_E(rad(0), rad(0))
+        n_EA2_E = lat_lon2n_E(rad(10), rad(0))
+        n_EB0_E = lat_lon2n_E(rad(1), rad(0.1))
+        n_EB1_E = closest_point_on_great_circle((n_EA1_E, n_EA2_E), n_EB0_E)
+        s_xt0 = np.pi/2*6371e+3+1
+        distance_rad = s_xt0 / radius
+        n_EB_E = n_EA_E_distance_and_azimuth2n_EB_E(n_EB1_E, distance_rad,
+                                                    np.pi/2)
+
+        n_EB2_E = closest_point_on_great_circle((n_EA1_E, n_EA2_E), n_EB_E)
 
         # Find the cross track distance from path A to position B.
 
@@ -324,15 +355,15 @@ class TestNvector(unittest.TestCase):
         c_E = unit(np.cross(n_EA1_E, n_EA2_E, axis=0))
 
         # Find the great circle cross track distance:
-        s_xt = -np.arcsin(np.dot(c_E.T, n_EB_E)) * r_Earth
-
-        # Find the Euclidean cross track distance:
-        d_xt = -np.dot(c_E.T, n_EB_E) * r_Earth
-        msg = 'Ex10, Cross track distance = {} m, Euclidean = {} m'
-        print(msg.format(s_xt, d_xt))
-
-        assert_array_almost_equal(s_xt, 11117.79911015)
-        assert_array_almost_equal(d_xt, 11117.79346741)
+        sin_theta = -np.dot(c_E.T, n_EB_E)
+        n_c = np.cross(c_E, n_EB_E, axis=0)
+        t = np.sign(np.dot(n_c.T, n_EA1_E))
+        cos_theta = -t*np.linalg.norm(n_c, axis=0)
+        s_xt = np.arcsin(sin_theta) * radius
+        s_xt2 = (np.arccos(np.dot(c_E.T, n_EB_E)) - np.pi/2) * radius
+        s_xt3 = great_circle_distance(n_EB1_E, n_EB_E, radius)
+        s_xt4 = np.arctan2(sin_theta, cos_theta) * radius
+        pass
 
     @staticmethod
     def test_R2xyz():
