@@ -43,8 +43,10 @@ reference frames can be found here:
 Documentation and code
 ======================
 
-Official documentation: http://www.navlab.net/nvector/
-                        http://nvector.readthedocs.io/en/latest/
+Official documentation:
+
+http://www.navlab.net/nvector/
+http://nvector.readthedocs.io/en/latest/
 
 *Kenneth Gade (2010):*
     `A Nonsingular Horizontal Position Representation,
