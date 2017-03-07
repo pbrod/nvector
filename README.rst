@@ -46,6 +46,7 @@ Documentation and code
 Official documentation:
 
 http://www.navlab.net/nvector/
+
 http://nvector.readthedocs.io/en/latest/
 
 *Kenneth Gade (2010):*
