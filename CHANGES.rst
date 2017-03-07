@@ -4,6 +4,19 @@ Changelog
 
 Created with gitcommand: git shortlog v0.4.1..v0.5.1
 
+Version 0.5.2, Mars 7, 2017
+==============================
+
+
+Per A Brodtkorb (10):
+      * Fixed tests in tests/test_frames.py
+      * Updated to setup.cfg and tox.ini + pep8
+      * updated .travis.yml
+      * Updated Readme.rst with new example 10 picture and link to nvector docs at readthedocs.
+      * updated official documentation links
+      * Updated crosstrack distance tests.
+
+
 Version 0.5.1, Mars 5, 2017
 ==============================
 
