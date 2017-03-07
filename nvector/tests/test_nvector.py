@@ -17,10 +17,7 @@ NOTES:
 - All angles are by default assumed to be in radians, if an angle is
 in degrees, the variable name has the following ending: _deg
 
-- The dot product (inner product) of vectors x and y is written dot(x,y)
-here to make the code more readable for those unfamiliar with
-Matlab. In Matlab one would normally write x'*y (i.e. x transposed
-times y)
+- The dot product (inner product) of vectors x and y is written dot(x,y).
 """
 import numpy as np
 
@@ -35,7 +32,7 @@ from nvector import (unit, deg, rad, lat_lon2n_E, n_E2lat_lon,
                      n_EA_E_distance_and_azimuth2n_EB_E,
                      n_EA_E_and_n_EB_E2azimuth,
                      n_E_and_wa2R_EL, n_E2R_EN, R_EL2n_E, R_EN2n_E)
-from numpy.testing import assert_array_almost_equal
+from numpy.testing import assert_array_almost_equal  # @UnresolvedImport
 
 
 class TestNvector(unittest.TestCase):
