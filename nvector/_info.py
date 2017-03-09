@@ -116,8 +116,8 @@ See also
    :target: https://pypi.python.org/pypi/Nvector/
 .. |tests_img| image:: https://travis-ci.org/pbrod/Nvector.svg?branch=master
    :target: https://travis-ci.org/pbrod/Nvector
-.. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=latest
-   :target: http://Nvector.readthedocs.org/en/latest/
+.. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable
+   :target: http://Nvector.readthedocs.org/en/stable/
 .. |health_img| image:: https://landscape.io/github/pbrod/Nvector/master/landscape.svg?style=flat
    :target: https://landscape.io/github/pbrod/Nvector/master
 .. |coverage_img| image:: https://coveralls.io/repos/pbrod/Nvector/badge.svg?branch=master&service=github
