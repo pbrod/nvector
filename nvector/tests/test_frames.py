@@ -112,8 +112,8 @@ class TestExamples(unittest.TestCase):
              39.49093416312986, -39.490934249581684, -118.47280298990226,
              -197.454672021303, -276.4365413071498]
         assert_array_almost_equal(delta_N[0], x)
-        assert_array_almost_equal(delta_N[1], 0, atol=1e-8)
-        assert_array_almost_equal(delta_N[2], 0, atol=1e-2)
+        assert_array_almost_equal(delta_N[1], 0, decimal=8)
+        assert_array_almost_equal(delta_N[2], 0, decimal=2)
         n2 = len(azimuth) // 2
         assert_array_almost_equal(azimuth[:n2], 0)
         assert_array_almost_equal(azimuth[n2:], 180)
