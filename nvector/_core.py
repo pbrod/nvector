@@ -944,8 +944,11 @@ def R_EN2n_E(R_EN):
     # n-vector equals minus the last column of R_EL and R_EN, see Section 5.5
     # in Gade (2010)
     return R_EL2n_E(R_EN)
-#     n_E = dot(R_EN, np.vstack((0, 0, -1)))
-#     return n_E
+
+
+def _atleast_3d(x, y, z):
+    x, y, z = np.atleast_1d(x, y, z)
+    return x[None, None, :], y[None, None, :], z[None, None, :]
 
 
 def xyz2R(x, y, z):
@@ -984,8 +987,7 @@ def xyz2R(x, y, z):
     --------
     R2xyz, zyx2R, R2zyx
     """
-    x, y, z = np.atleast_1d(x, y, z)
-    x, y, z = x[None, None, :], y[None, None, :], z[None, None, :]
+    x, y, z = _atleast_3d(x, y, z)
     cz, sz = cos(z), sin(z)
     cy, sy = cos(y), sin(y)
     cx, sx = cos(x), sin(x)
@@ -1036,8 +1038,7 @@ def zyx2R(z, y, x):
     --------
     R2zyx, xyz2R, R2xyz
     """
-    x, y, z = np.atleast_1d(x, y, z)
-    x, y, z = x[None, None, :], y[None, None, :], z[None, None, :]
+    x, y, z = _atleast_3d(x, y, z)
     cz, sz = cos(z), sin(z)
     cy, sy = cos(y), sin(y)
     cx, sx = cos(x), sin(x)
