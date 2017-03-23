@@ -367,6 +367,18 @@ class TestNvector(unittest.TestCase):
             self.assertTrue(np.abs(s_xt4-s_xt0)/s_xt0 < rtol, 's_xt4 fails')
 
     @staticmethod
+    def test_R2xyz_with_vectors():
+        x, y, z = rad(((10, 10), (20, 20), (30, 30)))
+        R_AB1 = xyz2R(x, y, z)
+        R_AB = np.array([[0.81379768, -0.46984631,  0.34202014],
+                         [0.54383814,  0.82317294, -0.16317591],
+                         [-0.20487413,  0.31879578,  0.92541658]])[:, :, None]
+        R_AB = np.concatenate((R_AB, R_AB), axis=2)
+        assert_array_almost_equal(R_AB, R_AB1)
+        x1, y1, z1 = R2xyz(R_AB1)
+        assert_array_almost_equal((x, y, z), (x1, y1, z1))
+
+    @staticmethod
     def test_R2xyz():
         x, y, z = rad((10, 20, 30))
         R_AB1 = xyz2R(x, y, z)

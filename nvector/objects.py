@@ -8,7 +8,7 @@ import numpy as np
 from numpy import deprecate
 from numpy.linalg import norm
 from geographiclib.geodesic import Geodesic as _Geodesic
-from nvector._core import (select_ellipsoid, rad, deg, zyx2R,
+from nvector._core import (mdot, select_ellipsoid, rad, deg, zyx2R,
                            lat_lon2n_E, n_E2lat_lon, n_E2R_EN, n_E_and_wa2R_EL,
                            n_EB_E2p_EB_E, p_EB_E2n_EB_E, unit,
                            closest_point_on_great_circle,
@@ -429,8 +429,8 @@ class ECEFvector(object):
         """
         _check_frames(self, frame.nvector)
         p_AB_E = self.pvector
-        p_AB_N = np.dot(frame.R_EN.T, p_AB_E)
-        return Pvector(p_AB_N, frame=frame)
+        p_AB_N = mdot(np.rollaxis(frame.R_EN, 1, 0), p_AB_E[:, None, ...])
+        return Pvector(p_AB_N.reshape(3, -1), frame=frame)
 
     def to_geo_point(self):
         """
@@ -749,7 +749,7 @@ class GeoPath(object):
             point of interpolation along path
         """
         point_a, point_b = self.nvectors()
-        point_c = point_a + ti * (point_b-point_a)
+        point_c = point_a + (point_b-point_a) * ti
         point_c.normal = unit(point_c.normal, norm_zero_vector=np.nan)
         return point_c
 
@@ -988,9 +988,14 @@ class FrameL(FrameN):
     def __init__(self, position, wander_azimuth=0):
         nvector = position.to_nvector()
         n_EA_E = nvector.normal
-        R_Ee = nvector.frame.R_Ee
         self.nvector = Nvector(n_EA_E, z=0, frame=nvector.frame)
-        self.R_EN = n_E_and_wa2R_EL(n_EA_E, wander_azimuth, R_Ee=R_Ee)
+        self.wander_azimuth = wander_azimuth
+
+    @property
+    def R_EN(self):
+        n_EA_E = self.nvector.normal
+        R_Ee = self.nvector.frame.R_Ee
+        return n_E_and_wa2R_EL(n_EA_E, self.wander_azimuth, R_Ee=R_Ee)
 
 
 class FrameB(FrameN):
@@ -1037,7 +1042,7 @@ class FrameB(FrameN):
         R_NB = zyx2R(self.yaw, self.pitch, self.roll)
         n_EB_E = self.nvector.normal
         R_EN = n_E2R_EN(n_EB_E, self.nvector.frame.R_Ee)
-        return np.dot(R_EN, R_NB)  # rotation matrix
+        return mdot(R_EN, R_NB)  # rotation matrix
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
         return (np.allclose(self.yaw, other.yaw, rtol=rtol, atol=atol) and

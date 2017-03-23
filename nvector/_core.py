@@ -179,7 +179,7 @@ def E_rotation(axes='e'):
 
     Returns
     -------
-    R_Ee : 2d array
+    R_Ee : 3 x 3 array
         rotation matrix defining the axes of the coordinate frame E as
         described in Table 2 in Gade (2010)
 
@@ -300,6 +300,62 @@ def unit(vector, norm_zero_vector=1):
     return unit_vector
 
 
+def mdot(a, b):
+    """
+    Return multiple matrix multiplications of two arrays
+      i.e.   dot(a, b)[i,j,k] = sum(a[i,:,j] * b[:,j,k])
+    or
+      np.concatenate([np.dot(a[...,i], b[...,i])[:, :, None]
+                      for i in range(2)], axis=2)
+
+    Examples
+    --------
+    3 x 3 x 2 times 3 x 3 x 2 array -> 3 x 2 x 2 array
+    >>> a = 1.0 * np.arange(18).reshape(3,3,2)
+    >>> b = - a
+    >>> t = np.concatenate([np.dot(a[...,i], b[...,i])[:, :, None]
+    ...                    for i in range(2)], axis=2)
+    >>> tt = mdot(a, b)
+    >>> tt.shape
+    (3, 3, 2)
+    >>> np.allclose(t, tt)
+    True
+
+    3 x 3 x 2 times 3 x 1 array -> 3 x 1 x 2 array
+    >>> t1 = np.concatenate([np.dot(a[...,i], b[:,0,0][:,None])[:,:,None]
+    ...                    for i in range(2)], axis=2)
+
+    >>> tt = mdot(a, b[:,0,0].reshape(-1,1))
+    >>> tt.shape
+    (3, 1, 2)
+    >>> np.allclose(t1, tt)
+    True
+
+    3 x 3  times 3 x 3 array -> 3 x 3 array
+    >>> tt0 = mdot(a[...,0], b[...,0])
+    >>> tt0.shape
+    (3, 3)
+    >>> np.allclose(t[...,0], tt0)
+    True
+
+    3 x 3  times 3 x 1 array -> 3 x 1 array
+    >>> tt0 = mdot(a[...,0], b[:,0,0][:,None])
+    >>> tt0.shape
+    (3, 1)
+    >>> np.allclose(t[:,0,0][:,None], tt0)
+    True
+
+    3 x 3  times 3 x 2 array -> 3 x 1 x 2 array
+    >>> tt0 = mdot(a[..., 0], b[:, :2, 0][:, None])
+    >>> tt0.shape
+    (3, 1, 2)
+    >>> np.allclose(t[:,:2,0][:,None], tt0)
+    True
+
+    """
+    return np.einsum('ij...,jk...->ik...', a, b)
+
+
 def lat_lon2n_E(latitude, longitude, R_Ee=None):
     """
     Converts latitude and longitude to n-vector.
@@ -308,7 +364,7 @@ def lat_lon2n_E(latitude, longitude, R_Ee=None):
     ----------
     latitude, longitude: real scalars or vectors of length n.
         Geodetic latitude and longitude given in [rad]
-    R_Ee : 2d array
+    R_Ee : 3 x 3 array
         rotation matrix defining the axes of the coordinate frame E.
 
     Returns
@@ -326,7 +382,7 @@ def lat_lon2n_E(latitude, longitude, R_Ee=None):
     nvec = np.vstack((sin(latitude),
                       sin(longitude) * cos(latitude),
                       -cos(longitude) * cos(latitude)))
-    n_E = np.dot(R_Ee.T, nvec)
+    n_E = dot(R_Ee.T, nvec)
     return n_E
 
 
@@ -338,12 +394,12 @@ def n_E2lat_lon(n_E, R_Ee=None):
     ----------
     n_E: 3 x n array
         n-vector [no unit] decomposed in E.
-    R_Ee : 2d array
+    R_Ee : 3 x 3 array
         rotation matrix defining the axes of the coordinate frame E.
 
     Returns
     -------
-    latitude, longitude: real scalars or vectors of lengt n.
+    latitude, longitude: real scalars or vectors of length n.
         Geodetic latitude and longitude given in [rad]
 
     See also
@@ -353,7 +409,7 @@ def n_E2lat_lon(n_E, R_Ee=None):
     if R_Ee is None:
         R_Ee = E_rotation()
     _check_length_deviation(n_E)
-    n_E = np.dot(R_Ee, n_E)
+    n_E = dot(R_Ee, n_E)
 
     # Equation (5) in Gade (2010):
     longitude = arctan2(n_E[1, :], -n_E[2, :])
@@ -394,14 +450,14 @@ def n_E2R_EN(n_E, R_Ee=None):
 
     Parameters
     ----------
-    n_E: 3 x 1 array
+    n_E: 3 x n array
         n-vector [no unit] decomposed in E
-    R_Ee : 2d array
+    R_Ee : 3 x 3 array
         rotation matrix defining the axes of the coordinate frame E.
 
     Returns
     -------
-    R_EN:  3 x 3 array
+    R_EN:  3 x 3 x n array
         The resulting rotation matrix [no unit] (direction cosine matrix).
 
     See also
@@ -411,7 +467,7 @@ def n_E2R_EN(n_E, R_Ee=None):
     if R_Ee is None:
         R_Ee = E_rotation()
     _check_length_deviation(n_E)
-    n_E = unit(np.dot(R_Ee, n_E))
+    n_E = unit(dot(R_Ee, n_E))
 
     # N coordinate frame (North-East-Down) is defined in Table 2 in Gade (2010)
     # Find z-axis of N (Nz):
@@ -422,19 +478,21 @@ def n_E2R_EN(n_E, R_Ee=None):
     # Ny points perpendicular to the plane
     Ny_E_direction = cross([[1], [0], [0]], n_E, axis=0)
     # formed by n-vector and Earth's spin axis
-    outside_poles = (norm(Ny_E_direction) != 0)
-    if outside_poles:
-        Ny_E = unit(Ny_E_direction)
-    else:  # Pole position:
-        Ny_E = array([[0], [1], [0]])  # selected y-axis direction
+    on_poles = np.flatnonzero(norm(Ny_E_direction, axis=0) == 0)
+    Ny_E = unit(Ny_E_direction)
+    Ny_E[:, on_poles] = array([[0], [1], [0]])  # selected y-axis direction
 
     # Find x-axis of N (North):
     Nx_E = cross(Ny_E, Nz_E, axis=0)  # Final axis found by right hand rule
 
     # Form R_EN from the unit vectors:
-    R_EN = dot(R_Ee.T, np.hstack((Nx_E, Ny_E, Nz_E)))
+    # R_EN = dot(R_Ee.T, np.hstack((Nx_E, Ny_E, Nz_E)))
+    Nxyz_E = np.hstack((Nx_E[:, None, ...],
+                        Ny_E[:, None, ...],
+                        Nz_E[:, None, ...]))
+    R_EN = mdot(np.rollaxis(R_Ee, 1, 0), Nxyz_E)
 
-    return R_EN
+    return np.squeeze(R_EN)
 
 
 def n_E_and_wa2R_EL(n_E, wander_azimuth, R_Ee=None):
@@ -449,11 +507,11 @@ def n_E_and_wa2R_EL(n_E, wander_azimuth, R_Ee=None):
 
     Parameters
     ----------
-    n_E: 3 x 1 array
+    n_E: 3 x n array
         n-vector [no unit] decomposed in E
-    wander_azimuth: real scalar
+    wander_azimuth: real scalar or array of length n
         Angle [rad] between L's x-axis and north, positive about L's z-axis.
-    R_Ee : 2d array
+    R_Ee : 3 x 3 array
         rotation matrix defining the axes of the coordinate frame E.
 
     Returns
@@ -470,8 +528,8 @@ def n_E_and_wa2R_EL(n_E, wander_azimuth, R_Ee=None):
     latitude, longitude = n_E2lat_lon(n_E, R_Ee)
 
     # Reference: See start of Section 5.2 in Gade (2010):
-    R_EL = dot(R_Ee.T, xyz2R(longitude, -latitude, wander_azimuth))
-    return R_EL
+    R_EL = mdot(R_Ee.T, xyz2R(longitude, -latitude, wander_azimuth))
+    return np.squeeze(R_EL)
 
 
 class _Nvector2ECEFvector(object):
@@ -489,7 +547,7 @@ class _Nvector2ECEFvector(object):
     f: real scalar, default WGS-84 ellipsoid.
         Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
         Earth with radius a is used in stead of WGS-84.
-    R_Ee : 2d array
+    R_Ee : 3 x 3 array
         rotation matrix defining the axes of the coordinate frame E.
 
     Returns
@@ -520,8 +578,7 @@ class _Nvector2ECEFvector(object):
 
 
 @use_docstring_from(_Nvector2ECEFvector)
-def n_EB_E2p_EB_E(
-        n_EB_E, depth=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
+def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     if R_Ee is None:
         R_Ee = E_rotation()
     _check_length_deviation(n_EB_E)
@@ -561,7 +618,7 @@ class _ECEFvector2Nvector(object):
     f: real scalar, default WGS-84 ellipsoid.
         Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
         Earth with radius a is used in stead of WGS-84.
-    R_Ee : 2d array
+    R_Ee : 3 x 3 array
         rotation matrix defining the axes of the coordinate frame E.
 
     Returns
@@ -656,7 +713,7 @@ class _DeltaFromPositionAtoB(object):
     f: real scalar, default WGS-84 ellipsoid.
         Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
         Earth with radius a is used in stead of WGS-84.
-    R_Ee : 2d array
+    R_Ee : 3 x 3 array
         rotation matrix defining the axes of the coordinate frame E.
 
     Returns
@@ -716,7 +773,7 @@ def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137,
     f: real scalar, default WGS-84 ellipsoid.
         Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
         Earth with radius a is used in stead of WGS-84.
-    R_Ee : 2d array
+    R_Ee : 3 x 3 array
         rotation matrix defining the axes of the coordinate frame E.
 
     Returns
@@ -758,14 +815,14 @@ def R2xyz(R_AB):
 
     Parameters
     ----------
-    R_AB: 3x3 array
+    R_AB: 3 x 3 x n array
         rotation matrix [no unit] (direction cosine matrix) such that the
         relation between a vector v decomposed in A and B is given by:
-        v_A = np.dot(R_AB, v_B)
+        v_A = mdot(R_AB, v_B)
 
     Returns
     -------
-    x, y, z: real scalars
+    x, y, z: real scalars or array of length n.
         Angles [rad] of rotation about new axes.
 
     Notes
@@ -786,16 +843,16 @@ def R2xyz(R_AB):
     --------
     xyz2R, R2zyx, xyz2R
     """
-    z = arctan2(-R_AB[0, 1], R_AB[0, 0])  # atan2: [-pi pi]
-    x = arctan2(-R_AB[1, 2], R_AB[2, 2])
+    z = arctan2(-R_AB[0, 1, ...], R_AB[0, 0, ...])  # atan2: [-pi pi]
+    x = arctan2(-R_AB[1, 2, ...], R_AB[2, 2, ...])
 
-    sin_y = R_AB[0, 2]
+    sin_y = R_AB[0, 2, ...]
 
     # cos_y is based on as many elements as possible, to average out
     # numerical errors. It is selected as the positive square root since
     # y: [-pi/2 pi/2]
-    cos_y = sqrt((R_AB[0, 0]**2 + R_AB[0, 1]**2 +
-                  R_AB[1, 2]**2 + R_AB[2, 2]**2) / 2)
+    cos_y = sqrt((R_AB[0, 0, ...]**2 + R_AB[0, 1, ...]**2 +
+                  R_AB[1, 2, ...]**2 + R_AB[2, 2, ...]**2) / 2)
 
     y = arctan2(sin_y, cos_y)
     return x, y, z
@@ -838,7 +895,7 @@ def R2zyx(R_AB):
     --------
     zyx2R, xyz2R, R2xyz
     """
-    x, y, z = R2xyz(np.transpose(R_AB))
+    x, y, z = R2xyz(np.rollaxis(R_AB, 1, 0))
     return -z, -y, -x
 
 
@@ -848,13 +905,13 @@ def R_EL2n_E(R_EL):
 
     Parameters
     ----------
-    R_EL: 3 x 3 array
+    R_EL: 3 x 3 x n array
         Rotation matrix (direction cosine matrix) [no unit]
 
     Returns
     -------
-    n_E: 3 x 1 array
-        n-vector [no unit] decomposed in E.
+    n_E: 3 x n array
+        n-vector(s) [no unit] decomposed in E.
 
     See also
     --------
@@ -862,8 +919,8 @@ def R_EL2n_E(R_EL):
     """
     # n-vector equals minus the last column of R_EL and R_EN, see Section 5.5
     # in Gade (2010)
-    n_E = dot(R_EL, np.vstack((0, 0, -1)))
-    return n_E
+    n_E = mdot(R_EL, np.vstack((0, 0, -1)))
+    return n_E.reshape(3, -1)
 
 
 def R_EN2n_E(R_EN):
@@ -872,12 +929,12 @@ def R_EN2n_E(R_EN):
 
     Parameters
     ----------
-    R_EN: 3 x 3 array
+    R_EN: 3 x 3 x n array
         Rotation matrix (direction cosine matrix) [no unit]
 
     Returns
     -------
-    n_E: 3 x 1 array
+    n_E: 3 x n array
         n-vector [no unit] decomposed in E.
 
     See also
@@ -886,8 +943,9 @@ def R_EN2n_E(R_EN):
     """
     # n-vector equals minus the last column of R_EL and R_EN, see Section 5.5
     # in Gade (2010)
-    n_E = dot(R_EN, np.vstack((0, 0, -1)))
-    return n_E
+    return R_EL2n_E(R_EN)
+#     n_E = dot(R_EN, np.vstack((0, 0, -1)))
+#     return n_E
 
 
 def xyz2R(x, y, z):
@@ -896,15 +954,15 @@ def xyz2R(x, y, z):
 
     Parameters
     ----------
-    x,y,z: real scalars
+    x,y,z: real scalars or array of lengths n
         Angles [rad] of rotation about new axes.
 
     Returns
     -------
-    R_AB: 3 x 3 array
+    R_AB: 3 x 3 x n array
         rotation matrix [no unit] (direction cosine matrix) such that the
         relation between a vector v decomposed in A and B is given by:
-        v_A = np.dot(R_AB, v_B)
+        v_A = mdot(R_AB, v_B)
 
     Notes
     -----
@@ -926,13 +984,15 @@ def xyz2R(x, y, z):
     --------
     R2xyz, zyx2R, R2zyx
     """
+    x, y, z = np.atleast_1d(x, y, z)
+    x, y, z = x[None, None, :], y[None, None, :], z[None, None, :]
     cz, sz = cos(z), sin(z)
     cy, sy = cos(y), sin(y)
     cx, sx = cos(x), sin(x)
 
-    R_AB = array([[cy * cz, -cy * sz, sy],
+    R_AB = array(([cy * cz, -cy * sz, sy],
                   [sy * sx * cz + cx * sz, -sy * sx * sz + cx * cz, -cy * sx],
-                  [-sy * cx * cz + sx * sz, sy * cx * sz + sx * cz, cy * cx]])
+                  [-sy * cx * cz + sx * sz, sy * cx * sz + sx * cz, cy * cx]))
 
     return np.squeeze(R_AB)
 
@@ -943,15 +1003,15 @@ def zyx2R(z, y, x):
 
     Parameters
     ----------
-    z, y, x: real scalars
+    z, y, x: real scalars or arrays of lenths n
         Angles [rad] of rotation about new axes.
 
     Returns
     -------
-    R_AB: 3 x 3 array
+    R_AB: 3 x 3 x n array
         rotation matrix [no unit] (direction cosine matrix) such that the
         relation between a vector v decomposed in A and B is given by:
-        v_A = np.dot(R_AB, v_B)
+        v_A = mdot(R_AB, v_B)
 
     Notes
     -----
@@ -976,6 +1036,8 @@ def zyx2R(z, y, x):
     --------
     R2zyx, xyz2R, R2xyz
     """
+    x, y, z = np.atleast_1d(x, y, z)
+    x, y, z = x[None, None, :], y[None, None, :], z[None, None, :]
     cz, sz = cos(z), sin(z)
     cy, sy = cos(y), sin(y)
     cx, sx = cos(x), sin(x)
@@ -993,7 +1055,7 @@ def interpolate(path, ti):
 
     Parameters
     ----------
-    path: tuple of n-vectors (positionA, po)
+    path: tuple of n-vectors (positionA, positionB)
 
     ti: real scalar
         interpolation time assuming position A and B is at t0=0 and t1=1,
@@ -1291,7 +1353,7 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563,
     f: real scalar, default WGS-84 ellipsoid.
         Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
         Earth with radius a is used in stead of WGS-84.
-    R_Ee : 2d array
+    R_Ee : 3 x 3 array
         rotation matrix defining the axes of the coordinate frame E.
 
     Returns

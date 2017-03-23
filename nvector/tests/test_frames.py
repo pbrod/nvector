@@ -84,33 +84,67 @@ class TestFrames(unittest.TestCase):
 
 class TestExamples(unittest.TestCase):
     @staticmethod
-    def test_Ex1_A_and_B_to_delta_in_frame_N():
+    def test_compute_delta_in_moving_frame_N():
         wgs84 = FrameE(name='WGS84')
-        pointA = wgs84.GeoPoint(latitude=1, longitude=2, z=3, degrees=True)
-        pointB = wgs84.GeoPoint(latitude=4, longitude=5, z=6, degrees=True)
+        point_a = wgs84.GeoPoint(latitude=1, longitude=2, z=0, degrees=True)
+        point_b = wgs84.GeoPoint(latitude=1.005, longitude=2.0, z=0,
+                                 degrees=True)
+        sensor_position = wgs84.GeoPoint(latitude=1.0025, longitude=2.0, z=0,
+                                         degrees=True)
+        path = GeoPath(point_a, point_b)
+        ship_positions = path.interpolate(np.linspace(0, 1.0, 8))
 
-        # Find the exact vector between the two positions, given in meters
-        # north, east, and down, i.e. find p_AB_N.
+        delta_E = diff_positions(ship_positions, sensor_position)
 
-        # SOLUTION:
-        p_AB_E = diff_positions(pointA, pointB)  # (delta decomposed in E).
-
-        frame_N = FrameN(pointA)
-        p_AB_N = p_AB_E.change_frame(frame_N)
-        p_AB_N = p_AB_N.pvector
+        frame_N = FrameN(ship_positions)
+        delta_N = delta_E.change_frame(frame_N)
+        delta_N = delta_N.pvector
         # Step5: Also find the direction (azimuth) to B, relative to north:
-        azimuth = np.rad2deg(np.arctan2(p_AB_N[1], p_AB_N[0]))
+        azimuth = np.round(np.abs(np.rad2deg(np.arctan2(delta_N[1],
+                                                        delta_N[0]))))
         # positive angle about down-axis
 
-        print('Ex1, delta north, east, down = {0}, {1}, {2}'.format(p_AB_N[0],
-                                                                    p_AB_N[1],
-                                                                    p_AB_N[2]))
+        print('Ex1, delta north, east, down = {0}'.format(delta_N.T))
+
+        print('Ex1, azimuth = {0} deg'.format(azimuth))
+        print(delta_N[0].tolist())
+        x = [276.436537069603, 197.45466985931083, 118.47280221160541,
+             39.49093416312986, -39.490934249581684, -118.47280298990226,
+             -197.454672021303, -276.4365413071498]
+        assert_array_almost_equal(delta_N[0], x)
+        assert_array_almost_equal(delta_N[1], 0, atol=1e-8)
+        assert_array_almost_equal(delta_N[2], 0, atol=1e-2)
+        n2 = len(azimuth) // 2
+        assert_array_almost_equal(azimuth[:n2], 0)
+        assert_array_almost_equal(azimuth[n2:], 180)
+
+    @staticmethod
+    def test_Ex1_A_and_B_to_delta_in_frame_N():
+        wgs84 = FrameE(name='WGS84')
+        point_a = wgs84.GeoPoint(latitude=1, longitude=2, z=3, degrees=True)
+        point_b = wgs84.GeoPoint(latitude=4, longitude=5, z=6, degrees=True)
+
+        # Find the exact vector between the two positions, given in meters
+        # north, east, and down, i.e. find delta_N.
+
+        # SOLUTION:
+        delta_E = diff_positions(point_a, point_b)  # (delta decomposed in E).
+
+        frame_N = FrameN(point_a)
+        delta_N = delta_E.change_frame(frame_N)
+        delta_N = delta_N.pvector
+        # Step5: Also find the direction (azimuth) to B, relative to north:
+        azimuth = np.rad2deg(np.arctan2(delta_N[1], delta_N[0]))
+        # positive angle about down-axis
+
+        msg = 'Ex1, delta north, east, down = {0}, {1}, {2}'
+        print(msg.format(delta_N[0], delta_N[1], delta_N[2]))
 
         print('Ex1, azimuth = {0} deg'.format(azimuth))
 
-        assert_array_almost_equal(p_AB_N[0], 331730.23478089)
-        assert_array_almost_equal(p_AB_N[1], 332997.87498927)
-        assert_array_almost_equal(p_AB_N[2], 17404.27136194)
+        assert_array_almost_equal(delta_N[0], 331730.23478089)
+        assert_array_almost_equal(delta_N[1], 332997.87498927)
+        assert_array_almost_equal(delta_N[2], 17404.27136194)
         assert_array_almost_equal(azimuth, 45.10926324)
 
     @staticmethod
@@ -132,14 +166,14 @@ class TestExamples(unittest.TestCase):
         p_EC_E = p_EB_E + p_BC_E
         pointC = p_EC_E.to_geo_point()
 
-        lat_EC, long_EC = pointC.latitude_deg, pointC.longitude_deg
+        lat_EC, lon_EC = pointC.latitude_deg, pointC.longitude_deg
         z_EC = pointC.z
         # Here we also assume that the user wants output height (= - depth):
         msg = 'Ex2, Pos C: lat, long = {},{} deg,  height = {} m'
-        print(msg.format(lat_EC, long_EC, -z_EC))
+        print(msg.format(lat_EC, lon_EC, -z_EC))
 
         assert_array_almost_equal(lat_EC, 53.32637826)
-        assert_array_almost_equal(long_EC, 63.46812344)
+        assert_array_almost_equal(lon_EC, 63.46812344)
         assert_array_almost_equal(z_EC, -406.00719607)
 
     @staticmethod
@@ -314,7 +348,7 @@ class TestExamples(unittest.TestCase):
         assert_array_almost_equal(lat, 40.31864307)
         assert_array_almost_equal(lon, 55.90186788)
 
-    def test_intersection_of_parallell_paths(self):
+    def test_intersect_on_parallell_paths(self):
 
         # Two paths A and B are given by two pairs of positions:
         pointA1 = GeoPoint(10, 20, degrees=True)
