@@ -6,8 +6,7 @@ Created on 18. des. 2015
 import unittest
 import numpy as np
 from numpy.testing import assert_array_almost_equal  # @UnresolvedImport
-from nvector import (FrameB, FrameE, FrameN, FrameL, GeoPoint, GeoPath, unit,
-                     diff_positions)
+from nvector import FrameB, FrameE, FrameN, FrameL, GeoPoint, GeoPath, unit
 
 EARTH_RADIUS_M = 6371009.0
 
@@ -84,7 +83,7 @@ class TestFrames(unittest.TestCase):
 
 class TestExamples(unittest.TestCase):
     @staticmethod
-    def test_compute_delta_in_moving_frame_N():
+    def test_compute_delta_in_moving_frame():
         wgs84 = FrameE(name='WGS84')
         point_a = wgs84.GeoPoint(latitude=1, longitude=2, z=0, degrees=True)
         point_b = wgs84.GeoPoint(latitude=1.005, longitude=2.0, z=0,
@@ -94,26 +93,21 @@ class TestExamples(unittest.TestCase):
         path = GeoPath(point_a, point_b)
         ship_positions = path.interpolate(np.linspace(0, 1.0, 8))
 
-        delta_E = diff_positions(ship_positions, sensor_position)
+        delta = ship_positions.delta_to(sensor_position)
 
-        frame_N = FrameN(ship_positions)
-        delta_N = delta_E.change_frame(frame_N)
-        delta_N = delta_N.pvector
-        # Step5: Also find the direction (azimuth) to B, relative to north:
-        azimuth = np.round(np.abs(np.rad2deg(np.arctan2(delta_N[1],
-                                                        delta_N[0]))))
+        x, y, z = delta.pvector
+        azimuth = np.round(np.abs(delta.azimuth_deg))
         # positive angle about down-axis
 
-        print('Ex1, delta north, east, down = {0}'.format(delta_N.T))
-
+        print('Ex1, delta north, east, down = {0}'.format(delta.pvector.T))
         print('Ex1, azimuth = {0} deg'.format(azimuth))
-        print(delta_N[0].tolist())
-        x = [276.436537069603, 197.45466985931083, 118.47280221160541,
-             39.49093416312986, -39.490934249581684, -118.47280298990226,
-             -197.454672021303, -276.4365413071498]
-        assert_array_almost_equal(delta_N[0], x)
-        assert_array_almost_equal(delta_N[1], 0, decimal=8)
-        assert_array_almost_equal(delta_N[2], 0, decimal=2)
+
+        true_x = [276.436537069603, 197.45466985931083, 118.47280221160541,
+                  39.49093416312986, -39.490934249581684, -118.47280298990226,
+                  -197.454672021303, -276.4365413071498]
+        assert_array_almost_equal(x, true_x)
+        assert_array_almost_equal(y, 0, decimal=8)
+        assert_array_almost_equal(z, 0, decimal=2)
         n2 = len(azimuth) // 2
         assert_array_almost_equal(azimuth[:n2], 0)
         assert_array_almost_equal(azimuth[n2:], 180)
@@ -128,24 +122,18 @@ class TestExamples(unittest.TestCase):
         # north, east, and down, i.e. find delta_N.
 
         # SOLUTION:
-        delta_E = diff_positions(point_a, point_b)  # (delta decomposed in E).
-
-        frame_N = FrameN(point_a)
-        delta_N = delta_E.change_frame(frame_N)
-        delta_N = delta_N.pvector
-        # Step5: Also find the direction (azimuth) to B, relative to north:
-        azimuth = np.rad2deg(np.arctan2(delta_N[1], delta_N[0]))
-        # positive angle about down-axis
-
-        msg = 'Ex1, delta north, east, down = {0}, {1}, {2}'
-        print(msg.format(delta_N[0], delta_N[1], delta_N[2]))
-
+        delta = point_a.delta_to(point_b)
+        x, y, z = delta.pvector
+        azimuth = delta.azimuth_deg
+        elevation = delta.elevation_deg
+        print('Ex1, delta north, east, down = {0}, {1}, {2}'.format(x, y, z))
         print('Ex1, azimuth = {0} deg'.format(azimuth))
 
-        assert_array_almost_equal(delta_N[0], 331730.23478089)
-        assert_array_almost_equal(delta_N[1], 332997.87498927)
-        assert_array_almost_equal(delta_N[2], 17404.27136194)
+        assert_array_almost_equal(x, 331730.23478089)
+        assert_array_almost_equal(y, 332997.87498927)
+        assert_array_almost_equal(z, 17404.27136194)
         assert_array_almost_equal(azimuth, 45.10926324)
+        assert_array_almost_equal(elevation, 2.12055861)
 
     @staticmethod
     def test_Ex2_B_and_delta_in_frame_B_to_C_in_frame_E():
@@ -161,9 +149,9 @@ class TestExamples(unittest.TestCase):
         p_BC_B = frame_B.Pvector(np.r_[3000, 2000, 100].reshape((-1, 1)))
 
         p_BC_E = p_BC_B.to_ecef_vector()
-
         p_EB_E = n_EB_E.to_ecef_vector()
         p_EC_E = p_EB_E + p_BC_E
+
         pointC = p_EC_E.to_geo_point()
 
         lat_EC, lon_EC = pointC.latitude_deg, pointC.longitude_deg
@@ -215,7 +203,7 @@ class TestExamples(unittest.TestCase):
 
         p_AB_E = positionB.to_ecef_vector() - positionA.to_ecef_vector()
         # The Euclidean distance is given by:
-        d_AB = np.linalg.norm(p_AB_E.pvector, axis=0)
+        d_AB = p_AB_E.length
 
         msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
         print(msg.format(s_AB / 1000, d_AB / 1000))
@@ -248,7 +236,7 @@ class TestExamples(unittest.TestCase):
 
         p_AB_E = pointB.to_ecef_vector() - pointA.to_ecef_vector()
         # The Euclidean distance is given by:
-        d_AB = np.linalg.norm(p_AB_E.pvector, axis=0)
+        d_AB = p_AB_E.length
 
         msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
         print(msg.format(s_AB / 1000, d_AB / 1000))
@@ -320,8 +308,8 @@ class TestExamples(unittest.TestCase):
     def test_Ex8_position_A_and_azimuth_and_distance_to_B():
         frame = FrameE(a=EARTH_RADIUS_M, f=0)
         pointA = frame.GeoPoint(latitude=80, longitude=-90, degrees=True)
-        pointB, _azimuthb = pointA.geo_point(distance=1000, azimuth=200,
-                                             degrees=True)
+        pointB, _azimuthb = pointA.displace(distance=1000, azimuth=200,
+                                            degrees=True)
 
         lat_B, lon_B = pointB.latitude_deg, pointB.longitude_deg
 

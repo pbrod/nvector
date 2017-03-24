@@ -418,6 +418,19 @@ class TestNvector(unittest.TestCase):
         assert_array_almost_equal(n_E, n_E1)
         assert_array_almost_equal(n_E, n_E2)
 
+    @staticmethod
+    def test_n_EA_E_and_n_EB_E2azimuth():
+        n1_E = np.array([[0], [0], [1]])
+        n2_E = np.array([[0], [1], [0]])
+        n3_E = np.array([[0, 0], [0, 0], [1, 1]])
+        n4_E = np.array([[0, 0], [1, 1], [0, 0]])
+        for n1, n2 in zip((n1_E, n3_E, n3_E), (n2_E, n2_E, n4_E)):
+            azimuth = n_EA_E_and_n_EB_E2azimuth(n1, n2)
+            assert_array_almost_equal(azimuth, np.pi/2)
+            azimuth = n_EA_E_and_n_EB_E2azimuth(n2, n1)
+            assert_array_almost_equal(azimuth, 0)
+
+
 if __name__ == "__main__":
     # import syssys.argv = ['', 'Test.testName']
     unittest.main()

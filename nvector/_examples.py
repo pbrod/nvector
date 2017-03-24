@@ -39,20 +39,16 @@ example_1_obj_solution = """Solution:
     >>> pointA = wgs84.GeoPoint(latitude=1, longitude=2, z=3, degrees=True)
     >>> pointB = wgs84.GeoPoint(latitude=4, longitude=5, z=6, degrees=True)
 
-Step 1: Find p_AB_E (delta decomposed in E).
-    >>> p_AB_E = nv.diff_positions(pointA, pointB)
-
-Step 2: Find p_AB_N (delta decomposed in N).
-    >>> frame_N = nv.FrameN(pointA)
-    >>> p_AB_N = p_AB_E.change_frame(frame_N)
-    >>> p_AB_N = p_AB_N.pvector.ravel()
-    >>> valtxt = '{0:8.2f}, {1:8.2f}, {2:8.2f}'.format(*p_AB_N)
+Step1:  Find p_AB_N (delta decomposed in N).
+    >>> p_AB_N = pointA.delta_to(pointB)
+    >>> x, y, z = p_AB_N.pvector.ravel()
+    >>> valtxt = '{0:8.2f}, {1:8.2f}, {2:8.2f}'.format(x, y, z)
     >>> 'Ex1: delta north, east, down = {}'.format(valtxt)
     'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
 
-Step3: Also find the direction (azimuth) to B, relative to north:
-    >>> azimuth = np.arctan2(p_AB_N[1], p_AB_N[0])
-    >>> 'azimuth = {0:4.2f} deg'.format(np.rad2deg(azimuth))
+Step2: Also find the direction (azimuth) to B, relative to north:
+    >>> azimuth = p_AB_N.azimuth_deg[0]
+    >>> 'azimuth = {0:4.2f} deg'.format(azimuth)
     'azimuth = 45.11 deg'
 
 """
@@ -129,7 +125,7 @@ Step 4: Find point C by adding delta BC to EB
     >>> p_EC_E = p_EB_E + p_BC_E
     >>> pointC = p_EC_E.to_geo_point()
 
-    >>> lat, lon, z = pointC.latitude_deg, pointC.longitude_deg, pointC.z
+    >>> lat, lon, z = pointC.latlon_deg
     >>> msg = 'Ex2: PosC: lat, lon = {:4.2f}, {:4.2f} deg,  height = {:4.2f} m'
     >>> msg.format(lat[0], lon[0], -z[0])
     'Ex2: PosC: lat, lon = 53.33, 63.47 deg,  height = 406.01 m'
@@ -196,9 +192,9 @@ Solution:
     >>> p_EB_E = wgs84.ECEFvector(position_B)
     >>> pointB = p_EB_E.to_geo_point()
 
-    >>> lat, lon, h = pointB.latitude_deg, pointB.longitude_deg, -pointB.z
+    >>> lat, lon, z = pointB.latlon_deg
     >>> msg = 'Ex3: Pos B: lat, lon = {:4.2f}, {:4.2f} deg, height = {:9.2f} m'
-    >>> msg.format(lat[0], lon[0], h[0])
+    >>> msg.format(lat[0], lon[0], -z[0])
     'Ex3: Pos B: lat, lon = 39.38, -48.01 deg, height = 4702059.83 m'
 
 """
@@ -289,7 +285,7 @@ Solution for a sphere:
 
     >>> s_AB, _azia, _azib = positionA.distance_and_azimuth(positionB)
     >>> p_AB_E = positionB.to_ecef_vector() - positionA.to_ecef_vector()
-    >>> d_AB = np.linalg.norm(p_AB_E.pvector, axis=0)[0]
+    >>> d_AB = p_AB_E.length[0]
 
     >>> msg = 'Ex5: Great circle and Euclidean distance = {}'
     >>> msg = msg.format('{:5.2f} km, {:5.2f} km')
@@ -310,7 +306,7 @@ Exact solution for the WGS84 ellipsoid:
     >>> s_12, _azi1, _azi2 = point1.distance_and_azimuth(point2)
 
     >>> p_12_E = point2.to_ecef_vector() - point1.to_ecef_vector()
-    >>> d_12 = np.linalg.norm(p_12_E.pvector, axis=0)[0]
+    >>> d_12 = p_12_E.length[0]
     >>> msg = 'Ellipsoidal and Euclidean distance = {:5.2f} km, {:5.2f} km'
     >>> msg.format(s_12 / 1000, d_12 / 1000)
     'Ellipsoidal and Euclidean distance = 333.95 km, 333.91 km'
@@ -342,7 +338,7 @@ Exact solution for the WGS84 ellipsoid:
     >>> s_12, _azi1, _azi2 = point1.distance_and_azimuth(point2)
 
     >>> p_12_E = point2.to_ecef_vector() - point1.to_ecef_vector()
-    >>> d_12 = np.linalg.norm(p_12_E.pvector, axis=0)[0]
+    >>> d_12 = p_12_E.length[0]
     >>> msg = 'Ellipsoidal and Euclidean distance = {:5.2f} km, {:5.2f} km'
     >>> msg.format(s_12 / 1000, d_12 / 1000)
     'Ellipsoidal and Euclidean distance = 333.95 km, 333.91 km'
@@ -378,7 +374,7 @@ Solution:
 
     >>> g_EB_E_ti = path.interpolate(ti_n).to_geo_point()
 
-    >>> lat_ti, lon_ti = g_EB_E_ti.latitude_deg, g_EB_E_ti.longitude_deg
+    >>> lat_ti, lon_ti, z_ti = g_EB_E_ti.latlon_deg
     >>> msg = 'Ex6, Interpolated position: lat, lon = {} deg, {} deg'
     >>> msg.format(lat_ti, lon_ti)
     'Ex6, Interpolated position: lat, lon = [ 89.7999805] deg, [ 180.] deg'
@@ -426,7 +422,7 @@ Solution:
     >>> points = nv.GeoPoint(latitude=[90, 60, 50],
     ...                      longitude=[0, 10, -20], degrees=True)
     >>> nvectors = points.to_nvector()
-    >>> n_EM_E = nvectors.mean_horizontal_position()
+    >>> n_EM_E = nvectors.mean()
     >>> g_EM_E = n_EM_E.to_geo_point()
     >>> lat, lon = g_EM_E.latitude_deg, g_EM_E.longitude_deg
     >>> msg = 'Ex7: Pos M: lat, lon = {:4.2f}, {:4.2f} deg'
@@ -486,8 +482,8 @@ Solution:
     >>> import nvector as nv
     >>> frame = nv.FrameE(a=6371e3, f=0)
     >>> pointA = frame.GeoPoint(latitude=80, longitude=-90, degrees=True)
-    >>> pointB, _azimuthb = pointA.geo_point(distance=1000, azimuth=200,
-    ...                                      degrees=True)
+    >>> pointB, _azimuthb = pointA.displace(distance=1000, azimuth=200,
+    ...                                     degrees=True)
     >>> lat, lon = pointB.latitude_deg, pointB.longitude_deg
 
     >>> msg = 'Ex8, Destination: lat, lon = {:4.2f} deg, {:4.2f} deg'

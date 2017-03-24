@@ -516,7 +516,7 @@ def n_E_and_wa2R_EL(n_E, wander_azimuth, R_Ee=None):
 
     Returns
     -------
-    R_EL: 3 x 3 array
+    R_EL: 3 x 3 x n array
         The resulting rotation matrix.       [no unit]
 
     See also
@@ -988,9 +988,9 @@ def xyz2R(x, y, z):
     R2xyz, zyx2R, R2zyx
     """
     x, y, z = _atleast_3d(x, y, z)
-    cz, sz = cos(z), sin(z)
-    cy, sy = cos(y), sin(y)
     cx, sx = cos(x), sin(x)
+    cy, sy = cos(y), sin(y)
+    cz, sz = cos(z), sin(z)
 
     R_AB = array(([cy * cz, -cy * sz, sy],
                   [sy * sx * cz + cx * sz, -sy * sx * sz + cx * cz, -cy * sx],
@@ -1039,9 +1039,9 @@ def zyx2R(z, y, x):
     R2zyx, xyz2R, R2xyz
     """
     x, y, z = _atleast_3d(x, y, z)
-    cz, sz = cos(z), sin(z)
-    cy, sy = cos(y), sin(y)
     cx, sx = cos(x), sin(x)
+    cy, sy = cos(y), sin(y)
+    cz, sz = cos(z), sin(z)
 
     R_AB = array([[cz * cy, -sz * cx + cz * sy * sx, sz * sx + cz * sy * cx],
                   [sz * cy, cz * cx + sz * sy * sx, - cz * sx + sz * sy * cx],
@@ -1359,7 +1359,7 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563,
 
     Returns
     -------
-    azimuth: n, array
+    azimuth: n array
         Angle [rad] the line makes with a meridian, taken clockwise from north.
     """
     if R_Ee is None:
@@ -1372,7 +1372,8 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563,
     R_EN = n_E2R_EN(n_EA_E, R_Ee=R_Ee)
 
     # Step4: Find p_AB_N
-    p_AB_N = dot(R_EN.T, p_AB_E)
+    # p_AB_N = dot(R_EN.T, p_AB_E)
+    p_AB_N = mdot(np.rollaxis(R_EN, 1, 0), p_AB_E[:, None, ...]).reshape(3, -1)
     # (Note the transpose of R_EN: The "closest-rule" says that when
     # decomposing, the frame in the subscript of the rotation matrix that
     # is closest to the vector, should equal the frame where the vector is
@@ -1395,7 +1396,7 @@ class _PositionBFromAzimuthAndDistanceFromPositionA(object):
         n-vector(s) [no unit] of position A decomposed in E.
     distance_rad: n, array
         great circle distance [rad] from position A to B
-    azimuth: n, array
+    azimuth: n array
         Angle [rad] the line makes with a meridian, taken clockwise from north.
 
     Returns
