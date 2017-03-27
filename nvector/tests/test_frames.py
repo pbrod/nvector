@@ -83,7 +83,43 @@ class TestFrames(unittest.TestCase):
 
 class TestExamples(unittest.TestCase):
     @staticmethod
-    def test_compute_delta_in_moving_frame():
+    def test_compute_delta_in_moving_frame_east():
+        wgs84 = FrameE(name='WGS84')
+        point_a = wgs84.GeoPoint(latitude=1, longitude=2, z=0, degrees=True)
+        point_b = wgs84.GeoPoint(latitude=1, longitude=2.005, z=0,
+                                 degrees=True)
+        sensor_position = wgs84.GeoPoint(latitude=1.0, longitude=2.0025, z=0,
+                                         degrees=True)
+        path = GeoPath(point_a, point_b)
+        ti = np.linspace(0, 1.0, 8)
+        ship_positions0 = path.interpolate(ti[:-1])
+        ship_positions1 = path.interpolate(ti[1:])
+        headings = ship_positions0.delta_to(ship_positions1).azimuth_deg
+        assert_array_almost_equal(headings, 90, decimal=4)
+
+        ship_positions = path.interpolate(ti)
+
+        delta = ship_positions.delta_to(sensor_position)
+
+        x, y, z = delta.pvector
+        azimuth = np.round(delta.azimuth_deg)
+        # positive angle about down-axis
+
+        print('Ex1, delta north, east, down = {0}'.format(delta.pvector.T))
+        print('Ex1, azimuth = {0} deg'.format(azimuth))
+
+        true_y = [278.2566243359911, 198.7547317612817, 119.25283909376164,
+                  39.750946370747656, -39.75094637085409, -119.25283909387079,
+                  -198.75473176137066, -278.2566243360949]
+        assert_array_almost_equal(x, 0, decimal=3)
+        assert_array_almost_equal(y, true_y)
+        assert_array_almost_equal(z, 0, decimal=2)
+        n2 = len(azimuth) // 2
+        assert_array_almost_equal(azimuth[:n2], 90)
+        assert_array_almost_equal(azimuth[n2:], -90)
+
+    @staticmethod
+    def test_compute_delta_in_moving_frame_north():
         wgs84 = FrameE(name='WGS84')
         point_a = wgs84.GeoPoint(latitude=1, longitude=2, z=0, degrees=True)
         point_b = wgs84.GeoPoint(latitude=1.005, longitude=2.0, z=0,
@@ -91,7 +127,13 @@ class TestExamples(unittest.TestCase):
         sensor_position = wgs84.GeoPoint(latitude=1.0025, longitude=2.0, z=0,
                                          degrees=True)
         path = GeoPath(point_a, point_b)
-        ship_positions = path.interpolate(np.linspace(0, 1.0, 8))
+        ti = np.linspace(0, 1.0, 8)
+        ship_positions0 = path.interpolate(ti[:-1])
+        ship_positions1 = path.interpolate(ti[1:])
+        headings = ship_positions0.delta_to(ship_positions1).azimuth_deg
+        assert_array_almost_equal(headings, 0, decimal=8)
+
+        ship_positions = path.interpolate(ti)
 
         delta = ship_positions.delta_to(sensor_position)
 

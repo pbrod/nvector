@@ -82,7 +82,16 @@ def delta_N(positionA, positionB):
 
 
 def _delta(self, other):
+    """Return cartesian delta vector from positions A to B decomposed in N."""
     return delta_N(self, other)
+
+
+def delta_L(positionA, positionB, wander_azimuth=0):
+    """Return cartesian delta vector from positions A to B decomposed in L."""
+    p_AB_E = delta_E(positionA, positionB)
+    p_AB_L = p_AB_E.change_frame(FrameL(positionA,
+                                        wander_azimuth=wander_azimuth))
+    return p_AB_L
 
 
 class GeoPoint(object):
@@ -1010,9 +1019,12 @@ class FrameN(_Common):
 
     def __init__(self, position):
         nvector = position.to_nvector()
-        n_EA_E = nvector.normal
-        self.nvector = Nvector(n_EA_E, z=0, frame=nvector.frame)
-        self.R_EN = n_E2R_EN(n_EA_E, nvector.frame.R_Ee)
+        self.nvector = Nvector(nvector.normal, z=0, frame=nvector.frame)
+
+    @property
+    def R_EN(self):
+        nvector = self.nvector
+        return n_E2R_EN(nvector.normal, nvector.frame.R_Ee)
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
         return (np.allclose(self.R_EN, other.R_EN, rtol=rtol, atol=atol) and
@@ -1034,7 +1046,7 @@ class FrameL(FrameN):
         frame L. The origin is directly beneath or above the vehicle (B), at
         Earth's surface (surface of ellipsoid model).
     wander_azimuth: real scalar
-        Angle between the x-axis of L and the north direction.
+        Angle [rad] between the x-axis of L and the north direction.
 
     Notes
     -----
@@ -1060,9 +1072,7 @@ class FrameL(FrameN):
     FrameE, FrameN, FrameB
     """
     def __init__(self, position, wander_azimuth=0):
-        nvector = position.to_nvector()
-        n_EA_E = nvector.normal
-        self.nvector = Nvector(n_EA_E, z=0, frame=nvector.frame)
+        super(FrameL, self).__init__(position)
         self.wander_azimuth = wander_azimuth
 
     @property
@@ -1103,8 +1113,7 @@ class FrameB(FrameN):
     """.format(_examples.get_examples([2]))
 
     def __init__(self, position, yaw=0, pitch=0, roll=0, degrees=False):
-        nvector = position.to_nvector()
-        self.nvector = nvector
+        self.nvector = position.to_nvector()
         if degrees:
             yaw, pitch, roll = rad(yaw), rad(pitch), rad(roll)
         self.yaw = yaw
