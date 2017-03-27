@@ -656,7 +656,7 @@ class GeoPath(object):
         """
         if method == 'exact':
             point_a, point_b = self.geo_points()
-            s_ab, _angle = point_a.distance_and_azimuth(point_b)
+            s_ab, _angle1, _angle2 = point_a.distance_and_azimuth(point_b)
             return s_ab
         if radius is None:
             radius = self._get_average_radius()

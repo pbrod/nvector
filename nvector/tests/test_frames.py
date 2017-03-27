@@ -262,11 +262,13 @@ class TestExamples(unittest.TestCase):
 
         s_AB = path.track_distance(method='greatcircle')
         d_AB = path.track_distance(method='euclidean')
+        s1_AB = path.track_distance(method='exact')
 
         msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
         print(msg.format(s_AB / 1000, d_AB / 1000))
 
         assert_array_almost_equal(s_AB / 1000, 332.45644411)
+        assert_array_almost_equal(s1_AB / 1000, 332.45644411)
         assert_array_almost_equal(d_AB / 1000, 332.41872486)
 
     @staticmethod
