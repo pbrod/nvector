@@ -6,7 +6,8 @@ Created on 18. des. 2015
 import unittest
 import numpy as np
 from numpy.testing import assert_array_almost_equal  # @UnresolvedImport
-from nvector import FrameB, FrameE, FrameN, FrameL, GeoPoint, GeoPath, unit
+from nvector import (FrameB, FrameE, FrameN, FrameL, GeoPoint, GeoPath, unit,
+                     delta_L)
 
 EARTH_RADIUS_M = 6371009.0
 
@@ -135,7 +136,9 @@ class TestExamples(unittest.TestCase):
 
         ship_positions = path.interpolate(ti)
 
+        delta0 = delta_L(ship_positions, sensor_position, wander_azimuth=0)
         delta = ship_positions.delta_to(sensor_position)
+        assert_array_almost_equal(delta0.pvector, delta.pvector)
 
         x, y, z = delta.pvector
         azimuth = np.round(np.abs(delta.azimuth_deg))
@@ -409,6 +412,7 @@ class TestExamples(unittest.TestCase):
         pointA2 = frame.GeoPoint(10, 0, degrees=True)
         pointB = frame.GeoPoint(1, 0.1, degrees=True)
         pointB2 = frame.GeoPoint(11, 0.1, degrees=True)
+        pointB3 = frame.GeoPoint(-1, 0.1, degrees=True)
 
         pathA = GeoPath(pointA1, pointA2)
 
@@ -421,6 +425,7 @@ class TestExamples(unittest.TestCase):
         pointC = pathA.closest_point_on_great_circle(pointB)
         pointC2 = pathA.closest_point_on_great_circle(pointB2)
         pointC3 = pathA.closest_point_on_path(pointB2)
+        pointC4 = pathA.closest_point_on_path(pointB3)
         s_xt2, _az_bc, _az_cb = pointB.distance_and_azimuth(pointC)
         assert_array_almost_equal(s_xt2, 11117.79911015)
         assert_array_almost_equal(s_xt, 11117.79911015)
@@ -432,8 +437,7 @@ class TestExamples(unittest.TestCase):
         self.assertFalse(pathA.on_path(pointC2))
         self.assertFalse(pathA.on_path(pointC2, method='exact'))
         self.assertEqual(pointC3, pointA2)
-
-
+        self.assertEqual(pointC4, pointA1)
 
 
 if __name__ == "__main__":

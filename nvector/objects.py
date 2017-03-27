@@ -22,7 +22,7 @@ import warnings
 
 __all__ = ['FrameE', 'FrameB', 'FrameL', 'FrameN', 'GeoPoint', 'GeoPath',
            'Nvector', 'ECEFvector', 'Pvector', 'diff_positions',
-           'delta_E', 'delta_N']
+           'delta_E', 'delta_N', 'delta_L']
 
 
 class _DeltaE(object):
