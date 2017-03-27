@@ -396,14 +396,14 @@ class TestExamples(unittest.TestCase):
         self.assertTrue(np.isnan(lat))
         self.assertTrue(np.isnan(lon))
 
-    @staticmethod
-    def test_Ex10_cross_track_distance():
+    def test_Ex10_cross_track_distance(self):
 
         frame = FrameE(a=6371e3, f=0)
         # Position A1 and A2 and B as lat/long in deg:
         pointA1 = frame.GeoPoint(0, 0, degrees=True)
         pointA2 = frame.GeoPoint(10, 0, degrees=True)
         pointB = frame.GeoPoint(1, 0.1, degrees=True)
+        pointB2 = frame.GeoPoint(11, 0.1, degrees=True)
 
         pathA = GeoPath(pointA1, pointA2)
 
@@ -413,8 +413,22 @@ class TestExamples(unittest.TestCase):
         msg = 'Ex10, Cross track distance = {} m, Euclidean = {} m'
         print(msg.format(s_xt, d_xt))
 
+        pointC = pathA.closest_point_on_great_circle(pointB)
+        pointC2 = pathA.closest_point_on_great_circle(pointB2)
+        pointC3 = pathA.closest_point_on_path(pointB2)
+        s_xt2, _az_bc, _az_cb = pointB.distance_and_azimuth(pointC)
+        assert_array_almost_equal(s_xt2, 11117.79911015)
         assert_array_almost_equal(s_xt, 11117.79911015)
         assert_array_almost_equal(d_xt, 11117.79346741)
+
+        self.assertTrue(pathA.on_path(pointC))
+        self.assertTrue(pathA.on_path(pointC, method='exact'))
+
+        self.assertFalse(pathA.on_path(pointC2))
+        self.assertFalse(pathA.on_path(pointC2, method='exact'))
+        self.assertEqual(pointC3, pointA2)
+
+
 
 
 if __name__ == "__main__":

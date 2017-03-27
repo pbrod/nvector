@@ -258,11 +258,11 @@ class GeoPoint(object):
 
         """
         _check_frames(self, point)
-
+        gpoint = point.to_geo_point()
         lat_a, lon_a = self.latitude, self.longitude
-        lat_b, lon_b = point.latitude, point.longitude
-        z = 0.5 * (self.z+point.z)
-        if not np.allclose(self.z, point.z):
+        lat_b, lon_b = gpoint.latitude, gpoint.longitude
+        z = 0.5 * (self.z+gpoint.z)
+        if not np.allclose(self.z, gpoint.z):
             warnings.warn('Depths differ. Calculating distance at average '
                           'depth={}'.format(str(z)))
         if degrees:
