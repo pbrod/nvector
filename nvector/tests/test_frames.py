@@ -354,6 +354,9 @@ class TestExamples(unittest.TestCase):
         pointA = frame.GeoPoint(latitude=80, longitude=-90, degrees=True)
         pointB, _azimuthb = pointA.displace(distance=1000, azimuth=200,
                                             degrees=True)
+        pointB2, _azimuthb = pointA.displace(distance=1000,
+                                             azimuth=np.deg2rad(200))
+        assert_array_almost_equal(pointB.latlon, pointB2.latlon)
 
         lat_B, lon_B = pointB.latitude_deg, pointB.longitude_deg
 
