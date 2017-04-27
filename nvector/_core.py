@@ -584,9 +584,6 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     _check_length_deviation(n_EB_E)
 
     n_EB_E = unit(dot(R_Ee, n_EB_E))
-    if depth is None:
-        depth = np.zeros((1, np.shape(n_EB_E)[1]))
-
     b = a * (1 - f)  # semi-minor axis
 
     # The following code implements equation (22) in Gade (2010):
