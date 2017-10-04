@@ -59,7 +59,7 @@ class TestFrames(unittest.TestCase):
 
         self.assertEqual(frame_N, frame_L1)
 
-        self.assertTrue((frame_N != frame_L1) == False)
+        self.assertFalse((frame_N != frame_L1))
 
         self.assertEqual(frame_N, frame_L2)
 
