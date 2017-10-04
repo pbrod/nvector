@@ -169,7 +169,7 @@ class GeodSolveTest(unittest.TestCase):
         self.assertAlmostEqual(lat_b, 90, delta=0.5e-5)
         if lon_b < 0:
             self.assertAlmostEqual(lon_b, -150, delta=0.5e-5)
-            self.assertAlmostEqual(az_b, -180, delta=0.5e-5)
+            self.assertAlmostEqual(az_b, 180, delta=0.5e-5)
         else:
             self.assertAlmostEqual(lon_b, 30, delta=0.5e-5)
             self.assertAlmostEqual(az_b, 0, delta=0.5e-5)
@@ -279,12 +279,12 @@ class GeodSolveTest(unittest.TestCase):
 
         s_ab, az_a, az_b = wgs84.inverse(0, 0, 0, 180, degrees=True)
         self.assertAlmostEqual(az_a, 0.00000, delta=0.5e-5)
-        self.assertAlmostEqual(az_b, -180.00000, delta=0.5e-5)
+        self.assertAlmostEqual(az_b, 180.00000, delta=0.5e-5)
         self.assertAlmostEqual(s_ab, 20003931, delta=0.5)
 
         s_ab, az_a, az_b = wgs84.inverse(0, 0, 1, 180, degrees=True)
         self.assertAlmostEqual(az_a, 0.00000, delta=0.5e-5)
-        self.assertAlmostEqual(az_b, -180.00000, delta=0.5e-5)
+        self.assertAlmostEqual(az_b, 180.00000, delta=0.5e-5)
         self.assertAlmostEqual(s_ab, 19893357, delta=0.5)
 
         geod = FrameE(6.4e6, 0)
@@ -294,11 +294,11 @@ class GeodSolveTest(unittest.TestCase):
         self.assertAlmostEqual(s_ab, 19994492, delta=0.5)
         s_ab, az_a, az_b = geod.inverse(0, 0, 0, 180, degrees=True)
         self.assertAlmostEqual(az_a, 0.00000, delta=0.5e-5)
-        self.assertAlmostEqual(az_b, -180.00000, delta=0.5e-5)
+        self.assertAlmostEqual(az_b, 180.00000, delta=0.5e-5)
         self.assertAlmostEqual(s_ab, 20106193, delta=0.5)
         s_ab, az_a, az_b = geod.inverse(0, 0, 1, 180, degrees=True)
         self.assertAlmostEqual(az_a, 0.00000, delta=0.5e-5)
-        self.assertAlmostEqual(az_b, -180.00000, delta=0.5e-5)
+        self.assertAlmostEqual(az_b, 180.00000, delta=0.5e-5)
         self.assertAlmostEqual(s_ab, 19994492, delta=0.5)
         geod = FrameE(6.4e6, -1 / 300.0)
         s_ab, az_a, az_b = geod.inverse(0, 0, 0, 179, degrees=True)
@@ -315,7 +315,7 @@ class GeodSolveTest(unittest.TestCase):
         self.assertAlmostEqual(s_ab, 20082617, delta=0.5)
         s_ab, az_a, az_b = geod.inverse(0, 0, 1, 180, degrees=True)
         self.assertAlmostEqual(az_a, 0.00000, delta=0.5e-5)
-        self.assertAlmostEqual(az_b, -180.00000, delta=0.5e-5)
+        self.assertAlmostEqual(az_b, 180.00000, delta=0.5e-5)
         self.assertAlmostEqual(s_ab, 20027270, delta=0.5)
 
     def test_GeodSolve55(self):
