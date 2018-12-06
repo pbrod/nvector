@@ -1,13 +1,16 @@
 # Travis configuration file using the build matrix feature
 # Read more under http://docs.travis-ci.com/user/build-configuration/
 # THIS SCRIPT IS SUPPOSED TO BE AN EXAMPLE. MODIFY IT ACCORDING TO YOUR NEEDS!
-sudo: false
+dist: trusty
+sudo: required
+#sudo: false
 language: python
 python:
   - 2.7
-  - 3.3
   - 3.4
   - 3.5
+  - 3.6
+  - 3.7
 notifications:
   email: false
  
@@ -35,7 +38,10 @@ before_install:
 # Install packages
 install:
   - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy pytest matplotlib basemap
+  - pip install setuptools    
+  - pip install coverage==4.3.4 
   - pip install coveralls
+  - pip install pyscaffold==2.5.11
   - pip install codecov
   - python setup.py install
 #  - conda build conda_recipe
@@ -47,7 +53,9 @@ before_script:
   - git config --global user.email "per.andreas.brodtkorb@gmail.com"
   - git config --global user.name "pbrod"
 script:
+  - coverage erase
   - coverage run --source=nvector setup.py test
+  - coverage xml -o coverage.xml
 
 after_success:
   - coveralls
