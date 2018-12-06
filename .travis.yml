@@ -36,7 +36,7 @@ before_install:
   - source activate condaenv
 # Install packages
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy pytest matplotlib<3.0 basemap
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy pytest "matplotlib<3.0" basemap
   - pip install setuptools    
   - pip install coverage
   - pip install coveralls
