@@ -16,11 +16,11 @@ notifications:
  
 install:
   - pip install -r requirements.txt
-  - pip install numpy scipy pytest "matplotlib<3.0" basemap
+  - pip install numpy scipy pytest "matplotlib==2.*" "basemap==1.*"
   - pip install setuptools    
   - pip install coverage
   - pip install coveralls
-  - pip install pyscaffold==2.5.11
+  - pip install "pyscaffold==2.5.*"
   - pip install codecov
   - pip install .
 before_script:
