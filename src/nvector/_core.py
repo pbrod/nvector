@@ -66,6 +66,7 @@ E_ROTATION_MATRIX = dict(e=array([[0, 0, 1],
                          E=np.eye(3))
 
 _EPS = np.finfo(float).eps  # machine precision (machine epsilon)
+_TINY = np.finfo(float).tiny
 
 
 ELLIPSOID = {1: ({'a': 6377563.3960, 'f': 1.0 / 299.3249646}, 'Airy 1858'),
@@ -288,14 +289,14 @@ def unit(vector, norm_zero_vector=1):
     --------
     >>> import numpy as np
     >>> import nvector as nv
-    >>> np.allclose(nv.unit([[1],[1],[1]]), [[ 0.57735027],
-    ...                                      [ 0.57735027],
-    ...                                      [ 0.57735027]])
+    >>> np.allclose(nv.unit([[1, 0],[1, 0],[1, 0]]), [[ 0.57735027, 1],
+    ...                                               [ 0.57735027, 0],
+    ...                                               [ 0.57735027, 0]])
     True
     """
     current_norm = norm(vector, axis=0)
-    unit_vector = vector / current_norm
     idx = np.flatnonzero(current_norm == 0)
+    unit_vector = vector / (current_norm + _TINY)
 
     unit_vector[:, idx] = 0 * norm_zero_vector
     unit_vector[0, idx] = 1 * norm_zero_vector
