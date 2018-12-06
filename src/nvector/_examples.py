@@ -239,7 +239,7 @@ Solution:
     >>> p_EB_E = pointB.to_ecef_vector()
 
     >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel())
-    'Ex4: p_EB_E = [ 6373290.27721828   222560.20067474   110568.82718179] m'
+    'Ex4: p_EB_E = [6373290.27721828   222560.20067474   110568.82718179] m'
 
 """
 
@@ -255,7 +255,7 @@ Solution:
     >>> p_EB_E = nv.n_EB_E2p_EB_E(n_EB_E, -h_EB, **wgs84)
 
     >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.ravel())
-    'Ex4: p_EB_E = [ 6373290.27721828   222560.20067474   110568.82718179] m'
+    'Ex4: p_EB_E = [6373290.27721828   222560.20067474   110568.82718179] m'
 
 """
 
@@ -377,7 +377,7 @@ Solution:
     >>> lat_ti, lon_ti, z_ti = g_EB_E_ti.latlon_deg
     >>> msg = 'Ex6, Interpolated position: lat, lon = {} deg, {} deg'
     >>> msg.format(lat_ti, lon_ti)
-    'Ex6, Interpolated position: lat, lon = [ 89.7999805] deg, [ 180.] deg'
+    'Ex6, Interpolated position: lat, lon = [89.7999805] deg, [180.] deg'
 
 """
 
@@ -400,7 +400,7 @@ Solution:
     >>> lat_ti, lon_ti = deg(lat_EB_ti), deg(lon_EB_ti)
     >>> msg = 'Ex6, Interpolated position: lat, lon = {} deg, {} deg'
     >>> msg.format(lat_ti, lon_ti)
-    'Ex6, Interpolated position: lat, lon = [ 89.7999805] deg, [ 180.] deg'
+    'Ex6, Interpolated position: lat, lon = [89.7999805] deg, [180.] deg'
 
 """
 
@@ -543,10 +543,11 @@ Solution:
     >>> pathB = nv.GeoPath(pointB1, pointB2)
 
     >>> pointC = pathA.intersect(pathB)
-    >>> pathA.on_path(pointC), pathB.on_path(pointC)
-    (array([False], dtype=bool), array([False], dtype=bool))
-    >>> pathA.on_great_circle(pointC), pathB.on_great_circle(pointC)
-    (array([ True], dtype=bool), array([ True], dtype=bool))
+    >>> np.allclose(pathA.on_path(pointC), pathB.on_path(pointC))
+    True
+    >>> np.allclose(pathA.on_great_circle(pointC),
+    ...             pathB.on_great_circle(pointC))
+    True
     >>> pointC = pointC.to_geo_point()
     >>> lat, lon = pointC.latitude_deg, pointC.longitude_deg
     >>> msg = 'Ex9, Intersection: lat, lon = {:4.2f}, {:4.2f} deg'
@@ -583,10 +584,11 @@ or alternatively
     >>> msg.format(lat[0], lon[0])
     'Ex9, Intersection: lat, lon = 40.32, 55.90 deg'
 
-    >>> nv.on_great_circle_path(path_a, n_EC_E), nv.on_great_circle_path(path_b, n_EC_E)
-    (array([False], dtype=bool), array([False], dtype=bool))
-    >>> nv.on_great_circle(path_a, n_EC_E), nv.on_great_circle(path_b, n_EC_E)
-    (array([ True], dtype=bool), array([ True], dtype=bool))
+    >>> np.allclose(nv.on_great_circle_path(path_a, n_EC_E),
+    ...             nv.on_great_circle_path(path_b, n_EC_E))
+    True
+    >>> np.allclose(nv.on_great_circle(path_a, n_EC_E), nv.on_great_circle(path_b, n_EC_E))
+    True
 
 """
 
@@ -629,8 +631,8 @@ Solution:
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 
     >>> pointC = pathA.closest_point_on_great_circle(pointB)
-    >>> pathA.on_path(pointC)
-    array([ True], dtype=bool)
+    >>> np.allclose(pathA.on_path(pointC), True)
+    True
 
 """
 
@@ -653,8 +655,8 @@ Solution:
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 
     >>> n_EC_E = nv.closest_point_on_great_circle(path, n_EB_E)
-    >>> nv.on_great_circle_path(path, n_EC_E, radius)
-    array([ True], dtype=bool)
+    >>> np.allclose(nv.on_great_circle_path(path, n_EC_E, radius), True)
+    True
 
 Alternative solution 2:
     >>> s_xt2 = nv.great_circle_distance(n_EB_E, n_EC_E, radius)

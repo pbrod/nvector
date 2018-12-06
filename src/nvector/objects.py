@@ -740,18 +740,18 @@ class GeoPath(object):
         >>> pointB = wgs84.GeoPoint(80, 0, degrees=True)
         >>> path = nv.GeoPath(pointA, pointB)
         >>> pointC = path.interpolate(0.6).to_geo_point()
-        >>> path.on_path(pointC)
-        array([ True], dtype=bool)
+        >>> np.allclose(path.on_path(pointC), True)
+        True
 
         >>> pointD = path.interpolate(1.000000001).to_geo_point()
-        >>> path.on_path(pointD)
-        array([False], dtype=bool)
+        >>> np.allclose(path.on_path(pointD), False)
+        True
         >>> pointE = wgs84.GeoPoint(85, 0.0001, degrees=True)
-        >>> path.on_path(pointE)
-        array([False], dtype=bool)
+        >>> np.allclose(path.on_path(pointE), False)
+        True
         >>> pointC = path.interpolate(-2).to_geo_point()
-        >>> path.on_path(pointC)
-        array([False], dtype=bool)
+        >>> np.allclose(path.on_path(pointC), False)
+        True
         >>> path = nv.GeoPath(pointC, pointA)
 
         """

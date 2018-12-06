@@ -64,7 +64,7 @@ def _get_version_from_git():
     try:
         version = subprocess.check_output("git describe --tags").decode('utf-8')
         version = version.lstrip('v').strip()
-    except subprocess.CalledProcessError:
+    except Exception: # subprocess.CalledProcessError:
         version = 'unknown'
     parts = version.split('-')
     if len(parts) == 1:

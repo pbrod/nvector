@@ -14,7 +14,7 @@ def plot_mean_position():
     Example
     -------
     >>> plot_mean_position()
-    Ex7, Average lat=[ 67.23615295], lon=[-6.91751117]
+    Ex7, Average lat=[67.23615295], lon=[-6.91751117]
     """
     positions = np.array([(90, 0),
                           (60, 10),

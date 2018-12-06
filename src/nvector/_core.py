@@ -188,15 +188,16 @@ def E_rotation(axes='e'):
 
     Examples
     --------
+    >>> import numpy as np
     >>> import nvector as nv
-    >>> nv.E_rotation(axes='e')
-    array([[ 0,  0,  1],
-           [ 0,  1,  0],
-           [-1,  0,  0]])
-    >>> nv.E_rotation(axes='E')
-    array([[ 1.,  0.,  0.],
-           [ 0.,  1.,  0.],
-           [ 0.,  0.,  1.]])
+    >>> np.allclose(nv.E_rotation(axes='e'), [[ 0,  0,  1],
+    ...                                       [ 0,  1,  0],
+    ...                                       [-1,  0,  0]])
+    True
+    >>> np.allclose(nv.E_rotation(axes='E'), [[ 1.,  0.,  0.],
+    ...                                       [ 0.,  1.,  0.],
+    ...                                       [ 0.,  0.,  1.]])
+    True
 
     Reference
     ---------
@@ -217,8 +218,8 @@ def nthroot(x, n):
     Examples
     --------
     >>> import nvector as nv
-    >>> nv.nthroot(27.0, 3)
-    array(3.0)
+    >>> np.allclose(nv.nthroot(27.0, 3), 3.0)
+    True
 
     """
     y = x**(1. / n)
@@ -285,11 +286,10 @@ def unit(vector, norm_zero_vector=1):
     Examples
     --------
     >>> import nvector as nv
-    >>> nv.unit([[1],[1],[1]])
-    array([[ 0.57735027],
-           [ 0.57735027],
-           [ 0.57735027]])
-
+    >>> np.allclose(nv.unit([[1],[1],[1]]), [[ 0.57735027],
+    ...                                      [ 0.57735027],
+    ...                                      [ 0.57735027]])
+    True
     """
     current_norm = norm(vector, axis=0)
     unit_vector = vector / current_norm
