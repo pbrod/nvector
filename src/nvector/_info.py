@@ -85,7 +85,7 @@ To test if the toolbox is working paste the following in an interactive
 python session::
 
    import nvector as nv
-   nv.test(coverage=True, doctests=True)
+   nv.test()
 
 
 Acknowledgement
