@@ -217,6 +217,7 @@ def nthroot(x, n):
 
     Examples
     --------
+    >>> import numpy as np
     >>> import nvector as nv
     >>> np.allclose(nv.nthroot(27.0, 3), 3.0)
     True
@@ -285,6 +286,7 @@ def unit(vector, norm_zero_vector=1):
 
     Examples
     --------
+    >>> import numpy as np
     >>> import nvector as nv
     >>> np.allclose(nv.unit([[1],[1],[1]]), [[ 0.57735027],
     ...                                      [ 0.57735027],
@@ -311,6 +313,7 @@ def mdot(a, b):
     Examples
     --------
     3 x 3 x 2 times 3 x 3 x 2 array -> 3 x 2 x 2 array
+    >>> import numpy as np
     >>> a = 1.0 * np.arange(18).reshape(3,3,2)
     >>> b = - a
     >>> t = np.concatenate([np.dot(a[...,i], b[...,i])[:, :, None]

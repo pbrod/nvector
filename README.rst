@@ -85,7 +85,7 @@ To test if the toolbox is working paste the following in an interactive
 python session::
 
    import nvector as nv
-   nv.test(coverage=True, doctests=True)
+   nv.test()
 
 
 Acknowledgement
@@ -115,7 +115,7 @@ Below the object-oriented solution to some common geodesic problems are given.
 In the first example the functional solution is also given.
 The functional solutions to the remaining problems can be found
 `here
-<https://github.com/pbrod/nvector/blob/master/nvector/tests/test_nvector.py>`_.
+<https://github.com/pbrod/nvector/blob/master/src/nvector/tests/test_nvector.py>`_.
 
 
 **Example 1: "A and B to delta"**
@@ -277,7 +277,7 @@ Solution:
     >>> pointB = wgs84.GeoPoint(latitude=1, longitude=2, z=-3, degrees=True)
     >>> p_EB_E = pointB.to_ecef_vector()
 
-    >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel())
+    >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel().tolist())
     'Ex4: p_EB_E = [ 6373290.27721828   222560.20067474   110568.82718179] m'
 
 See also
@@ -454,10 +454,11 @@ Solution:
     >>> pathB = nv.GeoPath(pointB1, pointB2)
 
     >>> pointC = pathA.intersect(pathB)
-    >>> pathA.on_path(pointC), pathB.on_path(pointC)
-    (array([False], dtype=bool), array([False], dtype=bool))
-    >>> pathA.on_great_circle(pointC), pathB.on_great_circle(pointC)
-    (array([ True], dtype=bool), array([ True], dtype=bool))
+    >>> np.allclose(pathA.on_path(pointC), pathB.on_path(pointC))
+    True
+    >>> np.allclose(pathA.on_great_circle(pointC),
+    ...             pathB.on_great_circle(pointC))
+    True
     >>> pointC = pointC.to_geo_point()
     >>> lat, lon = pointC.latitude_deg, pointC.longitude_deg
     >>> msg = 'Ex9, Intersection: lat, lon = {:4.2f}, {:4.2f} deg'
@@ -503,8 +504,8 @@ Solution:
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 
     >>> pointC = pathA.closest_point_on_great_circle(pointB)
-    >>> pathA.on_path(pointC)
-    array([ True], dtype=bool)
+    >>> np.allclose(pathA.on_path(pointC), True)
+    True
 
 See also
     `Example 10 at www.navlab.net <http://www.navlab.net/nvector/#example_10>`_
@@ -527,9 +528,3 @@ See also
    :target: https://coveralls.io/github/pbrod/Nvector?branch=master
 .. |versions_img| image:: https://img.shields.io/pypi/pyversions/Nvector.svg
    :target: https://github.com/pbrod/Nvector
-
-Note
-====
-
-This project has been set up using PyScaffold 2.4.4. For details and usage
-information on PyScaffold see http://pyscaffold.readthedocs.org/.

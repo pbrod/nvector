@@ -238,8 +238,8 @@ Solution:
     >>> pointB = wgs84.GeoPoint(latitude=1, longitude=2, z=-3, degrees=True)
     >>> p_EB_E = pointB.to_ecef_vector()
 
-    >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel())
-    'Ex4: p_EB_E = [6373290.27721828   222560.20067474   110568.82718179] m'
+    >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel().tolist())
+    'Ex4: p_EB_E = [6373290.277218279, 222560.20067473652, 110568.82718178593] m'
 
 """
 
@@ -254,8 +254,8 @@ Solution:
     >>> n_EB_E = nv.lat_lon2n_E(lat_EB, lon_EB)
     >>> p_EB_E = nv.n_EB_E2p_EB_E(n_EB_E, -h_EB, **wgs84)
 
-    >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.ravel())
-    'Ex4: p_EB_E = [6373290.27721828   222560.20067474   110568.82718179] m'
+    >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.ravel().tolist())
+    'Ex4: p_EB_E = [6373290.277218279, 222560.20067473652, 110568.82718178593] m'
 
 """
 
@@ -679,7 +679,7 @@ def get_examples(indices, OO=True):
     d = dict(globals())
     txt = 'example_{}_txt'
     sol = 'example_{}_obj_solution' if OO else 'example_{}_fun_solution'
-    return ''.join((d[txt.format(i)]+d[sol.format(i)] + see_also(i)
+    return ''.join((d[txt.format(i)] + d[sol.format(i)] + see_also(i)
                     for i in indices))
 
 
@@ -691,7 +691,7 @@ Below the object-oriented solution to some common geodesic problems are given.
 In the first example the functional solution is also given.
 The functional solutions to the remaining problems can be found
 `here
-<https://github.com/pbrod/nvector/blob/master/nvector/tests/test_nvector.py>`_.
+<https://github.com/pbrod/nvector/blob/master/src/nvector/tests/test_nvector.py>`_.
 
 {0}{1}{2}{3}{4}{5}
 """.format(example_1_txt, example_1_obj_solution, 'Functional ',
@@ -707,7 +707,7 @@ Below the functional solution to some common geodesic problems are given.
 In the first example the object-oriented solution is also given.
 The object-oriented solutions to the remaining problems can be found
 `here
-<https://github.com/pbrod/nvector/blob/master/nvector/tests/test_frames.py>`_.
+<https://github.com/pbrod/Nvector/blob/master/src/nvector/tests/test_frames.py>`_.
 
 {0}{1}{2}{3}{4}{5}
 """.format(example_1_txt, example_1_fun_solution,
