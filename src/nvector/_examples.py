@@ -375,9 +375,9 @@ Solution:
     >>> g_EB_E_ti = path.interpolate(ti_n).to_geo_point()
 
     >>> lat_ti, lon_ti, z_ti = g_EB_E_ti.latlon_deg
-    >>> msg = 'Ex6, Interpolated position: lat, lon = {} deg, {} deg'
-    >>> msg.format(lat_ti, lon_ti)
-    'Ex6, Interpolated position: lat, lon = [89.7999805] deg, [180.] deg'
+    >>> msg = 'Ex6, Interpolated position: lat, lon = {:2.1f} deg, {:2.1f} deg'
+    >>> msg.format(lat_ti[0], lon_ti[0])
+    'Ex6, Interpolated position: lat, lon = 89.8 deg, 180.0 deg'
 
 """
 
@@ -398,9 +398,9 @@ Solution:
     >>> lat_EB_ti, lon_EB_ti = nv.n_E2lat_lon(n_EB_E_ti)
 
     >>> lat_ti, lon_ti = deg(lat_EB_ti), deg(lon_EB_ti)
-    >>> msg = 'Ex6, Interpolated position: lat, lon = {} deg, {} deg'
-    >>> msg.format(lat_ti, lon_ti)
-    'Ex6, Interpolated position: lat, lon = [89.7999805] deg, [180.] deg'
+    >>> msg = 'Ex6, Interpolated position: lat, lon = {:2.1f} deg, {:2.1f} deg'
+    >>> msg.format(lat_ti[0], lon_ti[0])
+    'Ex6, Interpolated position: lat, lon = 89.8 deg, 180.0 deg'
 
 """
 

@@ -14,7 +14,7 @@ def plot_mean_position():
     Example
     -------
     >>> plot_mean_position()
-    Ex7, Average lat=[67.23615295], lon=[-6.91751117]
+    Ex7, Average lat=67.2, lon=-6.9
     """
     positions = np.array([(90, 0),
                           (60, 10),
@@ -27,7 +27,7 @@ def plot_mean_position():
     n_EM_E = unit(np.sum(nvecs, axis=1).reshape((3, 1)))
     lat, lon = n_E2lat_lon(n_EM_E)
     lat, lon = deg(lat), deg(lon)
-    print('Ex7, Average lat={0}, lon={1}'.format(lat, lon))
+    print('Ex7, Average lat={0:2.1f}, lon={1:2.1f}'.format(lat[0], lon[0]))
 
     map1 = Basemap(projection='ortho', lat_0=int(lat), lon_0=int(lon),
                    resolution='l')
