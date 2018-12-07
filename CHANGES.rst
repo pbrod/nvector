@@ -4,8 +4,51 @@ Changelog
 
 Version 0.6.0, December 07, 2018
 ==============================
-
-
+Per A Brodtkorb (57):
+      * Updated documentation on how to set package version
+      * Made a separate script to set package version in nvector/__init__.py
+      * Updated docstring for select_ellipsoid
+      * Replace GeoPoint.geo_point with GeoPoint.displace and removed deprecated GeoPoint.geo_point
+      * Update .travis.yml
+      * Fix so that codeclimate is able to parse .travis.yml
+      * Only run sonar and codeclimate reporter for python v3.6
+      * Added sonar-project.properties
+      * Pinned coverage to v4.3.4 due to fact that codeclimate reporter is only
+         compatible with Coverage.py versions >=4.0,<4.4.
+      * Updated with sonar scanner.
+      * Added .pylintrc
+      * Set up codeclimate reporter
+      * Updated docstring for unit function.
+      * Avoid division by zero in unit function.
+      * Reenabled the doctest of plot_mean_position
+      * Reset "pyscaffold==2.5.11"
+      * Replaced deprecated basemap with cartopy.
+      * Replaced doctest of plot_mean_position with test_plot_mean_position in
+         test_plot.py
+      * Fixed failing doctests for python v3.4 and v3.5 and made them more
+         robust.
+      * Fixed failing doctests and made them more robust.
+      * Increased pycoverage version to use.
+      * moved nvector to src/nvector/
+      * Reset the setup.py to require 'pyscaffold==2.5.11' which works on
+         python version 3.4, 3.5 and 3.6. as well as 2.7
+      * Updated unittests.
+      * Updated tests.
+      * Removed obsolete code
+      * Added test for delta_L
+      * Added corner testcase for
+         pointA.displace(distance=1000,azimuth=np.deg2rad(200))
+      * Added test for path.track_distance(method='exact')
+      * Added delta_L a function thet teturn cartesian delta vector from
+         positions A to B decomposed in L.
+      * Simplified OO-solution in example 1 by using delta_N function
+      * Refactored duplicated code
+      * Vectorized code so that the frames can take more than one position at
+         the time.
+      * Keeping only the html docs in the distribution.
+      * replaced link from latest to stable docs on readthedocs and updated
+         crosstrack distance test.
+      * updated documentation in setup.py
 
 Version 0.5.2, Mars 7, 2017
 ==============================
