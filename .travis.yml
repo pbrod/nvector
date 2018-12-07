@@ -70,6 +70,7 @@ before_script:
 script:
   - coverage erase
 #  - coverage run --source=nvector setup.py test
+# see http://www.camillescott.org/2016/07/15/travis-pytest-scipyconf/
   - py.test --cov-report term-missing --cov --doctest-modules -v --pyargs nvector
   - coverage xml -o coverage.xml
   - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then
