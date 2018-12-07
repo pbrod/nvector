@@ -31,15 +31,15 @@ Build
 PyPi upload:
   git pull origin
   git shortlog v0.4.1..HEAD -w80 --format="* %s" --reverse > log.txt  # update Changes.rst
-  python set_package_version 0.5.1
+  python set_package_version 0.5.1rc0
   git commit
-  git tag v0.5.1 master
+  git tag v0.5.1rc0 master
 Delete the build, dist, and nvector.egg-info folder in your root directory.
   python setup.py sdist
   python setup.py bdist_wheel --universal
   python setup.py egg_info
   git push --tags
-  twine -p PASSWORD upload dist/*
+  twine upload dist/*
 
 
 """
