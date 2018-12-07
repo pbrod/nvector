@@ -131,7 +131,7 @@ class GeoPoint(object):
 
     >>> positionA = wgs84.GeoPoint(40.6, -73.8, degrees=True)
     >>> az1, distance = 45, 10000e3
-    >>> positionB, az2 = positionA.geo_point(distance, az1, degrees=True)
+    >>> positionB, az2 = positionA.displace(distance, az1, degrees=True)
     >>> lat2, lon2 = positionB.latitude_deg, positionB.longitude_deg
     >>> msg = 'lat2 = {:5.2f}, lon2 = {:5.2f}, az2 = {:5.2f}'
     >>> msg.format(lat2, lon2, az2)
