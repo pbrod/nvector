@@ -2,7 +2,10 @@
 Changelog
 =========
 
-Created with gitcommand: git shortlog v0.4.1..v0.5.1
+Version 0.6.0, December 07, 2018
+==============================
+
+
 
 Version 0.5.2, Mars 7, 2017
 ==============================

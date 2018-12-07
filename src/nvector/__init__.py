@@ -4,7 +4,7 @@ from ._core import *
 from .objects import *
 
 
-__version__ = "0.5.2.post043+g1522bac"
+__version__ = "0.6.0rc"
 
 
 def test(*options):
