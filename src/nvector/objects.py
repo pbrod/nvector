@@ -197,11 +197,6 @@ class GeoPoint(object):
 
     delta_to = _delta
 
-    @deprecate
-    def geo_point(self, distance, azimuth, long_unroll=False, degrees=False):
-        """Deprecated use displace instead!"""
-        return self.displace(distance, azimuth, long_unroll, degrees)
-
     def displace(self, distance, azimuth, long_unroll=False, degrees=False):
         """
         Return position B computed from current position, distance and azimuth.
