@@ -285,6 +285,11 @@ def unit(vector, norm_zero_vector=1):
     unitvector : 3 x m array
         normalized unitvector(s) along axis==0.
 
+    Notes
+    -----
+    The column vector(s) that have zero length will be returned as unit vector(s)
+    pointing in the x-direction, i.e, [[1], [0], [0]]
+
     Examples
     --------
     >>> import numpy as np
