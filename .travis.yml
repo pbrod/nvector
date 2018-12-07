@@ -70,7 +70,7 @@ before_script:
 script:
   - coverage erase
 #  - coverage run --source=nvector setup.py test
-  - py.test --cov-report term-missing --cov --doctest-modules /home/travis/build/pbrod/Nvector -v
+  - py.test --cov-report term-missing --cov --doctest-modules -v --pyargs nvector
   - coverage xml -o coverage.xml
   - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then
         codeclimate-test-reporter;
