@@ -37,7 +37,8 @@ before_install:
   - source activate condaenv
 # Install packages
 install:
-  - conda install python=$TRAVIS_PYTHON_VERSION numpy scipy pytest matplotlib cartopy
+  - conda install python=$TRAVIS_PYTHON_VERSION numpy scipy pytest matplotlib
+  - conda install -c conda-forge cartopy
   - pip install setuptools    
   - pip install coverage
   - pip install coveralls
