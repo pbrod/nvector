@@ -110,8 +110,7 @@ class GeodesicTest(unittest.TestCase):
         for l in TESTCASES:
             (lat1, lon1, azi1, lat2, lon2, azi2, s12) = l[:7]
             point1 = GeoPoint(lat1, lon1, **options)
-            point2, az_b = point1.displace(s12, azi1, long_unroll=True,
-                                            degrees=True)
+            point2, az_b = point1.displace(s12, azi1, long_unroll=True, degrees=True)
 
             lat_b, lon_b = point2.latitude_deg, point2.longitude_deg
             self.assertAlmostEqual(lat2, lat_b, delta=1e-13)
