@@ -1,11 +1,13 @@
 # Travis configuration file using the build matrix feature
 # Read more under http://docs.travis-ci.com/user/build-configuration/
+# and https://conda.io/docs/user-guide/tasks/use-conda-with-travis-ci.html
 # THIS SCRIPT IS SUPPOSED TO BE AN EXAMPLE. MODIFY IT ACCORDING TO YOUR NEEDS!
 dist: trusty
 #sudo: required
 sudo: false
 language: python
 python:
+  # We don't actually use the Travis Python, but this keeps it organized.
   - 2.7
   - 3.4
   - 3.5
@@ -20,23 +22,23 @@ before_install:
     else
       wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
     fi
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      export PATH=/home/travis/miniconda2/bin:$PATH;
-    else
-      export PATH=/home/travis/miniconda3/bin:$PATH;
-    fi
-  - conda update --yes conda
-  - conda install --yes conda-build
-  - conda create --yes -n condaenv python=$TRAVIS_PYTHON_VERSION
-  - conda install --yes -n condaenv pip
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
+  - conda install conda-build
+  - conda create -q -n condaenv python=$TRAVIS_PYTHON_VERSION
+  - conda install -n condaenv pip
 #  - conda config --add channels https://conda.anaconda.org/omnia
 #  - conda config --add channels https://conda.anaconda.org/pbrod
   - source activate condaenv
 # Install packages
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION numpy scipy pytest matplotlib cartopy
+  - conda install python=$TRAVIS_PYTHON_VERSION numpy scipy pytest matplotlib
+  - pip install cartopy
   - pip install setuptools    
   - pip install coverage
   - pip install coveralls
