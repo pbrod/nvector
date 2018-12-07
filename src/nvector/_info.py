@@ -87,6 +87,11 @@ python session::
    import nvector as nv
    nv.test('--doctest-modules')
 
+or
+
+   $ py.test --pyargs nvector --doctest-modules
+
+at the command prompt.
 
 Acknowledgement
 ===============

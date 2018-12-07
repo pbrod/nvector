@@ -4,7 +4,7 @@ from ._core import *
 from .objects import *
 
 
-__version__ = "0.6.0rc"
+__version__ = "0.6.0rc.post012+g4bb7501"
 
 
 def test(*options):
@@ -241,8 +241,6 @@ def test(*options):
     to see available fixtures type: pytest --fixtures
     (shown according to specified file_or_dir or current dir if not specified)
     """
-    import os
-    import pytest
 
-    path = os.path.join(os.path.dirname(__file__))
-    pytest.main([path] + list(options))
+    import pytest
+    pytest.main(['--pyargs', 'nvector'] + list(options))
