@@ -152,10 +152,18 @@ def select_ellipsoid(name):
     >>> import nvector as nv
     >>> nv.select_ellipsoid(name='wgs84')
     (6378137.0, 0.0033528106647474805, 'GRS80 / WGS84  (NAD83)')
+    >>> nv.select_ellipsoid(name='GRS80')
+    (6378137.0, 0.0033528106647474805, 'GRS80 / WGS84  (NAD83)')
+    >>> nv.select_ellipsoid(name='NAD83')
+    (6378137.0, 0.0033528106647474805, 'GRS80 / WGS84  (NAD83)')
+    >>> nv.select_ellipsoid(name=18)
+    (6378137.0, 0.0033528106647474805, 'GRS80 / WGS84  (NAD83)')
     """
-    option = ELLIPSOID_IX.get(name.lower().replace(' ', ''), name)
+    if isinstance(name, str):
+        name = name.lower().replace(' ', '')
+    ellipsoid_id = ELLIPSOID_IX.get(name, name)
 
-    ellipsoid, fullname = ELLIPSOID[option]
+    ellipsoid, fullname = ELLIPSOID[ellipsoid_id]
     return ellipsoid['a'], ellipsoid['f'], fullname
 
 
