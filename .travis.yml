@@ -48,7 +48,7 @@ install:
   - conda install python=$TRAVIS_PYTHON_VERSION numpy scipy pytest matplotlib
   - conda install -c conda-forge cartopy
   - pip install setuptools    
-  - pip install coverage
+  - pip install coverage==4.3.4 # codeclimate reporter is only compatible with Coverage.py versions >=4.0,<4.4.
   - pip install coveralls
   - pip install pyscaffold==2.5.11
   - pip install codecov
