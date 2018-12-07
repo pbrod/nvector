@@ -72,7 +72,7 @@ script:
   - coverage erase
 #  - coverage run --source=nvector setup.py test
 # see http://www.camillescott.org/2016/07/15/travis-pytest-scipyconf/
-  - py.test --doctest-modules -v --pyargs nvector
+  - py.test --cov=src/nvector --doctest-modules -v src/nvector
   - coverage xml -o coverage.xml
   - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then
         codeclimate-test-reporter;
