@@ -54,6 +54,7 @@ install:
     else
         pip install coverage;
     fi
+  - pip install geographiclib
   - pip install coveralls
   - pip install pyscaffold==2.5.11
   - pip install codecov
