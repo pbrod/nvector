@@ -91,15 +91,33 @@ ELLIPSOID = {1: ({'a': 6377563.3960, 'f': 1.0 / 299.3249646}, 'Airy 1858'),
              18: ({'a': 6378137.0, 'f': 1.0 / 298.257223563},
                   'GRS80 / WGS84  (NAD83)')}
 
-ELLIPSOID_IX = {'airy1858': 1, 'airymodified': 2, 'australiannational': 3,
-                'everest1830': 6, 'everestmodified': 7, 'krassovsky': 12,
-                'krassovsky1938': 12, 'fisher1968': 9, 'fisher1960': 8,
-                'international': 11, 'hayford': 11,
-                'clarke1866': 17, 'nad27': 17, 'bessel': 4,
-                'bessel1841': 4, 'grs80': 18, 'wgs84': 18, 'nad83': 18,
-                'sovietgeod.system1985': 15, 'wgs72': 16,
-                'hough1956': 10, 'hough': 10, 'nwl-9d': 13, 'wgs66': 13,
-                'southamerican1969': 14, 'clarke1880': 5}
+ELLIPSOID_IX = {'airy1858': 1,
+                'airymodified': 2,
+                'australiannational': 3,
+                'bessel': 4,
+                'bessel1841': 4,
+                'clarke1880': 5,
+                'everest1830': 6,
+                'everestmodified': 7,
+                'fisher1960': 8,
+                'fisher1968': 9,
+                'hough1956': 10,
+                'hough': 10,
+                'international': 11,
+                'hayford': 11,
+                'krassovsky': 12,
+                'krassovsky1938': 12,
+                'nwl-9d': 13,
+                'wgs66': 13,
+                'southamerican1969': 14,
+                'sovietgeod.system1985': 15,
+                'wgs72': 16,
+                'clarke1866': 17,
+                'nad27': 17,
+                'grs80': 18,
+                'wgs84': 18,
+                'nad83': 18,
+                }
 
 
 def select_ellipsoid(name):
@@ -110,12 +128,24 @@ def select_ellipsoid(name):
     ----------
     name : string
         name of ellipsoid. Valid options are:
-        'airy1858', 'airymodified', 'australiannational', 'everest1830',
-        'everestmodified', 'krassovsky', 'krassovsky1938', 'fisher1968',
-        'fisher1960', 'international', 'hayford', 'clarke1866', 'nad27',
-        'bessel', 'bessel1841', 'grs80', 'wgs84', 'nad83',
-        'sovietgeod.system1985', 'wgs72', 'hough1956', 'hough', 'nwl-9d',
-        'wgs66', 'southamerican1969',  'clarke1880'.
+        1) Airy 1858
+        2) Airy Modified
+        3) Australian National
+        4) Bessel 1841
+        5) Clarke 1880
+        6) Everest 1830
+        7) Everest Modified
+        8) Fisher 1960
+        9) Fisher 1968
+        10) Hough 1956
+        11) International (Hayford)
+        12) Krassovsky 1938
+        13) NWL-9D (WGS 66)
+        14) South American 1969
+        15) Soviet Geod. System 1985
+        16) WGS 72
+        17) Clarke 1866    (NAD27)
+        18) GRS80 / WGS84  (NAD83)
 
     Examples
     --------
@@ -123,36 +153,8 @@ def select_ellipsoid(name):
     >>> nv.select_ellipsoid(name='wgs84')
     (6378137.0, 0.0033528106647474805, 'GRS80 / WGS84  (NAD83)')
     """
-    msg = """
-    Other Ellipsoids.'
-    -----------------'
-    '
-    1) Airy 1858
-    2) Airy Modified
-    3) Australian National
-    4) Bessel 1841
-    5) Clarke 1880
-    6) Everest 1830
-    7) Everest Modified
-    8) Fisher 1960
-    9) Fisher 1968
-    10) Hough 1956
-    11) International (Hayford)
-    12) Krassovsky 1938
-    13) NWL-9D (WGS 66)
-    14) South American 1969
-    15) Soviet Geod. System 1985
-    16) WGS 72
-    17) Clarke 1866    (NAD27)
-    18) GRS80 / WGS84  (NAD83)
-    '
-    Enter choice :
-    """
+    option = ELLIPSOID_IX.get(name.lower().replace(' ', ''), name)
 
-    if name:
-        option = ELLIPSOID_IX.get(name.lower().replace(' ', ''), name)
-    else:
-        option = input(msg)
     ellipsoid, fullname = ELLIPSOID[option]
     return ellipsoid['a'], ellipsoid['f'], fullname
 
