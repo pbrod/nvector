@@ -71,8 +71,8 @@ script:
   - coverage erase
   - coverage run --source=nvector setup.py test
   - coverage xml -o coverage.xml
-  - CODECLIMATE_REPO_TOKEN=e5452096cdc930ddd2a4bec5c310cdb9b657484e049a2475ef0b5a347b9e5812 codeclimate-test-reporter
   - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then
+        CODECLIMATE_REPO_TOKEN=e5452096cdc930ddd2a4bec5c310cdb9b657484e049a2475ef0b5a347b9e5812 codeclimate-test-reporter;
         sonar-scanner -X;
     fi
 
