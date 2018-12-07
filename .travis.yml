@@ -4,6 +4,14 @@
 # THIS SCRIPT IS SUPPOSED TO BE AN EXAMPLE. MODIFY IT ACCORDING TO YOUR NEEDS!
 dist: trusty
 #sudo: required
+addons:
+#  sonarcloud:
+#    token:
+#      secure: "67bcbf1aefb992993fdd45b78fb4977a05be39b9"
+  code_climate:
+    repo_token: e5452096cdc930ddd2a4bec5c310cdb9b657484e049a2475ef0b5a347b9e5812
+jdk:
+  - oraclejdk8
 sudo: false
 language: python
 python:
@@ -32,8 +40,8 @@ before_install:
   - conda install conda-build
   - conda create -q -n condaenv python=$TRAVIS_PYTHON_VERSION
   - conda install -n condaenv pip
-#  - conda config --add channels https://conda.anaconda.org/omnia
-#  - conda config --add channels https://conda.anaconda.org/pbrod
+#  - conda config --add channels conda-forge
+#  - conda config --add channels https://conda.anaconda.org/qttesting
   - source activate condaenv
 # Install packages
 install:
@@ -44,6 +52,7 @@ install:
   - pip install coveralls
   - pip install pyscaffold==2.5.11
   - pip install codecov
+  - pip install codeclimate-test-reporter
   - python setup.py install
 #  - conda build conda_recipe
 #  - conda install numdifftools --use-local
@@ -57,9 +66,14 @@ script:
   - coverage erase
   - coverage run --source=nvector setup.py test
   - coverage xml -o coverage.xml
+  - CODECLIMATE_REPO_TOKEN=e5452096cdc930ddd2a4bec5c310cdb9b657484e049a2475ef0b5a347b9e5812 codeclimate-test-reporter
 
 after_success:
   - coveralls
   - codecov
 cache:
   - apt
+#cache:
+#  directories:
+#    - '$HOME/.sonar/cache'
+
