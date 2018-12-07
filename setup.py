@@ -30,8 +30,8 @@ Build
 
 PyPi upload:
   git pull origin
-  git tag v0.5.1 master
-  git shortlog v0.4.1..v0.5.1 > log.txt  # update Changes.rst
+  git shortlog v0.4.1..HEAD > log.txt  # update Changes.rst
+  python set_package_version 0.5.1
   git commit
   git tag v0.5.1 master
 Delete the build, dist, and nvector.egg-info folder in your root directory.
@@ -64,7 +64,7 @@ def _get_version_from_git():
     try:
         version = subprocess.check_output("git describe --tags").decode('utf-8')
         version = version.lstrip('v').strip()
-    except Exception: # subprocess.CalledProcessError:
+    except Exception:  # subprocess.CalledProcessError:
         version = 'unknown'
     parts = version.split('-')
     if len(parts) == 1:
@@ -92,7 +92,7 @@ def update_version_in_package(version):
 
         new_text = re.sub(r"__version__ = ['\"]([^'\"]*)['\"]",
                           '__version__ = "{}"'.format(version),
-                          text, re.M)
+                          text, re.M)  # @UndefinedVariable
 
         with open("./src/nvector/__init__.py", "w") as fid:
             fid.write(new_text)
@@ -107,7 +107,7 @@ def setup_package():
     sphinx = ['sphinx', 'numpydoc',
               'sphinx_rtd_theme>=0.1.7'] if needs_sphinx else []
     setup(setup_requires=['pyscaffold==2.5.11'] + sphinx,
-          package_dir = {'': 'src'},
+          package_dir={'': 'src'},
           include_package_data=True,
           packages=find_packages(where=r'./src'),
           tests_require=['pytest_cov', 'pytest'],
