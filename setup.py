@@ -110,7 +110,7 @@ def setup_package():
           package_dir={'': 'src'},
           include_package_data=True,
           packages=find_packages(where=r'./src'),
-          tests_require=['pytest-cov', 'pytest-pep8', 'pytest'],
+          tests_require=['pytest-cov', 'pytest-pycodestyle', 'pytest'],
           use_pyscaffold=True)
 
 
