@@ -275,7 +275,7 @@ class TestNvector(unittest.TestCase):
         assert_array_almost_equal(deg(lat_EB), 79.99154867)
         assert_array_almost_equal(deg(long_EB), -90.01769837)
         azimuth1 = n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=r_Earth, f=0)
-        assert_array_almost_equal(azimuth, azimuth1+2*np.pi)
+        assert_array_almost_equal(azimuth, azimuth1 + 2 * np.pi)
 
     @staticmethod
     def test_Ex9_intersect():
@@ -340,15 +340,15 @@ class TestNvector(unittest.TestCase):
         path = (n_EA1_E, n_EA2_E)
         n_EB1_E = closest_point_on_great_circle(path, n_EB0_E)
 
-        for s_xt0 in [np.pi/3 * radius, 10., 0.1, 1e-4, 1e-8]:
+        for s_xt0 in [np.pi / 3 * radius, 10., 0.1, 1e-4, 1e-8]:
             distance_rad = s_xt0 / radius
             n_EB_E = n_EA_E_distance_and_azimuth2n_EB_E(n_EB1_E, distance_rad,
-                                                        np.pi/2)
+                                                        np.pi / 2)
 
             n_EB2_E = closest_point_on_great_circle(path, n_EB_E)
             s_xt = great_circle_distance(n_EB1_E, n_EB_E, radius)
             c_E = unit(np.cross(n_EA1_E, n_EA2_E, axis=0))
-            s_xt2 = (np.arccos(np.dot(c_E.T, n_EB_E)) - np.pi/2) * radius
+            s_xt2 = (np.arccos(np.dot(c_E.T, n_EB_E)) - np.pi / 2) * radius
             s_xt3 = cross_track_distance(path, n_EB_E, method='greatcircle',
                                          radius=radius)
 
@@ -360,18 +360,18 @@ class TestNvector(unittest.TestCase):
             assert_array_almost_equal(s_xt3, s_xt0)
             assert_array_almost_equal(s_xt4, s_xt0)
             rtol = 10**(-min(9 + np.log10(s_xt0), 15))
-            self.assertTrue(np.abs(s_xt-s_xt0)/s_xt0 < rtol, 's_xt fails')
-            self.assertTrue(np.abs(s_xt2-s_xt0)/s_xt0 < rtol, 's_xt2 fails')
-            self.assertTrue(np.abs(s_xt3-s_xt0)/s_xt0 < rtol, 's_xt3 fails')
-            self.assertTrue(np.abs(s_xt4-s_xt0)/s_xt0 < rtol, 's_xt4 fails')
+            self.assertTrue(np.abs(s_xt - s_xt0) / s_xt0 < rtol, 's_xt fails')
+            self.assertTrue(np.abs(s_xt2 - s_xt0) / s_xt0 < rtol, 's_xt2 fails')
+            self.assertTrue(np.abs(s_xt3 - s_xt0) / s_xt0 < rtol, 's_xt3 fails')
+            self.assertTrue(np.abs(s_xt4 - s_xt0) / s_xt0 < rtol, 's_xt4 fails')
 
     @staticmethod
     def test_R2xyz_with_vectors():
         x, y, z = rad(((10, 10), (20, 20), (30, 30)))
         R_AB1 = xyz2R(x, y, z)
-        R_AB = np.array([[0.81379768, -0.46984631,  0.34202014],
-                         [0.54383814,  0.82317294, -0.16317591],
-                         [-0.20487413,  0.31879578,  0.92541658]])[:, :, None]
+        R_AB = np.array([[0.81379768, -0.46984631, 0.34202014],
+                         [0.54383814, 0.82317294, -0.16317591],
+                         [-0.20487413, 0.31879578, 0.92541658]])[:, :, None]
         R_AB = np.concatenate((R_AB, R_AB), axis=2)
         assert_array_almost_equal(R_AB, R_AB1)
         x1, y1, z1 = R2xyz(R_AB1)
@@ -381,9 +381,9 @@ class TestNvector(unittest.TestCase):
     def test_R2xyz():
         x, y, z = rad((10, 20, 30))
         R_AB1 = xyz2R(x, y, z)
-        R_AB = [[0.81379768, -0.46984631,  0.34202014],
-                [0.54383814,  0.82317294, -0.16317591],
-                [-0.20487413,  0.31879578,  0.92541658]]
+        R_AB = [[0.81379768, -0.46984631, 0.34202014],
+                [0.54383814, 0.82317294, -0.16317591],
+                [-0.20487413, 0.31879578, 0.92541658]]
         assert_array_almost_equal(R_AB, R_AB1)
         x1, y1, z1 = R2xyz(R_AB1)
         assert_array_almost_equal((x, y, z), (x1, y1, z1))
@@ -403,10 +403,10 @@ class TestNvector(unittest.TestCase):
     @staticmethod
     def test_n_E_and_wa2R_EL():
         n_E = np.array([[0], [0], [1]])
-        R_EL = n_E_and_wa2R_EL(n_E, wander_azimuth=np.pi/2)
+        R_EL = n_E_and_wa2R_EL(n_E, wander_azimuth=np.pi / 2)
         R_EL1 = [[0, 1.0, 0],
                  [1.0, 0, 0],
-                 [0,  0, -1.0]]
+                 [0, 0, -1.0]]
         assert_array_almost_equal(R_EL, R_EL1)
 
         R_EN = n_E2R_EN(n_E)
@@ -425,7 +425,7 @@ class TestNvector(unittest.TestCase):
         n4_E = np.array([[0, 0], [1, 1], [0, 0]])
         for n1, n2 in zip((n1_E, n3_E, n3_E), (n2_E, n2_E, n4_E)):
             azimuth = n_EA_E_and_n_EB_E2azimuth(n1, n2)
-            assert_array_almost_equal(azimuth, np.pi/2)
+            assert_array_almost_equal(azimuth, np.pi / 2)
             azimuth = n_EA_E_and_n_EB_E2azimuth(n2, n1)
             assert_array_almost_equal(azimuth, 0)
 
