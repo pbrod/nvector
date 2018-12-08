@@ -867,8 +867,8 @@ def R2xyz(R_AB):
     # cos_y is based on as many elements as possible, to average out
     # numerical errors. It is selected as the positive square root since
     # y: [-pi/2 pi/2]
-    cos_y = sqrt((R_AB[0, 0, ...]**2 + R_AB[0, 1, ...]**2 +
-                  R_AB[1, 2, ...]**2 + R_AB[2, 2, ...]**2) / 2)
+    cos_y = sqrt((R_AB[0, 0, ...]**2 + R_AB[0, 1, ...]**2
+                  + R_AB[1, 2, ...]**2 + R_AB[2, 2, ...]**2) / 2)
 
     y = arctan2(sin_y, cos_y)
     return x, y, z

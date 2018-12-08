@@ -256,7 +256,7 @@ class GeoPoint(object):
         gpoint = point.to_geo_point()
         lat_a, lon_a = self.latitude, self.longitude
         lat_b, lon_b = gpoint.latitude, gpoint.longitude
-        z = 0.5 * (self.z+gpoint.z)
+        z = 0.5 * (self.z + gpoint.z)
         if not np.allclose(self.z, gpoint.z):
             warnings.warn('Depths differ. Calculating distance at average '
                           'depth={}'.format(str(z)))
@@ -367,9 +367,9 @@ class Nvector(_Common):
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
         options = dict(rtol=rtol, atol=atol)
-        return (np.allclose(self.normal, other.normal, **options) and
-                np.allclose(self.z, other.z, **options) and
-                self.frame == other.frame)
+        return (np.allclose(self.normal, other.normal, **options)
+                and np.allclose(self.z, other.z, **options)
+                and self.frame == other.frame)
 
     def __add__(self, other):
         _check_frames(self, other)
@@ -387,13 +387,13 @@ class Nvector(_Common):
         """elementwise multiplication"""
 
         if not isinstance(scalar, Nvector):
-            return self.frame.Nvector(self.normal*scalar, self.z*scalar)
+            return self.frame.Nvector(self.normal * scalar, self.z * scalar)
         raise NotImplementedError('Only scalar multiplication is implemented')
 
     def __div__(self, scalar):
         """elementwise division"""
         if not isinstance(scalar, Nvector):
-            return self.frame.Nvector(self.normal/scalar, self.z/scalar)
+            return self.frame.Nvector(self.normal / scalar, self.z / scalar)
         raise NotImplementedError('Only scalar division is implemented')
 
     __truediv__ = __div__
@@ -473,8 +473,7 @@ class ECEFvector(Pvector):
     """.format(_examples.get_examples([3, 4]))
 
     def __init__(self, pvector, frame=None):
-        self.pvector = pvector
-        self.frame = _default_frame(frame)
+        super(ECEFvector, self).__init__(pvector, _default_frame(frame))
 
     def change_frame(self, frame):
         """
@@ -608,7 +607,7 @@ class GeoPath(object):
         # radius = (norm(p_E1_E.pvector, axis=0) +
         #           norm(p_E2_E.pvector, axis=0)) / 2
         p_E1_E, p_E2_E = self.ecef_vectors()
-        radius = (p_E1_E.length + p_E2_E.length)/2
+        radius = (p_E1_E.length + p_E2_E.length) / 2
         return radius
 
     def cross_track_distance(self, point, method='greatcircle', radius=None):
@@ -827,7 +826,7 @@ class GeoPath(object):
             point of interpolation along path
         """
         point_a, point_b = self.nvectors()
-        point_c = point_a + (point_b-point_a) * ti
+        point_c = point_a + (point_b - point_a) * ti
         point_c.normal = unit(point_c.normal, norm_zero_vector=np.nan)
         return point_c
 
@@ -861,6 +860,7 @@ class FrameE(_Common):
     --------
     FrameN, FrameL, FrameB
     """
+
     def __init__(self, a=None, f=None, name='WGS84', axes='e'):
         if a is None or f is None:
             a, f, _full_name = select_ellipsoid(name)
@@ -870,12 +870,11 @@ class FrameE(_Common):
         self.R_Ee = E_rotation(axes)
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
-        return (np.allclose(self.a, other.a, rtol=rtol, atol=atol) and
-                np.allclose(self.f, other.f, rtol=rtol, atol=atol) and
-                np.allclose(self.R_Ee, other.R_Ee, rtol=rtol, atol=atol))
+        return (np.allclose(self.a, other.a, rtol=rtol, atol=atol)
+                and np.allclose(self.f, other.f, rtol=rtol, atol=atol)
+                and np.allclose(self.R_Ee, other.R_Ee, rtol=rtol, atol=atol))
 
-    def inverse(self, lat_a, lon_a, lat_b, lon_b, z=0, long_unroll=False,
-                degrees=False):
+    def inverse(self, lat_a, lon_a, lat_b, lon_b, z=0, long_unroll=False, degrees=False):
         """
         Return ellipsoidal distance between positions as well as the direction.
 
@@ -910,7 +909,7 @@ class FrameE(_Common):
         if long_unroll:
             outmask = _Geodesic.STANDARD | _Geodesic.LONG_UNROLL
 
-        geo = _Geodesic(self.a-z, self.f)
+        geo = _Geodesic(self.a - z, self.f)
         if not degrees:
             lat_a, lon_a, lat_b, lon_b = deg((lat_a, lon_a, lat_b, lon_b))
         result = geo.Inverse(lat_a, lon_a, lat_b, lon_b, outmask=outmask)
@@ -918,8 +917,7 @@ class FrameE(_Common):
         azimuth_b = result['azi2'] if degrees else rad(result['azi2'])
         return result['s12'], azimuth_a, azimuth_b
 
-    def direct(self, lat_a, lon_a, azimuth, distance, z=0, long_unroll=False,
-               degrees=False):
+    def direct(self, lat_a, lon_a, azimuth, distance, z=0, long_unroll=False, degrees=False):
         """
         Return position B computed from position A, distance and azimuth.
 
@@ -950,7 +948,7 @@ class FrameE(_Common):
         `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
         """
 
-        geo = _Geodesic(self.a-z, self.f)
+        geo = _Geodesic(self.a - z, self.f)
         outmask = _Geodesic.STANDARD
         if long_unroll:
             outmask = _Geodesic.STANDARD | _Geodesic.LONG_UNROLL
@@ -1022,8 +1020,8 @@ class FrameN(_Common):
         return n_E2R_EN(nvector.normal, nvector.frame.R_Ee)
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
-        return (np.allclose(self.R_EN, other.R_EN, rtol=rtol, atol=atol) and
-                self.nvector == other.nvector)
+        return (np.allclose(self.R_EN, other.R_EN, rtol=rtol, atol=atol)
+                and self.nvector == other.nvector)
 
     def Pvector(self, pvector):
         return Pvector(pvector, frame=self)
@@ -1066,6 +1064,7 @@ class FrameL(FrameN):
     --------
     FrameE, FrameN, FrameB
     """
+
     def __init__(self, position, wander_azimuth=0):
         super(FrameL, self).__init__(position)
         self.wander_azimuth = wander_azimuth
@@ -1123,11 +1122,11 @@ class FrameB(FrameN):
         return mdot(R_EN, R_NB)  # rotation matrix
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
-        return (np.allclose(self.yaw, other.yaw, rtol=rtol, atol=atol) and
-                np.allclose(self.pitch, other.pitch, rtol=rtol, atol=atol) and
-                np.allclose(self.roll, other.roll, rtol=rtol, atol=atol) and
-                np.allclose(self.R_EN, other.R_EN, rtol=rtol, atol=atol) and
-                self.nvector == other.nvector)
+        return (np.allclose(self.yaw, other.yaw, rtol=rtol, atol=atol)
+                and np.allclose(self.pitch, other.pitch, rtol=rtol, atol=atol)
+                and np.allclose(self.roll, other.roll, rtol=rtol, atol=atol)
+                and np.allclose(self.R_EN, other.R_EN, rtol=rtol, atol=atol)
+                and self.nvector == other.nvector)
 
 
 def _check_frames(self, other):

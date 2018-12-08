@@ -18,8 +18,7 @@ def use_docstring_from(cls):
 def test_docstrings(filename):
     import doctest
     print('Testing docstrings in {0!s}'.format(filename))
-    doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE |
-                    doctest.ELLIPSIS)
+    doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS)
     print('Docstrings tested')
 
 

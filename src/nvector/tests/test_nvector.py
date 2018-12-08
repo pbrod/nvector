@@ -207,8 +207,7 @@ class TestNvector(unittest.TestCase):
 
         # SOLUTION:
         # Using standard interpolation:
-        n_EB_E_ti = unit(n_EB_E_t0 +
-                         (ti - t0) * (n_EB_E_t1 - n_EB_E_t0) / (t1 - t0))
+        n_EB_E_ti = unit(n_EB_E_t0 + (ti - t0) * (n_EB_E_t1 - n_EB_E_t0) / (t1 - t0))
 
         # When displaying the resulting position for humans, it is more
         # convenient to see lat, long:
