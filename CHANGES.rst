@@ -2,9 +2,12 @@
 Changelog
 =========
 
-Version 0.6.0, December 07, 2018
+Version 0.6.0, December 08, 2018
 ==============================
-Per A Brodtkorb (57):
+Per A Brodtkorb (79):
+      * Replaced use of pytest-pep8 with pytest-pycodestyle
+      * Updated requirements in setup.py
+      * Removed tox.ini
       * Updated documentation on how to set package version
       * Made a separate script to set package version in nvector/__init__.py
       * Updated docstring for select_ellipsoid
@@ -70,7 +73,6 @@ Version 0.5.1, Mars 5, 2017
 Cody (4):
      * Explicitely numbered replacement fields
      * Migrated `%` string formating
-     
 
 Per A Brodtkorb (29):
      * pep8
@@ -83,8 +85,8 @@ Per A Brodtkorb (29):
      * Added .codeclimate.yml
      * Updated installation information in _info.py
      * Added GeoPath.on_path method. Clearified intersection example
-     * Added great_circle_normal, cross_track_distance Renamed intersection to intersect (Intersection is deprecated.)            
-     * Simplified R2zyx with a call to R2xyz Improved accuracy for great circle cross track distance for small distances. 
+     * Added great_circle_normal, cross_track_distance Renamed intersection to intersect (Intersection is deprecated.)
+     * Simplified R2zyx with a call to R2xyz Improved accuracy for great circle cross track distance for small distances.
      * Added on_great_circle, _on_great_circle_path, _on_ellipsoid_path, closest_point_on_great_circle and closest_point_on_path to GeoPath
      * made __eq__ more robust for frames
      * Removed duplicated code
@@ -93,7 +95,7 @@ Per A Brodtkorb (29):
      * replaced zero n-vector with nan
      * Commented out failing test.
      * Added example 10 image
-      Added 'closest_point_on_great_circle', 'on_great_circle','on_great_circle_path'. 
+     * Added 'closest_point_on_great_circle', 'on_great_circle','on_great_circle_path'.
      * Updated examples + documentation
      * Updated index depth
      * Updated README.rst and classifier in setup.cfg
@@ -118,8 +120,8 @@ pbrod (46):
       * Added figures to examples
       * Added GeoPath.interpolate + interpolation example 6
       * Added links to FFI homepage.
-      * Updated documentation:    
-          - Added link to nvector toolbox for matlab     
+      * Updated documentation:
+          - Added link to nvector toolbox for matlab
           - For each example added links to the more detailed explanation on the homepage
       * Updated link to nvector toolbox for matlab
       * Added link to nvector on  pypi
@@ -148,7 +150,6 @@ pbrod (31):
       * Fixed bug in .travis.yml
       * Updated .travis.yml
       * Removed dependence on navigator.py
-      
       * Updated README.rst
       * Updated examples
       * Deleted skeleton.py and added tox.ini
