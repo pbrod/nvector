@@ -5,7 +5,6 @@ Changelog
 Version 0.6.0, December 09, 2018
 ==============================
 Per A Brodtkorb (79):
-      * Replaced use of pytest-pep8 with pytest-pycodestyle
       * Updated requirements in setup.py
       * Removed tox.ini
       * Updated documentation on how to set package version
