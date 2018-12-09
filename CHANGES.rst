@@ -2,7 +2,7 @@
 Changelog
 =========
 
-Version 0.6.0, December 08, 2018
+Version 0.6.0, December 09, 2018
 ==============================
 Per A Brodtkorb (79):
       * Replaced use of pytest-pep8 with pytest-pycodestyle
