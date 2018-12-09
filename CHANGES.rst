@@ -3,7 +3,7 @@ Changelog
 =========
 
 Version 0.6.0, December 09, 2018
-==============================
+================================
 Per A Brodtkorb (79):
       * Updated requirements in setup.py
       * Removed tox.ini
@@ -52,8 +52,8 @@ Per A Brodtkorb (79):
          crosstrack distance test.
       * updated documentation in setup.py
 
-Version 0.5.2, Mars 7, 2017
-==============================
+Version 0.5.2, March 7, 2017
+============================
 
 
 Per A Brodtkorb (10):
@@ -65,8 +65,8 @@ Per A Brodtkorb (10):
       * Updated crosstrack distance tests.
 
 
-Version 0.5.1, Mars 5, 2017
-==============================
+Version 0.5.1, March 5, 2017
+============================
 
 
 Cody (4):
@@ -101,8 +101,8 @@ Per A Brodtkorb (29):
 
 
 
-Version 0.4.1, Januar 19, 2016
-==============================
+Version 0.4.1, January 19, 2016
+===============================
 
 pbrod (46):
 
@@ -133,8 +133,8 @@ pbrod (46):
       * All examples are now generated from _examples.py.
 
 
-Version 0.1.3, Januar 1, 2016
-=============================
+Version 0.1.3, January 1, 2016
+==============================
 
 pbrod (31):
 
@@ -161,8 +161,8 @@ pbrod (31):
       * Removed bug in setup.py
 
 
-Version 0.1.1, Januar 1, 2016
-=============================
+Version 0.1.1, January 1, 2016
+==============================
 
 pbrod (31):
       * Initial commit: Translated code from Matlab to Python.
