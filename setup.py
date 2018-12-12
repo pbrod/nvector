@@ -3,9 +3,6 @@
 """
     Setup file for nvector.
 
-    This file was generated with PyScaffold 2.4.4, a tool that easily
-    puts up a scaffold for your new Python project. Learn more under:
-    http://pyscaffold.readthedocs.org/
 
 Usage:
 Run all tests:
@@ -47,11 +44,12 @@ Delete the build, dist, and nvector.egg-info folder in your root directory.
 import sys
 from setuptools import setup, find_packages
 
+PACKAGE_NAME = 'nvector'
 
 def _get_version_from_pkg():
     import pkg_resources
     try:
-        version = pkg_resources.get_distribution("nvector").version
+        version = pkg_resources.get_distribution(PACKAGE_NAME).version
         with open("__conda_version__.txt", "w") as fid:
             fid.write(version)
     except pkg_resources.DistributionNotFound:
@@ -87,14 +85,15 @@ def get_version():
 def update_version_in_package(version):
     import re
     if version != 'unknown':
-        with open("./src/nvector/__init__.py", "r") as fid:
+        filename = "./src/{}/__init__.py".format(PACKAGE_NAME)
+        with open(filename, "r") as fid:
             text = fid.read()
 
         new_text = re.sub(r"__version__ = ['\"]([^'\"]*)['\"]",
                           '__version__ = "{}"'.format(version),
                           text, re.M)  # @UndefinedVariable
 
-        with open("./src/nvector/__init__.py", "w") as fid:
+        with open(filename, "w") as fid:
             fid.write(new_text)
 
 
