@@ -79,18 +79,19 @@ ELLIPSOID = {1: ({'a': 6377563.3960, 'f': 1.0 / 299.3249646}, 'Airy 1858'),
              8: ({'a': 6378166.0, 'f': 1.0 / 298.3}, 'Fisher 1960'),
              9: ({'a': 6378150.0, 'f': 1.0 / 298.3}, 'Fisher 1968'),
              10: ({'a': 6378270.0, 'f': 1.0 / 297}, 'Hough 1956'),
-             11: ({'a': 6378388.0, 'f': 1.0 / 297}, 'International (Hayford)'),
+             11: ({'a': 6378388.0, 'f': 1.0 / 297}, 'International (Hayford)/European Datum (ED50)'),
              12: ({'a': 6378245.0, 'f': 1.0 / 298.3}, 'Krassovsky 1938'),
              13: ({'a': 6378145., 'f': 1.0 / 298.25}, 'NWL-9D  (WGS 66)'),
-             14: ({'a': 6378160., 'f': 1.0 / 298.25}, 'South American 1969'),
+             14: ({'a': 6378160., 'f': 1.0 / 298.25}, 'South American 1969 (SAD69'),
              15: ({'a': 6378136, 'f': 1.0 / 298.257},
                   'Soviet Geod. System 1985'),
              16: ({'a': 6378135., 'f': 1.0 / 298.26}, 'WGS 72'),
              17: ({'a': 6378206.4, 'f': 1.0 / 294.9786982138},
                   'Clarke 1866    (NAD27)'),
              18: ({'a': 6378137.0, 'f': 1.0 / 298.257223563},
-                  'GRS80 / WGS84  (NAD83)')}
-
+                  'GRS80 / WGS84  (NAD83)'),
+             19: ({'a': 6378137, 'f': 298.257222101}, 'ETRS89')
+             }
 ELLIPSOID_IX = {'airy1858': 1,
                 'airymodified': 2,
                 'australiannational': 3,
@@ -105,11 +106,13 @@ ELLIPSOID_IX = {'airy1858': 1,
                 'hough': 10,
                 'international': 11,
                 'hayford': 11,
+                'ed50': 11,
                 'krassovsky': 12,
                 'krassovsky1938': 12,
                 'nwl-9d': 13,
                 'wgs66': 13,
                 'southamerican1969': 14,
+                'sad69': 14,
                 'sovietgeod.system1985': 15,
                 'wgs72': 16,
                 'clarke1866': 17,
@@ -138,7 +141,7 @@ def select_ellipsoid(name):
         8) Fisher 1960
         9) Fisher 1968
         10) Hough 1956
-        11) International (Hayford)
+        11) International (Hayford)/European Datum (ED50)
         12) Krassovsky 1938
         13) NWL-9D (WGS 66)
         14) South American 1969
@@ -146,6 +149,7 @@ def select_ellipsoid(name):
         16) WGS 72
         17) Clarke 1866    (NAD27)
         18) GRS80 / WGS84  (NAD83)
+        19) ETRS89
 
     Examples
     --------

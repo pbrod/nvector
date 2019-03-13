@@ -75,7 +75,17 @@ def diff_positions(positionA, positionB):
 
 
 def delta_N(positionA, positionB):
-    """Return cartesian delta vector from positions A to B decomposed in N."""
+    """Return cartesian delta vector from positions A to B decomposed in N.
+
+    Parameters
+    ----------
+    positionA, positionB: Nvector, GeoPoint or ECEFvector objects
+        position A and B, decomposed in E.
+
+    See also
+    --------
+    delta_E
+    """
     p_AB_E = delta_E(positionA, positionB)
     p_AB_N = p_AB_E.change_frame(FrameN(positionA))
     return p_AB_N
@@ -87,7 +97,19 @@ def _delta(self, other):
 
 
 def delta_L(positionA, positionB, wander_azimuth=0):
-    """Return cartesian delta vector from positions A to B decomposed in L."""
+    """Return cartesian delta vector from positions A to B decomposed in L.
+
+    Parameters
+    ----------
+    positionA, positionB: Nvector, GeoPoint or ECEFvector objects
+        position A and B, decomposed in E.
+    wander_azimuth: real scalar
+        Angle [rad] between the x-axis of L and the north direction.
+
+    See also
+    --------
+    delta_E
+    """
     p_AB_E = delta_E(positionA, positionB)
     p_AB_L = p_AB_E.change_frame(FrameL(positionA,
                                         wander_azimuth=wander_azimuth))
@@ -402,6 +424,9 @@ class Nvector(_Common):
 
 
 class Pvector(object):
+    """
+    Cartesian position vector in another frame
+    """
     def __init__(self, pvector, frame):
         self.pvector = pvector
         self.frame = frame
@@ -414,10 +439,10 @@ class Pvector(object):
         return ECEFvector(p_AB_E, frame=n_frame.nvector.frame)
 
     def to_nvector(self):
-        self.to_ecef_vector().to_nvector()
+        return self.to_ecef_vector().to_nvector()
 
     def to_geo_point(self):
-        self.to_ecef_vector().to_geo_point()
+        return self.to_ecef_vector().to_geo_point()
 
     delta_to = _delta
 

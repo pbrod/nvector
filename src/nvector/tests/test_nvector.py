@@ -389,6 +389,58 @@ class TestNvector(unittest.TestCase):
         assert_array_almost_equal((x, y, z), (x1, y1, z1))
 
     @staticmethod
+    def test_R2zxy_0():
+        x, y, z = rad((0, 0, 0))
+        R_AB1 = zyx2R(z, y, x)
+        print(R_AB1.tolist())
+        R_AB = [[1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 0.0, 1.0]]
+
+        assert_array_almost_equal(R_AB, R_AB1)
+        z1, y1, x1 = R2zyx(R_AB1)
+        assert_array_almost_equal((x, y, z), (x1, y1, z1))
+
+    @staticmethod
+    def test_R2zxy_z90():
+        x, y, z = rad((0, 0, 90))
+        R_AB1 = zyx2R(z, y, x)
+        print(R_AB1.tolist())
+        R_AB = [[0.0, -1.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0]]
+
+        assert_array_almost_equal(R_AB, R_AB1)
+        z1, y1, x1 = R2zyx(R_AB1)
+        assert_array_almost_equal((x, y, z), (x1, y1, z1))
+
+    @staticmethod
+    def test_R2zxy_y90():
+        x, y, z = rad((0, 90, 0))
+        R_AB1 = zyx2R(z, y, x)
+        print(R_AB1.tolist())
+        R_AB = [[0.0, 0.0, 1.0],
+                [0.0, 1.0, 0.0],
+                [-1.0, 0.0, 0.0]]
+
+        assert_array_almost_equal(R_AB, R_AB1)
+        z1, y1, x1 = R2zyx(R_AB1)
+        assert_array_almost_equal((x, y, z), (x1, y1, z1))
+
+    @staticmethod
+    def test_R2zxy_x90():
+        x, y, z = rad((90, 0, 0))
+        R_AB1 = zyx2R(z, y, x)
+        print(R_AB1.tolist())
+        R_AB = [[1.0, 0.0, 0.0],
+                [0.0, 0.0, -1.0],
+                [0.0, 1.0, 0.0]]
+
+        assert_array_almost_equal(R_AB, R_AB1)
+        z1, y1, x1 = R2zyx(R_AB1)
+        assert_array_almost_equal((x, y, z), (x1, y1, z1))
+
+    @staticmethod
     def test_R2zxy():
         x, y, z = rad((10, 20, 30))
         R_AB1 = zyx2R(z, y, x)
