@@ -55,8 +55,8 @@ __all__ = ['select_ellipsoid', 'E_rotation',
            'great_circle_distance', 'euclidean_distance',
            'great_circle_normal', 'cross_track_distance',
            'closest_point_on_great_circle', 'on_great_circle',
-           'on_great_circle_path', 'intersect',
-           'mean_horizontal_position',
+           'on_great_circle_path', 'interpolate',
+           'intersect', 'mean_horizontal_position',
            'R2xyz', 'xyz2R', 'R2zyx', 'zyx2R',
            'n_E_and_wa2R_EL', 'n_E2R_EN', 'R_EL2n_E', 'R_EN2n_E']
 
