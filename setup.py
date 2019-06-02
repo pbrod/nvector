@@ -82,12 +82,16 @@ def get_version():
     return version
 
 
+def read(filename):
+    with open(filename, 'r') as file_handle:
+        return file_handle.read()
+
+
 def update_version_in_package(version):
     import re
     if version != 'unknown':
         filename = "./src/{}/__init__.py".format(PACKAGE_NAME)
-        with open(filename, "r") as fid:
-            text = fid.read()
+        text = read(filename)
 
         new_text = re.sub(r"__version__ = ['\"]([^'\"]*)['\"]",
                           '__version__ = "{}"'.format(version),
@@ -98,15 +102,17 @@ def update_version_in_package(version):
 
 
 def setup_package():
+    description = read('README.rst')
     version = get_version()
     update_version_in_package(version)
     print("Version: {}".format(version))
 
     needs_sphinx = {'build_sphinx', 'upload_docs'}.intersection(sys.argv)
-    sphinx = ['sphinx', 'numpydoc',
+    sphinx = ['sphinx', 'numpydoc', 'pngmath',
               'sphinx_rtd_theme>=0.1.7'] if needs_sphinx else []
     setup(setup_requires=['pyscaffold==2.5.11'] + sphinx,
           package_dir={'': 'src'},
+          long_description=description,
           include_package_data=True,
           packages=find_packages(where=r'./src'),
           tests_require=['pytest-cov', 'pytest-pep8', 'pytest'],
