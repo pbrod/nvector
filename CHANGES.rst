@@ -9,6 +9,7 @@ Gary van der Merwe (1):
       * Add interpolate to __all__ so that it can be imported
 
 Per A Brodtkorb (26):
+      * Replaced deprecated sphinx.ext.png.math with sphinx.ext.img.math
       * Added pngmath to requirements for building the docs.
       * Fixing shallow clone warning. Replaced property
          'sonar.python.coverage.itReportPath' with
