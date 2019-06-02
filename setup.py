@@ -103,7 +103,7 @@ def setup_package():
     print("Version: {}".format(version))
 
     needs_sphinx = {'build_sphinx', 'upload_docs'}.intersection(sys.argv)
-    sphinx = ['sphinx', 'numpydoc', 'pngmath',
+    sphinx = ['sphinx', 'numpydoc',
               'sphinx_rtd_theme>=0.1.7'] if needs_sphinx else []
     setup(setup_requires=['pyscaffold==2.5.11'] + sphinx,
           package_dir={'': 'src'},
