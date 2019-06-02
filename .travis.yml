@@ -20,6 +20,11 @@ python:
   - 3.4
   - 3.5
   - 3.6
+matrix:
+  include:
+    - python: 3.7
+      dist: xenial
+      sudo: true
 notifications:
   email: false
  
@@ -49,10 +54,13 @@ install:
   - conda install -c conda-forge cartopy
   - pip install setuptools
 # codeclimate reporter is only compatible with Coverage.py versions >=4.0,<4.4.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.4" ]]; then    
-        pip install coverage;
-    else
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then    
         pip install coverage==4.3.4;
+    else
+        pip install coverage;
+    fi
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.4" ]]; then    
+        pip install --upgrade pytest;
     fi
   - pip install geographiclib
   - pip install coveralls
