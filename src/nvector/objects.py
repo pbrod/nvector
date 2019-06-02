@@ -936,7 +936,7 @@ class FrameE(_Common):
 
         geo = _Geodesic(self.a - z, self.f)
         if not degrees:
-            lat_a, lon_a, lat_b, lon_b = deg((lat_a, lon_a, lat_b, lon_b))
+            lat_a, lon_a, lat_b, lon_b = [deg(val) for val in (lat_a, lon_a, lat_b, lon_b)]
         result = geo.Inverse(lat_a, lon_a, lat_b, lon_b, outmask=outmask)
         azimuth_a = result['azi1'] if degrees else rad(result['azi1'])
         azimuth_b = result['azi2'] if degrees else rad(result['azi2'])
