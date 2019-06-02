@@ -25,8 +25,8 @@ matrix:
     - python: 3.7
       dist: xenial
       sudo: true
-      services:
-        - xvfb
+services:
+    - xvfb
 notifications:
   email: false
  
@@ -76,7 +76,7 @@ before_script:
   - if [[ "$TRAVIS_PYTHON_VERSION" <= "3.6" ]]; then    
         "export DISPLAY=:99.0";
         "sh -e /etc/init.d/xvfb start";
-        sleep 3; # give xvfb some time to start
+        sleep 3 # give xvfb some time to start
     fi
   - git config --global user.email "per.andreas.brodtkorb@gmail.com"
   - git config --global user.name "pbrod"
