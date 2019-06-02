@@ -9,6 +9,7 @@ Gary van der Merwe (1):
       * Add interpolate to __all__ so that it can be imported
 
 Per A Brodtkorb (26):
+      * Added pngmath to requirements for building the docs.
       * Fixing shallow clone warning. Replaced property
          'sonar.python.coverage.itReportPath' with
          'sonar.python.coverage.reportPaths' instead, because it is has been
