@@ -2,6 +2,29 @@
 Changelog
 =========
 
+Version 0.7.0, June 02, 2019
+================================
+
+Gary van der Merwe (1):
+      * Add interpolate to __all__ so that it can be imported
+
+Per A Brodtkorb (26):
+      * Fixing shallow clone warning. Replaced property
+         'sonar.python.coverage.itReportPath' with
+         'sonar.python.coverage.reportPaths' instead, because it is has been
+         removed.
+      * Drop python 3.4 support
+      * Added python 3.7 support
+      * Fixed a bug: Mixed scalars and np.array([1]) values don't work with
+         np.rad2deg function.
+      * Added ETRS ELLIPSOID in _core.py Added ED50 as alias for International
+         (Hayford)/European Datum in _core.py Added sad69 as alias for South
+         American 1969 in _core.py
+      * Simplified docstring for nv.test
+      * Generalized the setup.py.
+      * Replaced aliases with the correct names in setup.cfg.
+
+
 Version 0.6.0, December 09, 2018
 ================================
 Per A Brodtkorb (79):
