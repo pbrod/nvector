@@ -18,6 +18,7 @@ dist: xenial
 python:
   # We don't actually use the Travis Python, but this keeps it organized.
   - 2.7
+  - 3.4
   - 3.5
   - 3.6
 matrix:
@@ -74,11 +75,6 @@ install:
 #  - conda build conda_recipe
 #  - conda install numdifftools --use-local
 before_script:
-#  - if [[ "$TRAVIS_PYTHON_VERSION" <= "3.6" ]]; then    
-#        "export DISPLAY=:99.0";
-#        "sh -e /etc/init.d/xvfb start";
-#        sleep 3 # give xvfb some time to start
-#    fi
   - git config --global user.email "per.andreas.brodtkorb@gmail.com"
   - git config --global user.name "pbrod"
 script:
