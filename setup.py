@@ -27,7 +27,7 @@ Build
 
 PyPi upload:
   git pull origin
-  git shortlog v0.4.1..HEAD -w80 --format="* %s" --reverse > log.txt  # update Changes.rst
+  git shortlog v0.6.0..HEAD -w80 --format="* %s" --reverse > log.txt  # update Changes.rst
   python set_package_version.py 0.5.1rc0
   git commit
   git tag v0.5.1rc0 master
@@ -103,7 +103,7 @@ def setup_package():
     print("Version: {}".format(version))
 
     needs_sphinx = {'build_sphinx', 'upload_docs'}.intersection(sys.argv)
-    sphinx = ['sphinx', 'numpydoc',
+    sphinx = ['sphinx', 'numpydoc', 'pngmath',
               'sphinx_rtd_theme>=0.1.7'] if needs_sphinx else []
     setup(setup_requires=['pyscaffold==2.5.11'] + sphinx,
           package_dir={'': 'src'},
