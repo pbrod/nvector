@@ -50,7 +50,7 @@ install:
   - pip install setuptools
 # codeclimate reporter is only compatible with Coverage.py versions >=4.0,<4.4.
   - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6"]]; then    
-        pip install coverage==4.3.4; 
+        pip install coverage==4.3.4;
     else
         pip install coverage;
     fi
