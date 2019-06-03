@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Version 0.7.1, June 03, 2019
+================================
+Per A Brodtkorb (1):
+      * Fixed issue 7# incorrect test for test_n_E_and_wa2R_EL.
+
+
 Version 0.7.0, June 02, 2019
 ================================
 
