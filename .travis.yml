@@ -57,18 +57,18 @@ install:
   - conda install -c conda-forge cartopy
   - pip install setuptools
 # codeclimate reporter is only compatible with Coverage.py versions >=4.0,<4.4.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then    
-        pip install coverage==4.3.4;
-    else
-        pip install coverage;
-    fi
+#  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then    
+#        pip install coverage==4.3.4;
+#    else
+#        pip install coverage;
+#    fi
   - pip install coverage
   - pip install pytest-cov 
   - pip install pytest-pep8
   - pip install geographiclib
   - pip install coveralls
   - pip install codecov
-  - pip install codeclimate-test-reporter
+#  - pip install codeclimate-test-reporter
   - python setup.py install
 #  - conda build conda_recipe
 #  - conda install numdifftools --use-local
@@ -76,16 +76,23 @@ before_script:
   - git fetch --unshallow --quiet
   - git config --global user.email "per.andreas.brodtkorb@gmail.com"
   - git config --global user.name "pbrod"
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then
+        curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter;
+        chmod +x ./cc-test-reporter;
+        ./cc-test-reporter before-build;
+    fi
 script:
   - coverage erase
   - coverage run --source=nvector setup.py test
 # see http://www.camillescott.org/2016/07/15/travis-pytest-scipyconf/
   - coverage xml -o coverage.xml
   - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then
-        codeclimate-test-reporter;
         sonar-scanner -X;
     fi
-
+after_script:
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then
+        ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT;
+    fi
 after_success:
   - coveralls
   - codecov
