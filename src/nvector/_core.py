@@ -702,14 +702,16 @@ def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     k = sqrt(u + v + w**2) - w
     d = k * R / (k + e_2)
 
+    temp0 = sqrt(d**2 + p_EB_E[0, :]**2)
     # Calculate height:
-    height = (k + e_2 - 1) / k * sqrt(d**2 + p_EB_E[0, :]**2)
+    height = (k + e_2 - 1) / k * temp0
 
-    temp = 1. / sqrt(d**2 + p_EB_E[0, :]**2)
+    temp1 = 1. / temp0
+    temp2 = temp1 * k / (k + e_2)
 
-    n_EB_E_x = temp * p_EB_E[0, :]
-    n_EB_E_y = temp * k / (k + e_2) * p_EB_E[1, :]
-    n_EB_E_z = temp * k / (k + e_2) * p_EB_E[2, :]
+    n_EB_E_x = temp1 * p_EB_E[0, :]
+    n_EB_E_y = temp2 * p_EB_E[1, :]
+    n_EB_E_z = temp2 * p_EB_E[2, :]
 
     n_EB_E = np.vstack((n_EB_E_x, n_EB_E_y, n_EB_E_z))
     n_EB_E = unit(dot(R_Ee.T, n_EB_E))  # Ensure unit length
