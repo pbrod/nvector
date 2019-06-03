@@ -28,58 +28,20 @@ Build
 PyPi upload:
   git pull origin
   git shortlog v0.6.0..HEAD -w80 --format="* %s" --reverse > log.txt  # update Changes.rst
-  python set_package_version.py 0.5.1rc0
+  python build_package.py 0.7.0rc0
   git commit
-  git tag v0.5.1rc0 master
-Delete the build, dist, and nvector.egg-info folder in your root directory.
-  python setup.py sdist
-  python setup.py bdist_wheel --universal
-  python setup.py egg_info
+  git tag v0.7.0rc0 master
   git push --tags
+  twine check dist/*   # check
   twine upload dist/*
 
-
 """
-
+import os
+import re
 import sys
-from setuptools import setup, find_packages
-
+from setuptools import setup, Command
+ROOT = os.path.abspath(os.path.dirname(__file__))
 PACKAGE_NAME = 'nvector'
-
-def _get_version_from_pkg():
-    import pkg_resources
-    try:
-        version = pkg_resources.get_distribution(PACKAGE_NAME).version
-        with open("__conda_version__.txt", "w") as fid:
-            fid.write(version)
-    except pkg_resources.DistributionNotFound:
-        version = 'unknown'
-    return version
-
-
-def _get_version_from_git():
-    import subprocess
-    try:
-        version = subprocess.check_output("git describe --tags").decode('utf-8')
-        version = version.lstrip('v').strip()
-    except Exception:  # subprocess.CalledProcessError:
-        version = 'unknown'
-    parts = version.split('-')
-    if len(parts) == 1:
-        version = parts[0]
-    elif len(parts) == 3:
-        tag, revision, sha = parts
-        version = '{}.post{:03d}+{}'.format(tag, int(revision), sha)
-    else:
-        version = 'unknown'
-    return version
-
-
-def get_version():
-    version = _get_version_from_git()
-    if version == 'unknown':
-        return _get_version_from_pkg()
-    return version
 
 
 def read(filename):
@@ -87,36 +49,49 @@ def read(filename):
         return file_handle.read()
 
 
-def update_version_in_package(version):
-    import re
-    if version != 'unknown':
-        filename = "./src/{}/__init__.py".format(PACKAGE_NAME)
-        text = read(filename)
-
-        new_text = re.sub(r"__version__ = ['\"]([^'\"]*)['\"]",
-                          '__version__ = "{}"'.format(version),
+def get_version():
+    filename = os.path.join(ROOT, "src", PACKAGE_NAME, "__init__.py")
+    text = read(filename)
+    versions = re.findall(r"__version__ = ['\"]([^'\"]*)['\"]",
                           text, re.M)  # @UndefinedVariable
+    return versions[0]
 
-        with open(filename, "w") as fid:
-            fid.write(new_text)
+
+class Doctest(Command):
+    description = 'Run doctests with Sphinx'
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        from sphinx.application import Sphinx
+        sph = Sphinx('./docs',  # source directory
+                     './docs',  # directory containing conf.py
+                     './docs/_build',  # output directory
+                     './docs/_build/doctrees',  # doctree directory
+                     'doctest')  # finally, specify the doctest builder
+        sph.build()
 
 
 def setup_package():
-    description = read('README.rst')
     version = get_version()
-    update_version_in_package(version)
     print("Version: {}".format(version))
 
-    needs_sphinx = {'build_sphinx', 'upload_docs'}.intersection(sys.argv)
-    sphinx = ['sphinx', 'numpydoc', 'pngmath',
+    sphinx_requires = ['sphinx>=1.3.1']
+    needs_sphinx = {'build_sphinx'}.intersection(sys.argv)
+    sphinx = ['sphinx', 'numpydoc', 'imgmath',
               'sphinx_rtd_theme>=0.1.7'] if needs_sphinx else []
-    setup(setup_requires=['pyscaffold==2.5.11'] + sphinx,
-          package_dir={'': 'src'},
-          long_description=description,
-          include_package_data=True,
-          packages=find_packages(where=r'./src'),
-          tests_require=['pytest-cov', 'pytest-pep8', 'pytest'],
-          use_pyscaffold=True)
+    setup(setup_requires=["pytest-runner"] + sphinx,
+          version=version,
+          cmdclass={'doctests': Doctest
+                    },
+          extras_require={'build_sphinx': sphinx_requires,
+                          },
+          )
 
 
 if __name__ == "__main__":

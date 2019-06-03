@@ -62,12 +62,8 @@ install:
     else
         pip install coverage;
     fi
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.4" ]]; then    
-        pip install --upgrade pytest;
-    fi
   - pip install geographiclib
   - pip install coveralls
-  - pip install pyscaffold==2.5.11
   - pip install codecov
   - pip install codeclimate-test-reporter
   - python setup.py install
