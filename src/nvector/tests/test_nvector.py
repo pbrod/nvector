@@ -456,8 +456,8 @@ class TestNvector(unittest.TestCase):
     def test_n_E_and_wa2R_EL():
         n_E = np.array([[0], [0], [1]])
         R_EL = n_E_and_wa2R_EL(n_E, wander_azimuth=np.pi / 2)
-        R_EL1 = [[0, 1.0, 0],
-                 [1.0, 0, 0],
+        R_EL1 = [[0, -1.0, 0],
+                 [-1.0, 0, 0],
                  [0, 0, -1.0]]
         assert_array_almost_equal(R_EL, R_EL1)
 

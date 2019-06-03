@@ -60,9 +60,9 @@ __all__ = ['select_ellipsoid', 'E_rotation',
            'R2xyz', 'xyz2R', 'R2zyx', 'zyx2R',
            'n_E_and_wa2R_EL', 'n_E2R_EN', 'R_EL2n_E', 'R_EN2n_E']
 
-E_ROTATION_MATRIX = dict(e=array([[0, 0, 1],
-                                  [0, 1, 0],
-                                  [-1, 0, 0]]),
+E_ROTATION_MATRIX = dict(e=array([[0, 0, 1.0],
+                                  [0, 1.0, 0],
+                                  [-1.0, 0, 0]]),
                          E=np.eye(3))
 
 _EPS = np.finfo(float).eps  # machine precision (machine epsilon)
@@ -433,18 +433,18 @@ def n_E2lat_lon(n_E, R_Ee=None):
     if R_Ee is None:
         R_Ee = E_rotation()
     _check_length_deviation(n_E)
-    n_E = dot(R_Ee, n_E)
+    n_E0 = dot(R_Ee, n_E)
 
     # Equation (5) in Gade (2010):
-    longitude = arctan2(n_E[1, :], -n_E[2, :])
+    longitude = arctan2(n_E0[1, :], -n_E0[2, :])
 
     # Equation (6) in Gade (2010) (Robust numerical solution)
-    equatorial_component = sqrt(n_E[1, :]**2 + n_E[2, :]**2)
+    equatorial_component = sqrt(n_E0[1, :]**2 + n_E0[2, :]**2)
     # vector component in the equatorial plane
-    latitude = arctan2(n_E[0, :], equatorial_component)
+    latitude = arctan2(n_E0[0, :], equatorial_component)
     # atan() could also be used since latitude is within [-pi/2,pi/2]
 
-    # latitude=asin(n_E[0] is a theoretical solution, but close to the Poles
+    # latitude=asin(n_E0[0] is a theoretical solution, but close to the Poles
     # it is ill-conditioned which may lead to numerical inaccuracies (and it
     # will give imaginary results for norm(n_E)>1)
     return latitude, longitude
