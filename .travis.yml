@@ -2,7 +2,7 @@
 # Read more under http://docs.travis-ci.com/user/build-configuration/
 # and https://conda.io/docs/user-guide/tasks/use-conda-with-travis-ci.html
 # THIS SCRIPT IS SUPPOSED TO BE AN EXAMPLE. MODIFY IT ACCORDING TO YOUR NEEDS!
-dist: trusty
+dist: xenial
 #sudo: required
 addons:
   sonarcloud:
@@ -14,7 +14,6 @@ jdk:
   - oraclejdk8
 sudo: false
 language: python
-dist: xenial
 python:
   # We don't actually use the Travis Python, but this keeps it organized.
   - 2.7
@@ -53,22 +52,11 @@ before_install:
   - source activate condaenv
 # Install packages
 install:
-  - conda install python=$TRAVIS_PYTHON_VERSION numpy scipy pytest matplotlib
+  - conda install python=$TRAVIS_PYTHON_VERSION numpy scipy pytest matplotlib coverage pytest-cov pytest-pep8
   - conda install -c conda-forge cartopy
   - pip install setuptools
-# codeclimate reporter is only compatible with Coverage.py versions >=4.0,<4.4.
-#  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then    
-#        pip install coverage==4.3.4;
-#    else
-#        pip install coverage;
-#    fi
-  - pip install coverage
-  - pip install pytest-cov 
-  - pip install pytest-pep8
   - pip install geographiclib
-  - pip install coveralls
   - pip install codecov
-#  - pip install codeclimate-test-reporter
   - python setup.py install
 #  - conda build conda_recipe
 #  - conda install numdifftools --use-local
@@ -86,15 +74,12 @@ script:
   - coverage run --source=nvector setup.py test
 # see http://www.camillescott.org/2016/07/15/travis-pytest-scipyconf/
   - coverage xml -o coverage.xml
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then
-        sonar-scanner -X;
-    fi
 after_script:
   - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then
+        sonar-scanner -X;
         ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT;
     fi
 after_success:
-  - coveralls
   - codecov
 cache:
   - apt
