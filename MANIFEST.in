@@ -4,6 +4,7 @@ include requirements.txt
 include README.rst
 include LICENSE.txt
 include THANKS.txt
+exclude build_package.py
 global-exclude *.py[cod]
 global-exclude *.so
 global-exclude .svn*
