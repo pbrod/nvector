@@ -123,10 +123,11 @@ See also
    :target: https://travis-ci.org/pbrod/Nvector
 .. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable
    :target: http://Nvector.readthedocs.org/en/stable/
-.. |health_img| image:: https://landscape.io/github/pbrod/Nvector/master/landscape.svg?style=flat
-   :target: https://landscape.io/github/pbrod/Nvector/master
-.. |coverage_img| image:: https://coveralls.io/repos/pbrod/Nvector/badge.svg?branch=master&service=github
-   :target: https://coveralls.io/github/pbrod/Nvector?branch=master
+.. |health_img| image:: https://api.codeclimate.com/v1/badges/c04214bef610b25906fe/maintainability
+   :target: https://codeclimate.com/github/pbrod/Nvector/maintainability
+   :alt: Maintainability
+.. |coverage_img| image:: https://codecov.io/gh/pbrod/nvector/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/pbrod/nvector
 .. |versions_img| image:: https://img.shields.io/pypi/pyversions/Nvector.svg
    :target: https://github.com/pbrod/Nvector
 

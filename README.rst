@@ -284,7 +284,7 @@ Solution:
     >>> p_EB_E = pointB.to_ecef_vector()
 
     >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel().tolist())
-    'Ex4: p_EB_E = [ 6373290.27721828   222560.20067474   110568.82718179] m'
+    'Ex4: p_EB_E = [6373290.277218279, 222560.20067473652, 110568.82718178593] m'
 
 See also
     `Example 4 at www.navlab.net <http://www.navlab.net/nvector/#example_4>`_
@@ -368,9 +368,9 @@ Solution:
     >>> g_EB_E_ti = path.interpolate(ti_n).to_geo_point()
 
     >>> lat_ti, lon_ti, z_ti = g_EB_E_ti.latlon_deg
-    >>> msg = 'Ex6, Interpolated position: lat, lon = {} deg, {} deg'
-    >>> msg.format(lat_ti, lon_ti)
-    'Ex6, Interpolated position: lat, lon = [ 89.7999805] deg, [ 180.] deg'
+    >>> msg = 'Ex6, Interpolated position: lat, lon = {:2.1f} deg, {:2.1f} deg'
+    >>> msg.format(lat_ti[0], lon_ti[0])
+    'Ex6, Interpolated position: lat, lon = 89.8 deg, 180.0 deg'
 
 See also
     `Example 6 at www.navlab.net <http://www.navlab.net/nvector/#example_6>`_
