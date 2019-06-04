@@ -3,7 +3,7 @@ __doc__ = """
 Introduction to Nvector
 =======================
 
-|nvector_img| |tests_img| |docs_img| |health_img| |coverage_img| |versions_img|
+|nvector_img| |tests_img| |docs_img| |health_img| |coverage_img| |versions_img| |downloads_img|
 
 Nvector is a suite of tools written in Python to solve geographical position
 calculations like:
@@ -130,8 +130,9 @@ See also
 .. |coverage_img| image:: https://codecov.io/gh/pbrod/nvector/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/pbrod/nvector
 .. |versions_img| image:: https://img.shields.io/pypi/pyversions/Nvector.svg
-   :target: https://github.com/pbrod/Nvector
-
+   :target: https://github.com/pbrod/nvector
+.. |downloads_img| image:: https://img.shields.io/pypi/dm/nvector.svg
+   :alt: PyPI - Downloads
 """
 
 
