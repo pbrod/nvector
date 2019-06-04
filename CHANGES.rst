@@ -2,22 +2,36 @@
 Changelog
 =========
 
-Version 0.7.1, June 03, 2019
-================================
-Per A Brodtkorb (1):
+Version 0.7.3, June 4, 2019
+============================
+Per A Brodtkorb (6):
+      * Renamed LICENSE.txt and THANKS.txt to LICENSE.rst and THANKS.rst
+      * Updated README.rst and nvector/_info.py
       * Fixed issue 7# incorrect test for test_n_E_and_wa2R_EL.
+      * Removed coveralls test coverage report. 
+      * Replaced coverage badge from coveralls to codecov.
+      * Updated code-climate reporter.
+      * Simplified duplicated code in nvector._core.
+      * Added tests/__init__.py 
+      * Added "--pyargs nvector" to pytest options in setup.cfg
+      * Exclude build_package.py from distribution in MANIFEST.in
+      * Replaced healt_img from landscape to codeclimate. 
+      * Updated travis to explicitly install pytest-cov and pytest-pep8
+      * Removed dependence on pyscaffold 
+      * Added MANIFEST.in 
+      * Renamed set_package_version.py to build_package.py
 
 
-Version 0.7.0, June 02, 2019
-================================
+Version 0.7.0, June 2, 2019
+============================
 
 Gary van der Merwe (1):
       * Add interpolate to __all__ so that it can be imported
 
 Per A Brodtkorb (26):
       * Updated long_description in setup.cfg
-      * Replaced deprecated sphinx.ext.png.math with sphinx.ext.img.math
-      * Added pngmath to requirements for building the docs.
+      * Replaced deprecated sphinx.ext.pngmath with sphinx.ext.imgmath
+      * Added imgmath to requirements for building the docs.
       * Fixing shallow clone warning. Replaced property
          'sonar.python.coverage.itReportPath' with
          'sonar.python.coverage.reportPaths' instead, because it is has been
@@ -34,7 +48,7 @@ Per A Brodtkorb (26):
       * Replaced aliases with the correct names in setup.cfg.
 
 
-Version 0.6.0, December 09, 2018
+Version 0.6.0, December 9, 2018
 ================================
 Per A Brodtkorb (79):
       * Updated requirements in setup.py

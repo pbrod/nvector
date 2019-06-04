@@ -1,7 +1,3 @@
 .. _license:
 
-=======
-License
-=======
-
-.. literalinclude:: ../LICENSE.txt
+.. include:: ../LICENSE.rst

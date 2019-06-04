@@ -20,10 +20,10 @@ import re
 from datetime import datetime
 CURRENT_YEAR = datetime.now().year
 
-path0 = os.path.abspath(os.path.pardir)
+PATH0 = os.path.join(os.path.abspath(os.path.pardir), 'src')
 
-print('min path: {0}'.format(path0))
-sys.path.insert(0, path0)
+print('min path: {0}'.format(PATH0))
+sys.path.insert(0, PATH0)
 
 __location__ = os.path.join(os.getcwd(), os.path.dirname(
     inspect.getfile(inspect.currentframe())))

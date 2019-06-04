@@ -1,7 +1,7 @@
+
 =======
 nvector
 =======
-
 
 |nvector_img| |tests_img| |docs_img| |health_img| |coverage_img| |versions_img|
 
@@ -119,9 +119,12 @@ Getting Started
 
 Below the object-oriented solution to some common geodesic problems are given.
 In the first example the functional solution is also given.
-The functional solutions to the remaining problems can be found
-`here
-<https://github.com/pbrod/nvector/blob/master/src/nvector/tests/test_nvector.py>`_.
+The functional solutions to the remaining problems can be found in
+`test_nvector.py
+<https://github.com/pbrod/nvector/blob/master/src/nvector/tests/test_nvector.py>`_
+or the
+`getting_started_functional.html
+<./getting_started_functional.html>`_.
 
 
 **Example 1: "A and B to delta"**
@@ -535,3 +538,4 @@ See also
    :target: https://codecov.io/gh/pbrod/nvector
 .. |versions_img| image:: https://img.shields.io/pypi/pyversions/Nvector.svg
    :target: https://github.com/pbrod/Nvector
+

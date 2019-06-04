@@ -93,6 +93,7 @@ or
 
 at the command prompt.
 
+
 Acknowledgement
 ===============
 The `nvector package <http://pypi.python.org/pypi/nvector/>`_ for

@@ -1,4 +1,12 @@
 """
+Script to build the nvector package.
+
+The script remove the previous built binaries and generated documentation
+before it generate the documentation and build the binaries and finally
+check the built binaries.
+
+It assumes that the nvector library is installed in so called develop mode.
+
 Created on 7. des. 2018
 
 @author: pab
@@ -9,6 +17,8 @@ import shutil
 import subprocess
 
 import click
+
+from nvector._info import __doc__ as INFO_TXT
 
 
 ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -36,6 +46,7 @@ def build_main(version):
     """.format(PACKAGE_NAME)
     remove_previous_build()
     set_package(version)
+    update_readme()
 
     for cmd in ['docs', 'sdist', 'bdist_wheel', 'egg_info']:
         try:
@@ -48,11 +59,25 @@ def build_main(version):
         print("Twine: ", str(error))
 
 
+def update_readme():
+    readme_txt = INFO_TXT.replace(
+        """Introduction to Nvector
+=======================
+""", """=======
+nvector
+=======
+""")
+
+    filename = os.path.join(ROOT, "README.rst")
+    with open(filename, "w") as fid:
+        fid.write(readme_txt)
+
+
 def set_package(version):
     """Set version of {} package""".format(PACKAGE_NAME)
 
     if version:
-        filename = "{}/src/{}/__init__.py".format(ROOT, PACKAGE_NAME)
+        filename = os.path.join(ROOT, "src", PACKAGE_NAME, "__init__.py")
         print("Version: {}".format(version))
         with open(filename, "r") as fid:
             text = fid.read()

@@ -27,7 +27,9 @@ Build
 
 PyPi upload:
   git pull origin
-  git shortlog v0.6.0..HEAD -w80 --format="* %s" --reverse > log.txt  # update Changes.rst
+  git shortlog v0.6.0..HEAD -w80 --format="* %s" --reverse > log.txt
+  # update CHANGES.rst with info from log.txt
+  # update nvector._info (this file will be the generated README.rst)
   python build_package.py 0.7.0rc0
   git commit
   git tag v0.7.0rc0 master
