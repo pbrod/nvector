@@ -118,8 +118,8 @@ See also
 ========
 `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
 
-.. |nvector_img| image:: https://badge.fury.io/py/Nvector.png
-   :target: https://pypi.python.org/pypi/Nvector/
+.. |nvector_img| image:: https://badge.fury.io/py/nvector.png
+   :target: https://pypi.python.org/pypi/nvector/
 .. |tests_img| image:: https://travis-ci.org/pbrod/Nvector.svg?branch=master
    :target: https://travis-ci.org/pbrod/Nvector
 .. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable

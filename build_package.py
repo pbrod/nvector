@@ -66,7 +66,10 @@ def update_readme():
 """, """=======
 nvector
 =======
-""")
+""").replace("""
+or the
+`getting_started_functional.html
+<./getting_started_functional.html>`_""", '')
 
     filename = os.path.join(ROOT, "README.rst")
     with open(filename, "w") as fid:

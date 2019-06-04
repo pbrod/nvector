@@ -35,7 +35,7 @@ PyPi upload:
   git tag v0.7.0rc0 master
   git push --tags
   twine check dist/*   # check
-  twine upload dist/*
+  twine upload dist/*  # wait until the travis report is OK before doing this step.
 
 """
 import os

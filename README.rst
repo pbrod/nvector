@@ -121,10 +121,7 @@ Below the object-oriented solution to some common geodesic problems are given.
 In the first example the functional solution is also given.
 The functional solutions to the remaining problems can be found in
 `test_nvector.py
-<https://github.com/pbrod/nvector/blob/master/src/nvector/tests/test_nvector.py>`_
-or the
-`getting_started_functional.html
-<./getting_started_functional.html>`_.
+<https://github.com/pbrod/nvector/blob/master/src/nvector/tests/test_nvector.py>`_.
 
 
 **Example 1: "A and B to delta"**
