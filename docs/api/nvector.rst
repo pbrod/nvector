@@ -71,5 +71,8 @@ OO interface to Geodesic functions
    Nvector
    GeoPath
    Pvector
-	diff_positions
+   diff_positions
+   delta_E
+   delta_N
+   delta_L
 

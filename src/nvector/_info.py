@@ -1,11 +1,11 @@
 from nvector._examples import getting_started
 __doc__ = """
-Introduction to Nvector
+Introduction to nvector
 =======================
 
 |nvector_img| |tests_img| |docs_img| |health_img| |coverage_img| |versions_img| |downloads_img|
 
-Nvector is a suite of tools written in Python to solve geographical position
+The nvector library is a suite of tools written in Python to solve geographical position
 calculations like:
 
 * Calculate the surface distance between two geographical positions.

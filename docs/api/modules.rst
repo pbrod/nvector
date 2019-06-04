@@ -3,7 +3,7 @@
 Modules
 =======
 
-:Release: |version|
+:Release: |release|
 :Date: |today|
 
 .. module:: nvector

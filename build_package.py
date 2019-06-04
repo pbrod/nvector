@@ -61,7 +61,7 @@ def build_main(version):
 
 def update_readme():
     readme_txt = INFO_TXT.replace(
-        """Introduction to Nvector
+        """Introduction to nvector
 =======================
 """, """=======
 nvector

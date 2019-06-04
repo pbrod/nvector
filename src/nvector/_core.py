@@ -126,7 +126,7 @@ ELLIPSOID_IX = {'airy1858': 1,
 
 def select_ellipsoid(name):
     """
-    Return semi-major axis (a), flattening (f) and name of ellipsoid
+    Returns semi-major axis (a), flattening (f) and name of ellipsoid
 
     Parameters
     ----------
@@ -174,7 +174,7 @@ def select_ellipsoid(name):
 
 def E_rotation(axes='e'):
     """
-    Return rotation matrix R_Ee defining the axes of the coordinate frame E.
+    Returns rotation matrix R_Ee defining the axes of the coordinate frame E.
 
     Parameters
     ----------
@@ -226,7 +226,7 @@ def E_rotation(axes='e'):
 
 def nthroot(x, n):
     """
-    Return the n'th root of x to machine precision
+    Returns the n'th root of x to machine precision
 
     Parameters
     x, n
@@ -325,7 +325,7 @@ def unit(vector, norm_zero_vector=1):
 
 def mdot(a, b):
     """
-    Return multiple matrix multiplications of two arrays
+    Returns multiple matrix multiplications of two arrays
       i.e.   dot(a, b)[i,j,k] = sum(a[i,:,j] * b[:,j,k])
     or
       np.concatenate([np.dot(a[...,i], b[...,i])[:, :, None]
@@ -523,12 +523,6 @@ def n_E_and_wa2R_EL(n_E, wander_azimuth, R_Ee=None):
     """
     Returns rotation matrix R_EL from n-vector and wander azimuth angle.
 
-    R_EL = n_E_and_wa2R_EL(n_E,wander_azimuth) Calculates the rotation matrix
-    (direction cosine matrix) R_EL using n-vector (n_E) and the wander
-    azimuth angle.
-    When wander_azimuth=0, we have that N=L (See Table 2 in Gade (2010) for
-    details)
-
     Parameters
     ----------
     n_E: 3 x n array
@@ -542,6 +536,11 @@ def n_E_and_wa2R_EL(n_E, wander_azimuth, R_Ee=None):
     -------
     R_EL: 3 x 3 x n array
         The resulting rotation matrix.       [no unit]
+
+    Notes
+    -----
+    When wander_azimuth=0, we have that N=L.
+    (See Table 2 in Gade (2010) for details)
 
     See also
     --------
@@ -584,7 +583,7 @@ class _Nvector2ECEFvector(object):
     The position of B (typically body) relative to E (typically Earth) is
     given into this function as n-vector, n_EB_E. The function converts
     to cartesian position vector ("ECEF-vector"), p_EB_E, in meters.
-    The calculation is excact, taking the ellipsity of the Earth into account.
+    The calculation is exact, taking the ellipsity of the Earth into account.
     It is also non-singular as both n-vector and p-vector are non-singular
     (except for the center of the Earth).
     The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
@@ -722,7 +721,7 @@ def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
 
 class _DeltaFromPositionAtoB(object):
     __doc__ = """
-    Return the delta vector from position A to B.
+    Returns the delta vector from position A to B decomposed in E.
 
     Parameters
     ----------
@@ -781,7 +780,7 @@ def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
 def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137,
                              f=1.0 / 298.257223563, R_Ee=None):
     """
-    Return position B from position A and delta.
+    Returns position B from position A and delta.
 
     Parameters
     ----------
@@ -1075,7 +1074,7 @@ def zyx2R(z, y, x):
 
 def interpolate(path, ti):
     """
-    Return the interpolated point along the path
+    Returns the interpolated point along the path
 
     Parameters
     ----------
@@ -1098,7 +1097,7 @@ def interpolate(path, ti):
 
 
 class _Intersect(object):
-    __doc__ = """Return the intersection(s) between the great circles of the two paths
+    __doc__ = """Returns the intersection(s) between the great circles of the two paths
 
     Parameters
     ----------
@@ -1141,7 +1140,7 @@ def intersect(path_a, path_b):
 
 def great_circle_normal(n_EA_E, n_EB_E):
     """
-    Return the unit normal(s) to the great circle(s)
+    Returns the unit normal(s) to the great circle(s)
 
     Parameters
     ----------
@@ -1163,7 +1162,7 @@ def _great_circle_cross_track_distance(sin_theta, radius=1):
 
 
 class _CrossTrackDistance(object):
-    __doc__ = """ Return  cross track distance between path A and position B.
+    __doc__ = """Returns  cross track distance between path A and position B.
 
     Parameters
     ----------
@@ -1271,7 +1270,7 @@ def on_great_circle_path(path, n_EB_E, radius=6371009.0, rtol=1e-6, atol=1e-8):
 
 
 class _ClosestPointOnGreatCircle(object):
-    __doc__ = """ Return closest point C on great circle path A to position B.
+    __doc__ = """Returns closest point C on great circle path A to position B.
 
     Parameters
     ----------
@@ -1305,7 +1304,7 @@ def closest_point_on_great_circle(path, n_EB_E):
 
 
 class _GreatCircleDistance(object):
-    __doc__ = """ Return great circle distance between positions A and B
+    __doc__ = """Returns great circle distance between positions A and B
 
     Parameters
     ----------
@@ -1340,7 +1339,7 @@ def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
 
 
 class _EuclideanDistance(object):
-    __doc__ = """Return Euclidean distance between positions A and B
+    __doc__ = """Returns Euclidean distance between positions A and B
 
     Parameters
     ----------
@@ -1365,7 +1364,7 @@ def euclidean_distance(n_EA_E, n_EB_E, radius=6371009.0):
 def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563,
                               R_Ee=None):
     """
-    Return azimuth from A to B, relative to North:
+    Returns azimuth from A to B, relative to North:
 
     Parameters
     ----------
@@ -1411,7 +1410,7 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563,
 
 class _PositionBFromAzimuthAndDistanceFromPositionA(object):
     __doc__ = """
-    Return position B from azimuth and distance from position A
+    Returns position B from azimuth and distance from position A
 
     Parameters
     ----------
@@ -1455,7 +1454,7 @@ def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth,
 
 class _MeanHorizontalPosition(object):
     __doc__ = """
-    Return the n-vector of the horizontal mean position.
+    Returns the n-vector of the horizontal mean position.
 
     Parameters
     ----------

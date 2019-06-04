@@ -27,21 +27,21 @@ __all__ = ['FrameE', 'FrameB', 'FrameL', 'FrameN', 'GeoPoint', 'GeoPath',
 
 class _DeltaE(object):
     __doc__ = """
-    Return cartesian delta vector from positions A to B decomposed in E.
+    Returns cartesian delta vector from positions a to b decomposed in E.
 
     Parameters
     ----------
-    positionA, positionB: Nvector, GeoPoint or ECEFvector objects
-        position A and B, decomposed in E.
+    point_a, point_b: Nvector, GeoPoint or ECEFvector objects
+        position a and b, decomposed in E.
 
     Returns
     -------
-    p_AB_E:  ECEFvector
-        Cartesian position vector(s) from A to B, decomposed in E.
+    p_ab_E:  ECEFvector
+        Cartesian position vector(s) from a to b, decomposed in E.
 
     Notes
     -----
-    The calculation is excact, taking the ellipsity of the Earth into account.
+    The calculation is exact, taking the ellipsity of the Earth into account.
     It is also non-singular as both n-vector and p-vector are non-singular
     (except for the center of the Earth).
 
@@ -59,66 +59,66 @@ class _DeltaE(object):
 
 
 @use_docstring_from(_DeltaE)
-def delta_E(positionA, positionB):
+def delta_E(point_a, point_b):
     # Function 1. in Section 5.4 in Gade (2010):
-    p_EA_E = positionA.to_ecef_vector()
-    p_EB_E = positionB.to_ecef_vector()
+    p_EA_E = point_a.to_ecef_vector()
+    p_EB_E = point_b.to_ecef_vector()
     p_AB_E = -p_EA_E + p_EB_E
     return p_AB_E
 
 
 @deprecate
-def diff_positions(positionA, positionB):
+def diff_positions(point_a, point_b):
     """Deprecated use delta_E instead.
     """
-    return delta_E(positionA, positionB)
+    return delta_E(point_a, point_b)
 
 
-def delta_N(positionA, positionB):
-    """Return cartesian delta vector from positions A to B decomposed in N.
+def delta_N(point_a, point_b):
+    """Returns cartesian delta vector from positions a to b decomposed in N.
 
     Parameters
     ----------
-    positionA, positionB: Nvector, GeoPoint or ECEFvector objects
-        position A and B, decomposed in E.
+    point_a, point_b: Nvector, GeoPoint or ECEFvector objects
+        position a and b, decomposed in E.
 
     See also
     --------
-    delta_E
+    delta_E, delta_L
     """
-    p_AB_E = delta_E(positionA, positionB)
-    p_AB_N = p_AB_E.change_frame(FrameN(positionA))
-    return p_AB_N
+    # p_ab_E = delta_E(point_a, point_b)
+    # p_ab_N = p_ab_E.change_frame(....)
+    return delta_E(point_a, point_b).change_frame(FrameN(point_a))
 
 
 def _delta(self, other):
-    """Return cartesian delta vector from positions A to B decomposed in N."""
+    """Returns cartesian delta vector from positions a to b decomposed in N."""
     return delta_N(self, other)
 
 
-def delta_L(positionA, positionB, wander_azimuth=0):
-    """Return cartesian delta vector from positions A to B decomposed in L.
+def delta_L(point_a, point_b, wander_azimuth=0):
+    """Returns cartesian delta vector from positions a to b decomposed in L.
 
     Parameters
     ----------
-    positionA, positionB: Nvector, GeoPoint or ECEFvector objects
-        position A and B, decomposed in E.
+    point_a, point_b: Nvector, GeoPoint or ECEFvector objects
+        position a and b, decomposed in E.
     wander_azimuth: real scalar
         Angle [rad] between the x-axis of L and the north direction.
 
     See also
     --------
-    delta_E
+    delta_E, delta_N
     """
-    p_AB_E = delta_E(positionA, positionB)
-    p_AB_L = p_AB_E.change_frame(FrameL(positionA,
-                                        wander_azimuth=wander_azimuth))
-    return p_AB_L
+    local_frame = FrameL(point_a, wander_azimuth=wander_azimuth)
+    # p_ab_E = delta_E(point_a, point_b)
+    # p_ab_L = p_ab_E.change_frame(....)
+    return delta_E(point_a, point_b).change_frame(local_frame)
 
 
 class GeoPoint(object):
     """
-    Geographical position given as latitude, longitude, depth in frame E
+    Geographical position given as latitude, longitude, depth in frame E.
 
     Parameters
     ----------
@@ -143,18 +143,18 @@ class GeoPoint(object):
 
     The geodesic inverse problem
 
-    >>> positionA = wgs84.GeoPoint(-41.32, 174.81, degrees=True)
-    >>> positionB = wgs84.GeoPoint(40.96, -5.50, degrees=True)
-    >>> s12, az1, az2 = positionA.distance_and_azimuth(positionB, degrees=True)
+    >>> point_a = wgs84.GeoPoint(-41.32, 174.81, degrees=True)
+    >>> point_b = wgs84.GeoPoint(40.96, -5.50, degrees=True)
+    >>> s12, az1, az2 = point_a.distance_and_azimuth(point_b, degrees=True)
     >>> 's12 = {:5.2f}, az1 = {:5.2f}, az2 = {:5.2f}'.format(s12, az1, az2)
     's12 = 19959679.27, az1 = 161.07, az2 = 18.83'
 
     The geodesic direct problem
 
-    >>> positionA = wgs84.GeoPoint(40.6, -73.8, degrees=True)
+    >>> point_a = wgs84.GeoPoint(40.6, -73.8, degrees=True)
     >>> az1, distance = 45, 10000e3
-    >>> positionB, az2 = positionA.displace(distance, az1, degrees=True)
-    >>> lat2, lon2 = positionB.latitude_deg, positionB.longitude_deg
+    >>> point_b, az2 = point_a.displace(distance, az1, degrees=True)
+    >>> lat2, lon2 = point_b.latitude_deg, point_b.longitude_deg
     >>> msg = 'lat2 = {:5.2f}, lon2 = {:5.2f}, az2 = {:5.2f}'
     >>> msg.format(lat2, lon2, az2)
     'lat2 = 32.64, lon2 = 49.01, az2 = 140.37'
@@ -171,57 +171,62 @@ class GeoPoint(object):
 
     @property
     def latlon_deg(self):
+        """(latitude_deg, longitude_deg, z) tuple, angles are in degree."""
         return self.latitude_deg, self.longitude_deg, self.z
 
     @property
     def latlon(self):
+        """(latitude, longitude, z) tuple, angles are in radian."""
         return self.latitude, self.longitude, self.z
 
     @property
     def latitude_deg(self):
+        """latitude in degrees."""
         return deg(self.latitude)
 
     @property
     def longitude_deg(self):
+        """longitude in degrees."""
         return deg(self.longitude)
 
     def to_ecef_vector(self):
         """
-        Converts latitude and longitude to ECEF-vector.
+        Returns position as ECEFvector object.
+
+        See also
+        --------
+        ECEFvector
         """
         return self.to_nvector().to_ecef_vector()
 
     def to_geo_point(self):
-        """Return geo-point"""
+        """
+        Returns position as GeoPoint object.
+
+        See also
+        --------
+        GeoPoint
+        """
+
         return self
 
     def to_nvector(self):
         """
-        Converts latitude and longitude to n-vector.
-
-        Parameters
-        ----------
-        latitude, longitude: real scalars or vectors of length n.
-            Geodetic latitude and longitude given in [rad]
-
-        Returns
-        -------
-        n_E: 3 x n array
-            n-vector(s) [no unit] decomposed in E.
+        Returns position as Nvector object.
 
         See also
         --------
-        n_E2lat_lon.
+        Nvector
         """
         latitude, longitude = self.latitude, self.longitude
-        n_E = lat_lon2n_E(latitude, longitude, self.frame.R_Ee)
-        return Nvector(n_E, self.z, self.frame)
+        n_vector = lat_lon2n_E(latitude, longitude, self.frame.R_Ee)
+        return Nvector(n_vector, self.z, self.frame)
 
     delta_to = _delta
 
     def displace(self, distance, azimuth, long_unroll=False, degrees=False):
         """
-        Return position B computed from current position, distance and azimuth.
+        Returns position b computed from current position, distance and azimuth.
 
         Parameters
         ----------
@@ -256,21 +261,21 @@ class GeoPoint(object):
 
     def distance_and_azimuth(self, point, long_unroll=False, degrees=False):
         """
-        Return ellipsoidal distance between positions as well as the direction.
+        Returns ellipsoidal distance between positions as well as the direction.
 
         Parameters
         ----------
         point:  GeoPoint object
-            Latitude and longitude of position B.
+            Latitude and longitude of position b.
         degrees: bool
             azimuths are returned in degrees if True otherwise in radians.
 
         Returns
         -------
         s_ab: real scalar
-            ellipsoidal distance [m] between position A and B.
+            ellipsoidal distance [m] between position a and b.
         azimuth_a, azimuth_b
-            direction [rad or deg] of line at position A and B relative to
+            direction [rad or deg] of line at position a and b relative to
             North, respectively.
 
         """
@@ -332,40 +337,36 @@ class Nvector(_Common):
 
     def to_ecef_vector(self):
         """
-        Converts n-vector to Cartesian position vector ("ECEF-vector")
-
-        Returns
-        -------
-        p_EB_E:  ECEFvector object
-            Cartesian position vector(s) from E to B, decomposed in E.
-
-        The calculation is excact, taking the ellipsity of the Earth into
-        account. It is also non-singular as both n-vector and p-vector are
-        non-singular (except for the center of the Earth).
+        Returns position as ECEFvector object.
 
         See also
         --------
-        n_EB_E2p_EB_E, ECEFvector, Pvector, GeoPoint
+        ECEFvector
         """
         frame = self.frame
-        n_EB_E = self.normal
         a, f, R_Ee = frame.a, frame.f, frame.R_Ee
-        p_EB_E = n_EB_E2p_EB_E(n_EB_E, depth=self.z, a=a, f=f, R_Ee=R_Ee)
-        return ECEFvector(p_EB_E, self.frame)
+        pvector = n_EB_E2p_EB_E(self.normal, depth=self.z, a=a, f=f, R_Ee=R_Ee)
+        return ECEFvector(pvector, self.frame)
 
     def to_geo_point(self):
         """
-        Converts n-vector to geo-point.
+        Returns position as GeoPoint object.
 
         See also
         --------
-        n_E2lat_lon, GeoPoint, ECEFvector, Pvector
+        GeoPoint
         """
-        n_E = self.normal
-        latitude, longitude = n_E2lat_lon(n_E, R_Ee=self.frame.R_Ee)
+        latitude, longitude = n_E2lat_lon(self.normal, R_Ee=self.frame.R_Ee)
         return GeoPoint(latitude, longitude, self.z, self.frame)
 
     def to_nvector(self):
+        """
+        Returns position as Nvector object.
+
+        See also
+        --------
+        Nvector
+        """
         return self
 
     delta_to = _delta
@@ -381,11 +382,10 @@ class Nvector(_Common):
 
     def mean(self):
         """
-        Return mean position of the n-vectors.
+        Returns mean position of the n-vectors.
         """
-        n_EB_E = self.normal
-        n_EM_E = mean_horizontal_position(n_EB_E)
-        return self.frame.Nvector(n_EM_E, z=np.mean(self.z))
+        average_nvector = mean_horizontal_position(self.normal)
+        return self.frame.Nvector(average_nvector, z=np.mean(self.z))
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
         options = dict(rtol=rtol, atol=atol)
@@ -425,13 +425,21 @@ class Nvector(_Common):
 
 class Pvector(object):
     """
-    Cartesian position vector in another frame
+    Cartesian position vector in relative to a frame.
     """
     def __init__(self, pvector, frame):
         self.pvector = pvector
         self.frame = frame
 
     def to_ecef_vector(self):
+        """
+        Returns position as ECEFvector object.
+
+        See also
+        --------
+        ECEFvector
+        """
+
         n_frame = self.frame
         p_AB_N = self.pvector
         # p_AB_E = np.dot(n_frame.R_EN, p_AB_N)
@@ -439,32 +447,52 @@ class Pvector(object):
         return ECEFvector(p_AB_E, frame=n_frame.nvector.frame)
 
     def to_nvector(self):
+        """
+        Returns position as Nvector object.
+
+        See also
+        --------
+        Nvector
+        """
+
         return self.to_ecef_vector().to_nvector()
 
     def to_geo_point(self):
+        """
+        Returns position as GeoPoint object.
+
+        See also
+        --------
+        GeoPoint
+        """
         return self.to_ecef_vector().to_geo_point()
 
     delta_to = _delta
 
     @property
     def length(self):
+        "Length of the pvector."
         return norm(self.pvector, axis=0)
 
     @property
     def azimuth_deg(self):
+        """Azimuth in degree."""
         return deg(self.azimuth)
 
     @property
     def azimuth(self):
+        """Azimuth in radian"""
         p_AB_N = self.pvector
         return np.arctan2(p_AB_N[1], p_AB_N[0])
 
     @property
     def elevation_deg(self):
+        """Elevation in degree."""
         return deg(self.elevation)
 
     @property
     def elevation(self):
+        """Elevation in radian."""
         z = self.pvector[2]
         return np.arcsin(z / self.length)
 
@@ -531,38 +559,21 @@ class ECEFvector(Pvector):
 
     def to_geo_point(self):
         """
-        Converts ECEF-vector to geo-point.
-
-        Returns
-        -------
-        point: GeoPoint object
-            containing geodetic latitude and longitude given in [rad or deg]
-            and depth, z, relative to the ellipsoid (depth = -height).
+        Returns position as GeoPoint object.
 
         See also
         --------
-        n_E2lat_lon, n_EB_E2p_EB_E,  GeoPoint, Nvector, ECEFvector, Pvector
+        GeoPoint
         """
         return self.to_nvector().to_geo_point()
 
     def to_nvector(self):
         """
-        Converts ECEF-vector to n-vector.
-
-        Returns
-        -------
-        n_EB_E:  Nvector object
-            n-vector(s) [no unit] of position B, decomposed in E.
-
-        Notes
-        -----
-        The calculation is excact, taking the ellipsity of the Earth into
-        account. It is also non-singular as both n-vector and p-vector are
-        non-singular (except for the center of the Earth).
+        Returns position as Nvector object.
 
         See also
         --------
-        n_EB_E2p_EB_E, Nvector
+        Nvector
         """
         frame = self.frame
         p_EB_E = self.pvector
@@ -590,7 +601,7 @@ class GeoPath(object):
 
     Parameters
     ----------
-     positionA, positionB: Nvector, GeoPoint or ECEFvector objects
+     point_a, point_b: Nvector, GeoPoint or ECEFvector objects
         The path is defined by the line between position A and B, decomposed
         in E.
 
@@ -600,32 +611,33 @@ class GeoPath(object):
     {0}
     """.format(_examples.get_examples([5, 6, 9, 10]))
 
-    def __init__(self, positionA, positionB):
-        self.positionA = positionA
-        self.positionB = positionB
+    def __init__(self, point_a, point_b):
+        self.point_a = point_a
+        self.point_b = point_b
 
     def nvectors(self):
-        """ Return positionA and positionB as n-vectors
+        """ Returns point_a and point_b as n-vectors
         """
-        return self.positionA.to_nvector(), self.positionB.to_nvector()
+        return self.point_a.to_nvector(), self.point_b.to_nvector()
 
     def geo_points(self):
-        """ Return positionA and positionB as geo-points
+        """ Returns point_a and point_b as geo-points
         """
-        return self.positionA.to_geo_point(), self.positionB.to_geo_point()
+        return self.point_a.to_geo_point(), self.point_b.to_geo_point()
 
     def ecef_vectors(self):
-        """ Return positionA and positionB as  ECEF-vectors
+        """ Returns point_a and point_b as  ECEF-vectors
         """
-        return self.positionA.to_ecef_vector(), self.positionB.to_ecef_vector()
+        return self.point_a.to_ecef_vector(), self.point_b.to_ecef_vector()
 
     def nvector_normals(self):
-        n_EA_E, n_EB_E = self.nvectors()
-        return n_EA_E.normal, n_EB_E.normal
+        """Returns nvector normals for position a and b"""
+        nvector_a, nvector_b = self.nvectors()
+        return nvector_a.normal, nvector_b.normal
 
     def _get_average_radius(self):
-        # n1 = self.positionA.to_nvector()
-        # n2 = self.positionB.to_nvector()
+        # n1 = self.point_a.to_nvector()
+        # n2 = self.point_b.to_nvector()
         # n_EM_E = mean_horizontal_position(np.hstack((n1.normal, n2.normal)))
         # p_EM_E = n1.frame.Nvector(n_EM_E).to_ecef_vector()
         # radius = norm(p_EM_E.pvector, axis=0)
@@ -637,7 +649,7 @@ class GeoPath(object):
 
     def cross_track_distance(self, point, method='greatcircle', radius=None):
         """
-        Return cross track distance from path to point.
+        Returns cross track distance from path to point.
 
         Parameters
         ----------
@@ -662,7 +674,7 @@ class GeoPath(object):
 
     def track_distance(self, method='greatcircle', radius=None):
         """
-        Return the distance of the path.
+        Returns the distance of the path.
 
         Parameters
         ----------
@@ -694,7 +706,7 @@ class GeoPath(object):
 
     def intersect(self, path):
         """
-        Return the intersection(s) between the great circles of the two paths
+        Returns the intersection(s) between the great circles of the two paths
 
         Parameters
         ----------
@@ -706,7 +718,7 @@ class GeoPath(object):
         point: GeoPoint
             point of intersection between paths
         """
-        frame = self.positionA.frame
+        frame = self.point_a.frame
         path_a = self.nvector_normals()
         path_b = path.nvector_normals()
         n_EC_E = intersect(path_a, path_b)
@@ -720,6 +732,7 @@ class GeoPath(object):
                                                         rtol=rtol, atol=atol)
 
     def on_great_circle(self, point, rtol=1e-6, atol=1e-8):
+        """Returns True if point is on the great circle."""
         distance = np.abs(self.cross_track_distance(point))
         return np.isclose(distance, 0, rtol, atol)
 
@@ -741,7 +754,7 @@ class GeoPath(object):
 
     def on_path(self, point, method='greatcircle', rtol=1e-6, atol=1e-8):
         """
-        Return True if point is on the path between A and B
+        Returns True if point is on the path between A and B
 
         Parameters
         ----------
@@ -779,6 +792,39 @@ class GeoPath(object):
         return self._on_great_circle_path(point, rtol=rtol, atol=atol)
 
     def closest_point_on_great_circle(self, point):
+        """
+        Returns closest point on great circle path to the point.
+
+        Parameters
+        ----------
+        point: GeoPoint
+            point of intersection between paths
+
+        Returns
+        -------
+        closest_point: GeoPoint
+            closest point on path.
+
+        Example
+        -------
+        >>> import nvector as nv
+        >>> wgs84 = nv.FrameE(name='WGS84')
+        >>> point_a = wgs84.GeoPoint(51., 1., degrees=True)
+        >>> point_b = wgs84.GeoPoint(51., 2., degrees=True)
+        >>> point_c = wgs84.GeoPoint(51., 2.9, degrees=True)
+        >>> path = nv.GeoPath(point_a, point_b)
+        >>> point = path.closest_point_on_great_circle(point_c)
+        >>> path.on_path(point)[0]
+        False
+        >>> np.allclose((point.latitude_deg, point.longitude_deg),
+        ...             ([50.99270338], [2.89977984]))
+        True
+
+        >>> np.allclose(GeoPath(point_c, point).track_distance(),  810.76312076)
+        True
+
+        """
+
         nvector = point.to_nvector()
 
         path = self.nvector_normals()
@@ -832,12 +878,12 @@ class GeoPath(object):
         d1 = great_circle_distance(n1, n0, radius)
         d2 = great_circle_distance(n2, n0, radius)
         if d1 < d2:
-            return self.positionA.to_geo_point()
-        return self.positionB.to_geo_point()
+            return self.point_a.to_geo_point()
+        return self.point_b.to_geo_point()
 
     def interpolate(self, ti):
         """
-        Return the interpolated point along the path
+        Returns the interpolated point along the path
 
         Parameters
         ----------
@@ -901,7 +947,7 @@ class FrameE(_Common):
 
     def inverse(self, lat_a, lon_a, lat_b, lon_b, z=0, long_unroll=False, degrees=False):
         """
-        Return ellipsoidal distance between positions as well as the direction.
+        Returns ellipsoidal distance between positions as well as the direction.
 
         Parameters
         ----------
@@ -944,7 +990,7 @@ class FrameE(_Common):
 
     def direct(self, lat_a, lon_a, azimuth, distance, z=0, long_unroll=False, degrees=False):
         """
-        Return position B computed from position A, distance and azimuth.
+        Returns position B computed from position A, distance and azimuth.
 
         Parameters
         ----------
@@ -1041,6 +1087,7 @@ class FrameN(_Common):
 
     @property
     def R_EN(self):
+        """Rotation matrix to go between E and N frame"""
         nvector = self.nvector
         return n_E2R_EN(nvector.normal, nvector.frame.R_Ee)
 
@@ -1049,6 +1096,7 @@ class FrameN(_Common):
                 and self.nvector == other.nvector)
 
     def Pvector(self, pvector):
+        """Returns Pvector relative to the local frame."""
         return Pvector(pvector, frame=self)
 
 
@@ -1096,6 +1144,7 @@ class FrameL(FrameN):
 
     @property
     def R_EN(self):
+        """Rotation matrix to go between E and L frame"""
         n_EA_E = self.nvector.normal
         R_Ee = self.nvector.frame.R_Ee
         return n_E_and_wa2R_EL(n_EA_E, self.wander_azimuth, R_Ee=R_Ee)
@@ -1141,6 +1190,7 @@ class FrameB(FrameN):
 
     @property
     def R_EN(self):
+        """Rotation matrix to go between E and B frame"""
         R_NB = zyx2R(self.yaw, self.pitch, self.roll)
         n_EB_E = self.nvector.normal
         R_EN = n_E2R_EN(n_EB_E, self.nvector.frame.R_Ee)
