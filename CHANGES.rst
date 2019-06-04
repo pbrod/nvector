@@ -2,23 +2,29 @@
 Changelog
 =========
 
+Version 0.7.4, June 4, 2019
+============================
+Per A Brodtkorb (2):
+      * Fixed PyPi badge and added downloads badge in nvector/_info.py and README.rst
+      * Removed obsolete and wrong badges from docs/index.rst
+
 Version 0.7.3, June 4, 2019
 ============================
 Per A Brodtkorb (6):
       * Renamed LICENSE.txt and THANKS.txt to LICENSE.rst and THANKS.rst
       * Updated README.rst and nvector/_info.py
       * Fixed issue 7# incorrect test for test_n_E_and_wa2R_EL.
-      * Removed coveralls test coverage report. 
+      * Removed coveralls test coverage report.
       * Replaced coverage badge from coveralls to codecov.
       * Updated code-climate reporter.
       * Simplified duplicated code in nvector._core.
-      * Added tests/__init__.py 
+      * Added tests/__init__.py
       * Added "--pyargs nvector" to pytest options in setup.cfg
       * Exclude build_package.py from distribution in MANIFEST.in
-      * Replaced healt_img from landscape to codeclimate. 
+      * Replaced healt_img from landscape to codeclimate.
       * Updated travis to explicitly install pytest-cov and pytest-pep8
-      * Removed dependence on pyscaffold 
-      * Added MANIFEST.in 
+      * Removed dependence on pyscaffold
+      * Added MANIFEST.in
       * Renamed set_package_version.py to build_package.py
 
 
