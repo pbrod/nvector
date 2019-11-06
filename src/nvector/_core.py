@@ -969,6 +969,25 @@ def R_EN2n_E(R_EN):
 
 
 def _atleast_3d(x, y, z):
+    """
+    Example
+    -------
+    >>> from nvector._core import _atleast_3d
+    >>> for arr in _atleast_3d([1, 2], [[1, 2]], [[[1, 2]]]):
+     ...     print(arr, arr.shape)
+    [[[1 2]]] (1, 1, 2)
+    [[[[1 2]]]] (1, 1, 1, 2)
+    [[[[[1 2]]]]] (1, 1, 1, 1, 2)
+
+     >>> for arr in _atleast_3d([[1], [2]], [[[1], [2]]], [[[[1], [2]]]]):
+     ...     print(arr, arr.shape)
+    [[[[1]
+       [2]]]] (1, 1, 2, 1)
+    [[[[[1]
+        [2]]]]] (1, 1, 1, 2, 1)
+    [[[[[[1]
+         [2]]]]]] (1, 1, 1, 1, 2, 1)
+    """
     x, y, z = np.atleast_1d(x, y, z)
     return x[None, None, :], y[None, None, :], z[None, None, :]
 
@@ -1010,9 +1029,8 @@ def xyz2R(x, y, z):
     R2xyz, zyx2R, R2zyx
     """
     x, y, z = _atleast_3d(x, y, z)
-    cx, sx = cos(x), sin(x)
-    cy, sy = cos(y), sin(y)
-    cz, sz = cos(z), sin(z)
+    sx, sy, sz = sin(x), sin(y), sin(z)
+    cx, cy, cz = cos(x), cos(y), cos(z)
 
     R_AB = array(([cy * cz, -cy * sz, sy],
                   [sy * sx * cz + cx * sz, -sy * sx * sz + cx * cz, -cy * sx],
@@ -1061,9 +1079,8 @@ def zyx2R(z, y, x):
     R2zyx, xyz2R, R2xyz
     """
     x, y, z = _atleast_3d(x, y, z)
-    cx, sx = cos(x), sin(x)
-    cy, sy = cos(y), sin(y)
-    cz, sz = cos(z), sin(z)
+    sx, sy, sz = sin(x), sin(y), sin(z)
+    cx, cy, cz = cos(x), cos(y), cos(z)
 
     R_AB = array([[cz * cy, -sz * cx + cz * sy * sx, sz * sx + cz * sy * cx],
                   [sz * cy, cz * cx + sz * sy * sx, - cz * sx + sz * sy * cx],

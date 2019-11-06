@@ -381,7 +381,7 @@ class TestExamples(unittest.TestCase):
         points = GeoPoint(latitude=[90, 60, 50], longitude=[0, 10, -20],
                           degrees=True)
         nvectors = points.to_nvector()
-        nmean = nvectors.mean_horizontal_position()
+        nmean = nvectors.mean()
         n_EM_E = nmean.normal
         assert_array_almost_equal(n_EM_E.ravel(),
                                   [0.384117, -0.046602, 0.922107])
