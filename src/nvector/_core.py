@@ -1032,9 +1032,9 @@ def xyz2R(x, y, z):
     sx, sy, sz = sin(x), sin(y), sin(z)
     cx, cy, cz = cos(x), cos(y), cos(z)
 
-    R_AB = array(([cy * cz, -cy * sz, sy],
+    R_AB = array([[cy * cz, -cy * sz, sy],
                   [sy * sx * cz + cx * sz, -sy * sx * sz + cx * cz, -cy * sx],
-                  [-sy * cx * cz + sx * sz, sy * cx * sz + sx * cz, cy * cx]))
+                  [-sy * cx * cz + sx * sz, sy * cx * sz + sx * cz, cy * cx]])
 
     return np.squeeze(R_AB)
 
