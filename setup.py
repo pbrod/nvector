@@ -89,7 +89,7 @@ def setup_package():
               'sphinx_rtd_theme>=0.1.7'] if needs_sphinx else []
     setup(setup_requires=["pytest-runner"] + sphinx,
           version=version,
-          cmdclass={'doctests': Doctest
+          cmdclass={'doctest': Doctest
                     },
           extras_require={'build_sphinx': sphinx_requires,
                           },
