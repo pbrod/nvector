@@ -71,7 +71,9 @@ before_script:
     fi
 script:
   - coverage erase
-  - coverage run --source=nvector setup.py test
+  # - coverage run --source=nvector setup.py test
+  - coverage run --source=nvector -m py.test build/lib
+
 # see http://www.camillescott.org/2016/07/15/travis-pytest-scipyconf/
   - coverage xml -o coverage.xml
 after_script:
