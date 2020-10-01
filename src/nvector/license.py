@@ -1,7 +1,7 @@
-=======
-License
-=======
+from datetime import datetime
+CURRENT_YEAR = datetime.now().year
 
+__doc__ = """
 The content of this library is based on the following publication:
 
 Gade, K. (2010). A Nonsingular Horizontal Position Representation, The Journal
@@ -10,7 +10,7 @@ of Navigation, Volume 63, Issue 03, pp 395-417, July 2010.
 
 This paper should be cited in publications using this library.
 
-Copyright (c) 2015, Norwegian Defence Research Establishment (FFI)
+Copyright (c) 2015-{}, Norwegian Defence Research Establishment (FFI)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,5 +35,4 @@ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
 INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
-THE POSSIBILITY OF SUCH DAMAGE.
-
+THE POSSIBILITY OF SUCH DAMAGE.""".format(CURRENT_YEAR)

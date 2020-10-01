@@ -3,7 +3,7 @@ graft src/nvector
 include requirements.txt
 include README.rst
 include LICENSE.txt
-include THANKS.txt
+include THANKS.rst
 exclude build_package.py
 global-exclude *.py[cod]
 global-exclude *.so

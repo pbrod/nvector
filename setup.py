@@ -8,7 +8,7 @@ Usage:
 Run all tests:
   python setup.py test
 
-  python setup.py doctests
+  python setup.py doctest
 
 Build documentation
 
@@ -36,27 +36,48 @@ PyPi upload:
   git push --tags
   twine check dist/*   # check
   twine upload dist/*  # wait until the travis report is OK before doing this step.
+Notes
+-----
+Don't use package_data and/or data_files, use include_package_data=True and MANIFEST.in instead!
+Don't hard-code the list of packages, use setuptools.find_packages() instead!
+
+
+See also
+--------
+https://docs.pytest.org/en/latest/goodpractices.html
+https://python-packaging.readthedocs.io/en/latest/
+https://packaging.python.org/en/latest/distributing.html
+https://github.com/pypa/sampleproject
+https://chriswarrick.com/blog/2014/09/15/python-apps-the-right-way-entry_points-and-scripts/
+https://blog.ionelmc.ro/2014/05/25/python-packaging/#the-structure
+https://ep2015.europython.eu/media/conference/slides/less-known-packaging-features-and-tricks.pdf
+https://realpython.com/documenting-python-code/#public-and-open-source-projects
 
 """
 import os
 import re
 import sys
+import pkg_resources
 from setuptools import setup, Command
+pkg_resources.require('setuptools>=39.2') # setuptools >=38.3.0     # version with most `setup.cfg` bugfixes
 ROOT = os.path.abspath(os.path.dirname(__file__))
 PACKAGE_NAME = 'nvector'
 
 
-def read(filename):
-    with open(filename, 'r') as file_handle:
-        return file_handle.read()
+def read(*parts, lines=False):
+    with open(os.path.join(ROOT, *parts), 'r') as fp:
+        if lines:
+            return fp.readlines()
+        return fp.read()
 
 
-def get_version():
-    filename = os.path.join(ROOT, "src", PACKAGE_NAME, "__init__.py")
-    text = read(filename)
-    versions = re.findall(r"__version__ = ['\"]([^'\"]*)['\"]",
-                          text, re.M)  # @UndefinedVariable
-    return versions[0]
+def find_version(*file_paths):
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)  # @UndefinedVariable
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
 
 
 class Doctest(Command):
@@ -79,20 +100,47 @@ class Doctest(Command):
         sph.build()
 
 
+class Latex(Command):
+    description = 'Run latex with Sphinx'
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        from sphinx.application import Sphinx
+        sph = Sphinx('./docs',  # source directory
+                     './docs',  # directory containing conf.py
+                     './docs/_build/latex',  # output directory
+                     './docs/_build/doctrees',  # doctree directory
+                     'latex')  # finally, specify the latex builder
+        sph.build()
+
+
 def setup_package():
-    version = get_version()
+    version = find_version('src', PACKAGE_NAME, "__init__.py")
     print("Version: {}".format(version))
 
     sphinx_requires = ['sphinx>=1.3.1']
     needs_sphinx = {'build_sphinx'}.intersection(sys.argv)
-    sphinx = ['sphinx', 'numpydoc', 'imgmath',
-              'sphinx_rtd_theme>=0.1.7'] if needs_sphinx else []
-    setup(setup_requires=["pytest-runner"] + sphinx,
-          version=version,
-          cmdclass={'doctest': Doctest
-                    },
-          extras_require={'build_sphinx': sphinx_requires,
-                          },
+    sphinx = ['numpydoc',
+              'imgmath',
+              'sphinx_rtd_theme>=0.1.7'] + sphinx_requires if needs_sphinx else []
+    setup(
+        name=PACKAGE_NAME,
+        version=version,
+        install_requires=read('requirements.txt', lines=True),
+        extras_require={'build_sphinx': sphinx_requires,},
+        setup_requires=["pytest-runner"] + sphinx,
+        tests_require=['pytest',
+                       'pytest-cov', 
+                       'pytest-pep8',
+                       ],
+        cmdclass={'doctest': Doctest,
+                  'latex': Latex},
           )
 
 

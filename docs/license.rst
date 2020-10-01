@@ -1,3 +1,7 @@
 .. _license:
 
-.. include:: ../LICENSE.rst
+#######
+License
+#######
+
+.. literalinclude:: ../LICENSE.txt
