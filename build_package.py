@@ -15,18 +15,19 @@ import os
 import re
 import shutil
 import subprocess
-
+import importlib
 import click
-
-from nvector._info import __doc__ as INFO_TXT
 
 
 ROOT = os.path.abspath(os.path.dirname(__file__))
 PACKAGE_NAME = 'nvector'
+INFO = importlib.import_module(PACKAGE_NAME+'.info','./src')
+LICENSE = importlib.import_module(PACKAGE_NAME+'.license','./src')
 
 
 def remove_previous_build():
-    """Removes ./dist, ./build, ./docs/_build, and ./src/{}.egg-info directories.""".format(PACKAGE_NAME)
+    """Removes ./dist, ./build, ./docs/_build, and ./src/{}.egg-info directories.
+    """.format(PACKAGE_NAME)
     egginfo_path = os.path.join('src', '{}.egg-info'.format(PACKAGE_NAME))
     docs_folder = os.path.join('docs', '_build')
 
@@ -37,13 +38,13 @@ def remove_previous_build():
 
 
 def update_readme():
-    readme_txt = INFO_TXT.replace(
-        """Introduction to nvector
-=======================
-""", """=======
-nvector
-=======
-""").replace("""
+    readme_txt = INFO_TXT.__doc__.replace(
+        """Introduction to {}
+================{}
+""".format(PACKAGE_NAME, '='*len(PACKAGE_NAME)), """{1}
+{0}
+{1}
+""".format(PACKAGE_NAME, '='*len(PACKAGE_NAME))).replace("""
 or the
 `getting_started_functional.html
 <./getting_started_functional.html>`_""", '')
@@ -70,6 +71,12 @@ def set_package(version):
             fid.write(new_text)
 
 
+def update_license():
+    filename = os.path.join(ROOT, "LICENSE.txt")
+    with open(filename, "w") as fid:
+        fid.write(LICENSE.__doc__)
+
+
 class ChangeDir:
     """Context manager for changing the current working directory"""
     def __init__(self, new_path):
@@ -86,13 +93,12 @@ class ChangeDir:
 def call_subprocess(cmd_opts):
     """Safe call to subprocess"""
     print("\n\n***********************************************")
-    print("Running {}".format(' '.join(cmd_opts))
+    print("Running {}".format(' '.join(cmd_opts)))
     try:
         subprocess.call(cmd_opts)
     except Exception as error:  # subprocess.CalledProcessError:
         print(str(error))
     print("***********************************************\n")
-
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
@@ -106,6 +112,7 @@ def build_main(version):
     """.format(PACKAGE_NAME)
     remove_previous_build()
     set_package(version)
+    update_license()
     update_readme()
 
     for cmd in ['docs', 'latexpdf', 'egg_info', 'sdist', 'bdist_wheel']:
@@ -114,6 +121,7 @@ def build_main(version):
                 call_subprocess(["make.bat", cmd])
         else:
             call_subprocess(["python", "setup.py", cmd])
+
     call_subprocess(["twine", "check", "dist/*"])
 
 
