@@ -10,6 +10,9 @@ addons:
       secure: "67bcbf1aefb992993fdd45b78fb4977a05be39b9"
   code_climate:
     repo_token: e5452096cdc930ddd2a4bec5c310cdb9b657484e049a2475ef0b5a347b9e5812
+env:
+  global:
+    CC_TEST_REPORTER_ID=e5452096cdc930ddd2a4bec5c310cdb9b657484e049a2475ef0b5a347b9e5812
 jdk:
   - oraclejdk8
 sudo: false
