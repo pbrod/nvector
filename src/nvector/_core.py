@@ -1,49 +1,14 @@
-"""
-This file is part of NavLab and is available from www.navlab.net/nvector
-
-The content of this file is based on the following publication:
-
-Gade, K. (2010). A Nonsingular Horizontal Position Representation, The Journal
-of Navigation, Volume 63, Issue 03, pp 395-417, July 2010.
-(www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf)
-
-This paper should be cited in publications using this file.
-
-Copyright (c) 2015, Norwegian Defence Research Establishment (FFI)
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above publication
-information, copyright notice, this list of conditions and the following
-disclaimer.
-
-2. Redistributions in binary form must reproduce the above publication
-information, copyright notice, this list of conditions and the following
-disclaimer in the documentation and/or other materials provided with the
-distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
-TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
-BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
-THE POSSIBILITY OF SUCH DAMAGE.
-"""
 from __future__ import division, print_function
 import warnings
 import numpy as np
 from numpy import rad2deg, deg2rad, arctan2, sin, cos, array, cross, dot, sqrt
 from numpy.linalg import norm
-from nvector import _examples
+from nvector import _examples, license as license1
 from nvector._common import test_docstrings, use_docstring_from
 
+__doc__ = """
+This file is part of NavLab and is available from www.navlab.net/nvector
+""" + license1.__doc__
 
 __all__ = ['select_ellipsoid', 'E_rotation',
            'unit', 'deg', 'rad', 'nthroot',
