@@ -321,10 +321,13 @@ class TestNvector(unittest.TestCase):
         # Find the unit normal to the great circle:
         c_E = unit(np.cross(n_EA1_E, n_EA2_E, axis=0))
         # Find the great circle cross track distance:
-        s_xt = -np.arcsin(np.dot(c_E.T, n_EB_E)) * radius
+        sin_theta = -np.dot(c_E.T, n_EB_E)
+        s_xt = np.arcsin(sin_theta) * radius
+        # ill conditioned for small angles:
+        s_xt2 = (np.arccos(-sin_theta) - np.pi / 2) * radius
 
         # Find the Euclidean cross track distance:
-        d_xt = -np.dot(c_E.T, n_EB_E) * radius
+        d_xt = sin_theta * radius
         msg = 'Ex10, Cross track distance = {} m, Euclidean = {} m'
         print(msg.format(s_xt, d_xt))
 
