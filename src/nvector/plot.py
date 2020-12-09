@@ -3,9 +3,11 @@ Created on 9. des. 2015
 
 @author: pab
 """
-
-import cartopy.feature as cpf
-import cartopy.crs as ccrs
+try:
+    import cartopy.feature as cpf
+    import cartopy.crs as ccrs
+except OSError:
+    cpf = ccrs = None
 
 import matplotlib.pyplot as plt
 import numpy as np

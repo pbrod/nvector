@@ -1309,15 +1309,18 @@ class _GreatCircleDistance(object):
 @use_docstring_from(_GreatCircleDistance)
 def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
 
-    s_AB = np.arctan2(norm(np.cross(n_EA_E, n_EB_E, axis=0), axis=0),
-                      dot(n_EA_E.T, n_EB_E)) * radius
+    sin_theta = norm(np.cross(n_EA_E, n_EB_E, axis=0), axis=0)
+    cos_theta = dot(n_EA_E.T, n_EB_E)
+    theta = np.arctan2(sin_theta, cos_theta).ravel()
+    s_AB = theta * radius
 
     # ill conditioned for small angles:
     # s_AB_version1 = arccos(dot(n_EA_E,n_EB_E))*radius
 
     # ill-conditioned for angles near pi/2 (and not valid above pi/2)
     # s_AB_version2 = arcsin(norm(cross(n_EA_E,n_EB_E)))*radius
-    return s_AB.ravel()
+
+    return s_AB
 
 
 class _EuclideanDistance(object):
@@ -1339,8 +1342,8 @@ class _EuclideanDistance(object):
 
 @use_docstring_from(_EuclideanDistance)
 def euclidean_distance(n_EA_E, n_EB_E, radius=6371009.0):
-    d_AB = norm(n_EB_E - n_EA_E, axis=0) * radius
-    return d_AB.ravel()
+    d_AB = norm(n_EB_E - n_EA_E, axis=0).ravel() * radius
+    return d_AB
 
 
 def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563,
@@ -1369,8 +1372,7 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563,
     if R_Ee is None:
         R_Ee = E_rotation()
     # Step2: Find p_AB_E (delta decomposed in E).
-    p_AB_E = n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=a, f=f,
-                                      R_Ee=R_Ee)
+    p_AB_E = n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=a, f=f, R_Ee=R_Ee)
 
     # Step3: Find R_EN for position A:
     R_EN = n_E2R_EN(n_EA_E, R_Ee=R_Ee)

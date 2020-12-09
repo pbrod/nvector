@@ -4,6 +4,7 @@ Created on 29. des. 2015
 @author: pab
 """
 from __future__ import division, print_function
+from functools import partial
 import numpy as np
 from numpy import deprecate
 from numpy.linalg import norm
@@ -289,8 +290,13 @@ class GeoPoint(object):
                           'depth={}'.format(str(z)))
         if degrees:
             lat_a, lon_a, lat_b, lon_b = deg((lat_a, lon_a, lat_b, lon_b))
-        return self.frame.inverse(lat_a, lon_a, lat_b, lon_b, z=z,
-                                  long_unroll=long_unroll, degrees=degrees)
+
+        fun = partial(self.frame.inverse,  long_unroll=long_unroll, degrees=degrees)
+        items = zip(*np.broadcast_arrays(*np.atleast_1d(lat_a, lon_a, lat_b, lon_b, z)))
+        s_ab, azimuth_a, azimuth_b = np.transpose([fun(lat_ai, lon_ai, lat_bi, lon_bi, z=zi)
+                                                   for lat_ai, lon_ai, lat_bi, lon_bi, zi in items])
+
+        return s_ab, azimuth_a, azimuth_b
 
 
 class _Common(object):
@@ -604,6 +610,12 @@ class GeoPath(object):
      point_a, point_b: Nvector, GeoPoint or ECEFvector objects
         The path is defined by the line between position A and B, decomposed
         in E.
+
+    Notes
+    -----
+    Please note that either point_a or point_b or both might be a vector of points.
+    In this case the GeoPath instance represents all the paths between the points
+    of a and the corresponding points of b.
 
     Examples
     --------
