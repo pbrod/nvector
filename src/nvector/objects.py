@@ -164,7 +164,7 @@ class GeoPoint(object):
 
     def __init__(self, latitude, longitude, z=0, frame=None, degrees=False):
         if degrees:
-            latitude, longitude = rad(latitude), rad(longitude)
+            latitude, longitude = rad(latitude, longitude)
         self.latitude = latitude
         self.longitude = longitude
         self.z = z
@@ -254,10 +254,10 @@ class GeoPoint(object):
         latb, lonb, azimuth_b = frame.direct(lat_a, lon_a, azimuth, distance,
                                              z=z, long_unroll=long_unroll,
                                              degrees=True)
+
         if not degrees:
             azimuth_b = rad(azimuth_b)
-        point_b = frame.GeoPoint(latitude=latb, longitude=lonb, z=z,
-                                 degrees=True)
+        point_b = frame.GeoPoint(latitude=latb, longitude=lonb, z=z, degrees=True)
         return point_b, azimuth_b
 
     def distance_and_azimuth(self, point, long_unroll=False, degrees=False):
@@ -273,9 +273,9 @@ class GeoPoint(object):
 
         Returns
         -------
-        s_ab: real scalar
+        s_ab: real scalar or vector of length n.
             ellipsoidal distance [m] between position a and b.
-        azimuth_a, azimuth_b
+        azimuth_a, azimuth_b: real scalars or vectors of length n.
             direction [rad or deg] of line at position a and b relative to
             North, respectively.
 
@@ -289,14 +289,9 @@ class GeoPoint(object):
             warnings.warn('Depths differ. Calculating distance at average '
                           'depth={}'.format(str(z)))
         if degrees:
-            lat_a, lon_a, lat_b, lon_b = deg((lat_a, lon_a, lat_b, lon_b))
+            lat_a, lon_a, lat_b, lon_b = deg(lat_a, lon_a, lat_b, lon_b)
 
-        fun = partial(self.frame.inverse,  long_unroll=long_unroll, degrees=degrees)
-        items = zip(*np.broadcast_arrays(*np.atleast_1d(lat_a, lon_a, lat_b, lon_b, z)))
-        s_ab, azimuth_a, azimuth_b = np.transpose([fun(lat_ai, lon_ai, lat_bi, lon_bi, z=zi)
-                                                   for lat_ai, lon_ai, lat_bi, lon_bi, zi in items])
-
-        return s_ab, azimuth_a, azimuth_b
+        return self.frame.inverse(lat_a, lon_a, lat_b, lon_b, z, long_unroll, degrees)
 
 
 class _Common(object):
@@ -615,7 +610,7 @@ class GeoPath(object):
     -----
     Please note that either point_a or point_b or both might be a vector of points.
     In this case the GeoPath instance represents all the paths between the points
-    of a and the corresponding points of b.
+    of A and the corresponding points of B.
 
     Examples
     --------
@@ -740,8 +735,8 @@ class GeoPath(object):
         point_a, point_b = self.geo_points()
         distanceAB, azimuth_ab, _azi_ba = point_a.distance_and_azimuth(point_b)
         distanceAC, azimuth_ac, _azi_ca = point_a.distance_and_azimuth(point)
-        return distanceAB >= distanceAC and np.allclose(azimuth_ab, azimuth_ac,
-                                                        rtol=rtol, atol=atol)
+        return (distanceAB >= distanceAC) & np.isclose(azimuth_ab, azimuth_ac,
+                                                         rtol=rtol, atol=atol)
 
     def on_great_circle(self, point, rtol=1e-6, atol=1e-8):
         """Returns True if point is on the great circle."""
@@ -957,26 +952,27 @@ class FrameE(_Common):
                 and np.allclose(self.f, other.f, rtol=rtol, atol=atol)
                 and np.allclose(self.R_Ee, other.R_Ee, rtol=rtol, atol=atol))
 
+
     def inverse(self, lat_a, lon_a, lat_b, lon_b, z=0, long_unroll=False, degrees=False):
         """
         Returns ellipsoidal distance between positions as well as the direction.
 
         Parameters
         ----------
-        lat_a, lon_a:  real scalars
+        lat_a, lon_a:  real scalars or vectors.
             Latitude and longitude of position a.
-        lat_b, lon_b:  real scalars
+        lat_b, lon_b:  real scalars or vectors.
             Latitude and longitude of position b.
-        z : real scalar
+        z : real scalar or vector
             depth relative to Earth ellipsoid.
         degrees: bool
             angles are given in degrees if True otherwise in radians.
 
         Returns
         -------
-        s_ab: real scalar
+        s_ab: real scalar or vector
             ellipsoidal distance [m] between position A and B.
-        azimuth_a, azimuth_b
+        azimuth_a, azimuth_b:  real scalars or vectors.
             direction [rad or deg] of line at position A and B relative to
             North, respectively.
 
@@ -987,18 +983,34 @@ class FrameE(_Common):
         `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
 
         """
-
-        outmask = _Geodesic.STANDARD
-        if long_unroll:
-            outmask = _Geodesic.STANDARD | _Geodesic.LONG_UNROLL
-
-        geo = _Geodesic(self.a - z, self.f)
         if not degrees:
-            lat_a, lon_a, lat_b, lon_b = [deg(val) for val in (lat_a, lon_a, lat_b, lon_b)]
+            lat_a, lon_a, lat_b, lon_b = deg(lat_a, lon_a, lat_b, lon_b)
+
+        lat_a, lon_a, lat_b, lon_b, z = np.broadcast_arrays(lat_a, lon_a, lat_b, lon_b, z)
+        fun = partial(self._inverse,  outmask=self._outmask(long_unroll))
+        items = zip(*np.atleast_1d(lat_a, lon_a, lat_b, lon_b, z))
+        sab, azia, azib = np.transpose([fun(lat_ai, lon_ai, lat_bi, lon_bi, z=zi)
+                                        for lat_ai, lon_ai, lat_bi, lon_bi, zi in items])
+
+        if not degrees:
+            s_ab, azimuth_a, azimuth_b = sab.ravel(), rad(azia.ravel()), rad(azib.ravel())
+        else:
+            s_ab, azimuth_a, azimuth_b = sab.ravel(), azia.ravel(), azib.ravel()
+
+        if np.ndim(lat_a)==0:
+            return s_ab[0], azimuth_a[0], azimuth_b[0]
+        return s_ab, azimuth_a, azimuth_b
+
+    def _inverse(self, lat_a, lon_a, lat_b, lon_b, z=0, outmask=None):
+        geo = _Geodesic(self.a - z, self.f)
         result = geo.Inverse(lat_a, lon_a, lat_b, lon_b, outmask=outmask)
-        azimuth_a = result['azi1'] if degrees else rad(result['azi1'])
-        azimuth_b = result['azi2'] if degrees else rad(result['azi2'])
-        return result['s12'], azimuth_a, azimuth_b
+        return result['s12'], result['azi1'], result['azi2']
+
+
+    def _outmask(self, long_unroll):
+        if long_unroll:
+            return _Geodesic.STANDARD | _Geodesic.LONG_UNROLL
+        return _Geodesic.STANDARD
 
     def direct(self, lat_a, lon_a, azimuth, distance, z=0, long_unroll=False, degrees=False):
         """
@@ -1006,22 +1018,22 @@ class FrameE(_Common):
 
         Parameters
         ----------
-        lat_a, lon_a:  real scalars
+        lat_a, lon_a:  real scalars or vectors of length n.
             Latitude and longitude [rad or deg] of position a.
-        azimuth_a:
+        azimuth_a:  real scalar or vector of length n.
             azimuth [rad or deg] of line at position A.
-        distance: real scalar
+        distance: real scalar or vector of length n.
             ellipsoidal distance [m] between position A and B.
-        z : real scalar
+        z: real scalar or vector of length n.
             depth relative to Earth ellipsoid.
         degrees: bool
             angles are given in degrees if True otherwise in radians.
 
         Returns
         -------
-        lat_b, lon_b:  real scalars
+        lat_b, lon_b:  real scalars or vectors of length n
             Latitude and longitude of position b.
-        azimuth_b
+        azimuth_b: real scalar or vector of length n.
             azimuth [rad or deg] of line at position B.
 
         References
@@ -1030,17 +1042,27 @@ class FrameE(_Common):
 
         `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
         """
-
-        geo = _Geodesic(self.a - z, self.f)
-        outmask = _Geodesic.STANDARD
-        if long_unroll:
-            outmask = _Geodesic.STANDARD | _Geodesic.LONG_UNROLL
         if not degrees:
-            lat_a, lon_a, azimuth = deg((lat_a, lon_a, azimuth))
+            lat_a, lon_a, azimuth = deg(lat_a, lon_a, azimuth)
+
+        lat_a, lon_a, azimuth, distance, z = np.broadcast_arrays(lat_a, lon_a, azimuth, distance, z)
+        fun = partial(self._direct,  outmask=self._outmask(long_unroll))
+
+        items = zip(*np.atleast_1d(lat_a, lon_a, azimuth, distance, z))
+        lab, lob, azib = np.transpose([fun(lat_ai, lon_ai, azimuthi, distancei, z=zi)
+                                              for lat_ai, lon_ai, azimuthi, distancei, zi in items])
+        if not degrees:
+            latb, lonb, azimuth_b = rad(lab.ravel(), lob.ravel(), azib.ravel())
+        else:
+            latb, lonb, azimuth_b = lab.ravel(), lob.ravel(), azib.ravel()
+        if np.ndim(lat_a) == 0:
+            return latb[0], lonb[0], azimuth_b[0]
+        return latb, lonb, azimuth_b
+
+    def _direct(self, lat_a, lon_a, azimuth, distance, z=0, outmask=None):
+        geo = _Geodesic(self.a - z, self.f)
         result = geo.Direct(lat_a, lon_a, azimuth, distance, outmask=outmask)
         latb, lonb, azimuth_b = result['lat2'], result['lon2'], result['azi2']
-        if not degrees:
-            return rad(latb), rad(lonb), rad(azimuth_b)
         return latb, lonb, azimuth_b
 
     @use_docstring_from(GeoPoint)

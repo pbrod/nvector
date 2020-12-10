@@ -209,46 +209,50 @@ def nthroot(x, n):
                     y - (y**n - x) / (n * y**(n - 1)), y)
 
 
-def deg(rad_angle):
+def deg(*rad_angles):
     """
     Converts angle in radians to degrees.
 
     Parameters
     ----------
-    rad_angle:
+    rad_angles:
         angle in radians
 
     Returns
     -------
-    deg_angle:
+    deg_angles:
         angle in degrees
 
     See also
     --------
     rad
     """
-    return rad2deg(rad_angle)
+    if len(rad_angles) == 1:
+        return rad2deg(rad_angles[0])
+    return tuple(rad2deg(angle) for angle in rad_angles)
 
 
-def rad(deg_angle):
+def rad(*deg_angles):
     """
     Converts angle in degrees to radians.
 
     Parameters
     ----------
-    deg_angle:
+    deg_angles:
         angle in degrees
 
     Returns
     -------
-    rad_angle:
+    rad_angles:
         angle in radians
 
     See also
     --------
     deg
     """
-    return deg2rad(deg_angle)
+    if len(deg_angles) == 1:
+        return deg2rad(deg_angles[0])
+    return tuple(deg2rad(angle) for angle in deg_angles)
 
 
 def unit(vector, norm_zero_vector=1):
@@ -1247,8 +1251,7 @@ def on_great_circle_path(path, n_EB_E, radius=6371009.0, rtol=1e-6, atol=1e-8):
     scale = norm(n_EA2_E - n_EA1_E, axis=0)
     ti1 = norm(n_EB_E - n_EA1_E, axis=0) / scale
     ti2 = norm(n_EB_E - n_EA2_E, axis=0) / scale
-    return (ti1 <= 1) & (ti2 <= 1) & on_great_circle(path, n_EB_E, radius,
-                                                     rtol, atol)
+    return (ti1 <= 1) & (ti2 <= 1) & on_great_circle(path, n_EB_E, radius, rtol, atol)
 
 
 class _ClosestPointOnGreatCircle(object):
