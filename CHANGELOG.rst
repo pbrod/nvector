@@ -6,7 +6,7 @@ Version 0.7.5, December 11, 2020
 ================================
 
 Per A Brodtkorb (24):
-      * Updated CHANGELOG.rst prepare for release 7.5
+      * Updated CHANGELOG.rst and prepare for release 0.7.5
       * Updated docs/conf.py
       * Updated README.rst and LICENSE.txt
       * Replaced import unittest with import pytest in test_frames.py
