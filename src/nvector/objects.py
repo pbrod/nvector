@@ -119,6 +119,15 @@ def delta_L(point_a, point_b, wander_azimuth=0):
 
 
 class _Common(object):
+
+    def __repr__(self):
+        n = len(self.__class__.__name__) + 1
+        fmt = ',\n' + ' ' * n
+        params = fmt.join(['{}={!r}'.format(name, val)
+                           for name, val in self.__dict__.items() if not name.startswith('_')])
+
+        return (f'{self.__class__.__name__}({params})')
+
     def __eq__(self, other):
         try:
             return self is other or self._is_equal_to(other, rtol=1e-12, atol=1e-14)
@@ -181,12 +190,12 @@ class GeoPoint(_Common):
         self.frame = _default_frame(frame)
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
-        options = dict(rtol=rtol, atol=atol)
         def diff(angle1, angle2):
             pi2 = 2 * np.pi
             delta = (angle1 - angle2) % pi2
             return np.where(delta > np.pi, pi2 - delta, delta)
 
+        options = dict(rtol=rtol, atol=atol)
         delta_lat = diff(self.latitude, other.latitude)
         delta_lon = diff(self.longitude, other.longitude)
         return (np.allclose(delta_lat, 0, **options)
@@ -763,7 +772,6 @@ class GeoPath(object):
             radius = self._get_average_radius()
         n_EA_E, n_EB_E = self.nvector_normals()
 
-
         distance_fun = euclidean_distance if method[:2] == "eu" else great_circle_distance
         if np.ndim(radius) == 0:
             return distance_fun(n_EA_E, n_EB_E, radius)[0]  # scalar track distance
@@ -793,15 +801,15 @@ class GeoPath(object):
         frame = self.point_a.frame
         path_a = self.nvector_normals()
         path_b = path.nvector_normals()
-        n_EC_E = intersect(path_a, path_b)
-        return frame.Nvector(n_EC_E)
+        point_c = intersect(path_a, path_b)  # nvector
+        return frame.Nvector(point_c)
 
     def _on_ellipsoid_path(self, point, rtol=1e-6, atol=1e-8):
         point_a, point_b = self.geo_points()
-        distanceAB, azimuth_ab, _azi_ba = point_a.distance_and_azimuth(point_b)
-        distanceAC, azimuth_ac, _azi_ca = point_a.distance_and_azimuth(point)
-        return (np.isclose(distanceAC, 0, rtol=rtol, atol=atol)
-                | ((distanceAB >= distanceAC)
+        distance_ab, azimuth_ab, _azi_ba = point_a.distance_and_azimuth(point_b)
+        distance_ac, azimuth_ac, _azi_ca = point_a.distance_and_azimuth(point)
+        return (np.isclose(distance_ac, 0, atol=atol)
+                | ((distance_ab >= distance_ac)
                    & np.isclose(azimuth_ac, azimuth_ab, rtol=rtol, atol=atol)))
 
     def on_great_circle(self, point, rtol=1e-6, atol=1e-8):
@@ -809,21 +817,12 @@ class GeoPath(object):
         distance = np.abs(self.cross_track_distance(point))
         return np.isclose(distance, 0, rtol, atol)
 
-    def _on_great_circle_path(self, point, radius=None, rtol=1e-6, atol=1e-8):
+    def _on_great_circle_path(self, point, radius=None, atol=1e-8):
         if radius is None:
             radius = self._get_average_radius()
         path = self.nvector_normals()
         point_c = point.to_nvector().normal
-        return on_great_circle_path(path, point_c, radius, rtol, atol)
-# pointA, pointB = path
-# p_ba = pointB - pointA
-# p_ca = point_c - pointA
-# is_parallell = np.all(np.isclose(np.cross(p_ba, p_ca, axis=0), 0,
-#                                  rtol, atol), axis=0)
-# same_direction = (np.all(np.sign(np.dot(p_ba.T, p_ca)) == 1, axis=0) &
-#                   np.all(np.sign(p_ba) == np.sign(p_ca), axis=0))
-# return (is_parallell & same_direction &
-#          norm(p_ba, axis=0) >= norm(p_ca, axis=0))
+        return on_great_circle_path(path, point_c, radius, atol=atol)
 
     def on_path(self, point, method='greatcircle', rtol=1e-6, atol=1e-8):
         """
@@ -838,7 +837,7 @@ class GeoPath(object):
 
         Returns
         -------
-        result: Bool scalar or vector
+        result: Bool scalar or boolean vector
 
         Examples
         --------
@@ -865,7 +864,7 @@ class GeoPath(object):
         """
         if method[:2] in {'ex', 'el'}: # exact or ellipsoid
             return self._on_ellipsoid_path(point, rtol=rtol, atol=atol)
-        return self._on_great_circle_path(point, rtol=rtol, atol=atol)
+        return self._on_great_circle_path(point, atol=atol)
 
     def closest_point_on_great_circle(self, point):
         """

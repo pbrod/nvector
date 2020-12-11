@@ -1195,13 +1195,22 @@ class _OnGreatCircle(object):
         n-vector(s) of position B to check to.
     radius: real scalar
         radius of sphere. (default 6371009.0)
-    rtol, atol: real scalars
-        defining relative and absolute tolerance
+    atol: real scalar
+        The absolute tolerance parameter (See notes).
 
     Returns
     -------
     on : bool array of length max(n, m)
         True if position B is on great circle through path A.
+
+    Notes
+    -----
+    The default value of `atol` is not zero, and is used to determine what
+    small values should be considered close to zero. The default value is
+    appropriate for expected values of order unity. However, `atol` should
+    be carefully selected for the use case at hand. Typically the value
+    should be set to the accepted error tolerance. For GPS data the error
+    ranges from 0.01 m to 15 m.
 
     Examples
     --------
@@ -1212,9 +1221,9 @@ class _OnGreatCircle(object):
 
 
 @use_docstring_from(_OnGreatCircle)
-def on_great_circle(path, n_EB_E, radius=6371009.0, rtol=1e-6, atol=1e-8):
+def on_great_circle(path, n_EB_E, radius=6371009.0, atol=1e-8):
     distance = np.abs(cross_track_distance(path, n_EB_E, radius=radius))
-    return np.isclose(distance, 0, rtol, atol)
+    return distance <= atol
 
 
 class _OnGreatCirclePath(object):
@@ -1228,13 +1237,22 @@ class _OnGreatCirclePath(object):
         n-vector(s) of position B to measure the cross track distance to.
     radius: real scalar
         radius of sphere. (default 6371009.0)
-    rtol, atol: real scalars
-        defining relative and absolute tolerance
+    atol: real scalars
+        The absolute tolerance parameter (See notes).
 
     Returns
     -------
     on : bool array of length max(n, m)
         True if position B is on great circle and between endpoints of path A.
+
+    Notes
+    -----
+    The default value of `atol` is not zero, and is used to determine what
+    small values should be considered close to zero. The default value is
+    appropriate for expected values of order unity. However, `atol` should
+    be carefully selected for the use case at hand. Typically the value
+    should be set to the accepted error tolerance. For GPS data the error
+    ranges from 0.01 m to 15 m.
 
     Examples
     --------
@@ -1245,12 +1263,12 @@ class _OnGreatCirclePath(object):
 
 
 @use_docstring_from(_OnGreatCirclePath)
-def on_great_circle_path(path, n_EB_E, radius=6371009.0, rtol=1e-6, atol=1e-8):
+def on_great_circle_path(path, n_EB_E, radius=6371009.0, atol=1e-8):
     n_EA1_E, n_EA2_E = path
     scale = norm(n_EA2_E - n_EA1_E, axis=0)
     ti1 = norm(n_EB_E - n_EA1_E, axis=0) / scale
     ti2 = norm(n_EB_E - n_EA2_E, axis=0) / scale
-    return (ti1 <= 1) & (ti2 <= 1) & on_great_circle(path, n_EB_E, radius, rtol, atol)
+    return (ti1 <= 1) & (ti2 <= 1) & on_great_circle(path, n_EB_E, radius, atol=atol)
 
 
 class _ClosestPointOnGreatCircle(object):
