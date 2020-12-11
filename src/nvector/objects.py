@@ -15,6 +15,7 @@ from nvector._core import (mdot, select_ellipsoid, rad, deg, zyx2R,
                            closest_point_on_great_circle,
                            great_circle_distance, euclidean_distance,
                            cross_track_distance, intersect,
+                           n_EA_E_distance_and_azimuth2n_EB_E,
                            mean_horizontal_position,
                            E_rotation, on_great_circle_path)
 from nvector import _examples
@@ -248,7 +249,7 @@ class GeoPoint(_Common):
 
     delta_to = _delta
 
-    def displace(self, distance, azimuth, long_unroll=False, degrees=False):
+    def displace(self, distance, azimuth, long_unroll=False, degrees=False, method='karney'):
         """
         Returns position b computed from current position, distance and azimuth.
 
@@ -269,6 +270,19 @@ class GeoPoint(_Common):
             azimuth [rad or deg] of line at position B.
 
         """
+        if method == 'nvector':  # nvector solution
+            nvector = self.to_nvector()
+            radius = nvector.to_ecef_vector().length
+            distance_rad = distance / radius
+            azimuth_rad = azimuth if not degrees else rad(azimuth)
+            n_EB_E = n_EA_E_distance_and_azimuth2n_EB_E(nvector.normal, distance_rad, azimuth_rad)
+            point_b = Nvector(n_EB_E, self.z, self.frame).to_geo_point()
+            azimuth_b = self.delta_to(point_b).azimuth
+            if degrees:
+                return point_b, deg(azimuth_b)
+            return point_b, azimuth_b
+
+        # Karney solution
         frame = self.frame
         z = self.z
         if not degrees:

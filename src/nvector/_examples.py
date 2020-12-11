@@ -504,8 +504,7 @@ Solution:
     >>> r_earth = 6371e3  # [m], mean earth radius
 
     >>> distance_rad = s_AB / r_earth
-    >>> n_EB_E = nv.n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad,
-    ...                                                azimuth)
+    >>> n_EB_E = nv.n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth)
     >>> lat_EB, lon_EB = nv.n_E2lat_lon(n_EB_E)
     >>> lat, lon = deg(lat_EB), deg(lon_EB)
     >>> msg = 'Ex8, Destination: lat, lon = {:4.2f} deg, {:4.2f} deg'
