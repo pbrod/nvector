@@ -47,7 +47,7 @@ Step1:  Find p_AB_N (delta decomposed in N).
     'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
 
 Step2: Also find the direction (azimuth) to B, relative to north:
-    >>> azimuth = p_AB_N.azimuth_deg[0]
+    >>> azimuth = p_AB_N.azimuth_deg
     >>> 'azimuth = {0:4.2f} deg'.format(azimuth)
     'azimuth = 45.11 deg'
 
@@ -127,7 +127,7 @@ Step 4: Find point C by adding delta BC to EB
 
     >>> lat, lon, z = pointC.latlon_deg
     >>> msg = 'Ex2: PosC: lat, lon = {:4.2f}, {:4.2f} deg,  height = {:4.2f} m'
-    >>> msg.format(lat[0], lon[0], -z[0])
+    >>> msg.format(lat, lon, -z)
     'Ex2: PosC: lat, lon = 53.33, 63.47 deg,  height = 406.01 m'
 
 """
@@ -194,7 +194,7 @@ Solution:
 
     >>> lat, lon, z = pointB.latlon_deg
     >>> msg = 'Ex3: Pos B: lat, lon = {:4.2f}, {:4.2f} deg, height = {:9.2f} m'
-    >>> msg.format(lat[0], lon[0], -z[0])
+    >>> msg.format(lat, lon, -z)
     'Ex3: Pos B: lat, lon = 39.38, -48.01 deg, height = 4702059.83 m'
 
 """
@@ -285,7 +285,7 @@ Solution for a sphere:
 
     >>> s_AB, _azia, _azib = positionA.distance_and_azimuth(positionB)
     >>> p_AB_E = positionB.to_ecef_vector() - positionA.to_ecef_vector()
-    >>> d_AB = p_AB_E.length[0]
+    >>> d_AB = p_AB_E.length
 
     >>> msg = 'Ex5: Great circle and Euclidean distance = {}'
     >>> msg = msg.format('{:5.2f} km, {:5.2f} km')
@@ -294,9 +294,9 @@ Solution for a sphere:
 
 Alternative sphere solution:
     >>> path = nv.GeoPath(positionA, positionB)
-    >>> s_AB2 = path.track_distance(method='greatcircle').ravel()
-    >>> d_AB2 = path.track_distance(method='euclidean').ravel()
-    >>> msg.format(s_AB2[0] / 1000, d_AB2[0] / 1000)
+    >>> s_AB2 = path.track_distance(method='greatcircle')
+    >>> d_AB2 = path.track_distance(method='euclidean')
+    >>> msg.format(s_AB2 / 1000, d_AB2 / 1000)
     'Ex5: Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
 Exact solution for the WGS84 ellipsoid:
@@ -306,7 +306,7 @@ Exact solution for the WGS84 ellipsoid:
     >>> s_12, _azi1, _azi2 = point1.distance_and_azimuth(point2)
 
     >>> p_12_E = point2.to_ecef_vector() - point1.to_ecef_vector()
-    >>> d_12 = p_12_E.length[0]
+    >>> d_12 = p_12_E.length
     >>> msg = 'Ellipsoidal and Euclidean distance = {:5.2f} km, {:5.2f} km'
     >>> msg.format(s_12 / 1000, d_12 / 1000)
     'Ellipsoidal and Euclidean distance = 333.95 km, 333.91 km'
@@ -376,7 +376,7 @@ Solution:
 
     >>> lat_ti, lon_ti, z_ti = g_EB_E_ti.latlon_deg
     >>> msg = 'Ex6, Interpolated position: lat, lon = {:2.1f} deg, {:2.1f} deg'
-    >>> msg.format(lat_ti[0], lon_ti[0])
+    >>> msg.format(lat_ti, lon_ti)
     'Ex6, Interpolated position: lat, lon = 89.8 deg, 180.0 deg'
 
 """
@@ -426,7 +426,7 @@ Solution:
     >>> g_EM_E = n_EM_E.to_geo_point()
     >>> lat, lon = g_EM_E.latitude_deg, g_EM_E.longitude_deg
     >>> msg = 'Ex7: Pos M: lat, lon = {:4.2f}, {:4.2f} deg'
-    >>> msg.format(lat[0], lon[0])
+    >>> msg.format(lat, lon)
     'Ex7: Pos M: lat, lon = 67.24, -6.92 deg'
 
 """
@@ -482,8 +482,7 @@ Solution:
     >>> import nvector as nv
     >>> frame = nv.FrameE(a=6371e3, f=0)
     >>> pointA = frame.GeoPoint(latitude=80, longitude=-90, degrees=True)
-    >>> pointB, _azimuthb = pointA.displace(distance=1000, azimuth=200,
-    ...                                     degrees=True)
+    >>> pointB, _azimuthb = pointA.displace(distance=1000, azimuth=200, degrees=True)
     >>> lat, lon = pointB.latitude_deg, pointB.longitude_deg
 
     >>> msg = 'Ex8, Destination: lat, lon = {:4.2f} deg, {:4.2f} deg'
@@ -551,7 +550,7 @@ Solution:
     >>> pointC = pointC.to_geo_point()
     >>> lat, lon = pointC.latitude_deg, pointC.longitude_deg
     >>> msg = 'Ex9, Intersection: lat, lon = {:4.2f}, {:4.2f} deg'
-    >>> msg.format(lat[0], lon[0])
+    >>> msg.format(lat, lon)
     'Ex9, Intersection: lat, lon = 40.32, 55.90 deg'
 
 """
@@ -623,10 +622,10 @@ Solution:
     >>> pointB = frame.GeoPoint(1, 0.1, degrees=True)
     >>> pathA = nv.GeoPath(pointA1, pointA2)
 
-    >>> s_xt = pathA.cross_track_distance(pointB, method='greatcircle').ravel()
-    >>> d_xt = pathA.cross_track_distance(pointB, method='euclidean').ravel()
+    >>> s_xt = pathA.cross_track_distance(pointB, method='greatcircle')
+    >>> d_xt = pathA.cross_track_distance(pointB, method='euclidean')
 
-    >>> val_txt = '{:4.2f} km, {:4.2f} km'.format(s_xt[0]/1000, d_xt[0]/1000)
+    >>> val_txt = '{:4.2f} km, {:4.2f} km'.format(s_xt/1000, d_xt/1000)
     >>> 'Ex10: Cross track distance: s_xt, d_xt = {}'.format(val_txt)
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 

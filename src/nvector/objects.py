@@ -117,7 +117,18 @@ def delta_L(point_a, point_b, wander_azimuth=0):
     return delta_E(point_a, point_b).change_frame(local_frame)
 
 
-class GeoPoint(object):
+class _Common(object):
+    def __eq__(self, other):
+        try:
+            return self is other or self._is_equal_to(other, rtol=1e-12, atol=1e-14)
+        except AttributeError:
+            return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+
+class GeoPoint(_Common):
     """
     Geographical position given as latitude, longitude, depth in frame E.
 
@@ -165,10 +176,22 @@ class GeoPoint(object):
     def __init__(self, latitude, longitude, z=0, frame=None, degrees=False):
         if degrees:
             latitude, longitude = rad(latitude, longitude)
-        self.latitude = latitude
-        self.longitude = longitude
-        self.z = z
+        self.latitude, self.longitude, self.z = np.broadcast_arrays(latitude, longitude, z)
         self.frame = _default_frame(frame)
+
+    def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
+        options = dict(rtol=rtol, atol=atol)
+        def diff(angle1, angle2):
+            pi2 = 2 * np.pi
+            delta = (angle1 - angle2) % pi2
+            return np.where(delta > np.pi, pi2 - delta, delta)
+
+        delta_lat = diff(self.latitude, other.latitude)
+        delta_lon = diff(self.longitude, other.longitude)
+        return (np.allclose(delta_lat, 0, **options)
+                and np.allclose(delta_lon, 0, **options)
+                and np.allclose(self.z, other.z, **options)
+                and self.frame == other.frame)
 
     @property
     def latlon_deg(self):
@@ -251,13 +274,13 @@ class GeoPoint(object):
         if not degrees:
             azimuth = deg(azimuth)
         lat_a, lon_a = self.latitude_deg, self.longitude_deg
-        latb, lonb, azimuth_b = frame.direct(lat_a, lon_a, azimuth, distance,
-                                             z=z, long_unroll=long_unroll,
-                                             degrees=True)
+        lat_b, lon_b, azimuth_b = frame.direct(lat_a, lon_a, azimuth, distance,
+                                               z=z, long_unroll=long_unroll,
+                                               degrees=True)
 
+        point_b = frame.GeoPoint(latitude=lat_b, longitude=lon_b, z=z, degrees=True)
         if not degrees:
-            azimuth_b = rad(azimuth_b)
-        point_b = frame.GeoPoint(latitude=latb, longitude=lonb, z=z, degrees=True)
+            return point_b, rad(azimuth_b)
         return point_b, azimuth_b
 
     def distance_and_azimuth(self, point, long_unroll=False, degrees=False):
@@ -274,36 +297,27 @@ class GeoPoint(object):
         Returns
         -------
         s_ab: real scalar or vector of length n.
-            ellipsoidal distance [m] between position a and b.
+            ellipsoidal distance [m] between position a and b at their average height.
         azimuth_a, azimuth_b: real scalars or vectors of length n.
             direction [rad or deg] of line at position a and b relative to
             North, respectively.
 
+        References
+        ----------
+        C. F. F. Karney, Algorithms for geodesics, J. Geodesy 87(1), 43-55
+
+        `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
         """
         _check_frames(self, point)
         gpoint = point.to_geo_point()
         lat_a, lon_a = self.latitude, self.longitude
         lat_b, lon_b = gpoint.latitude, gpoint.longitude
-        z = 0.5 * (self.z + gpoint.z)
-        if not np.allclose(self.z, gpoint.z):
-            warnings.warn('Depths differ. Calculating distance at average '
-                          'depth={}'.format(str(z)))
+        z = 0.5 * (self.z + gpoint.z)  # Average depth
+
         if degrees:
             lat_a, lon_a, lat_b, lon_b = deg(lat_a, lon_a, lat_b, lon_b)
 
         return self.frame.inverse(lat_a, lon_a, lat_b, lon_b, z, long_unroll, degrees)
-
-
-class _Common(object):
-    def __eq__(self, other):
-        try:
-            return self is other or self._is_equal_to(other, rtol=1e-12,
-                                                      atol=1e-14)
-        except AttributeError:
-            return False
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
 
 
 class Nvector(_Common):
@@ -347,7 +361,8 @@ class Nvector(_Common):
         frame = self.frame
         a, f, R_Ee = frame.a, frame.f, frame.R_Ee
         pvector = n_EB_E2p_EB_E(self.normal, depth=self.z, a=a, f=f, R_Ee=R_Ee)
-        return ECEFvector(pvector, self.frame)
+        scalar = np.ndim(self.z) == 0 and self.normal.shape[1] == 1
+        return ECEFvector(pvector, self.frame, scalar=scalar)
 
     def to_geo_point(self):
         """
@@ -358,6 +373,8 @@ class Nvector(_Common):
         GeoPoint
         """
         latitude, longitude = n_E2lat_lon(self.normal, R_Ee=self.frame.R_Ee)
+        if np.ndim(self.z) == 0 and latitude.size == 1 and longitude.size==1:
+            return GeoPoint(latitude[0], longitude[0], self.z, self.frame)  # Scalar geo_point
         return GeoPoint(latitude, longitude, self.z, self.frame)
 
     def to_nvector(self):
@@ -424,13 +441,21 @@ class Nvector(_Common):
     __rmul__ = __mul__
 
 
-class Pvector(object):
+class Pvector(_Common):
     """
     Cartesian position vector in relative to a frame.
     """
-    def __init__(self, pvector, frame):
+    def __init__(self, pvector, frame, scalar=None):
+        if scalar is None:
+            scalar = np.shape(pvector)[1] == 1
         self.pvector = pvector
         self.frame = frame
+        self.scalar = scalar
+
+    def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
+        options = dict(rtol=rtol, atol=atol)
+        return (np.allclose(self.pvector, other.pvector, **options)
+                and self.frame == other.frame)
 
     def to_ecef_vector(self):
         """
@@ -445,7 +470,7 @@ class Pvector(object):
         p_AB_N = self.pvector
         # p_AB_E = np.dot(n_frame.R_EN, p_AB_N)
         p_AB_E = mdot(n_frame.R_EN, p_AB_N[:, None, ...]).reshape(3, -1)
-        return ECEFvector(p_AB_E, frame=n_frame.nvector.frame)
+        return ECEFvector(p_AB_E, frame=n_frame.nvector.frame, scalar=self.scalar)
 
     def to_nvector(self):
         """
@@ -473,7 +498,10 @@ class Pvector(object):
     @property
     def length(self):
         "Length of the pvector."
-        return norm(self.pvector, axis=0)
+        lengths = norm(self.pvector, axis=0)
+        if self.scalar:  # and len(lengths) == 1:
+            return lengths[0]
+        return lengths
 
     @property
     def azimuth_deg(self):
@@ -484,6 +512,8 @@ class Pvector(object):
     def azimuth(self):
         """Azimuth in radian"""
         p_AB_N = self.pvector
+        if self.scalar: # and self.pvector.shape[1] == 1:
+            return np.arctan2(p_AB_N[1], p_AB_N[0])[0]
         return np.arctan2(p_AB_N[1], p_AB_N[0])
 
     @property
@@ -495,6 +525,8 @@ class Pvector(object):
     def elevation(self):
         """Elevation in radian."""
         z = self.pvector[2]
+        if self.scalar:
+            return np.arcsin(z / self.length)[0]
         return np.arcsin(z / self.length)
 
 
@@ -526,8 +558,8 @@ class ECEFvector(Pvector):
     GeoPoint, ECEFvector, Pvector
     """.format(_examples.get_examples([3, 4]))
 
-    def __init__(self, pvector, frame=None):
-        super(ECEFvector, self).__init__(pvector, _default_frame(frame))
+    def __init__(self, pvector, frame=None, scalar=None):
+        super(ECEFvector, self).__init__(pvector, _default_frame(frame), scalar)
 
     def change_frame(self, frame):
         """
@@ -553,7 +585,7 @@ class ECEFvector(Pvector):
         _check_frames(self, frame.nvector)
         p_AB_E = self.pvector
         p_AB_N = mdot(np.rollaxis(frame.R_EN, 1, 0), p_AB_E[:, None, ...])
-        return Pvector(p_AB_N.reshape(3, -1), frame=frame)
+        return Pvector(p_AB_N.reshape(3, -1), frame=frame, scalar=self.scalar)
 
     def to_ecef_vector(self):
         return self
@@ -580,20 +612,24 @@ class ECEFvector(Pvector):
         p_EB_E = self.pvector
         R_Ee = frame.R_Ee
         n_EB_E, depth = p_EB_E2n_EB_E(p_EB_E, a=frame.a, f=frame.f, R_Ee=R_Ee)
+        if self.scalar:
+            return Nvector(n_EB_E, z=depth[0], frame=frame)
         return Nvector(n_EB_E, z=depth, frame=frame)
 
     delta_to = _delta
 
     def __add__(self, other):
         _check_frames(self, other)
-        return ECEFvector(self.pvector + other.pvector, self.frame)
+        scalar = self.scalar and other.scalar
+        return ECEFvector(self.pvector + other.pvector, self.frame, scalar)
 
     def __sub__(self, other):
         _check_frames(self, other)
-        return ECEFvector(self.pvector - other.pvector, self.frame)
+        scalar = self.scalar and other.scalar
+        return ECEFvector(self.pvector - other.pvector, self.frame, scalar)
 
     def __neg__(self):
-        return ECEFvector(-self.pvector, self.frame)
+        return ECEFvector(-self.pvector, self.frame, self.scalar)
 
 
 class GeoPath(object):
@@ -603,12 +639,12 @@ class GeoPath(object):
     Parameters
     ----------
      point_a, point_b: Nvector, GeoPoint or ECEFvector objects
-        The path is defined by the line between position A and B, decomposed
+        The path is defined by the line between point A and B, decomposed
         in E.
 
     Notes
     -----
-    Please note that either point_a or point_b or both might be a vector of points.
+    Please note that either point A or point B or both might be a vector of points.
     In this case the GeoPath instance represents all the paths between the points
     of A and the corresponding points of B.
 
@@ -621,6 +657,19 @@ class GeoPath(object):
     def __init__(self, point_a, point_b):
         self.point_a = point_a
         self.point_b = point_b
+
+    @property
+    def positionA(self):
+        """Deprecated use point_a instead"""
+        warnings.warn('Deprecated use point_a instead', category=DeprecationWarning, stacklevel=2)
+        return self.point_a
+
+
+    @property
+    def positionB(self):
+        """Deprecated use point_a instead"""
+        warnings.warn('Deprecated use point_b instead', category=DeprecationWarning, stacklevel=2)
+        return self.point_b
 
     def nvectors(self):
         """ Returns point_a and point_b as n-vectors
@@ -663,36 +712,36 @@ class GeoPath(object):
         point: GeoPoint, Nvector or ECEFvector object
             position to measure the cross track distance to.
         radius: real scalar
-            radius of sphere in [m]. Default mean Earth radius
-        method: string
-            defining distance calculated. Options are:
-            'greatcircle' or 'euclidean'
+            radius of sphere in [m]. Default is the average height of points A and B.
+        method: 'greatcircle' or 'euclidean'
+            defining distance calculated.
 
         Returns
         -------
-        distance: real scalar
+        distance: real scalar or vector
             distance in [m]
         """
         if radius is None:
             radius = self._get_average_radius()
         path = self.nvector_normals()
         n_c = point.to_nvector().normal
-        return cross_track_distance(path, n_c, method=method, radius=radius)
+        distance = cross_track_distance(path, n_c, method=method, radius=radius)
+        if np.ndim(radius) == 0 and distance.size == 1:
+            return distance[0]  # scalar cross track distance
+        return distance
 
     def track_distance(self, method='greatcircle', radius=None):
         """
-        Returns the distance of the path.
+        Returns the path distance computed at the average height.
 
         Parameters
         ----------
-        method: string
-            'greatcircle':
-            'euclidean'
-            'exact'
+        method:  'greatcircle',  'euclidean' or 'ellipsoidal'
+            defining distance calculated.
         radius: real scalar
-            radius of sphere
+            radius of sphere. Default is the average height of points A and B
         """
-        if method == 'exact':
+        if method[:2] in {'ex', 'el'}:  # exact or ellipsoidal
             point_a, point_b = self.geo_points()
             s_ab, _angle1, _angle2 = point_a.distance_and_azimuth(point_b)
             return s_ab
@@ -700,9 +749,11 @@ class GeoPath(object):
             radius = self._get_average_radius()
         n_EA_E, n_EB_E = self.nvector_normals()
 
-        if method[:2] == "eu":
-            return euclidean_distance(n_EA_E, n_EB_E, radius)
-        return great_circle_distance(n_EA_E, n_EB_E, radius)
+
+        distance_fun = euclidean_distance if method[:2] == "eu" else great_circle_distance
+        if np.ndim(radius) == 0:
+            return distance_fun(n_EA_E, n_EB_E, radius)[0]  # scalar track distance
+        return distance_fun(n_EA_E, n_EB_E, radius)
 
     @deprecate
     def intersection(self, path):
@@ -735,8 +786,9 @@ class GeoPath(object):
         point_a, point_b = self.geo_points()
         distanceAB, azimuth_ab, _azi_ba = point_a.distance_and_azimuth(point_b)
         distanceAC, azimuth_ac, _azi_ca = point_a.distance_and_azimuth(point)
-        return (distanceAB >= distanceAC) & np.isclose(azimuth_ab, azimuth_ac,
-                                                         rtol=rtol, atol=atol)
+        return (np.isclose(distanceAC, 0, rtol=rtol, atol=atol)
+                | ((distanceAB >= distanceAC)
+                   & np.isclose(azimuth_ac, azimuth_ab, rtol=rtol, atol=atol)))
 
     def on_great_circle(self, point, rtol=1e-6, atol=1e-8):
         """Returns True if point is on the great circle."""
@@ -767,9 +819,12 @@ class GeoPath(object):
         ----------
         point : Nvector, GeoPoint or ECEFvector
             point to test
-        method: string
-            'greatcircle':
-            'exact'
+        method: 'greatcircle' or 'ellipsoid'
+            defining the path.
+
+        Returns
+        -------
+        result: Bool scalar or vector
 
         Examples
         --------
@@ -794,7 +849,7 @@ class GeoPath(object):
         >>> path = nv.GeoPath(pointC, pointA)
 
         """
-        if method == 'exact':
+        if method[:2] in {'ex', 'el'}: # exact or ellipsoid
             return self._on_ellipsoid_path(point, rtol=rtol, atol=atol)
         return self._on_great_circle_path(point, rtol=rtol, atol=atol)
 
@@ -877,7 +932,7 @@ class GeoPath(object):
         (51.0, 2.0)
         """
         point_c = self.closest_point_on_great_circle(point)
-        if self.on_path(point_c):
+        if self.on_path(point_c):  # TODO: vectorize this
             return point_c
         n0 = point.to_nvector().normal
         n1, n2 = self.nvector_normals()
@@ -997,7 +1052,7 @@ class FrameE(_Common):
         else:
             s_ab, azimuth_a, azimuth_b = sab.ravel(), azia.ravel(), azib.ravel()
 
-        if np.ndim(lat_a)==0:
+        if np.ndim(lat_a) == 0:
             return s_ab[0], azimuth_a[0], azimuth_b[0]
         return s_ab, azimuth_a, azimuth_b
 
@@ -1081,7 +1136,14 @@ class FrameE(_Common):
         return ECEFvector(*args, frame=self, **kwds)
 
 
-class FrameN(_Common):
+class _LocalFrame(_Common):
+
+    def Pvector(self, pvector):
+        """Returns Pvector relative to the local frame."""
+        return Pvector(pvector, frame=self)
+
+
+class FrameN(_LocalFrame):
     __doc__ = """
     North-East-Down frame
 
@@ -1128,10 +1190,6 @@ class FrameN(_Common):
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
         return (np.allclose(self.R_EN, other.R_EN, rtol=rtol, atol=atol)
                 and self.nvector == other.nvector)
-
-    def Pvector(self, pvector):
-        """Returns Pvector relative to the local frame."""
-        return Pvector(pvector, frame=self)
 
 
 class FrameL(FrameN):
@@ -1184,7 +1242,7 @@ class FrameL(FrameN):
         return n_E_and_wa2R_EL(n_EA_E, self.wander_azimuth, R_Ee=R_Ee)
 
 
-class FrameB(FrameN):
+class FrameB(_LocalFrame):
     __doc__ = """
     Body frame
 
@@ -1247,6 +1305,7 @@ def _default_frame(frame):
     if frame is None:
         return FrameE()
     return frame
+
 
 
 if __name__ == "__main__":

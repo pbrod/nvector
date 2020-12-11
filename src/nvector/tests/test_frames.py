@@ -3,23 +3,107 @@ Created on 18. des. 2015
 
 @author: pab
 """
-import unittest
+import pytest
 import numpy as np
 from numpy.testing import assert_array_almost_equal  # @UnresolvedImport
-from nvector import (FrameB, FrameE, FrameN, FrameL, GeoPoint, GeoPath, unit,
-                     delta_L)
+from nvector import FrameB, FrameE, FrameN, FrameL, GeoPoint, GeoPath, unit, delta_L
 
 EARTH_RADIUS_M = 6371009.0
 
+@pytest.mark.parametrize("lat_a,lat_b,method", [(81, 80, 'ellipsoid'),
+                                                (79, 80, 'ellipsoid'),
+                                                (81, 80, 'greatcircle'),
+                                                (79, 80, 'greatcircle')])
+def test_geo_path_on_path(lat_a, lat_b, method):
+    wgs84 = FrameE(name='WGS84')
+    point_a = wgs84.GeoPoint(latitude=lat_a, longitude=0, degrees=True)
+    point_b = wgs84.GeoPoint(latitude=lat_b, longitude=0, degrees=True)
+    point_c = wgs84.GeoPoint(latitude=0.5*(lat_a+lat_b), longitude=0, degrees=True)
 
-class TestFrames(unittest.TestCase):
+    path = GeoPath(point_a, point_b)
+    for point in [point_a, point_b, point_c]:
+        assert path.on_path(point, method=method)
+
+    point_a1 = wgs84.GeoPoint(latitude=lat_a, longitude=1e-6, degrees=True)
+    point_b1 = wgs84.GeoPoint(latitude=lat_b, longitude=1e-6, degrees=True)
+    for point in [point_a1, point_b1]:
+        assert not path.on_path(point, method=method)
+
+    tol = 1e-10
+    lat_e, lat_f = (lat_a-tol, lat_b + tol) if lat_a < lat_b else (lat_a+tol, lat_b - tol)
+    point_e = wgs84.GeoPoint(latitude=lat_e, longitude=0, degrees=True)
+    point_f = wgs84.GeoPoint(latitude=lat_f, longitude=0, degrees=True)
+    for point in [point_e, point_f]:
+        assert not path.on_path(point, method=method)
+
+    # Test vectorized
+
+class TestGeoPoint:
+
+    def test_scalar_geopoint_to_nvector_to_geopoint(self):
+        wgs84 = FrameE(name='WGS84')
+        gp1 = wgs84.GeoPoint(10, 5, degrees=True)
+        np1 = gp1.to_nvector()
+        gp2 = np1.to_geo_point()
+        assert gp1 == gp2
+        # Check that the round trip returns a scalar GeoPoint
+        assert np.ndim(gp2.z) == 0
+        assert np.ndim(gp2.latitude) == 0
+        assert np.ndim(gp2.longitude) == 0
+
+    def test_scalar_geopoint_to_nvector_to_ecef_to_geopoint(self):
+        wgs84 = FrameE(name='WGS84')
+        gp1 = wgs84.GeoPoint(10, 5, degrees=True)
+        np1 = gp1.to_nvector()
+        ep1 = np1.to_ecef_vector()
+        gp2 = ep1.to_geo_point()
+        assert gp1 == gp2
+        # Check that the round trip returns a scalar GeoPoint
+        assert np.ndim(gp2.z) == 0
+        assert np.ndim(gp2.latitude) == 0
+        assert np.ndim(gp2.longitude) == 0
+
+        assert np.ndim(ep1.length) == 0
+        assert np.ndim(ep1.azimuth) == 0
+        assert np.ndim(ep1.elevation) == 0
+
+
+    def test_vector_geopoint_to_nvector_to_geopoint(self):
+        wgs84 = FrameE(name='WGS84')
+        gp1 = wgs84.GeoPoint(10, [5, 7], degrees=True)
+        np1 = gp1.to_nvector()
+        gp2 = np1.to_geo_point()
+        assert gp1 == gp2
+        # Check that the round trip returns a vector GeoPoint
+        assert np.ndim(gp2.z) == 1
+        assert np.ndim(gp2.latitude) == 1
+        assert np.ndim(gp2.longitude) == 1
+
+    def test_vector_geopoint_to_nvector_to_ecef_to_geopoint(self):
+        wgs84 = FrameE(name='WGS84')
+        gp1 = wgs84.GeoPoint([10, 15], 5, degrees=True)
+        np1 = gp1.to_nvector()
+        ep1 = np1.to_ecef_vector()
+        gp2 = ep1.to_geo_point()
+        assert gp1 == gp2
+        # Check that the round trip returns a vector GeoPoint
+        assert np.ndim(gp2.z) == 1
+        assert np.ndim(gp2.latitude) == 1
+        assert np.ndim(gp2.longitude) == 1
+
+        assert np.ndim(ep1.length) == 1
+        assert np.ndim(ep1.azimuth) == 1
+        assert np.ndim(ep1.elevation) == 1
+
+
+class TestFrames:
     def test_compare_E_frames(self):
         E = FrameE(name='WGS84')
         E2 = FrameE(a=E.a, f=E.f)
-        self.assertEqual(E, E2)
-        self.assertEqual(E, E)
+        assert E == E2
+        assert E == E
         E3 = FrameE(a=E.a, f=0)
-        self.assertNotEqual(E, E3)
+        assert E != E3
 
     def test_compare_B_frames(self):
         E = FrameE(name='WGS84')
@@ -27,22 +111,22 @@ class TestFrames(unittest.TestCase):
 
         n_EB_E = E.Nvector(unit([[1], [2], [3]]), z=-400)
         B = FrameB(n_EB_E, yaw=10, pitch=20, roll=30, degrees=True)
-        self.assertEqual(B, B)
-        self.assertNotEqual(B, E)
+        assert B == B
+        assert B != E
 
         B2 = FrameB(n_EB_E, yaw=1, pitch=20, roll=30, degrees=True)
-        self.assertNotEqual(B, B2)
+        assert B != B2
 
         B3 = FrameB(n_EB_E, yaw=10, pitch=20, roll=30, degrees=True)
-        self.assertEqual(B, B3)
+        assert B == B3
 
         n_EC_E = E.Nvector(unit([[1], [2], [2]]), z=-400)
         B4 = FrameB(n_EC_E, yaw=10, pitch=20, roll=30, degrees=True)
-        self.assertNotEqual(B, B4)
+        assert B != B4
 
         n_ED_E = E2.Nvector(unit([[1], [2], [3]]), z=-400)
         B5 = FrameB(n_ED_E, yaw=10, pitch=20, roll=30, degrees=True)
-        self.assertNotEqual(B, B5)
+        assert B != B5
 
     def test_compare_N_frames(self):
         wgs84 = FrameE(name='WGS84')
@@ -55,16 +139,15 @@ class TestFrames(unittest.TestCase):
         frame_L2 = FrameL(pointA, wander_azimuth=0)
         frame_L3 = FrameL(pointB, wander_azimuth=0)
 
-        self.assertEqual(frame_N, frame_N)
+        assert frame_N == frame_N
 
-        self.assertEqual(frame_N, frame_L1)
+        assert frame_N == frame_L1
+        assert not (frame_N != frame_L1)
 
-        self.assertFalse((frame_N != frame_L1))
+        assert frame_N == frame_L2
 
-        self.assertEqual(frame_N, frame_L2)
-
-        self.assertTrue(frame_N != frame_L3)
-        self.assertTrue(frame_L1 != frame_L3)
+        assert frame_N != frame_L3
+        assert frame_L1 != frame_L3
 
     def test_compare_L_frames(self):
         wgs84 = FrameE(name='WGS84')
@@ -76,21 +159,19 @@ class TestFrames(unittest.TestCase):
         frame_N1 = FrameL(pointA, wander_azimuth=10)
         frame_N2 = FrameL(pointB, wander_azimuth=10)
 
-        self.assertEqual(frame_N, frame_N)
-        self.assertNotEqual(frame_N, frame_N1)
-        self.assertNotEqual(frame_N, frame_N2)
-        self.assertNotEqual(frame_N1, frame_N2)
+        assert frame_N == frame_N
+        assert frame_N != frame_N1
+        assert frame_N != frame_N2
+        assert frame_N1 != frame_N2
 
 
-class TestExamples(unittest.TestCase):
+class TestExamples:
     @staticmethod
     def test_compute_delta_L_in_moving_frame_east():
         wgs84 = FrameE(name='WGS84')
         point_a = wgs84.GeoPoint(latitude=1, longitude=2, z=0, degrees=True)
-        point_b = wgs84.GeoPoint(latitude=1, longitude=2.005, z=0,
-                                 degrees=True)
-        sensor_position = wgs84.GeoPoint(latitude=1.000090437, longitude=2.0025, z=0,
-                                         degrees=True)
+        point_b = wgs84.GeoPoint(latitude=1, longitude=2.005, z=0, degrees=True)
+        sensor_position = wgs84.GeoPoint(latitude=1.000090437, longitude=2.0025, z=0, degrees=True)
         path = GeoPath(point_a, point_b)
         ti = np.linspace(0, 1.0, 8)
         ship_positions0 = path.interpolate(ti[:-1])
@@ -122,10 +203,8 @@ class TestExamples(unittest.TestCase):
     def test_compute_delta_N_in_moving_frame_east():
         wgs84 = FrameE(name='WGS84')
         point_a = wgs84.GeoPoint(latitude=1, longitude=2, z=0, degrees=True)
-        point_b = wgs84.GeoPoint(latitude=1, longitude=2.005, z=0,
-                                 degrees=True)
-        sensor_position = wgs84.GeoPoint(latitude=1.0, longitude=2.0025, z=0,
-                                         degrees=True)
+        point_b = wgs84.GeoPoint(latitude=1, longitude=2.005, z=0, degrees=True)
+        sensor_position = wgs84.GeoPoint(latitude=1.0, longitude=2.0025, z=0, degrees=True)
         path = GeoPath(point_a, point_b)
         ti = np.linspace(0, 1.0, 8)
         ship_positions0 = path.interpolate(ti[:-1])
@@ -234,15 +313,14 @@ class TestExamples(unittest.TestCase):
 
         pointC = p_EC_E.to_geo_point()
 
-        lat_EC, lon_EC = pointC.latitude_deg, pointC.longitude_deg
-        z_EC = pointC.z
+        lat, lon, z = pointC.latlon_deg
         # Here we also assume that the user wants output height (= - depth):
-        msg = 'Ex2, Pos C: lat, long = {},{} deg,  height = {} m'
-        print(msg.format(lat_EC, lon_EC, -z_EC))
+        msg = 'Ex2, Pos C: lat, lon = {},{} deg,  height = {} m'
+        print(msg.format(lat, lon, -z))
 
-        assert_array_almost_equal(lat_EC, 53.32637826)
-        assert_array_almost_equal(lon_EC, 63.46812344)
-        assert_array_almost_equal(z_EC, -406.00719607)
+        assert_array_almost_equal(lat, 53.32637826)
+        assert_array_almost_equal(lon, 63.46812344)
+        assert_array_almost_equal(z, -406.00719607)
 
     @staticmethod
     def test_Ex3_ECEF_vector_to_geodetic_latitude():
@@ -294,9 +372,9 @@ class TestExamples(unittest.TestCase):
     @staticmethod
     def test_alternative_great_circle_distance():
         frame_E = FrameE(a=6371e3, f=0)
-        positionA = frame_E.GeoPoint(latitude=88, longitude=0, degrees=True)
-        positionB = frame_E.GeoPoint(latitude=89, longitude=-170, degrees=True)
-        path = GeoPath(positionA, positionB)
+        point_a = frame_E.GeoPoint(latitude=88, longitude=0, degrees=True)
+        point_b = frame_E.GeoPoint(latitude=89, longitude=-170, degrees=True)
+        path = GeoPath(point_a, point_b)
 
         s_AB = path.track_distance(method='greatcircle')
         d_AB = path.track_distance(method='euclidean')
@@ -436,8 +514,8 @@ class TestExamples(unittest.TestCase):
         lat, lon = pointC.latitude_deg, pointC.longitude_deg
         msg = 'Ex9, Intersection: lat, long = {} {} deg'
         print(msg.format(lat, lon))
-        self.assertTrue(np.isnan(lat))
-        self.assertTrue(np.isnan(lon))
+        assert np.isnan(lat)
+        assert np.isnan(lon)
 
     def test_Ex10_cross_track_distance(self):
 
@@ -466,15 +544,11 @@ class TestExamples(unittest.TestCase):
         assert_array_almost_equal(s_xt, 11117.79911015)
         assert_array_almost_equal(d_xt, 11117.79346741)
 
-        self.assertTrue(pathA.on_path(pointC))
-        self.assertTrue(pathA.on_path(pointC, method='exact'))
+        assert pathA.on_path(pointC)
+        assert pathA.on_path(pointC, method='exact')
 
-        self.assertFalse(pathA.on_path(pointC2))
-        self.assertFalse(pathA.on_path(pointC2, method='exact'))
-        self.assertEqual(pointC3, pointA2)
-        self.assertEqual(pointC4, pointA1)
+        assert not pathA.on_path(pointC2)
+        assert not pathA.on_path(pointC2, method='exact')
+        assert pointC3 == pointA2
+        assert pointC4 == pointA1
 
-
-if __name__ == "__main__":
-    # import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()

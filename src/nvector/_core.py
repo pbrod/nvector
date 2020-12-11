@@ -1175,8 +1175,7 @@ class _CrossTrackDistance(object):
 
 
 @use_docstring_from(_CrossTrackDistance)
-def cross_track_distance(path, n_EB_E, method='greatcircle',
-                         radius=6371009.0):
+def cross_track_distance(path, n_EB_E, method='greatcircle', radius=6371009.0):
 
     c_E = great_circle_normal(path[0], path[1])
     sin_theta = -np.dot(c_E.T, n_EB_E).ravel()
