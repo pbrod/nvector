@@ -2,6 +2,47 @@
 Changelog
 =========
 
+Version 0.7.5, December 11, 2020
+================================
+
+Per A Brodtkorb (24):
+      * Updated CHANGELOG.rst prepare for release 7.5
+      * Updated docs/conf.py
+      * Updated README.rst and LICENSE.txt
+      * Replaced import unittest with import pytest in test_frames.py
+      * Fixed issue #10: Inconsistent return types in GeoPath.track_distance:   *
+         - GeoPath, GeoPoint, Nvector and ECEFvector and Pvector now return
+           scalars for the case where the input is not actually arrays of points
+           but just single objects.
+      * Added extra tests for issue #10 and updated old tests and the examples in the help headers.
+      * Vectorized FrameE.inverse and FrameE.direct methods.
+      * Extended deg and rad functions in _core.py.
+      * Vectorized GeoPoint.distance_and_azimuth
+      * Made import of cartopy in nvector.plot more robust.
+      * Updated test_Ex10_cross_track_distance
+      * Updated sonar-project.properties
+      * Replaced deprecated sonar.XXXX.reportPath with sonar.XXXX.reportPaths
+      * Simplified nvector/_core.__doc__
+      * Updated .travis.yml
+      * Changed the definition of sonar addon
+      * Added CC_TEST_REPORTER_ID to .travis.yml
+      * Added python 3.8 to the CI testing.
+      * Changed so that setup.py is python 2.7 compatible again.
+      * Updated build_package.py
+      * Renamed CHANGES.rst to CHANGELOG.rst
+      * Updated setup.cfg and setup.py
+      * Added license.py
+      * Updated build_package.py
+      * Removed conda-build from .travis.yml
+      * Attempt to get travis to run the tests again....
+      * API change: replaced "python setup.py doctests" with "python setup.py doctest"
+      * Added doctest example to nvector._core._atleast_3d Made xyz2R and zyx2R code simpler.
+      * Replaced deprecated Nvector.mean_horizontal_position with  Nvector.mean in test_frames.py
+      * Added mdot to __all__ in nvector/_core.py and in documentation summary.
+      * Sorted the the documentation summary by function name in nvector.rst
+      * Removed --pyargs nvector --doctest-modules --pep8 from addopts section in setup.cfg
+      * Updated documentation and added missing documentation.
+
 Version 0.7.4, June 4, 2019
 ============================
 Per A Brodtkorb (2):
@@ -38,17 +79,14 @@ Per A Brodtkorb (26):
       * Updated long_description in setup.cfg
       * Replaced deprecated sphinx.ext.pngmath with sphinx.ext.imgmath
       * Added imgmath to requirements for building the docs.
-      * Fixing shallow clone warning. Replaced property
-         'sonar.python.coverage.itReportPath' with
-         'sonar.python.coverage.reportPaths' instead, because it is has been
-         removed.
+      * Fixing shallow clone warning.
+      * Replaced property 'sonar.python.coverage.itReportPath' with
+         'sonar.python.coverage.reportPaths' instead, because it is has been removed.
       * Drop python 3.4 support
       * Added python 3.7 support
-      * Fixed a bug: Mixed scalars and np.array([1]) values don't work with
-         np.rad2deg function.
+      * Fixed a bug: Mixed scalars and np.array([1]) values don't work with np.rad2deg function.
       * Added ETRS ELLIPSOID in _core.py Added ED50 as alias for International
-         (Hayford)/European Datum in _core.py Added sad69 as alias for South
-         American 1969 in _core.py
+         (Hayford)/European Datum in _core.py Added sad69 as alias for South American 1969 in _core.py
       * Simplified docstring for nv.test
       * Generalized the setup.py.
       * Replaced aliases with the correct names in setup.cfg.
@@ -136,7 +174,8 @@ Per A Brodtkorb (29):
      * Added .codeclimate.yml
      * Updated installation information in _info.py
      * Added GeoPath.on_path method. Clearified intersection example
-     * Added great_circle_normal, cross_track_distance Renamed intersection to intersect (Intersection is deprecated.)
+     * Added great_circle_normal, cross_track_distance
+     * Renamed intersection to intersect (Intersection is deprecated.)
      * Simplified R2zyx with a call to R2xyz Improved accuracy for great circle cross track distance for small distances.
      * Added on_great_circle, _on_great_circle_path, _on_ellipsoid_path, closest_point_on_great_circle and closest_point_on_path to GeoPath
      * made __eq__ more robust for frames
