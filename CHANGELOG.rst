@@ -5,8 +5,12 @@ Changelog
 Version 0.7.5, December 12, 2020
 ================================
 
-Per A Brodtkorb (29):
+Per A Brodtkorb (32):
       * Updated CHANGELOG.rst and prepare for release 0.7.5
+	  * Changed so that GeoPath.on_great_circle and GeoPath.on_great_circle
+         returns scalar result if the two points defining the path are scalars. See issue #10.
+      * Fixed failing doctests.
+      * Added doctest configuration to docs/conf.py
       * Added allclose to nvector/objects.py
       * Added array_to_list_dict an isclose functions in nvector.objects.py
          Replaced f-string in the __repr__ method of the _Common class in
