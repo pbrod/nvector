@@ -7,7 +7,7 @@ Version 0.7.5, December 12, 2020
 
 Per A Brodtkorb (32):
       * Updated CHANGELOG.rst and prepare for release 0.7.5
-	  * Changed so that GeoPath.on_great_circle and GeoPath.on_great_circle
+	   * Changed so that GeoPath.on_great_circle and GeoPath.on_great_circle
          returns scalar result if the two points defining the path are scalars. See issue #10.
       * Fixed failing doctests.
       * Added doctest configuration to docs/conf.py
@@ -55,14 +55,18 @@ Per A Brodtkorb (32):
       * Removed --pyargs nvector --doctest-modules --pep8 from addopts section in setup.cfg
       * Updated documentation and added missing documentation.
 
+
 Version 0.7.4, June 4, 2019
-============================
+===========================
+
 Per A Brodtkorb (2):
       * Fixed PyPi badge and added downloads badge in nvector/_info.py and README.rst
       * Removed obsolete and wrong badges from docs/index.rst
 
+
 Version 0.7.3, June 4, 2019
-============================
+===========================
+
 Per A Brodtkorb (6):
       * Renamed LICENSE.txt and THANKS.txt to LICENSE.rst and THANKS.rst
       * Updated README.rst and nvector/_info.py
@@ -105,7 +109,8 @@ Per A Brodtkorb (26):
 
 
 Version 0.6.0, December 9, 2018
-================================
+===============================
+
 Per A Brodtkorb (79):
       * Updated requirements in setup.py
       * Removed tox.ini
@@ -153,6 +158,7 @@ Per A Brodtkorb (79):
       * replaced link from latest to stable docs on readthedocs and updated
          crosstrack distance test.
       * updated documentation in setup.py
+
 
 Version 0.5.2, March 7, 2017
 ============================
