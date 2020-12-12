@@ -128,6 +128,66 @@ def isclose(a, b, rtol=1e-9, atol=0.0, equal_nan=False):
     return out
 
 
+def allclose(a, b, rtol=1.e-5, atol=1.e-8, equal_nan=False):
+    """
+    Returns True if two arrays are element-wise equal within a tolerance.
+
+    Parameters
+    ----------
+    a, b : array_like
+        Input arrays to compare.
+    rtol : float
+        The relative tolerance parameter (see Notes).
+    atol : float
+        The absolute tolerance parameter (see Notes).
+    equal_nan : bool
+        Whether to compare NaN's as equal.  If True, NaN's in `a` will be
+        considered equal to NaN's in `b` in the output array.
+
+        .. versionadded:: 1.10.0
+
+    Returns
+    -------
+    allclose : bool
+        Returns True if the two arrays are equal within the given
+        tolerance; False otherwise.
+
+    See Also
+    --------
+    isclose, all, any, equal
+
+    Notes
+    -----
+    For finite values, allclose uses the following equation to test whether
+    two floating point values are equivalent:
+
+     absolute(`a` - `b`) <= maximimum(`atol`, `rtol` * maximum(absolute(`a`), absolute(`b`)))
+
+    NaNs are treated as equal if they are in the same place and if
+    ``equal_nan=True``.  Infs are treated as equal if they are in the same
+    place and of the same sign in both arrays.
+
+    The comparison of `a` and `b` uses standard broadcasting, which
+    means that `a` and `b` need not have the same shape in order for
+    ``allclose(a, b)`` to evaluate to True.
+
+    Examples
+    --------
+    >>> import nvector.objects as no
+    >>> no.allclose([1e10,1e-7], [1.00001e10,1e-8])
+    False
+    >>> no.allclose([1e10,1e-8], [1.00001e10,1e-9])
+    True
+    >>> no.allclose([1e10,1e-8], [1.0001e10,1e-9])
+    False
+    >>> no.allclose([1.0, np.nan], [1.0, np.nan])
+    False
+    >>> no.allclose([1.0, np.nan], [1.0, np.nan], equal_nan=True)
+    True
+
+    """
+    return np.all(isclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan))
+
 class _DeltaE(object):
     __doc__ = """
     Returns cartesian delta vector from positions a to b decomposed in E.
@@ -309,9 +369,9 @@ class GeoPoint(_Common):
         options = dict(rtol=rtol, atol=atol)
         delta_lat = diff(self.latitude, other.latitude)
         delta_lon = diff(self.longitude, other.longitude)
-        return (np.allclose(delta_lat, 0, **options)
-                and np.allclose(delta_lon, 0, **options)
-                and np.allclose(self.z, other.z, **options)
+        return (allclose(delta_lat, 0, **options)
+                and allclose(delta_lon, 0, **options)
+                and allclose(self.z, other.z, **options)
                 and self.frame == other.frame)
 
     @property
@@ -557,8 +617,8 @@ class Nvector(_Common):
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
         options = dict(rtol=rtol, atol=atol)
-        return (np.allclose(self.normal, other.normal, **options)
-                and np.allclose(self.z, other.z, **options)
+        return (allclose(self.normal, other.normal, **options)
+                and allclose(self.z, other.z, **options)
                 and self.frame == other.frame)
 
     def __add__(self, other):
@@ -604,7 +664,7 @@ class Pvector(_Common):
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
         options = dict(rtol=rtol, atol=atol)
-        return (np.allclose(self.pvector, other.pvector, **options)
+        return (allclose(self.pvector, other.pvector, **options)
                 and self.frame == other.frame)
 
     def to_ecef_vector(self):
@@ -1136,9 +1196,9 @@ class FrameE(_Common):
         self.R_Ee = E_rotation(axes)
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
-        return (np.allclose(self.a, other.a, rtol=rtol, atol=atol)
-                and np.allclose(self.f, other.f, rtol=rtol, atol=atol)
-                and np.allclose(self.R_Ee, other.R_Ee, rtol=rtol, atol=atol))
+        return (allclose(self.a, other.a, rtol=rtol, atol=atol)
+                and allclose(self.f, other.f, rtol=rtol, atol=atol)
+                and allclose(self.R_Ee, other.R_Ee, rtol=rtol, atol=atol))
 
 
     def inverse(self, lat_a, lon_a, lat_b, lon_b, z=0, long_unroll=False, degrees=False):
@@ -1321,7 +1381,7 @@ class FrameN(_LocalFrame):
         return n_E2R_EN(nvector.normal, nvector.frame.R_Ee)
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
-        return (np.allclose(self.R_EN, other.R_EN, rtol=rtol, atol=atol)
+        return (allclose(self.R_EN, other.R_EN, rtol=rtol, atol=atol)
                 and self.nvector == other.nvector)
 
 
@@ -1422,10 +1482,10 @@ class FrameB(_LocalFrame):
         return mdot(R_EN, R_NB)  # rotation matrix
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
-        return (np.allclose(self.yaw, other.yaw, rtol=rtol, atol=atol)
-                and np.allclose(self.pitch, other.pitch, rtol=rtol, atol=atol)
-                and np.allclose(self.roll, other.roll, rtol=rtol, atol=atol)
-                and np.allclose(self.R_EN, other.R_EN, rtol=rtol, atol=atol)
+        return (allclose(self.yaw, other.yaw, rtol=rtol, atol=atol)
+                and allclose(self.pitch, other.pitch, rtol=rtol, atol=atol)
+                and allclose(self.roll, other.roll, rtol=rtol, atol=atol)
+                and allclose(self.R_EN, other.R_EN, rtol=rtol, atol=atol)
                 and self.nvector == other.nvector)
 
 
