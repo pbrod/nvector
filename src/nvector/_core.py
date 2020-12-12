@@ -300,43 +300,46 @@ def mdot(a, b):
     Examples
     --------
     3 x 3 x 2 times 3 x 3 x 2 array -> 3 x 2 x 2 array
+
     >>> import numpy as np
+    >>> import nvector as nv
     >>> a = 1.0 * np.arange(18).reshape(3,3,2)
     >>> b = - a
     >>> t = np.concatenate([np.dot(a[...,i], b[...,i])[:, :, None]
     ...                    for i in range(2)], axis=2)
-    >>> tt = mdot(a, b)
+    >>> tt = nv.mdot(a, b)
     >>> tt.shape
     (3, 3, 2)
     >>> np.allclose(t, tt)
     True
 
     3 x 3 x 2 times 3 x 1 array -> 3 x 1 x 2 array
+
     >>> t1 = np.concatenate([np.dot(a[...,i], b[:,0,0][:,None])[:,:,None]
     ...                    for i in range(2)], axis=2)
 
-    >>> tt = mdot(a, b[:,0,0].reshape(-1,1))
+    >>> tt = nv.mdot(a, b[:,0,0].reshape(-1,1))
     >>> tt.shape
     (3, 1, 2)
     >>> np.allclose(t1, tt)
     True
 
     3 x 3  times 3 x 3 array -> 3 x 3 array
-    >>> tt0 = mdot(a[...,0], b[...,0])
+    >>> tt0 = nv.mdot(a[...,0], b[...,0])
     >>> tt0.shape
     (3, 3)
     >>> np.allclose(t[...,0], tt0)
     True
 
     3 x 3  times 3 x 1 array -> 3 x 1 array
-    >>> tt0 = mdot(a[...,0], b[:,0,0][:,None])
+    >>> tt0 = nv.mdot(a[...,0], b[:,0,0][:,None])
     >>> tt0.shape
     (3, 1)
     >>> np.allclose(t[:,0,0][:,None], tt0)
     True
 
     3 x 3  times 3 x 2 array -> 3 x 1 x 2 array
-    >>> tt0 = mdot(a[..., 0], b[:, :2, 0][:, None])
+    >>> tt0 = nv.mdot(a[..., 0], b[:, :2, 0][:, None])
     >>> tt0.shape
     (3, 1, 2)
     >>> np.allclose(t[:,:2,0][:,None], tt0)
@@ -940,13 +943,13 @@ def _atleast_3d(x, y, z):
     -------
     >>> from nvector._core import _atleast_3d
     >>> for arr in _atleast_3d([1, 2], [[1, 2]], [[[1, 2]]]):
-     ...     print(arr, arr.shape)
+    ...     print(arr, arr.shape)
     [[[1 2]]] (1, 1, 2)
     [[[[1 2]]]] (1, 1, 1, 2)
     [[[[[1 2]]]]] (1, 1, 1, 1, 2)
 
-     >>> for arr in _atleast_3d([[1], [2]], [[[1], [2]]], [[[[1], [2]]]]):
-     ...     print(arr, arr.shape)
+    >>> for arr in _atleast_3d([[1], [2]], [[[1], [2]]], [[[[1], [2]]]]):
+    ...     print(arr, arr.shape)
     [[[[1]
        [2]]]] (1, 1, 2, 1)
     [[[[[1]

@@ -338,7 +338,7 @@ Exact solution for the WGS84 ellipsoid:
     >>> s_12, _azi1, _azi2 = point1.distance_and_azimuth(point2)
 
     >>> p_12_E = point2.to_ecef_vector() - point1.to_ecef_vector()
-    >>> d_12 = p_12_E.length[0]
+    >>> d_12 = p_12_E.length
     >>> msg = 'Ellipsoidal and Euclidean distance = {:5.2f} km, {:5.2f} km'
     >>> msg.format(s_12 / 1000, d_12 / 1000)
     'Ellipsoidal and Euclidean distance = 333.95 km, 333.91 km'
