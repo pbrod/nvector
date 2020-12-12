@@ -27,6 +27,107 @@ __all__ = ['FrameE', 'FrameB', 'FrameL', 'FrameN', 'GeoPoint', 'GeoPath',
            'delta_E', 'delta_N', 'delta_L']
 
 
+def array_to_list_dict(d):
+    """
+    Examples
+    --------
+    >>> import numpy as np
+    >>> d = dict(a=np.zeros((3,)), b=(1,2,3), c=[], d=1, e='test',
+    ...          f=np.nan, g=[1], h=[np.nan], i=None)
+    >>> e = array_to_list_dict(d)
+    >>> e == {'a': [0.0, 0.0, 0.0],  'b': [1, 2, 3], 'c': [],'d': 1,
+    ...       'e': 'test', 'f': np.nan, 'g': [1], 'h': [np.nan], 'i': None}
+    True
+
+    """
+    if isinstance(d, dict):
+        for key in d:
+            d[key] = array_to_list_dict(d[key])
+    elif isinstance(d, (list, tuple)):
+        d = [array_to_list_dict(item) for item in d]
+    else:
+        try:
+            d = d.tolist()
+        except AttributeError:
+            pass
+    return d
+
+
+def isclose(a, b, rtol=1e-9, atol=0.0, equal_nan=False):
+    """
+    Returns True where the two arrays `a` and `b` are element-wise equal within a tolerance.
+
+    Parameters
+    ----------
+    a, b : array_like
+        Input arrays to compare.
+    rtol : float
+        The relative tolerance parameter (see Notes).
+    atol : float
+        The absolute tolerance parameter (see Notes).
+    equal_nan : bool
+        Whether to compare NaN's as equal.  If True, NaN's in `a` will be
+        considered equal to NaN's in `b` in the output array.
+
+    Returns
+    -------
+    y : array_like
+        Returns a boolean array of where `a` and `b` are equal within the
+        given tolerance. If both `a` and `b` are scalars, returns a single
+        boolean value.
+
+    See Also
+    --------
+    allclose
+
+    Notes
+    -----
+    .. versionadded:: 0.7.5
+
+    For finite values, isclose uses the following equation to test whether
+    two floating point values are equivalent:
+
+     absolute(`a` - `b`) <= maximimum(`atol`, `rtol` * maximum(absolute(`a`), absolute(`b`)))
+
+    Like the built-in `math.isclose`, the above equation is symmetric
+    in `a` and `b`. Furthermore, `atol` should be carefully selected for
+    the use case at hand. A zero value for `atol` will result in `False`
+    if either `a` or `b` is zero.
+
+    Examples
+    --------
+    >>> import nvector.objects as no
+    >>> no.isclose([1e10,1e-7], [1.00001e10,1e-8])
+    array([False, False])
+    >>> no.isclose([1e10,1e-8], [1.00001e10,1e-9])
+    array([False, False])
+    >>> no.isclose([1e10,1e-8], [1.0001e10,1e-9])
+    array([False,  False])
+    >>> no.isclose([1.0, np.nan], [1.0, np.nan])
+    array([ True, False])
+    >>> no.isclose([1.0, np.nan], [1.0, np.nan], equal_nan=True)
+    array([ True, True])
+    >>> no.isclose([1e-8, 1e-7], [0.0, 0.0])
+    array([False, False])
+    >>> no.isclose([1e-100, 1e-7], [0.0, 0.0], atol=0.0)
+    array([False, False])
+    >>> no.isclose([1e-10, 1e-10], [1e-20, 0.0])
+    array([False,  False])
+    >>> no.isclose([1e-10, 1e-10], [1e-20, 0.999999e-10], atol=0.0)
+    array([False,  False])
+    """
+    a, b = np.broadcast_arrays(a, b)
+
+    mask = np.isfinite(a) & np.isfinite(b)
+
+    out = np.full(b.shape, False)
+    abs_tol = np.maximum(atol, rtol*np.maximum(np.abs(a[mask]), np.abs(b[mask])))
+    out[mask] = np.isclose(a[mask], b[mask], rtol=0, atol=abs_tol, equal_nan=equal_nan)
+    mask = ~mask
+    out[mask] = np.isclose(a[mask], b[mask], equal_nan=equal_nan)
+    return out
+
+
 class _DeltaE(object):
     __doc__ = """
     Returns cartesian delta vector from positions a to b decomposed in E.
@@ -121,12 +222,13 @@ def delta_L(point_a, point_b, wander_azimuth=0):
 class _Common(object):
 
     def __repr__(self):
-        n = len(self.__class__.__name__) + 1
-        fmt = ',\n' + ' ' * n
+        cname = self.__class__.__name__
+        fmt = ', '
+        dict_params = array_to_list_dict(self.__dict__)
         params = fmt.join(['{}={!r}'.format(name, val)
-                           for name, val in self.__dict__.items() if not name.startswith('_')])
+                           for name, val in dict_params.items() if not name.startswith('_')])
 
-        return (f'{self.__class__.__name__}({params})')
+        return ('{}({})'.format(cname, params))
 
     def __eq__(self, other):
         try:
@@ -162,11 +264,20 @@ class GeoPoint(_Common):
 
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
+    >>> point_a = wgs84.GeoPoint(-41.32, 174.81, degrees=True)
+    >>> point_b = wgs84.GeoPoint(40.96, -5.50, degrees=True)
+
+    >>> print(point_a)
+    GeoPoint(latitude=-0.721170046924057,
+             longitude=3.0510100654112877,
+             z=0,
+            frame=FrameE(a=6378137.0,
+                         f=0.0033528106647474805,
+                         name='WGS84',
+                         R_Ee=[[0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [-1.0, 0.0, 0.0]]))
 
     The geodesic inverse problem
 
-    >>> point_a = wgs84.GeoPoint(-41.32, 174.81, degrees=True)
-    >>> point_b = wgs84.GeoPoint(40.96, -5.50, degrees=True)
     >>> s12, az1, az2 = point_a.distance_and_azimuth(point_b, degrees=True)
     >>> 's12 = {:5.2f}, az1 = {:5.2f}, az2 = {:5.2f}'.format(s12, az1, az2)
     's12 = 19959679.27, az1 = 161.07, az2 = 18.83'
@@ -363,6 +474,22 @@ class Nvector(_Common):
     given into this function as n-vector, n_EB_E and a depth, z relative to the
     ellipsiod.
 
+    Examples
+    --------
+    >>> import nvector as nv
+    >>> wgs84 = nv.FrameE(name='WGS84')
+    >>> point_a = wgs84.GeoPoint(-41.32, 174.81, degrees=True)
+    >>> point_b = wgs84.GeoPoint(40.96, -5.50, degrees=True)
+    >>> nv_a = point_a.to_nvector()
+    >>> print(nv_a)
+    Nvector(normal=[[-0.7479546170813224], [0.06793758070955484], [-0.6602638683996461]],
+            z=0,
+            frame=FrameE(a=6378137.0,
+                        f=0.0033528106647474805,
+                        name='WGS84',
+                        R_Ee=[[0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [-1.0, 0.0, 0.0]]))
+
+
     See also
     --------
     GeoPoint, ECEFvector, Pvector
@@ -522,7 +649,7 @@ class Pvector(_Common):
     def length(self):
         "Length of the pvector."
         lengths = norm(self.pvector, axis=0)
-        if self.scalar:  # and len(lengths) == 1:
+        if self.scalar:
             return lengths[0]
         return lengths
 
@@ -535,7 +662,7 @@ class Pvector(_Common):
     def azimuth(self):
         """Azimuth in radian"""
         p_AB_N = self.pvector
-        if self.scalar: # and self.pvector.shape[1] == 1:
+        if self.scalar:
             return np.arctan2(p_AB_N[1], p_AB_N[0])[0]
         return np.arctan2(p_AB_N[1], p_AB_N[0])
 
@@ -715,13 +842,6 @@ class GeoPath(object):
         return nvector_a.normal, nvector_b.normal
 
     def _get_average_radius(self):
-        # n1 = self.point_a.to_nvector()
-        # n2 = self.point_b.to_nvector()
-        # n_EM_E = mean_horizontal_position(np.hstack((n1.normal, n2.normal)))
-        # p_EM_E = n1.frame.Nvector(n_EM_E).to_ecef_vector()
-        # radius = norm(p_EM_E.pvector, axis=0)
-        # radius = (norm(p_E1_E.pvector, axis=0) +
-        #           norm(p_E2_E.pvector, axis=0)) / 2
         p_E1_E, p_E2_E = self.ecef_vectors()
         radius = (p_E1_E.length + p_E2_E.length) / 2
         return radius
@@ -808,14 +928,14 @@ class GeoPath(object):
         point_a, point_b = self.geo_points()
         distance_ab, azimuth_ab, _azi_ba = point_a.distance_and_azimuth(point_b)
         distance_ac, azimuth_ac, _azi_ca = point_a.distance_and_azimuth(point)
-        return (np.isclose(distance_ac, 0, atol=atol)
+        return (isclose(distance_ac, 0, atol=atol)
                 | ((distance_ab >= distance_ac)
-                   & np.isclose(azimuth_ac, azimuth_ab, rtol=rtol, atol=atol)))
+                   & isclose(azimuth_ac, azimuth_ab, rtol=rtol, atol=atol)))  #
 
-    def on_great_circle(self, point, rtol=1e-6, atol=1e-8):
-        """Returns True if point is on the great circle."""
+    def on_great_circle(self, point, atol=1e-8):
+        """Returns True if point is on the great circle within a tolerance."""
         distance = np.abs(self.cross_track_distance(point))
-        return np.isclose(distance, 0, rtol, atol)
+        return isclose(distance, 0, atol=atol)
 
     def _on_great_circle_path(self, point, radius=None, atol=1e-8):
         if radius is None:
@@ -826,7 +946,7 @@ class GeoPath(object):
 
     def on_path(self, point, method='greatcircle', rtol=1e-6, atol=1e-8):
         """
-        Returns True if point is on the path between A and B
+        Returns True if point is on the path between A and B witin a tolerance.
 
         Parameters
         ----------
@@ -892,7 +1012,7 @@ class GeoPath(object):
         >>> path.on_path(point)[0]
         False
         >>> np.allclose((point.latitude_deg, point.longitude_deg),
-        ...             ([50.99270338], [2.89977984]))
+        ...             (50.99270338, 2.89977984))
         True
 
         >>> np.allclose(GeoPath(point_c, point).track_distance(),  810.76312076)
@@ -935,7 +1055,7 @@ class GeoPath(object):
         >>> path = nv.GeoPath(pointA, pointB)
         >>> point = path.closest_point_on_path(pointC)
         >>> np.allclose((point.latitude_deg, point.longitude_deg),
-        ...             ([51.00038411380564], [1.900003311624411]))
+        ...             (51.00038411380564, 1.900003311624411))
         True
         >>> np.allclose(GeoPath(pointC, point).track_distance(),  42.67368351)
         True

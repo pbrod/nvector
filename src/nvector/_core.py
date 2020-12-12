@@ -34,30 +34,27 @@ _EPS = np.finfo(float).eps  # machine precision (machine epsilon)
 _TINY = np.finfo(float).tiny
 
 
-ELLIPSOID = {1: ({'a': 6377563.3960, 'f': 1.0 / 299.3249646}, 'Airy 1858'),
-             2: ({'a': 6377340.189, 'f': 1.0 / 299.3249646}, 'Airy Modified'),
-             3: ({'a': 6378160, 'f': 1.0 / 298.25}, 'Australian National'),
-             4: ({'a': 6377397.155, 'f': 1.0 / 299.1528128}, 'Bessel 1841'),
-             5: ({'a': 6378249.145, 'f': 1.0 / 293.465}, 'Clarke 1880'),
-             6: ({'a': 6377276.345, 'f': 1.0 / 300.8017}, 'Everest 1830'),
-             7: ({'a': 6377304.063, 'f': 1.0 / 300.8017}, 'Everest Modified'),
-             8: ({'a': 6378166.0, 'f': 1.0 / 298.3}, 'Fisher 1960'),
-             9: ({'a': 6378150.0, 'f': 1.0 / 298.3}, 'Fisher 1968'),
-             10: ({'a': 6378270.0, 'f': 1.0 / 297}, 'Hough 1956'),
-             11: ({'a': 6378388.0, 'f': 1.0 / 297},
-                  'International (Hayford)/European Datum (ED50)'),
-             12: ({'a': 6378245.0, 'f': 1.0 / 298.3}, 'Krassovsky 1938'),
-             13: ({'a': 6378145., 'f': 1.0 / 298.25}, 'NWL-9D  (WGS 66)'),
-             14: ({'a': 6378160., 'f': 1.0 / 298.25}, 'South American 1969 (SAD69'),
-             15: ({'a': 6378136, 'f': 1.0 / 298.257},
-                  'Soviet Geod. System 1985'),
-             16: ({'a': 6378135., 'f': 1.0 / 298.26}, 'WGS 72'),
-             17: ({'a': 6378206.4, 'f': 1.0 / 294.9786982138},
-                  'Clarke 1866    (NAD27)'),
-             18: ({'a': 6378137.0, 'f': 1.0 / 298.257223563},
-                  'GRS80 / WGS84  (NAD83)'),
-             19: ({'a': 6378137, 'f': 298.257222101}, 'ETRS89')
-             }
+ELLIPSOID = {
+    1: ({'a': 6377563.3960, 'f': 1.0 / 299.3249646}, 'Airy 1858'),
+    2: ({'a': 6377340.189, 'f': 1.0 / 299.3249646}, 'Airy Modified'),
+    3: ({'a': 6378160, 'f': 1.0 / 298.25}, 'Australian National'),
+    4: ({'a': 6377397.155, 'f': 1.0 / 299.1528128}, 'Bessel 1841'),
+    5: ({'a': 6378249.145, 'f': 1.0 / 293.465}, 'Clarke 1880'),
+    6: ({'a': 6377276.345, 'f': 1.0 / 300.8017}, 'Everest 1830'),
+    7: ({'a': 6377304.063, 'f': 1.0 / 300.8017}, 'Everest Modified'),
+    8: ({'a': 6378166.0, 'f': 1.0 / 298.3}, 'Fisher 1960'),
+    9: ({'a': 6378150.0, 'f': 1.0 / 298.3}, 'Fisher 1968'),
+    10: ({'a': 6378270.0, 'f': 1.0 / 297}, 'Hough 1956'),
+    11: ({'a': 6378388.0, 'f': 1.0 / 297}, 'International (Hayford)/European Datum (ED50)'),
+    12: ({'a': 6378245.0, 'f': 1.0 / 298.3}, 'Krassovsky 1938'),
+    13: ({'a': 6378145., 'f': 1.0 / 298.25}, 'NWL-9D  (WGS 66)'),
+    14: ({'a': 6378160., 'f': 1.0 / 298.25}, 'South American 1969 (SAD69'),
+    15: ({'a': 6378136, 'f': 1.0 / 298.257}, 'Soviet Geod. System 1985'),
+    16: ({'a': 6378135., 'f': 1.0 / 298.26}, 'WGS 72'),
+    17: ({'a': 6378206.4, 'f': 1.0 / 294.9786982138}, 'Clarke 1866    (NAD27)'),
+    18: ({'a': 6378137.0, 'f': 1.0 / 298.257223563}, 'GRS80 / WGS84  (NAD83)'),
+    19: ({'a': 6378137, 'f': 298.257222101}, 'ETRS89')
+}
 ELLIPSOID_IX = {'airy1858': 1,
                 'airymodified': 2,
                 'australiannational': 3,
@@ -1366,8 +1363,7 @@ def euclidean_distance(n_EA_E, n_EB_E, radius=6371009.0):
     return d_AB
 
 
-def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563,
-                              R_Ee=None):
+def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     """
     Returns azimuth from A to B, relative to North:
 
@@ -1439,8 +1435,7 @@ class _PositionBFromAzimuthAndDistanceFromPositionA(object):
 
 
 @use_docstring_from(_PositionBFromAzimuthAndDistanceFromPositionA)
-def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth,
-                                       R_Ee=None):
+def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth, R_Ee=None):
 
     if R_Ee is None:
         R_Ee = E_rotation()
