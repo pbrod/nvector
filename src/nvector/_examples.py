@@ -105,8 +105,8 @@ use a = 6 378 135 m and f = 1/298.26.
 
 example_2_obj_solution = """
 Solution:
-    >>> import nvector as nv
     >>> import numpy as np
+    >>> import nvector as nv
     >>> wgs72 = nv.FrameE(name='WGS72')
     >>> wgs72 = nv.FrameE(a=6378135, f=1.0/298.26)
 
@@ -532,6 +532,7 @@ Find the position C where the two great circles intersect.
 
 example_9_obj_solution = """
 Solution:
+    >>> import numpy as np
     >>> import nvector as nv
     >>> pointA1 = nv.GeoPoint(10, 20, degrees=True)
     >>> pointA2 = nv.GeoPoint(30, 40, degrees=True)
@@ -614,6 +615,7 @@ between position A1 and A2.
 
 example_10_obj_solution = """
 Solution:
+    >>> import numpy as np
     >>> import nvector as nv
     >>> frame = nv.FrameE(a=6371e3, f=0)
     >>> pointA1 = frame.GeoPoint(0, 0, degrees=True)

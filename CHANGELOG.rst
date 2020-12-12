@@ -2,15 +2,23 @@
 Changelog
 =========
 
-Version 0.7.5, December 11, 2020
+Version 0.7.5, December 12, 2020
 ================================
 
-Per A Brodtkorb (24):
+Per A Brodtkorb (29):
       * Updated CHANGELOG.rst and prepare for release 0.7.5
+      * Added allclose to nvector/objects.py
+      * Added array_to_list_dict an isclose functions in nvector.objects.py
+         Replaced f-string in the __repr__ method of the _Common class in
+         nvector.objects.py with format in order to work on python version 3.5
+         and below. 
+      * Made nvector.plot.py more robust.
+      * Removed rtol parameter from the on_greatcircle function. See issue #12 for a discussion.
+      * Added nvector solution to the GeoPoint.displace method.
       * Updated docs/conf.py
       * Updated README.rst and LICENSE.txt
       * Replaced import unittest with import pytest in test_frames.py
-      * Fixed issue #10: Inconsistent return types in GeoPath.track_distance:   *
+      * Fixed issue #10: Inconsistent return types in GeoPath.track_distance:
          - GeoPath, GeoPoint, Nvector and ECEFvector and Pvector now return
            scalars for the case where the input is not actually arrays of points
            but just single objects.
