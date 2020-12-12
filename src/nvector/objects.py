@@ -995,14 +995,20 @@ class GeoPath(object):
     def on_great_circle(self, point, atol=1e-8):
         """Returns True if point is on the great circle within a tolerance."""
         distance = np.abs(self.cross_track_distance(point))
-        return isclose(distance, 0, atol=atol)
+        result = isclose(distance, 0, atol=atol)
+        if np.ndim(result) == 0:
+            return result[()]
+        return result
 
     def _on_great_circle_path(self, point, radius=None, atol=1e-8):
         if radius is None:
             radius = self._get_average_radius()
         path = self.nvector_normals()
         point_c = point.to_nvector().normal
-        return on_great_circle_path(path, point_c, radius, atol=atol)
+        result =  on_great_circle_path(path, point_c, radius, atol=atol)
+        if np.ndim(radius) == 0 and result.size==1:
+            return result[0]  # scalar outout
+        return result
 
     def on_path(self, point, method='greatcircle', rtol=1e-6, atol=1e-8):
         """
@@ -1027,20 +1033,23 @@ class GeoPath(object):
         >>> pointB = wgs84.GeoPoint(80, 0, degrees=True)
         >>> path = nv.GeoPath(pointA, pointB)
         >>> pointC = path.interpolate(0.6).to_geo_point()
-        >>> np.allclose(path.on_path(pointC), True)
+        >>> path.on_path(pointC)
         True
-
+        >>> path.on_path(pointC, 'ellipsoid')
+        True
         >>> pointD = path.interpolate(1.000000001).to_geo_point()
-        >>> np.allclose(path.on_path(pointD), False)
-        True
+        >>> path.on_path(pointD)
+        False
+        >>> path.on_path(pointD, 'ellipsoid')
+        False
         >>> pointE = wgs84.GeoPoint(85, 0.0001, degrees=True)
-        >>> np.allclose(path.on_path(pointE), False)
-        True
+        >>> path.on_path(pointE)
+        False
         >>> pointC = path.interpolate(-2).to_geo_point()
-        >>> np.allclose(path.on_path(pointC), False)
+        >>> path.on_path(pointC)
+        False
+        >>> path.on_great_circle(pointC)
         True
-        >>> path = nv.GeoPath(pointC, pointA)
-
         """
         if method[:2] in {'ex', 'el'}: # exact or ellipsoid
             return self._on_ellipsoid_path(point, rtol=rtol, atol=atol)
@@ -1069,7 +1078,7 @@ class GeoPath(object):
         >>> point_c = wgs84.GeoPoint(51., 2.9, degrees=True)
         >>> path = nv.GeoPath(point_a, point_b)
         >>> point = path.closest_point_on_great_circle(point_c)
-        >>> path.on_path(point)[0]
+        >>> path.on_path(point)
         False
         >>> np.allclose((point.latitude_deg, point.longitude_deg),
         ...             (50.99270338, 2.89977984))
