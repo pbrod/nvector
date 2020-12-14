@@ -1284,7 +1284,7 @@ class FrameE(_Common):
         Parameters
         ----------
         lat_a, lon_a:  real scalars or vectors of length n.
-            Latitude and longitude [rad or deg] of position a.
+            Latitude and longitude [rad or deg] of position A.
         azimuth_a:  real scalar or vector of length n.
             azimuth [rad or deg] of line at position A.
         distance: real scalar or vector of length n.
