@@ -12,7 +12,7 @@ Per A Brodtkorb (32):
       * Fixed failing doctests.
       * Added doctest configuration to docs/conf.py
       * Added allclose to nvector/objects.py
-      * Added array_to_list_dict an isclose functions in nvector.objects.py
+      * Added array_to_list_dict and isclose functions in nvector.objects.py
          Replaced f-string in the __repr__ method of the _Common class in
          nvector.objects.py with format in order to work on python version 3.5
          and below. 

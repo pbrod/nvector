@@ -395,6 +395,13 @@ class GeoPoint(_Common):
         """longitude in degrees."""
         return deg(self.longitude)
 
+    @property
+    def scalar(self):
+        """True if the position is a scalar point"""
+        return (np.ndim(self.z) == 0
+                and np.size(self.latitude) == 1
+                and np.size(self.longitude) == 1)
+
     def to_ecef_vector(self):
         """
         Returns position as ECEFvector object.
@@ -454,6 +461,9 @@ class GeoPoint(_Common):
             ellipsoidal or great circle distance [m] between position A and B.
         azimuth_a:
             azimuth [rad or deg] of line at position A.
+        long_unroll: bool
+            Controls the treatment of longitude when method=='ellipsoid'.
+            See distance_and_azimuth method for details.
         degrees: bool
             azimuths are given in degrees if True otherwise in radians.
         method: 'greatcircle' or 'ellipsoid'
@@ -496,6 +506,11 @@ class GeoPoint(_Common):
         ----------
         point:  GeoPoint object
             Latitude and longitude of position b.
+        long_unroll: bool
+            Controls the treatment of longitude. If it is False then the lon_a and
+            lon_b are both reduced to the range [-180, 180). If it is True, then
+            lon_a is as given in the function call and (lon_b - lon_a) determines
+            how many times and in what sense the geodesic has encircled the ellipsoid.
         degrees: bool
             azimuths are returned in degrees if True otherwise in radians.
 
@@ -507,9 +522,16 @@ class GeoPoint(_Common):
             direction [rad or deg] of line at position a and b relative to
             North, respectively.
 
+        Notes
+        -----
+        Restriction on the parameters:
+        * Latitudes must lie between -90 and 90 degrees.
+        * Latitudes outside this range will be set to NaNs.
+        * The flattening f should be between -1/50 and 1/50 inn order to retain full accuracy.
+
         References
         ----------
-        C. F. F. Karney, Algorithms for geodesics, J. Geodesy 87(1), 43-55
+        `C. F. F. Karney, Algorithms for geodesics, J. Geodesy 87(1), 43-55 (2013) <https://rdcu.be/cccgm>`_
 
         `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
         """
@@ -582,8 +604,13 @@ class Nvector(_Common):
         frame = self.frame
         a, f, R_Ee = frame.a, frame.f, frame.R_Ee
         pvector = n_EB_E2p_EB_E(self.normal, depth=self.z, a=a, f=f, R_Ee=R_Ee)
-        scalar = np.ndim(self.z) == 0 and self.normal.shape[1] == 1
+        scalar = self.scalar
         return ECEFvector(pvector, self.frame, scalar=scalar)
+
+    @property
+    def scalar(self):
+        """True if the position is a scalar point"""
+        return np.ndim(self.z) == 0 and self.normal.shape[1] == 1
 
     def to_geo_point(self):
         """
@@ -594,7 +621,8 @@ class Nvector(_Common):
         GeoPoint
         """
         latitude, longitude = n_E2lat_lon(self.normal, R_Ee=self.frame.R_Ee)
-        if np.ndim(self.z) == 0 and latitude.size == 1 and longitude.size == 1:
+
+        if self.scalar:
             return GeoPoint(latitude[0], longitude[0], self.z, self.frame)  # Scalar geo_point
         return GeoPoint(latitude, longitude, self.z, self.frame)
 
@@ -1143,8 +1171,12 @@ class GeoPath(object):
         >>> pointE.latitude_deg, pointE.longitude_deg
         (51.0, 2.0)
         """
+        # TODO: vectorize this
+        return self._closest_point_on_path(point)
+
+    def _closest_point_on_path(self, point):
         point_c = self.closest_point_on_great_circle(point)
-        if self.on_path(point_c):  # TODO: vectorize this
+        if self.on_path(point_c):
             return point_c
         n0 = point.to_nvector().normal
         n1, n2 = self.nvector_normals()
@@ -1231,6 +1263,11 @@ class FrameE(_Common):
             Latitude and longitude of position b.
         z : real scalar or vector
             depth relative to Earth ellipsoid.
+        long_unroll: bool
+            Controls the treatment of longitude. If it is False then the lon_a and lon_b
+            are both reduced to the range [-180, 180). If it is True, then lon_a
+            is as given in the function call and (lon_b - lon_a) determines how many times
+            and in what sense the geodesic has encircled the ellipsoid.
         degrees: bool
             angles are given in degrees if True otherwise in radians.
 
@@ -1242,9 +1279,17 @@ class FrameE(_Common):
             direction [rad or deg] of line at position A and B relative to
             North, respectively.
 
+        Notes
+        -----
+        Restriction on the parameters:
+
+          * Latitudes must lie between -90 and 90 degrees.
+          * Latitudes outside this range will be set to NaNs.
+          * The flattening f should be between -1/50 and 1/50 inn order to retain full accuracy.
+
         References
         ----------
-        C. F. F. Karney, Algorithms for geodesics, J. Geodesy 87(1), 43-55
+        `C. F. F. Karney, Algorithms for geodesics, J. Geodesy 87(1), 43-55 (2013) <https://rdcu.be/cccgm>`_
 
         `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
 
@@ -1291,6 +1336,11 @@ class FrameE(_Common):
             ellipsoidal distance [m] between position A and B.
         z: real scalar or vector of length n.
             depth relative to Earth ellipsoid.
+        long_unroll: bool
+            Controls the treatment of longitude. If it is False then the lon_a and lon_b
+            are both reduced to the range [-180, 180). If it is True, then lon_a
+            is as given in the function call and (lon_b - lon_a) determines how many times
+            and in what sense the geodesic has encircled the ellipsoid.
         degrees: bool
             angles are given in degrees if True otherwise in radians.
 
@@ -1301,9 +1351,17 @@ class FrameE(_Common):
         azimuth_b: real scalar or vector of length n.
             azimuth [rad or deg] of line at position B.
 
+        Notes
+        -----
+        Restriction on the parameters:
+
+          * Latitudes must lie between -90 and 90 degrees.
+          * Latitudes outside this range will be set to NaNs.
+          * The flattening f should be between -1/50 and 1/50 inn order to retain full accuracy.
+
         References
         ----------
-        C. F. F. Karney, Algorithms for geodesics, J. Geodesy 87(1), 43-55
+        `C. F. F. Karney, Algorithms for geodesics, J. Geodesy 87(1), 43-55 (2013) <https://rdcu.be/cccgm>`_
 
         `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
         """

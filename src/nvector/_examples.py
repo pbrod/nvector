@@ -692,11 +692,11 @@ In the first example the functional solution is also given.
 The functional solutions to the remaining problems can be found in
 `test_nvector.py
 <https://github.com/pbrod/nvector/blob/master/src/nvector/tests/test_nvector.py>`_
-or the
-`getting_started_functional.html
-<./getting_started_functional.html>`_.
+or the `getting_started_functional.html 
+<getting_started_functional.html>`_.
 
 {0}{1}{2}{3}{4}{5}
+
 """.format(example_1_txt, example_1_obj_solution, 'Functional ',
            example_1_fun_solution, see_also(1),
            get_examples(range(2, 11), OO=True))
@@ -711,11 +711,12 @@ In the first example the object-oriented solution is also given.
 The object-oriented solutions to the remaining problems can be found in
 `test_frames.py
 <https://github.com/pbrod/Nvector/blob/master/src/nvector/tests/test_frames.py>`_
-or the
-`overview.html#getting-started
-<./overview.html#getting-started>`_.
+or the 
+`getting_started 
+<getting_started.html>`_.
 
 {0}{1}{2}{3}{4}{5}
+
 """.format(example_1_txt, example_1_fun_solution,
            'OO-', example_1_obj_solution, see_also(1),
            get_examples(range(2, 11), OO=False))

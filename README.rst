@@ -6,7 +6,7 @@ nvector
 |nvector_img| |tests_img| |docs_img| |health_img| |coverage_img| |versions_img| |downloads_img|
 
 The nvector library is a suite of tools written in Python to solve geographical position
-calculations like:
+calculations. Currently the following operations are implemented:
 
 * Calculate the surface distance between two geographical positions.
 
@@ -38,7 +38,8 @@ using the provided functions.
 n_E is n-vector in the program code, while in documents we use nE. E denotes
 an Earth-fixed coordinate frame, and it indicates that the three components of
 n-vector are along the three axes of E. More details about the notation and
-reference frames can be found here:
+reference frames can be found in the documentation.
+
 
 Documentation and code
 ======================
@@ -121,7 +122,10 @@ Below the object-oriented solution to some common geodesic problems are given.
 In the first example the functional solution is also given.
 The functional solutions to the remaining problems can be found in
 `test_nvector.py
-<https://github.com/pbrod/nvector/blob/master/src/nvector/tests/test_nvector.py>`_.
+<https://github.com/pbrod/nvector/blob/master/src/nvector/tests/test_nvector.py>`_
+or the
+`getting_started_functional.html
+<./getting_started_functional.html>`_.
 
 
 **Example 1: "A and B to delta"**
