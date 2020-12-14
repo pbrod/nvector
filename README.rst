@@ -1,9 +1,12 @@
-
 =======
 nvector
 =======
 
-|nvector_img| |tests_img| |docs_img| |health_img| |coverage_img| |versions_img| |downloads_img|
+
+.. only:: html
+
+    |pkg_img| |tests_img| |docs_img| |health_img| |coverage_img| |versions_img| |downloads_img|
+
 
 The nvector library is a suite of tools written in Python to solve geographical position
 calculations. Currently the following operations are implemented:
@@ -21,9 +24,13 @@ calculations. Currently the following operations are implemented:
 * Find the cross track distance between a path and a position.
 
 
+Using n-vector, the calculations become simple and non-singular. 
+Full accuracy is achieved for any global position (and for any distance).
+
+
+
 Description
 ===========
-
 In this library, we represent position with an "n-vector",  which
 is the normal vector to the Earth model (the same reference ellipsoid that is
 used for latitude and longitude). When using n-vector, all Earth-positions are
@@ -39,6 +46,8 @@ n_E is n-vector in the program code, while in documents we use nE. E denotes
 an Earth-fixed coordinate frame, and it indicates that the three components of
 n-vector are along the three axes of E. More details about the notation and
 reference frames can be found in the documentation.
+
+
 
 
 Documentation and code
@@ -94,9 +103,9 @@ or
 
 at the command prompt.
 
+Acknowledgements
+================
 
-Acknowledgement
-===============
 The `nvector package <http://pypi.python.org/pypi/nvector/>`_ for
 `Python <https://www.python.org/>`_ was written by Per A. Brodtkorb at
 `FFI (The Norwegian Defence Research Establishment) <http://www.ffi.no/en>`_
@@ -104,12 +113,7 @@ based on the `nvector toolbox <http://www.navlab.net/nvector/#download>`_ for
 `Matlab <http://www.mathworks.com>`_ written by the navigation group at
 `FFI <http://www.ffi.no/en>`_.
 
-Most of the content is based on the following article:
-
-*Kenneth Gade (2010):*
-    `A Nonsingular Horizontal Position Representation,
-    The Journal of Navigation, Volume 63, Issue 03, pp 395-417, July 2010.
-    <http://www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf>`_
+Most of the content is based on the article by K. Gade :cite:`Gade2010Nonsingular`:
 
 Thus this article should be cited in publications using this page or the
 downloaded program code.
@@ -123,9 +127,8 @@ In the first example the functional solution is also given.
 The functional solutions to the remaining problems can be found in
 `test_nvector.py
 <https://github.com/pbrod/nvector/blob/master/src/nvector/tests/test_nvector.py>`_
-or the
-`getting_started_functional.html
-<./getting_started_functional.html>`_.
+or the `getting_started_functional.html 
+<getting_started_functional.html>`_.
 
 
 **Example 1: "A and B to delta"**
@@ -523,22 +526,28 @@ See also
 
 
 
+
 See also
 ========
 `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
 
-.. |nvector_img| image:: https://badge.fury.io/py/nvector.png
-   :target: https://pypi.python.org/pypi/nvector/
-.. |tests_img| image:: https://travis-ci.org/pbrod/Nvector.svg?branch=master
-   :target: https://travis-ci.org/pbrod/Nvector
-.. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable
-   :target: http://Nvector.readthedocs.org/en/stable/
-.. |health_img| image:: https://api.codeclimate.com/v1/badges/c04214bef610b25906fe/maintainability
-   :target: https://codeclimate.com/github/pbrod/Nvector/maintainability
-   :alt: Maintainability
-.. |coverage_img| image:: https://codecov.io/gh/pbrod/nvector/branch/master/graph/badge.svg
-   :target: https://codecov.io/gh/pbrod/nvector
-.. |versions_img| image:: https://img.shields.io/pypi/pyversions/Nvector.svg
-   :target: https://github.com/pbrod/nvector
-.. |downloads_img| image:: https://img.shields.io/pypi/dm/nvector.svg
-   :alt: PyPI - Downloads
+
+
+.. only:: html
+
+    .. |pkg_img| image:: https://badge.fury.io/py/nvector.png
+       :target: https://pypi.python.org/pypi/nvector/
+    .. |tests_img| image:: https://travis-ci.org/pbrod/Nvector.svg?branch=master
+       :target: https://travis-ci.org/pbrod/Nvector
+    .. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable
+       :target: http://Nvector.readthedocs.org/en/stable/
+    .. |health_img| image:: https://api.codeclimate.com/v1/badges/c04214bef610b25906fe/maintainability
+       :target: https://codeclimate.com/github/pbrod/Nvector/maintainability
+       :alt: Maintainability
+    .. |coverage_img| image:: https://codecov.io/gh/pbrod/nvector/branch/master/graph/badge.svg
+       :target: https://codecov.io/gh/pbrod/nvector
+    .. |versions_img| image:: https://img.shields.io/pypi/pyversions/Nvector.svg
+       :target: https://github.com/pbrod/nvector
+    .. |downloads_img| image:: https://img.shields.io/pypi/dm/nvector.svg
+       :alt: PyPI - Downloads
+

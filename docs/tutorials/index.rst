@@ -25,7 +25,6 @@ in the order presented here.
 
 .. toctree::
     :maxdepth: 1
-    
 
     install
     getting_started
