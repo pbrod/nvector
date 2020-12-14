@@ -5,6 +5,7 @@ Created on 29. des. 2015
 """
 from __future__ import division, print_function
 from functools import partial
+import warnings
 import numpy as np
 from numpy import deprecate
 from numpy.linalg import norm
@@ -20,37 +21,36 @@ from nvector._core import (mdot, select_ellipsoid, rad, deg, zyx2R,
                            E_rotation, on_great_circle_path)
 from nvector import _examples
 from nvector._common import test_docstrings, use_docstring_from
-import warnings
 
 __all__ = ['FrameE', 'FrameB', 'FrameL', 'FrameN', 'GeoPoint', 'GeoPath',
            'Nvector', 'ECEFvector', 'Pvector', 'diff_positions',
            'delta_E', 'delta_N', 'delta_L']
 
 
-def array_to_list_dict(d):
+def array_to_list_dict(data):
     """
     Examples
     --------
     >>> import numpy as np
-    >>> d = dict(a=np.zeros((3,)), b=(1,2,3), c=[], d=1, e='test',
+    >>> data = dict(a=np.zeros((3,)), b=(1,2,3), c=[], d=1, e='test',
     ...          f=np.nan, g=[1], h=[np.nan], i=None)
-    >>> e = array_to_list_dict(d)
+    >>> e = array_to_list_dict(data)
     >>> e == {'a': [0.0, 0.0, 0.0],  'b': [1, 2, 3], 'c': [],'d': 1,
     ...       'e': 'test', 'f': np.nan, 'g': [1], 'h': [np.nan], 'i': None}
     True
 
     """
-    if isinstance(d, dict):
-        for key in d:
-            d[key] = array_to_list_dict(d[key])
-    elif isinstance(d, (list, tuple)):
-        d = [array_to_list_dict(item) for item in d]
+    if isinstance(data, dict):
+        for key in data:
+            data[key] = array_to_list_dict(data[key])
+    elif isinstance(data, (list, tuple)):
+        data = [array_to_list_dict(item) for item in data]
     else:
         try:
-            d = d.tolist()
+            data = data.tolist()
         except AttributeError:
             pass
-    return d
+    return data
 
 
 def isclose(a, b, rtol=1e-9, atol=0.0, equal_nan=False):
@@ -188,6 +188,7 @@ def allclose(a, b, rtol=1.e-5, atol=1.e-8, equal_nan=False):
     """
     return np.all(isclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan))
 
+
 class _DeltaE(object):
     __doc__ = """
     Returns cartesian delta vector from positions a to b decomposed in E.
@@ -288,7 +289,7 @@ class _Common(object):
         params = fmt.join(['{}={!r}'.format(name, val)
                            for name, val in dict_params.items() if not name.startswith('_')])
 
-        return ('{}({})'.format(cname, params))
+        return '{}({})'.format(cname, params)
 
     def __eq__(self, other):
         try:
@@ -429,18 +430,34 @@ class GeoPoint(_Common):
 
     delta_to = _delta
 
-    def displace(self, distance, azimuth, long_unroll=False, degrees=False, method='karney'):
+    def _displace_great_circle(self, distance, azimuth, degrees):
+        """ Returns the great circle solution using the nvector method.
+        """
+        nvector = self.to_nvector()
+        radius = nvector.to_ecef_vector().length
+        distance_rad = distance / radius
+        azimuth_rad = azimuth if not degrees else rad(azimuth)
+        n_EB_E = n_EA_E_distance_and_azimuth2n_EB_E(nvector.normal, distance_rad, azimuth_rad)
+        point_b = Nvector(n_EB_E, self.z, self.frame).to_geo_point()
+        azimuth_b = self.delta_to(point_b).azimuth
+        if degrees:
+            return point_b, deg(azimuth_b)
+        return point_b, azimuth_b
+
+    def displace(self, distance, azimuth, long_unroll=False, degrees=False, method='ellipsoid'):
         """
         Returns position b computed from current position, distance and azimuth.
 
         Parameters
         ----------
         distance: real scalar
-            ellipsoidal distance [m] between position A and B.
+            ellipsoidal or great circle distance [m] between position A and B.
         azimuth_a:
             azimuth [rad or deg] of line at position A.
         degrees: bool
             azimuths are given in degrees if True otherwise in radians.
+        method: 'greatcircle' or 'ellipsoid'
+            defining the path where to find position b.
 
         Returns
         -------
@@ -450,19 +467,13 @@ class GeoPoint(_Common):
             azimuth [rad or deg] of line at position B.
 
         """
-        if method == 'nvector':  # nvector solution
-            nvector = self.to_nvector()
-            radius = nvector.to_ecef_vector().length
-            distance_rad = distance / radius
-            azimuth_rad = azimuth if not degrees else rad(azimuth)
-            n_EB_E = n_EA_E_distance_and_azimuth2n_EB_E(nvector.normal, distance_rad, azimuth_rad)
-            point_b = Nvector(n_EB_E, self.z, self.frame).to_geo_point()
-            azimuth_b = self.delta_to(point_b).azimuth
-            if degrees:
-                return point_b, deg(azimuth_b)
-            return point_b, azimuth_b
+        if method[:1] == 'e':  # exact solution
+            return self._displace_ellipsoid(distance, azimuth, long_unroll, degrees)
+        return self._displace_great_circle(distance, azimuth, degrees)
 
-        # Karney solution
+    def _displace_ellipsoid(self, distance, azimuth, long_unroll=False, degrees=False):
+        """ Returns the exact ellipsoidal solution using the method of Karney.
+        """
         frame = self.frame
         z = self.z
         if not degrees:
@@ -583,7 +594,7 @@ class Nvector(_Common):
         GeoPoint
         """
         latitude, longitude = n_E2lat_lon(self.normal, R_Ee=self.frame.R_Ee)
-        if np.ndim(self.z) == 0 and latitude.size == 1 and longitude.size==1:
+        if np.ndim(self.z) == 0 and latitude.size == 1 and longitude.size == 1:
             return GeoPoint(latitude[0], longitude[0], self.z, self.frame)  # Scalar geo_point
         return GeoPoint(latitude, longitude, self.z, self.frame)
 
@@ -874,7 +885,6 @@ class GeoPath(object):
         warnings.warn('Deprecated use point_a instead', category=DeprecationWarning, stacklevel=2)
         return self.point_a
 
-
     @property
     def positionB(self):
         """Deprecated use point_a instead"""
@@ -1005,8 +1015,8 @@ class GeoPath(object):
             radius = self._get_average_radius()
         path = self.nvector_normals()
         point_c = point.to_nvector().normal
-        result =  on_great_circle_path(path, point_c, radius, atol=atol)
-        if np.ndim(radius) == 0 and result.size==1:
+        result = on_great_circle_path(path, point_c, radius, atol=atol)
+        if np.ndim(radius) == 0 and result.size == 1:
             return result[0]  # scalar outout
         return result
 
@@ -1051,7 +1061,7 @@ class GeoPath(object):
         >>> path.on_great_circle(pointC)
         True
         """
-        if method[:2] in {'ex', 'el'}: # exact or ellipsoid
+        if method[:2] in {'ex', 'el'}:  # exact or ellipsoid
             return self._on_ellipsoid_path(point, rtol=rtol, atol=atol)
         return self._on_great_circle_path(point, atol=atol)
 
@@ -1209,7 +1219,6 @@ class FrameE(_Common):
                 and allclose(self.f, other.f, rtol=rtol, atol=atol)
                 and allclose(self.R_Ee, other.R_Ee, rtol=rtol, atol=atol))
 
-
     def inverse(self, lat_a, lon_a, lat_b, lon_b, z=0, long_unroll=False, degrees=False):
         """
         Returns ellipsoidal distance between positions as well as the direction.
@@ -1244,7 +1253,7 @@ class FrameE(_Common):
             lat_a, lon_a, lat_b, lon_b = deg(lat_a, lon_a, lat_b, lon_b)
 
         lat_a, lon_a, lat_b, lon_b, z = np.broadcast_arrays(lat_a, lon_a, lat_b, lon_b, z)
-        fun = partial(self._inverse,  outmask=self._outmask(long_unroll))
+        fun = partial(self._inverse, outmask=self._outmask(long_unroll))
         items = zip(*np.atleast_1d(lat_a, lon_a, lat_b, lon_b, z))
         sab, azia, azib = np.transpose([fun(lat_ai, lon_ai, lat_bi, lon_bi, z=zi)
                                         for lat_ai, lon_ai, lat_bi, lon_bi, zi in items])
@@ -1262,7 +1271,6 @@ class FrameE(_Common):
         geo = _Geodesic(self.a - z, self.f)
         result = geo.Inverse(lat_a, lon_a, lat_b, lon_b, outmask=outmask)
         return result['s12'], result['azi1'], result['azi2']
-
 
     def _outmask(self, long_unroll):
         if long_unroll:
@@ -1303,11 +1311,11 @@ class FrameE(_Common):
             lat_a, lon_a, azimuth = deg(lat_a, lon_a, azimuth)
 
         lat_a, lon_a, azimuth, distance, z = np.broadcast_arrays(lat_a, lon_a, azimuth, distance, z)
-        fun = partial(self._direct,  outmask=self._outmask(long_unroll))
+        fun = partial(self._direct, outmask=self._outmask(long_unroll))
 
         items = zip(*np.atleast_1d(lat_a, lon_a, azimuth, distance, z))
         lab, lob, azib = np.transpose([fun(lat_ai, lon_ai, azimuthi, distancei, z=zi)
-                                              for lat_ai, lon_ai, azimuthi, distancei, zi in items])
+                                       for lat_ai, lon_ai, azimuthi, distancei, zi in items])
         if not degrees:
             latb, lonb, azimuth_b = rad(lab.ravel(), lob.ravel(), azib.ravel())
         else:
@@ -1507,7 +1515,6 @@ def _default_frame(frame):
     if frame is None:
         return FrameE()
     return frame
-
 
 
 if __name__ == "__main__":
