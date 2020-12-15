@@ -38,7 +38,8 @@ def remove_previous_build():
 
 
 def update_readme():
-    root = 'https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorial/images/'
+
+    root = 'image:: https://github.com/pbrod/nvector/tree/master/docs/tutorials/images/'
     readme_txt = INFO.__doc__.replace(
         """Introduction to {}
 ================{}
@@ -48,7 +49,7 @@ def update_readme():
 """.format(PACKAGE_NAME,
            '='*len(PACKAGE_NAME))).replace(""".. only:: html""",
                                            '').replace('    .. |',
-                                                       '.. |').replace('/images/',
+                                                       '.. |').replace('image:: images/',
                                                                        root)
 
     filename = os.path.join(ROOT, "README.rst")

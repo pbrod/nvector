@@ -12,6 +12,7 @@ what they are and what they do.
 .. toctree::
     :maxdepth: 2
 
+    nvector_summary
     nvector
 
     
