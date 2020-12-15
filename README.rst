@@ -45,9 +45,8 @@ using the provided functions.
 n_E is n-vector in the program code, while in documents we use nE. E denotes
 an Earth-fixed coordinate frame, and it indicates that the three components of
 n-vector are along the three axes of E. More details about the notation and
-reference frames can be found in the documentation.
-
-
+reference frames can be found in the `documentation. 
+<https://www.navlab.net/nvector/#vector_symbols>`_
 
 
 Documentation and code
@@ -89,7 +88,6 @@ To install the downloaded nvector, just type:
    $ pip install --no-index --find-links=pkg nvector
 
 
-
 Verifying installation
 ======================
 To verify that nvector can be seen by Python, type ``python`` from your shell.
@@ -114,21 +112,6 @@ or
 
 at the command prompt.
 
-Acknowledgements
-================
-
-The `nvector package <http://pypi.python.org/pypi/nvector/>`_ for
-`Python <https://www.python.org/>`_ was written by Per A. Brodtkorb at
-`FFI (The Norwegian Defence Research Establishment) <http://www.ffi.no/en>`_
-based on the `nvector toolbox <http://www.navlab.net/nvector/#download>`_ for
-`Matlab <http://www.mathworks.com>`_ written by the navigation group at
-`FFI <http://www.ffi.no/en>`_.
-
-Most of the content is based on the article by K. Gade :cite:`Gade2010Nonsingular`:
-
-Thus this article should be cited in publications using this page or the
-downloaded program code.
-
 
 Getting Started
 ===============
@@ -136,9 +119,8 @@ Getting Started
 Below the object-oriented solution to some common geodesic problems are given.
 In the first example the functional solution is also given.
 The functional solutions to the remaining problems can be found in
-`test_nvector.py
-<https://github.com/pbrod/nvector/blob/master/src/nvector/tests/test_nvector.py>`_
-or the :doc:`functional examples </tutorials/getting_started_functional>`
+the :doc:`functional examples </tutorials/getting_started_functional>` section 
+of the tutorial.
 
 
 **Example 1: "A and B to delta"**
@@ -546,6 +528,38 @@ See also
 
 
 
+Acknowledgements
+================
+
+The `nvector package <http://pypi.python.org/pypi/nvector/>`_ for
+`Python <https://www.python.org/>`_ was written by Per A. Brodtkorb at
+`FFI (The Norwegian Defence Research Establishment) <http://www.ffi.no/en>`_
+based on the `nvector toolbox <http://www.navlab.net/nvector/#download>`_ for
+`Matlab <http://www.mathworks.com>`_ written by the navigation group at
+`FFI <http://www.ffi.no/en>`_. The nvector._core module is a vectorized reimplementation
+of the matlab nvector toolbox while the nvector.objects module is a new easy to
+use object oriented user interface to the nvector core functionality.
+
+Most of the content is based on the article by K. Gade [Gad10]_.
+
+Thus this article should be cited in publications using this page or
+downloaded program code.
+
+However, if you use the FrameE.direct and FrameE.inverse,
+GeoPoint.distance_and_azimuth GeoPoint.displace methods you should also cite the article by
+Karney [Kar13]_ because these methods call Karney's
+`geographiclib <https://pypi.python.org/pypi/geographiclib>`_ library to do the calculations.
+
+
+
+
+    References
+    ==========
+
+    .. [Gad10] K. Gade, `A Nonsingular Horizontal Position Representation, J. Navigation, 63(3):395-417, 2010.
+               <http://www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf>`_
+    .. [Kar13] C. F. F. Karney. `Algorithms for geodesics. J. Geodesy, 87(1):43-55, 2013. <https://rdcu.be/cccgm>`_
+
 
 See also
 ========
@@ -554,20 +568,19 @@ See also
 
 
 
-
-.. |pkg_img| image:: https://badge.fury.io/py/nvector.png
+    .. |pkg_img| image:: https://badge.fury.io/py/nvector.png
        :target: https://pypi.python.org/pypi/nvector/
-.. |tests_img| image:: https://travis-ci.org/pbrod/Nvector.svg?branch=master
+    .. |tests_img| image:: https://travis-ci.org/pbrod/Nvector.svg?branch=master
        :target: https://travis-ci.org/pbrod/Nvector
-.. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable
+    .. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable
        :target: http://Nvector.readthedocs.org/en/stable/
-.. |health_img| image:: https://api.codeclimate.com/v1/badges/c04214bef610b25906fe/maintainability
+    .. |health_img| image:: https://api.codeclimate.com/v1/badges/c04214bef610b25906fe/maintainability
        :target: https://codeclimate.com/github/pbrod/Nvector/maintainability
        :alt: Maintainability
-.. |coverage_img| image:: https://codecov.io/gh/pbrod/nvector/branch/master/graph/badge.svg
+    .. |coverage_img| image:: https://codecov.io/gh/pbrod/nvector/branch/master/graph/badge.svg
        :target: https://codecov.io/gh/pbrod/nvector
-.. |versions_img| image:: https://img.shields.io/pypi/pyversions/Nvector.svg
+    .. |versions_img| image:: https://img.shields.io/pypi/pyversions/Nvector.svg
        :target: https://github.com/pbrod/nvector
-.. |downloads_img| image:: https://img.shields.io/pypi/dm/nvector.svg
+    .. |downloads_img| image:: https://img.shields.io/pypi/dm/nvector.svg
        :alt: PyPI - Downloads
 

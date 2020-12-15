@@ -46,9 +46,15 @@ def update_readme(version):
 {0}
 {1}
 """.format(PACKAGE_NAME,
-           '='*len(PACKAGE_NAME))).replace(""".. only:: html""",
-                                           '').replace('    .. |',
-                                                       '.. |').replace('|release|', version)
+           '='*len(PACKAGE_NAME)))
+    replacements = [(":cite:`Karney2013Algorithms`", '[Kar13]_'),
+                    (":cite:`Gade2010Nonsingular`", '[Gad10]_'),
+                    ('|release|', version),
+                    (""".. only:: html""", ''),
+                    (""".. only:: readme""", '')
+                    ]
+    for oldkey, newkey in replacements:
+        readme_txt = readme_txt.replace(oldkey, newkey)
 
     filename = os.path.join(ROOT, "README.rst")
     with open(filename, "w") as fid:

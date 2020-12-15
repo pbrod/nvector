@@ -10,17 +10,11 @@ __doc__ = ("""Introduction to nvector
 """ + _intro.__doc__  # @UndefinedVariable @ReservedAssignment
            + _documentation.__doc__  # @UndefinedVariable
            + _installation.__doc__  # @UndefinedVariable
+           + _examples_object_oriented.__doc__
            + """Acknowledgements
 ================
 """ + _acknowledgements.__doc__  # @UndefinedVariable
-           + _examples_object_oriented.__doc__
-           + """
-See also
-========
-`geographiclib <https://pypi.python.org/pypi/geographiclib>`_
-
-
-""" + _images.__doc__)  # @UndefinedVariable
+    + _images.__doc__)  # @UndefinedVariable
 
 
 if __name__ == '__main__':

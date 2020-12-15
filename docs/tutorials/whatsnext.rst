@@ -20,7 +20,7 @@ how the documentation works so that you can get the most out of it.
 Finding documentation
 =====================
 
-nvector got a *lot* of documentation,
+The nvector library got a *lot* of documentation,
 so finding what you need can sometimes be tricky. A few good places to start
 are the :ref:`search` and the :ref:`genindex`.
 
@@ -29,7 +29,7 @@ Or you can just browse around!
 How the documentation is organized
 ==================================
 
-nvector main documentation is broken up into "chunks" designed to fill
+The nvector main documentation is broken up into "chunks" designed to fill
 different needs:
 
 * The :doc:`introductory material </tutorials/index>` is designed for people new
