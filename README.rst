@@ -561,11 +561,6 @@ Karney [Kar13]_ because these methods call Karney's
     .. [Kar13] C. F. F. Karney. `Algorithms for geodesics. J. Geodesy, 87(1):43-55, 2013. <https://rdcu.be/cccgm>`_
 
 
-See also
-========
-`geographiclib <https://pypi.python.org/pypi/geographiclib>`_
-
-
 
 
     .. |pkg_img| image:: https://badge.fury.io/py/nvector.png
