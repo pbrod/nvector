@@ -37,9 +37,8 @@ def remove_previous_build():
             shutil.rmtree(path)
 
 
-def update_readme():
+def update_readme(version):
 
-    root = 'image:: https://github.com/pbrod/nvector/tree/master/docs/tutorials/images/'
     readme_txt = INFO.__doc__.replace(
         """Introduction to {}
 ================{}
@@ -49,7 +48,7 @@ def update_readme():
 """.format(PACKAGE_NAME,
            '='*len(PACKAGE_NAME))).replace(""".. only:: html""",
                                            '').replace('    .. |',
-                                                       '.. |')
+                                                       '.. |').replace('|release|', version)
 
     filename = os.path.join(ROOT, "README.rst")
     with open(filename, "w") as fid:
@@ -115,7 +114,7 @@ def build_main(version):
     remove_previous_build()
     set_package(version)
     update_license()
-    update_readme()
+    update_readme(version)
 
     for cmd in ['docs', 'latexpdf', 'egg_info', 'sdist', 'bdist_wheel']:
         if cmd == 'latexpdf':
