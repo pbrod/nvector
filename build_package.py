@@ -50,6 +50,8 @@ def update_readme(version):
     replacements = [(":cite:`Karney2013Algorithms`", '[Kar13]_'),
                     (":cite:`Gade2010Nonsingular`", '[Gad10]_'),
                     (":cite:`GadeAndBrodtkorb2020Nvector`", '[GB20]_'),
+                    (":doc:`functional examples </tutorials/getting_started_functional>`",
+                     "functional examples"),
                     ('|release|', version),
                     (""".. only:: html""", ''),
                     (""".. only:: readme""", '')
