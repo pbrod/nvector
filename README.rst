@@ -119,8 +119,7 @@ Getting Started
 Below the object-oriented solution to some common geodesic problems are given.
 In the first example the functional solution is also given.
 The functional solutions to the remaining problems can be found in
-the :doc:`functional examples </tutorials/getting_started_functional>` section 
-of the tutorial.
+the functional examples section of the tutorial.
 
 
 **Example 1: "A and B to delta"**
@@ -552,34 +551,31 @@ Karney [Kar13]_ because these methods call Karney's
 `geographiclib <https://pypi.python.org/pypi/geographiclib>`_ library to do the calculations.
 
 
+References
+==========
 
-
-
-    References
-    ==========
-
-    .. [Gad10] K. Gade, `A Nonsingular Horizontal Position Representation, J. Navigation, 63(3):395-417, 2010.
+.. [Gad10] K. Gade, `A Nonsingular Horizontal Position Representation, J. Navigation, 63(3):395-417, 2010.
                <http://www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf>`_
-    .. [Kar13] C. F. F. Karney. `Algorithms for geodesics. J. Geodesy, 87(1):43-55, 2013. <https://rdcu.be/cccgm>`_
+.. [Kar13] C.F.F. Karney, `Algorithms for geodesics. J. Geodesy, 87(1):43-55, 2013. <https://rdcu.be/cccgm>`_
 
-    .. [GB20] K. Gade and P.A. Brodtkorb, `Nvector Documentation for Python, 2020.
+.. [GB20] K. Gade and P.A. Brodtkorb, `Nvector Documentation for Python, 2020.
                <https://nvector.readthedocs.io/en/v0.7.5>`_
 
 
 
-    .. |pkg_img| image:: https://badge.fury.io/py/nvector.png
-       :target: https://pypi.python.org/pypi/nvector/
-    .. |tests_img| image:: https://travis-ci.org/pbrod/Nvector.svg?branch=master
-       :target: https://travis-ci.org/pbrod/Nvector
-    .. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable
-       :target: http://Nvector.readthedocs.org/en/stable/
-    .. |health_img| image:: https://api.codeclimate.com/v1/badges/c04214bef610b25906fe/maintainability
-       :target: https://codeclimate.com/github/pbrod/Nvector/maintainability
-       :alt: Maintainability
-    .. |coverage_img| image:: https://codecov.io/gh/pbrod/nvector/branch/master/graph/badge.svg
-       :target: https://codecov.io/gh/pbrod/nvector
-    .. |versions_img| image:: https://img.shields.io/pypi/pyversions/Nvector.svg
-       :target: https://github.com/pbrod/nvector
-    .. |downloads_img| image:: https://img.shields.io/pypi/dm/nvector.svg
-       :alt: PyPI - Downloads
+.. |pkg_img| image:: https://badge.fury.io/py/nvector.png
+   :target: https://pypi.python.org/pypi/nvector/
+.. |tests_img| image:: https://travis-ci.org/pbrod/Nvector.svg?branch=master
+   :target: https://travis-ci.org/pbrod/Nvector
+.. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable
+   :target: http://Nvector.readthedocs.org/en/stable/
+.. |health_img| image:: https://api.codeclimate.com/v1/badges/c04214bef610b25906fe/maintainability
+   :target: https://codeclimate.com/github/pbrod/Nvector/maintainability
+   :alt: Maintainability
+.. |coverage_img| image:: https://codecov.io/gh/pbrod/nvector/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/pbrod/nvector
+.. |versions_img| image:: https://img.shields.io/pypi/pyversions/Nvector.svg
+   :target: https://github.com/pbrod/nvector
+.. |downloads_img| image:: https://img.shields.io/pypi/dm/nvector.svg
+   :alt: PyPI - Downloads
 
