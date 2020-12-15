@@ -49,6 +49,7 @@ def update_readme(version):
            '='*len(PACKAGE_NAME)))
     replacements = [(":cite:`Karney2013Algorithms`", '[Kar13]_'),
                     (":cite:`Gade2010Nonsingular`", '[Gad10]_'),
+                    (":cite:`GadeAndBrodtkorb2020Nvector`", '[GB20]_'),
                     ('|release|', version),
                     (""".. only:: html""", ''),
                     (""".. only:: readme""", '')

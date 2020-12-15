@@ -538,17 +538,19 @@ based on the `nvector toolbox <http://www.navlab.net/nvector/#download>`_ for
 `Matlab <http://www.mathworks.com>`_ written by the navigation group at
 `FFI <http://www.ffi.no/en>`_. The nvector._core module is a vectorized reimplementation
 of the matlab nvector toolbox while the nvector.objects module is a new easy to
-use object oriented user interface to the nvector core functionality.
+use object oriented user interface to the nvector core functionality
+documented in [GB20]_.
 
 Most of the content is based on the article by K. Gade [Gad10]_.
 
 Thus this article should be cited in publications using this page or
 downloaded program code.
 
-However, if you use the FrameE.direct and FrameE.inverse,
-GeoPoint.distance_and_azimuth GeoPoint.displace methods you should also cite the article by
+However, if you use any of the FrameE.direct, FrameE.inverse,
+GeoPoint.distance_and_azimuth or GeoPoint.displace methods you should also cite the article by
 Karney [Kar13]_ because these methods call Karney's
 `geographiclib <https://pypi.python.org/pypi/geographiclib>`_ library to do the calculations.
+
 
 
 
@@ -560,6 +562,8 @@ Karney [Kar13]_ because these methods call Karney's
                <http://www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf>`_
     .. [Kar13] C. F. F. Karney. `Algorithms for geodesics. J. Geodesy, 87(1):43-55, 2013. <https://rdcu.be/cccgm>`_
 
+    .. [GB20] K. Gade and P.A. Brodtkorb, `Nvector Documentation for Python, 2020.
+               <https://nvector.readthedocs.io/en/v0.7.5>`_
 
 
 
