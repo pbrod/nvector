@@ -2,6 +2,36 @@
 Changelog
 =========
 
+Version 0.7.6, December 15, 2020
+================================
+
+Per A Brodtkorb (15):
+      * Added Nvector documentation ref https://nvector.readthedocs.io/en/v0.7.5 to refs1.bib and _acknowledgements.py
+      * Updated README.rst
+      * Renamed requirements.readthedocs.txt to docs/requirements.txt 
+      * Added .readthedocs.yml
+      * Added sphinxcontrib-bibtex to requirements.readthedocs.txt
+      * Added missing docs/tutorials/images/ex3img.png 
+      * Deleted obsolete ex10img.png 
+      * Updated acknowledgement with reference to Karney's article.
+      * Updated README.rst by moving acknowledgement to the end with references.
+      * Renamed position input argument to point in the FrameN, FrameB and
+         FrameL classes. Deleted _example_images.py
+      * Renamed nvector.rst to nvector_summary.rst in docs/reference
+      * Added example images to tutorials/images/ folder 
+      * Added Nvector logo, install.rst to docs 
+      * Added src/nvector/_example_images.py
+      * Added docs/tutorials/whatsnext.rst
+      * Reorganized the documentation in docs by splitting _info.py into: 
+          - _intro.py, 
+          - _documentation.py
+          - _examples_object_oriented.py
+          - _images.py,
+          - _installation.py and _acknowledgements.py   
+      * Added docs/tutorials/index.rst, docs/intro/index.rst, docs/how-to/index.rst docs/appendix/index.rst and docs/make.bat
+      * updated references.
+
+
 Version 0.7.5, December 12, 2020
 ================================
 
