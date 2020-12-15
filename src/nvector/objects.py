@@ -692,7 +692,7 @@ class Nvector(_Common):
 
 class Pvector(_Common):
     """
-    Cartesian position vector in relative to a frame.
+    Cartesian position vector relative to a frame.
     """
     def __init__(self, pvector, frame, scalar=None):
         if scalar is None:

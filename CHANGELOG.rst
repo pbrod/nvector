@@ -78,7 +78,7 @@ Per A Brodtkorb (6):
       * Added tests/__init__.py
       * Added "--pyargs nvector" to pytest options in setup.cfg
       * Exclude build_package.py from distribution in MANIFEST.in
-      * Replaced healt_img from landscape to codeclimate.
+      * Replaced health_img from landscape to codeclimate.
       * Updated travis to explicitly install pytest-cov and pytest-pep8
       * Removed dependence on pyscaffold
       * Added MANIFEST.in
@@ -261,9 +261,11 @@ pbrod (31):
       * Updated README.rst
       * Updated examples
       * Deleted skeleton.py and added tox.ini
-      * Small refactoring     Renamed distance_rad_bearing_rad2point to n_EA_E_distance_and_azimuth2n_EB_E     updated tests
-      * Renamed azimuth to n_EA_E_and_n_EB_E2azimuth     Added tests for R2xyz as well as R2zyx
-      * Removed backward compatibility     Added test_n_E_and_wa2R_EL
+      * Renamed distance_rad_bearing_rad2point to n_EA_E_distance_and_azimuth2n_EB_E
+      * Renamed azimuth to n_EA_E_and_n_EB_E2azimuth     
+      * Added tests for R2xyz as well as R2zyx
+      * Removed backward compatibility     
+      * Added test_n_E_and_wa2R_EL
       * Refactored tests
       * Commented out failing tests on python 3+
       * updated CHANGES.rst

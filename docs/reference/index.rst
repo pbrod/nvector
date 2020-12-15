@@ -4,14 +4,9 @@
 Reference nvector package
 #########################
 
-.. only:: html
-
-    :Release: |release|
-    :Date: |today|
-
 
 Technical reference material that details functions,
-modules, and objects included in nvector, describing
+modules, and objects included in nvector version |release|, describing
 what they are and what they do.
 
 .. toctree::

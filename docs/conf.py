@@ -23,8 +23,8 @@ DEV_YEARS = '{}'.format(START_YEAR) if START_YEAR == CURRENT_YEAR else '{}-{}'.f
 # General information about the project.
 
 
-project = u'nvector'
-PACKAGE_NAME = 'nvector'
+project = u'Nvector'
+PACKAGE_NAME = project.lower()
 author = 'Kenneth Gade and Per A. Brodtkorb'
 organizations = 'Norwegian Defence Research Establishment (FFI)'
 copyright = ', '.join((DEV_YEARS, organizations))
@@ -240,7 +240,7 @@ latex_engine = 'pdflatex'
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc,  '{}-{}.tex'.format(PACKAGE_NAME, release), project + ' Documentation',
+    (master_doc,  '{}-{}.tex'.format(PACKAGE_NAME, release), project + ' for Python Documentation',
      author, 'manual'),
 ]
 
@@ -271,7 +271,7 @@ latex_elements = {
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-# latex_logo = ""
+latex_logo = "_static/logo.jpg"
 
 # If true, show page references after internal links.
 latex_show_pagerefs = True

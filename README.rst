@@ -3,7 +3,7 @@ nvector
 =======
 
 
-.. only:: html
+
 
     |pkg_img| |tests_img| |docs_img| |health_img| |coverage_img| |versions_img| |downloads_img|
 
@@ -70,8 +70,8 @@ Bleeding edge: https://github.com/pbrod/nvector.
 Official releases available at: http://pypi.python.org/pypi/nvector.
 
 
-Installation
-============
+Install nvector
+===============
 
 If you have pip installed and are online, then simply type:
 
@@ -89,9 +89,20 @@ To install the downloaded nvector, just type:
    $ pip install --no-index --find-links=pkg nvector
 
 
-Unit tests
-===========
-To test if the toolbox is working paste the following in an interactive
+
+Verifying installation
+======================
+To verify that nvector can be seen by Python, type ``python`` from your shell.
+Then at the Python prompt, try to import nvector:
+
+.. parsed-literal::
+
+    >>> import nvector as nv
+    >>> print(nv.__version__)
+    |release|
+
+
+To test if the toolbox is working correctly paste the following in an interactive
 python session::
 
    import nvector as nv
@@ -127,8 +138,7 @@ In the first example the functional solution is also given.
 The functional solutions to the remaining problems can be found in
 `test_nvector.py
 <https://github.com/pbrod/nvector/blob/master/src/nvector/tests/test_nvector.py>`_
-or the `getting_started_functional.html 
-<getting_started_functional.html>`_.
+or the :doc:`functional examples </tutorials/getting_started_functional>`
 
 
 **Example 1: "A and B to delta"**
@@ -533,21 +543,21 @@ See also
 
 
 
-.. only:: html
 
-    .. |pkg_img| image:: https://badge.fury.io/py/nvector.png
+
+.. |pkg_img| image:: https://badge.fury.io/py/nvector.png
        :target: https://pypi.python.org/pypi/nvector/
-    .. |tests_img| image:: https://travis-ci.org/pbrod/Nvector.svg?branch=master
+.. |tests_img| image:: https://travis-ci.org/pbrod/Nvector.svg?branch=master
        :target: https://travis-ci.org/pbrod/Nvector
-    .. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable
+.. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable
        :target: http://Nvector.readthedocs.org/en/stable/
-    .. |health_img| image:: https://api.codeclimate.com/v1/badges/c04214bef610b25906fe/maintainability
+.. |health_img| image:: https://api.codeclimate.com/v1/badges/c04214bef610b25906fe/maintainability
        :target: https://codeclimate.com/github/pbrod/Nvector/maintainability
        :alt: Maintainability
-    .. |coverage_img| image:: https://codecov.io/gh/pbrod/nvector/branch/master/graph/badge.svg
+.. |coverage_img| image:: https://codecov.io/gh/pbrod/nvector/branch/master/graph/badge.svg
        :target: https://codecov.io/gh/pbrod/nvector
-    .. |versions_img| image:: https://img.shields.io/pypi/pyversions/Nvector.svg
+.. |versions_img| image:: https://img.shields.io/pypi/pyversions/Nvector.svg
        :target: https://github.com/pbrod/nvector
-    .. |downloads_img| image:: https://img.shields.io/pypi/dm/nvector.svg
+.. |downloads_img| image:: https://img.shields.io/pypi/dm/nvector.svg
        :alt: PyPI - Downloads
 

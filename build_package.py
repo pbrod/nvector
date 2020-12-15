@@ -38,16 +38,18 @@ def remove_previous_build():
 
 
 def update_readme():
+    root = 'https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorial/images/'
     readme_txt = INFO.__doc__.replace(
         """Introduction to {}
 ================{}
 """.format(PACKAGE_NAME, '='*len(PACKAGE_NAME)), """{1}
 {0}
 {1}
-""".format(PACKAGE_NAME, '='*len(PACKAGE_NAME))).replace("""
-or the
-`getting_started_functional.html
-<./getting_started_functional.html>`_""", '')
+""".format(PACKAGE_NAME,
+           '='*len(PACKAGE_NAME))).replace(""".. only:: html""",
+                                           '').replace('    .. |',
+                                                       '.. |').replace('/images/',
+                                                                       root)
 
     filename = os.path.join(ROOT, "README.rst")
     with open(filename, "w") as fid:
