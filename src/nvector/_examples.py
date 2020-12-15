@@ -700,9 +700,8 @@ Getting Started
 Below the object-oriented solution to some common geodesic problems are given.
 In the first example the functional solution is also given.
 The functional solutions to the remaining problems can be found in
-`test_nvector.py
-<https://github.com/pbrod/nvector/blob/master/src/nvector/tests/test_nvector.py>`_
-or the :doc:`functional examples </tutorials/getting_started_functional>`
+the :doc:`functional examples </tutorials/getting_started_functional>` section 
+of the tutorial.
 
 {0}{1}{2}{3}{4}{5}
 
@@ -718,10 +717,7 @@ Functional examples
 Below the functional solution to some common geodesic problems are given.
 In the first example the object-oriented solution is also given.
 The object-oriented solutions to the remaining problems can be found in
-`test_frames.py
-<https://github.com/pbrod/Nvector/blob/master/src/nvector/tests/test_frames.py>`_
-or the
-:doc:`getting started </tutorials/getting_started>`
+the :doc:`getting started </tutorials/getting_started>` section of the tutorial.
 
 {0}{1}{2}{3}{4}{5}
 

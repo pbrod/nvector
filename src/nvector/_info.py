@@ -14,7 +14,7 @@ __doc__ = ("""Introduction to nvector
            + """Acknowledgements
 ================
 """ + _acknowledgements.__doc__  # @UndefinedVariable
-    + _images.__doc__)  # @UndefinedVariable
+           + _images.__doc__)  # @UndefinedVariable
 
 
 if __name__ == '__main__':

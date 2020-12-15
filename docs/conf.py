@@ -19,7 +19,7 @@ from datetime import datetime
 CURRENT_YEAR = datetime.now().year
 START_YEAR = 2015
 
-DEV_YEARS = '{}'.format(START_YEAR) if START_YEAR == CURRENT_YEAR else '{}-{}'.format(START_YEAR, CURRENT_YEAR) 
+DEV_YEARS = '{}'.format(START_YEAR) if START_YEAR == CURRENT_YEAR else '{}-{}'.format(START_YEAR, CURRENT_YEAR)
 # General information about the project.
 
 
@@ -240,7 +240,7 @@ latex_engine = 'pdflatex'
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc,  '{}-{}.tex'.format(PACKAGE_NAME, release), project + ' for Python Documentation',
+    (master_doc,  '{}-{}.tex'.format(PACKAGE_NAME, release), project + ' Documentation for Python',
      author, 'manual'),
 ]
 

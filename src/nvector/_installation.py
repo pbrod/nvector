@@ -18,7 +18,6 @@ To install the downloaded nvector, just type:
    $ pip install --no-index --find-links=pkg nvector
 
 
-
 Verifying installation
 ======================
 To verify that nvector can be seen by Python, type ``python`` from your shell.
