@@ -692,7 +692,7 @@ class Nvector(_Common):
 
 class Pvector(_Common):
     """
-    Cartesian position vector relative to a frame.
+    Geographical position given as cartesian position vector in a frame.
     """
     def __init__(self, pvector, frame, scalar=None):
         if scalar is None:
@@ -781,7 +781,7 @@ class Pvector(_Common):
 
 class ECEFvector(Pvector):
     __doc__ = """
-    Geographical position given as Cartesian position vector in frame E
+    Geographical position given as cartesian position vector in frame E
 
     Parameters
     ----------
@@ -888,14 +888,14 @@ class GeoPath(object):
     Parameters
     ----------
      point_a, point_b: Nvector, GeoPoint or ECEFvector objects
-        The path is defined by the line between point A and B, decomposed
+        The path is defined by the line between position A and B, decomposed
         in E.
 
     Notes
     -----
-    Please note that either point A or point B or both might be a vector of points.
-    In this case the GeoPath instance represents all the paths between the points
-    of A and the corresponding points of B.
+    Please note that either position A or B or both might be a vector of points.
+    In this case the GeoPath instance represents all the paths between the positions
+    of A and the corresponding positions of B.
 
     Examples
     --------
@@ -1417,7 +1417,7 @@ class FrameN(_LocalFrame):
 
     Parameters
     ----------
-    position: ECEFvector, GeoPoint or Nvector object
+    point: ECEFvector, GeoPoint or Nvector object
         position of the vehicle (B) which also defines the origin of the local
         frame N. The origin is directly beneath or above the vehicle (B), at
         Earth's surface (surface of ellipsoid model).
@@ -1445,8 +1445,8 @@ class FrameN(_LocalFrame):
     FrameE, FrameL, FrameB
     """.format(_examples.get_examples([1]))
 
-    def __init__(self, position):
-        nvector = position.to_nvector()
+    def __init__(self, point):
+        nvector = point.to_nvector()
         self.nvector = Nvector(nvector.normal, z=0, frame=nvector.frame)
 
     @property
@@ -1467,7 +1467,7 @@ class FrameL(FrameN):
 
     Parameters
     ----------
-    position: ECEFvector, GeoPoint or Nvector object
+    point: ECEFvector, GeoPoint or Nvector object
         position of the vehicle (B) which also defines the origin of the local
         frame L. The origin is directly beneath or above the vehicle (B), at
         Earth's surface (surface of ellipsoid model).
@@ -1498,8 +1498,8 @@ class FrameL(FrameN):
     FrameE, FrameN, FrameB
     """
 
-    def __init__(self, position, wander_azimuth=0):
-        super(FrameL, self).__init__(position)
+    def __init__(self, point, wander_azimuth=0):
+        super(FrameL, self).__init__(point)
         self.wander_azimuth = wander_azimuth
 
     @property
@@ -1516,7 +1516,7 @@ class FrameB(_LocalFrame):
 
     Parameters
     ----------
-    position: ECEFvector, GeoPoint or Nvector object
+    point: ECEFvector, GeoPoint or Nvector object
         position of the vehicle's reference point which also coincides with
         the origin of the frame B.
     yaw, pitch, roll: real scalars
@@ -1540,8 +1540,8 @@ class FrameB(_LocalFrame):
     FrameE, FrameL, FrameN
     """.format(_examples.get_examples([2]))
 
-    def __init__(self, position, yaw=0, pitch=0, roll=0, degrees=False):
-        self.nvector = position.to_nvector()
+    def __init__(self, point, yaw=0, pitch=0, roll=0, degrees=False):
+        self.nvector = point.to_nvector()
         if degrees:
             yaw, pitch, roll = rad(yaw), rad(pitch), rad(roll)
         self.yaw = yaw

@@ -3,7 +3,6 @@ from nvector import (_intro,
                      _installation,
                      _examples_object_oriented,
                      _acknowledgements,
-                     _example_images,
                      _images)
 
 __doc__ = ("""Introduction to nvector
@@ -21,8 +20,7 @@ See also
 `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
 
 
-""" + _example_images.__doc__  # @UndefinedVariable
-+ _images.__doc__)  # @UndefinedVariable
+""" + _images.__doc__)  # @UndefinedVariable
 
 
 if __name__ == '__main__':

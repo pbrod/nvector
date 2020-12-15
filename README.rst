@@ -144,7 +144,8 @@ or the :doc:`functional examples </tutorials/getting_started_functional>`
 **Example 1: "A and B to delta"**
 ---------------------------------
 
-|ex1_img|
+.. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex1img.png
+
 
 Given two positions, A and B as latitudes, longitudes and depths relative to
 Earth, E.
@@ -213,7 +214,8 @@ See also
 **Example 2: "B and delta to C"**
 ---------------------------------
 
-|ex2_img|
+.. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex2img.png
+
 
 A radar or sonar attached to a vehicle B (Body coordinate frame) measures the
 distance and direction to an object C. We assume that the distance and two
@@ -260,7 +262,8 @@ See also
 **Example 3: "ECEF-vector to geodetic latitude"**
 -------------------------------------------------
 
-|ex3_img|
+.. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex3img.png
+
 
 Position B is given as an "ECEF-vector" p_EB_E (i.e. a vector from E, the
 center of the Earth, to B, decomposed in E).
@@ -288,7 +291,8 @@ See also
 **Example 4: "Geodetic latitude to ECEF-vector"**
 -------------------------------------------------
 
-|ex4_img|
+.. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex4img.png
+
 
 Geodetic latitude, longitude and height are given for position B as latEB,
 lonEB and hEB, find the ECEF-vector for this position, p_EB_E.
@@ -310,7 +314,8 @@ See also
 **Example 5: "Surface distance"**
 ---------------------------------
 
-|ex5_img|
+.. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex5img.png
+
 
 Find the surface distance sAB (i.e. great circle distance) between two
 positions A and B. The heights of A and B are ignored, i.e. if they don't have
@@ -362,7 +367,8 @@ See also
 **Example 6 "Interpolated position"**
 -------------------------------------
 
-|ex6_img|
+.. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex6img.png
+
 
 Given the position of B at time t0 and t1, n_EB_E(t0) and n_EB_E(t1).
 
@@ -396,7 +402,8 @@ See also
 **Example 7: "Mean position"**
 ------------------------------
 
-|ex7_img|
+.. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex7img.png
+
 
 Three positions A, B, and C are given as n-vectors n_EA_E, n_EB_E, and n_EC_E.
 Find the mean position, M, given as n_EM_E.
@@ -422,7 +429,8 @@ See also
 **Example 8: "A and azimuth/distance to B"**
 --------------------------------------------
 
-|ex8_img|
+.. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex8img.png
+
 
 We have an initial position A, direction of travel given as an azimuth
 (bearing) relative to north (clockwise), and finally the
@@ -456,7 +464,8 @@ See also
 **Example 9: "Intersection of two paths"**
 ------------------------------------------
 
-|ex9_img|
+.. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex9img.png
+
 
 Define a path from two given positions (at the surface of a spherical Earth),
 as the great circle that goes through the two points.
@@ -495,7 +504,8 @@ See also
 **Example 10: "Cross track distance"**
 --------------------------------------
 
-|ex10_img|
+.. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex10img.png
+
 
 Path A is given by the two positions A1 and A2 (similar to the previous
 example).
@@ -542,17 +552,6 @@ See also
 `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
 
 
-
-.. |ex1_img| image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex1img.png
-.. |ex2_img| image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex2img.png
-.. |ex3_img| image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex3img.png
-.. |ex4_img| image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex4img.png
-.. |ex5_img| image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex5img.png
-.. |ex6_img| image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex6img.png
-.. |ex7_img| image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex7img.png
-.. |ex8_img| image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex8img.png
-.. |ex9_img| image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex9img.png
-.. |ex10_img| image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex10img.png
 
 
 
