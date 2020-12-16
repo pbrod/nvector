@@ -96,7 +96,6 @@ example_2_header = """
 
 example_2_txt = """
 
-
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex2img.png
 
 A radar or sonar attached to a vehicle B (Body coordinate frame) measures the
@@ -184,7 +183,6 @@ example_3_header = """
 -------------------------------------------------"""
 
 example_3_txt = """
-
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex3img.png
 
@@ -540,6 +538,7 @@ Solution:
 example_9_header = """
 **Example 9: "Intersection of two paths"**
 ------------------------------------------"""
+
 example_9_txt = """
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex9img.png

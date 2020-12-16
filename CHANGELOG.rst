@@ -5,12 +5,12 @@ Changelog
 Version 0.7.6, December 16, 2020
 ================================
 
-Per A Brodtkorb (19):                                                                                                         
-	  * Fixed the documentation so that it shows correctly in the reference manual. 
-	  * Added logo.png and docs/reference/nvector.rst
-	  * Updated build_package.py so it generates a valid README.rst file.
-	  * Updated THANKS.rst
-	  * Updated CHANGELOG.rst and prepare for release 0.7.6
+Per A Brodtkorb (19):                                                                                                      
+      * Fixed the documentation so that it shows correctly in the reference manual. 
+      * Added logo.png and docs/reference/nvector.rst
+      * Updated build_package.py so it generates a valid README.rst file.
+      * Updated THANKS.rst
+      * Updated CHANGELOG.rst and prepare for release 0.7.6
       * Added Nvector documentation ref https://nvector.readthedocs.io/en/v0.7.5 to refs1.bib and _acknowledgements.py
       * Updated README.rst
       * Renamed requirements.readthedocs.txt to docs/requirements.txt 
@@ -20,8 +20,8 @@ Per A Brodtkorb (19):
       * Deleted obsolete ex10img.png 
       * Updated acknowledgement with reference to Karney's article.
       * Updated README.rst by moving acknowledgement to the end with references.
-      * Renamed position input argument to point in the FrameN, FrameB and
-         FrameL classes. Deleted _example_images.py
+      * Renamed position input argument to point in the FrameN, FrameB and FrameL classes. 
+      * Deleted _example_images.py
       * Renamed nvector.rst to nvector_summary.rst in docs/reference
       * Added example images to tutorials/images/ folder 
       * Added Nvector logo, install.rst to docs 
@@ -31,7 +31,7 @@ Per A Brodtkorb (19):
           - _intro.py, 
           - _documentation.py
           - _examples_object_oriented.py
-          - _images.py,
+          - _images.py
           - _installation.py and _acknowledgements.py   
       * Added docs/tutorials/index.rst, docs/intro/index.rst, docs/how-to/index.rst docs/appendix/index.rst and docs/make.bat
       * updated references.

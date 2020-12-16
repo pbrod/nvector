@@ -13,6 +13,7 @@ Created on 7. des. 2018
 """
 import os
 import re
+import textwrap
 import shutil
 import subprocess
 import importlib
@@ -55,10 +56,17 @@ def update_readme(version):
                     ('|release|', version),
                     (""".. only:: html""", ''),
                     ]
+    tag = ".. only:: html"
+    ix1 = readme_txt.find(tag)
+    ix2 = readme_txt.find(tag, ix1+1)
+    ix3 = ix2 + len(tag) + 1
+    readme_txt = readme_txt[:ix3] + textwrap.dedent(readme_txt[ix3:].strip('\n'))
     for oldkey, newkey in replacements:
         readme_txt = readme_txt.replace(oldkey, newkey)
 
     readme_txt = readme_txt + """
+
+
 References
 ==========
 
