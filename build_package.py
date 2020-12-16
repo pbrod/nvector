@@ -54,11 +54,21 @@ def update_readme(version):
                      "functional examples"),
                     ('|release|', version),
                     (""".. only:: html""", ''),
-                    (""".. only:: readme""", '')
                     ]
     for oldkey, newkey in replacements:
         readme_txt = readme_txt.replace(oldkey, newkey)
 
+    readme_txt = readme_txt + """
+References
+==========
+
+.. [Gad10] K. Gade, `A Nonsingular Horizontal Position Representation, J. Navigation, 63(3):395-417, 2010.
+           <http://www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf>`_
+.. [Kar13] C.F.F. Karney. `Algorithms for geodesics. J. Geodesy, 87(1):43-55, 2013. <https://rdcu.be/cccgm>`_
+
+.. [GB20] K. Gade and P.A. Brodtkorb, `Nvector Documentation for Python, 2020.
+           <https://nvector.readthedocs.io/en/v0.7.5>`_
+"""
     filename = os.path.join(ROOT, "README.rst")
     with open(filename, "w") as fid:
         fid.write(readme_txt)

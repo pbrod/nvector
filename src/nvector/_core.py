@@ -1,4 +1,5 @@
 from __future__ import division, print_function
+from collections import namedtuple
 import warnings
 import numpy as np
 from numpy import rad2deg, deg2rad, arctan2, sin, cos, array, cross, dot, sqrt
@@ -32,28 +33,28 @@ E_ROTATION_MATRIX = dict(e=array([[0, 0, 1.0],
 
 _EPS = np.finfo(float).eps  # machine precision (machine epsilon)
 _TINY = np.finfo(float).tiny
-
+Ellipsoid = namedtuple('Ellipsoid', 'a f name')
 
 ELLIPSOID = {
-    1: ({'a': 6377563.3960, 'f': 1.0 / 299.3249646}, 'Airy 1858'),
-    2: ({'a': 6377340.189, 'f': 1.0 / 299.3249646}, 'Airy Modified'),
-    3: ({'a': 6378160, 'f': 1.0 / 298.25}, 'Australian National'),
-    4: ({'a': 6377397.155, 'f': 1.0 / 299.1528128}, 'Bessel 1841'),
-    5: ({'a': 6378249.145, 'f': 1.0 / 293.465}, 'Clarke 1880'),
-    6: ({'a': 6377276.345, 'f': 1.0 / 300.8017}, 'Everest 1830'),
-    7: ({'a': 6377304.063, 'f': 1.0 / 300.8017}, 'Everest Modified'),
-    8: ({'a': 6378166.0, 'f': 1.0 / 298.3}, 'Fisher 1960'),
-    9: ({'a': 6378150.0, 'f': 1.0 / 298.3}, 'Fisher 1968'),
-    10: ({'a': 6378270.0, 'f': 1.0 / 297}, 'Hough 1956'),
-    11: ({'a': 6378388.0, 'f': 1.0 / 297}, 'International (Hayford)/European Datum (ED50)'),
-    12: ({'a': 6378245.0, 'f': 1.0 / 298.3}, 'Krassovsky 1938'),
-    13: ({'a': 6378145., 'f': 1.0 / 298.25}, 'NWL-9D  (WGS 66)'),
-    14: ({'a': 6378160., 'f': 1.0 / 298.25}, 'South American 1969 (SAD69'),
-    15: ({'a': 6378136, 'f': 1.0 / 298.257}, 'Soviet Geod. System 1985'),
-    16: ({'a': 6378135., 'f': 1.0 / 298.26}, 'WGS 72'),
-    17: ({'a': 6378206.4, 'f': 1.0 / 294.9786982138}, 'Clarke 1866    (NAD27)'),
-    18: ({'a': 6378137.0, 'f': 1.0 / 298.257223563}, 'GRS80 / WGS84  (NAD83)'),
-    19: ({'a': 6378137, 'f': 298.257222101}, 'ETRS89')
+    1: Ellipsoid(a=6377563.3960, f=1.0 / 299.3249646, name='Airy 1858'),
+    2: Ellipsoid(a=6377340.189, f=1.0 / 299.3249646, name='Airy Modified'),
+    3: Ellipsoid(a=6378160, f=1.0 / 298.25, name='Australian National'),
+    4: Ellipsoid(a=6377397.155, f=1.0 / 299.1528128, name='Bessel 1841'),
+    5: Ellipsoid(a=6378249.145, f=1.0 / 293.465, name='Clarke 1880'),
+    6: Ellipsoid(a=6377276.345, f=1.0 / 300.8017, name='Everest 1830'),
+    7: Ellipsoid(a=6377304.063, f=1.0 / 300.8017, name='Everest Modified'),
+    8: Ellipsoid(a=6378166.0, f=1.0 / 298.3, name='Fisher 1960'),
+    9: Ellipsoid(a=6378150.0, f=1.0 / 298.3, name='Fisher 1968'),
+    10: Ellipsoid(a=6378270.0, f=1.0 / 297, name='Hough 1956'),
+    11: Ellipsoid(a=6378388.0, f=1.0 / 297, name='International (Hayford)/European Datum (ED50)'),
+    12: Ellipsoid(a=6378245.0, f=1.0 / 298.3, name='Krassovsky 1938'),
+    13: Ellipsoid(a=6378145., f=1.0 / 298.25, name='NWL-9D  (WGS 66)'),
+    14: Ellipsoid(a=6378160., f=1.0 / 298.25, name='South American 1969 (SAD69'),
+    15: Ellipsoid(a=6378136, f=1.0 / 298.257, name='Soviet Geod. System 1985'),
+    16: Ellipsoid(a=6378135., f=1.0 / 298.26, name='WGS 72'),
+    17: Ellipsoid(a=6378206.4, f=1.0 / 294.9786982138, name='Clarke 1866    (NAD27)'),
+    18: Ellipsoid(a=6378137.0, f=1.0 / 298.257223563, name='GRS80 / WGS84  (NAD83)'),
+    19: Ellipsoid(a=6378137, f=298.257222101, name='ETRS89')
 }
 ELLIPSOID_IX = {'airy1858': 1,
                 'airymodified': 2,
@@ -118,20 +119,19 @@ def select_ellipsoid(name):
     --------
     >>> import nvector as nv
     >>> nv.select_ellipsoid(name='wgs84')
-    (6378137.0, 0.0033528106647474805, 'GRS80 / WGS84  (NAD83)')
+    Ellipsoid(a=6378137.0, f=0.0033528106647474805, name='GRS80 / WGS84  (NAD83)')
     >>> nv.select_ellipsoid(name='GRS80')
-    (6378137.0, 0.0033528106647474805, 'GRS80 / WGS84  (NAD83)')
+    Ellipsoid(a=6378137.0, f=0.0033528106647474805, name='GRS80 / WGS84  (NAD83)')
     >>> nv.select_ellipsoid(name='NAD83')
-    (6378137.0, 0.0033528106647474805, 'GRS80 / WGS84  (NAD83)')
+    Ellipsoid(a=6378137.0, f=0.0033528106647474805, name='GRS80 / WGS84  (NAD83)')
     >>> nv.select_ellipsoid(name=18)
-    (6378137.0, 0.0033528106647474805, 'GRS80 / WGS84  (NAD83)')
+    Ellipsoid(a=6378137.0, f=0.0033528106647474805, name='GRS80 / WGS84  (NAD83)')
     """
     if isinstance(name, str):
         name = name.lower().replace(' ', '')
     ellipsoid_id = ELLIPSOID_IX.get(name, name)
 
-    ellipsoid, fullname = ELLIPSOID[ellipsoid_id]
-    return ellipsoid['a'], ellipsoid['f'], fullname
+    return ELLIPSOID[ellipsoid_id]
 
 
 def E_rotation(axes='e'):
@@ -141,28 +141,29 @@ def E_rotation(axes='e'):
     Parameters
     ----------
     axes : 'e' or 'E'
-        defines orientation of the axes of the coordinate frame E. Options are:
-        'e': z-axis points to the North Pole along the Earth's rotation axis,
-             x-axis points towards the point where latitude = longitude = 0.
-             This choice is very common in many fields.
-        'E': x-axis points to the North Pole along the Earth's rotation axis,
-             y-axis points towards longitude +90deg (east) and latitude = 0.
-             (the yz-plane coincides with the equatorial plane).
-             This choice of axis ensures that at zero latitude and longitude,
-             frame N (North-East-Down) has the same orientation as frame E.
-             If roll/pitch/yaw are zero, also frame B (forward-starboard-down)
-             has this orientation. In this manner, the axes of frame E is
-             chosen to correspond with the axes of frame N and B.
-             The functions in this library originally used this option.
+        defines orientation of the axes of the coordinate frame E.
+        If axes is 'e' then z-axis points to the North Pole along the Earth's
+        rotation axis, x-axis points towards the point where latitude = longitude = 0.
+        If axes is 'E' then x-axis points to the North Pole along the Earth's
+        rotation axis, y-axis points towards longitude +90deg (east) and latitude = 0.
 
     Returns
     -------
     R_Ee : 3 x 3 array
         rotation matrix defining the axes of the coordinate frame E as
-        described in Table 2 in Gade (2010)
+        described in Table 2 in Gade (2010).
 
+    Notes
+    -----
     R_Ee controls the axes of the coordinate frame E (Earth-Centred,
-    Earth-Fixed, ECEF) used by the other functions in this library
+    Earth-Fixed, ECEF) used by the other functions in this library.
+    It is very common in many fields to choose axes equal to 'e'.
+    If you choose axes equal to 'E' the yz-plane coincides with the equatorial
+    plane. This choice of axis ensures that at zero latitude and longitude,
+    frame N (North-East-Down) has the same orientation as frame E. If
+    roll/pitch/yaw are zero, also frame B (forward-starboard-down) has this
+    orientation. In this manner, the axes of frame E is chosen to correspond
+    with the axes of frame N and B.
 
     Examples
     --------
@@ -177,8 +178,8 @@ def E_rotation(axes='e'):
     ...                                       [ 0.,  0.,  1.]])
     True
 
-    Reference
-    ---------
+    References
+    ----------
     Gade, K. (2010). `A Nonsingular Horizontal Position Representation,
     The Journal of Navigation, Volume 63, Issue 03, pp 395-417, July 2010.
     <www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf>`_
@@ -220,6 +221,14 @@ def deg(*rad_angles):
     deg_angles:
         angle in degrees
 
+    Examples
+    --------
+    >>> import nvector as nv
+    >>> nv.deg(np.pi/2)
+    90.0
+    >>> nv.deg(np.pi/2, [0, np.pi])
+    (90.0, array([  0., 180.]))
+
     See also
     --------
     rad
@@ -242,6 +251,14 @@ def rad(*deg_angles):
     -------
     rad_angles:
         angle in radians
+
+    Examples
+    --------
+    >>> import nvector as nv
+    >>> nv.deg(nv.rad(90))
+    90.0
+    >>> nv.deg(*nv.rad(90, [0, 180]))
+    (90.0, array([  0., 180.]))
 
     See also
     --------
@@ -300,50 +317,48 @@ def mdot(a, b):
     Examples
     --------
     3 x 3 x 2 times 3 x 3 x 2 array -> 3 x 2 x 2 array
-
-    >>> import numpy as np
-    >>> import nvector as nv
-    >>> a = 1.0 * np.arange(18).reshape(3,3,2)
-    >>> b = - a
-    >>> t = np.concatenate([np.dot(a[...,i], b[...,i])[:, :, None]
-    ...                    for i in range(2)], axis=2)
-    >>> tt = nv.mdot(a, b)
-    >>> tt.shape
-    (3, 3, 2)
-    >>> np.allclose(t, tt)
-    True
+        >>> import numpy as np
+        >>> import nvector as nv
+        >>> a = 1.0 * np.arange(18).reshape(3,3,2)
+        >>> b = - a
+        >>> t = np.concatenate([np.dot(a[...,i], b[...,i])[:, :, None]
+        ...                    for i in range(2)], axis=2)
+        >>> tt = nv.mdot(a, b)
+        >>> tt.shape
+        (3, 3, 2)
+        >>> np.allclose(t, tt)
+        True
 
     3 x 3 x 2 times 3 x 1 array -> 3 x 1 x 2 array
+        >>> t1 = np.concatenate([np.dot(a[...,i], b[:,0,0][:,None])[:,:,None]
+        ...                    for i in range(2)], axis=2)
 
-    >>> t1 = np.concatenate([np.dot(a[...,i], b[:,0,0][:,None])[:,:,None]
-    ...                    for i in range(2)], axis=2)
-
-    >>> tt = nv.mdot(a, b[:,0,0].reshape(-1,1))
-    >>> tt.shape
-    (3, 1, 2)
-    >>> np.allclose(t1, tt)
-    True
+        >>> tt = nv.mdot(a, b[:,0,0].reshape(-1,1))
+        >>> tt.shape
+        (3, 1, 2)
+        >>> np.allclose(t1, tt)
+        True
 
     3 x 3  times 3 x 3 array -> 3 x 3 array
-    >>> tt0 = nv.mdot(a[...,0], b[...,0])
-    >>> tt0.shape
-    (3, 3)
-    >>> np.allclose(t[...,0], tt0)
-    True
+        >>> tt0 = nv.mdot(a[...,0], b[...,0])
+        >>> tt0.shape
+        (3, 3)
+        >>> np.allclose(t[...,0], tt0)
+        True
 
     3 x 3  times 3 x 1 array -> 3 x 1 array
-    >>> tt0 = nv.mdot(a[...,0], b[:,0,0][:,None])
-    >>> tt0.shape
-    (3, 1)
-    >>> np.allclose(t[:,0,0][:,None], tt0)
-    True
+        >>> tt0 = nv.mdot(a[...,0], b[:,0,0][:,None])
+        >>> tt0.shape
+        (3, 1)
+        >>> np.allclose(t[:,0,0][:,None], tt0)
+        True
 
     3 x 3  times 3 x 2 array -> 3 x 1 x 2 array
-    >>> tt0 = nv.mdot(a[..., 0], b[:, :2, 0][:, None])
-    >>> tt0.shape
-    (3, 1, 2)
-    >>> np.allclose(t[:,:2,0][:,None], tt0)
-    True
+        >>> tt0 = nv.mdot(a[..., 0], b[:, :2, 0][:, None])
+        >>> tt0.shape
+        (3, 1, 2)
+        >>> np.allclose(t[:,:2,0][:,None], tt0)
+        True
 
     """
     return np.einsum('ij...,jk...->ik...', a, b)
@@ -525,48 +540,46 @@ def n_E_and_wa2R_EL(n_E, wander_azimuth, R_Ee=None):
 
 
 class _Nvector2ECEFvector(object):
-    __doc__ = """
-    Converts n-vector to Cartesian position vector in meters.
+    __doc__ = """Converts n-vector to Cartesian position vector in meters.
 
-    Parameters
-    ----------
-    n_EB_E:  3 x n array
-        n-vector(s) [no unit] of position B, decomposed in E.
-    depth:  1 x n array
-        Depth(s) [m] of system B, relative to the ellipsoid (depth = -height)
-    a: real scalar, default WGS-84 ellipsoid.
-        Semi-major axis of the Earth ellipsoid given in [m].
-    f: real scalar, default WGS-84 ellipsoid.
-        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
-        Earth with radius a is used in stead of WGS-84.
-    R_Ee : 3 x 3 array
-        rotation matrix defining the axes of the coordinate frame E.
+Parameters
+----------
+n_EB_E:  3 x n array
+    n-vector(s) [no unit] of position B, decomposed in E.
+depth:  1 x n array
+    Depth(s) [m] of system B, relative to the ellipsoid (depth = -height)
+a: real scalar, default WGS-84 ellipsoid.
+    Semi-major axis of the Earth ellipsoid given in [m].
+f: real scalar, default WGS-84 ellipsoid.
+    Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+    Earth with radius a is used in stead of WGS-84.
+R_Ee : 3 x 3 array
+    rotation matrix defining the axes of the coordinate frame E.
 
-    Returns
-    -------
-    p_EB_E:  3 x n array
-        Cartesian position vector(s) from E to B, decomposed in E.
+Returns
+-------
+p_EB_E:  3 x n array
+    Cartesian position vector(s) from E to B, decomposed in E.
 
-    Notes
-    -----
-    The position of B (typically body) relative to E (typically Earth) is
-    given into this function as n-vector, n_EB_E. The function converts
-    to cartesian position vector ("ECEF-vector"), p_EB_E, in meters.
-    The calculation is exact, taking the ellipsity of the Earth into account.
-    It is also non-singular as both n-vector and p-vector are non-singular
-    (except for the center of the Earth).
-    The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
-    might be specified.
+Notes
+-----
+The position of B (typically body) relative to E (typically Earth) is
+given into this function as n-vector, n_EB_E. The function converts
+to cartesian position vector ("ECEF-vector"), p_EB_E, in meters.
+The calculation is exact, taking the ellipsity of the Earth into account.
+It is also non-singular as both n-vector and p-vector are non-singular
+(except for the center of the Earth).
+The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
+might be specified.
 
-    Examples
-    --------
+Examples
+--------
+{0}
 
-    {0}
-
-    See also
-    --------
-    p_EB_E2n_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E
-    """.format(_examples.get_examples([4], OO=False))
+See also
+--------
+p_EB_E2n_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E
+""".format(_examples.get_examples_no_header([4], OO=False))
 
 
 @use_docstring_from(_Nvector2ECEFvector)
@@ -595,51 +608,49 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
 
 
 class _ECEFvector2Nvector(object):
-    __doc__ = """
-    Converts Cartesian position vector in meters to n-vector.
+    __doc__ = """Converts Cartesian position vector in meters to n-vector.
 
-    Parameters
-    ----------
-    p_EB_E:  3 x n array
-        Cartesian position vector(s) from E to B, decomposed in E.
-    a: real scalar, default WGS-84 ellipsoid.
-        Semi-major axis of the Earth ellipsoid given in [m].
-    f: real scalar, default WGS-84 ellipsoid.
-        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
-        Earth with radius a is used in stead of WGS-84.
-    R_Ee : 3 x 3 array
-        rotation matrix defining the axes of the coordinate frame E.
+Parameters
+----------
+p_EB_E:  3 x n array
+    Cartesian position vector(s) from E to B, decomposed in E.
+a: real scalar, default WGS-84 ellipsoid.
+    Semi-major axis of the Earth ellipsoid given in [m].
+f: real scalar, default WGS-84 ellipsoid.
+    Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+    Earth with radius a is used in stead of WGS-84.
+R_Ee : 3 x 3 array
+    rotation matrix defining the axes of the coordinate frame E.
 
-    Returns
-    -------
-    n_EB_E:  3 x n array
-        n-vector(s) [no unit] of position B, decomposed in E.
-    depth:  1 x n array
-        Depth(s) [m] of system B, relative to the ellipsoid (depth = -height)
+Returns
+-------
+n_EB_E:  3 x n array
+    n-vector(s) [no unit] of position B, decomposed in E.
+depth:  1 x n array
+    Depth(s) [m] of system B, relative to the ellipsoid (depth = -height)
 
 
-    Notes
-    -----
-    The position of B (typically body) relative to E (typically Earth) is
-    given into this function as cartesian position vector p_EB_E, in meters.
-    ("ECEF-vector"). The function converts to n-vector, n_EB_E and its
-    depth, depth.
-    The calculation is excact, taking the ellipsity of the Earth into account.
-    It is also non-singular as both n-vector and p-vector are non-singular
-    (except for the center of the Earth).
-    The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
-    might be specified.
+Notes
+-----
+The position of B (typically body) relative to E (typically Earth) is
+given into this function as cartesian position vector p_EB_E, in meters.
+("ECEF-vector"). The function converts to n-vector, n_EB_E and its
+depth, depth.
+The calculation is excact, taking the ellipsity of the Earth into account.
+It is also non-singular as both n-vector and p-vector are non-singular
+(except for the center of the Earth).
+The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
+might be specified.
 
-    Examples
-    --------
+Examples
+--------
+{0}
 
-    {0}
+See also
+--------
+n_EB_E2p_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E
 
-    See also
-    --------
-    n_EB_E2p_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E
-
-    """.format(_examples.get_examples([3], OO=False))
+""".format(_examples.get_examples_no_header([3], OO=False))
 
 
 @use_docstring_from(_ECEFvector2Nvector)
@@ -689,50 +700,48 @@ def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
 
 
 class _DeltaFromPositionAtoB(object):
-    __doc__ = """
-    Returns the delta vector from position A to B decomposed in E.
+    __doc__ = """Returns the delta vector from position A to B decomposed in E.
 
-    Parameters
-    ----------
-    n_EA_E, n_EB_E:  3 x n array
-        n-vector(s) [no unit] of position A and B, decomposed in E.
-    z_EA, z_EB:  1 x n array
-        Depth(s) [m] of system A and B, relative to the ellipsoid.
-        (z_EA = -height, z_EB = -height)
-    a: real scalar, default WGS-84 ellipsoid.
-        Semi-major axis of the Earth ellipsoid given in [m].
-    f: real scalar, default WGS-84 ellipsoid.
-        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
-        Earth with radius a is used in stead of WGS-84.
-    R_Ee : 3 x 3 array
-        rotation matrix defining the axes of the coordinate frame E.
+Parameters
+----------
+n_EA_E, n_EB_E:  3 x n array
+    n-vector(s) [no unit] of position A and B, decomposed in E.
+z_EA, z_EB:  1 x n array
+    Depth(s) [m] of system A and B, relative to the ellipsoid.
+    (z_EA = -height, z_EB = -height)
+a: real scalar, default WGS-84 ellipsoid.
+    Semi-major axis of the Earth ellipsoid given in [m].
+f: real scalar, default WGS-84 ellipsoid.
+    Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+    Earth with radius a is used in stead of WGS-84.
+R_Ee : 3 x 3 array
+    rotation matrix defining the axes of the coordinate frame E.
 
-    Returns
-    -------
-    p_AB_E:  3 x n array
-        Cartesian position vector(s) from A to B, decomposed in E.
+Returns
+-------
+p_AB_E:  3 x n array
+    Cartesian position vector(s) from A to B, decomposed in E.
 
-    Notes
-    -----
-    The n-vectors for positions A (n_EA_E) and B (n_EB_E) are given. The
-    output is the delta vector from A to B (p_AB_E).
-    The calculation is excact, taking the ellipsity of the Earth into account.
-    It is also non-singular as both n-vector and p-vector are non-singular
-    (except for the center of the Earth).
-    The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
-    might be specified.
+Notes
+-----
+The n-vectors for positions A (n_EA_E) and B (n_EB_E) are given. The
+output is the delta vector from A to B (p_AB_E).
+The calculation is excact, taking the ellipsity of the Earth into account.
+It is also non-singular as both n-vector and p-vector are non-singular
+(except for the center of the Earth).
+The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
+might be specified.
 
-    Examples
-    --------
-
-    {0}
+Examples
+--------
+{0}
 
 
-    See also
-    --------
-    n_EA_E_and_p_AB_E2n_EB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E
+See also
+--------
+n_EA_E_and_p_AB_E2n_EB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E
 
-    """.format(_examples.get_examples([1], False))
+""".format(_examples.get_examples_no_header([1], False))
 
 
 @use_docstring_from(_DeltaFromPositionAtoB)
@@ -748,48 +757,50 @@ def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
 
 def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137,
                              f=1.0 / 298.257223563, R_Ee=None):
-    """
-    Returns position B from position A and delta.
+    __doc__="""Returns position B from position A and delta.
 
-    Parameters
-    ----------
-    n_EA_E:  3 x n array
-        n-vector(s) [no unit] of position A, decomposed in E.
-    p_AB_E:  3 x n array
-        Cartesian position vector(s) from A to B, decomposed in E.
-    z_EA:  1 x n array
-        Depth(s) [m] of system A, relative to the ellipsoid. (z_EA = -height)
-    a: real scalar, default WGS-84 ellipsoid.
-        Semi-major axis of the Earth ellipsoid given in [m].
-    f: real scalar, default WGS-84 ellipsoid.
-        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
-        Earth with radius a is used in stead of WGS-84.
-    R_Ee : 3 x 3 array
-        rotation matrix defining the axes of the coordinate frame E.
+Parameters
+----------
+n_EA_E:  3 x n array
+    n-vector(s) [no unit] of position A, decomposed in E.
+p_AB_E:  3 x n array
+    Cartesian position vector(s) from A to B, decomposed in E.
+z_EA:  1 x n array
+    Depth(s) [m] of system A, relative to the ellipsoid. (z_EA = -height)
+a: real scalar, default WGS-84 ellipsoid.
+    Semi-major axis of the Earth ellipsoid given in [m].
+f: real scalar, default WGS-84 ellipsoid.
+    Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+    Earth with radius a is used in stead of WGS-84.
+R_Ee : 3 x 3 array
+    rotation matrix defining the axes of the coordinate frame E.
 
-    Returns
-    -------
-    n_EB_E:  3 x n array
-        n-vector(s) [no unit] of position B, decomposed in E.
-    z_EB:  1 x n array
-        Depth(s) [m] of system B, relative to the ellipsoid.
-        (z_EB = -height)
+Returns
+-------
+n_EB_E:  3 x n array
+    n-vector(s) [no unit] of position B, decomposed in E.
+z_EB:  1 x n array
+    Depth(s) [m] of system B, relative to the ellipsoid.
+    (z_EB = -height)
 
-    Notes
-    -----
-    The n-vector for position A (n_EA_E) and the position-vector from position
-    A to position B (p_AB_E) are given. The output is the n-vector of position
-    B (n_EB_E) and depth of B (z_EB).
-    The calculation is excact, taking the ellipsity of the Earth into account.
-    It is also non-singular as both n-vector and p-vector are non-singular
-    (except for the center of the Earth).
-    The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
-    might be specified.
+Notes
+-----
+The n-vector for position A (n_EA_E) and the position-vector from position
+A to position B (p_AB_E) are given. The output is the n-vector of position
+B (n_EB_E) and depth of B (z_EB).
+The calculation is excact, taking the ellipsity of the Earth into account.
+It is also non-singular as both n-vector and p-vector are non-singular
+(except for the center of the Earth).
+The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
+might be specified.
 
-    See also
-    --------
-    n_EA_E_and_n_EB_E2p_AB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E
-    """
+{0}
+
+See also
+--------
+n_EA_E_and_n_EB_E2p_AB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E
+""".format(_examples.get_examples_no_header([2], OO=False))
+
     if R_Ee is None:
         R_Ee = E_rotation()
 
@@ -1085,24 +1096,23 @@ def interpolate(path, ti):
 class _Intersect(object):
     __doc__ = """Returns the intersection(s) between the great circles of the two paths
 
-    Parameters
-    ----------
-    path_a, path_b: tuple of 2 n-vectors
-        defining path A and path B, respectively.
-        Path A and B has shape 2 x 3 x n and 2 x 3 x m, respectively.
+Parameters
+----------
+path_a, path_b: tuple of 2 n-vectors
+    defining path A and path B, respectively.
+    Path A and B has shape 2 x 3 x n and 2 x 3 x m, respectively.
 
-    Returns
-    -------
-    n_EC_E : array of shape 3 x max(n, m)
-        n-vector(s) [no unit] of position C decomposed in E.
-        point(s) of intersection between paths.
+Returns
+-------
+n_EC_E : array of shape 3 x max(n, m)
+    n-vector(s) [no unit] of position C decomposed in E.
+    point(s) of intersection between paths.
 
-    Examples
-    --------
+Examples
+--------
+{0}
 
-    {0}
-
-    """.format(_examples.get_examples([9], OO=False))
+""".format(_examples.get_examples_no_header([9], OO=False))
 
 
 @use_docstring_from(_Intersect)
@@ -1150,28 +1160,27 @@ def _great_circle_cross_track_distance(sin_theta, radius=1):
 class _CrossTrackDistance(object):
     __doc__ = """Returns  cross track distance between path A and position B.
 
-    Parameters
-    ----------
-    path: tuple of 2 n-vectors
-        2 n-vectors of positions defining path A, decomposed in E.
-    n_EB_E:  3 x m array
-        n-vector(s) of position B to measure the cross track distance to.
-    method: string
-        defining distance calculated. Options are: 'greatcircle' or 'euclidean'
-    radius: real scalar
-        radius of sphere. (default 6371009.0)
+Parameters
+----------
+path: tuple of 2 n-vectors
+    2 n-vectors of positions defining path A, decomposed in E.
+n_EB_E:  3 x m array
+    n-vector(s) of position B to measure the cross track distance to.
+method: string
+    defining distance calculated. Options are: 'greatcircle' or 'euclidean'
+radius: real scalar
+    radius of sphere. (default 6371009.0)
 
-    Returns
-    -------
-    distance : array of length max(n, m)
-        cross track distance(s)
+Returns
+-------
+distance : array of length max(n, m)
+    cross track distance(s)
 
-    Examples
-    --------
+Examples
+--------
+{0}
 
-    {0}
-
-    """.format(_examples.get_examples([10], OO=False))
+""".format(_examples.get_examples_no_header([10], OO=False))
 
 
 @use_docstring_from(_CrossTrackDistance)
@@ -1185,39 +1194,38 @@ def cross_track_distance(path, n_EB_E, method='greatcircle', radius=6371009.0):
 
 
 class _OnGreatCircle(object):
-    __doc__ = """ True if position B is on great circle through path A.
+    __doc__ = """Returns True if position B is on great circle through path A.
 
-    Parameters
-    ----------
-    path: tuple of 2 n-vectors
-        2 n-vectors of positions defining path A, decomposed in E.
-    n_EB_E:  3 x m array
-        n-vector(s) of position B to check to.
-    radius: real scalar
-        radius of sphere. (default 6371009.0)
-    atol: real scalar
-        The absolute tolerance parameter (See notes).
+Parameters
+----------
+path: tuple of 2 n-vectors
+    2 n-vectors of positions defining path A, decomposed in E.
+n_EB_E:  3 x m array
+    n-vector(s) of position B to check to.
+radius: real scalar
+    radius of sphere. (default 6371009.0)
+atol: real scalar
+    The absolute tolerance parameter (See notes).
 
-    Returns
-    -------
-    on : bool array of length max(n, m)
-        True if position B is on great circle through path A.
+Returns
+-------
+on : bool array of length max(n, m)
+    True if position B is on great circle through path A.
 
-    Notes
-    -----
-    The default value of `atol` is not zero, and is used to determine what
-    small values should be considered close to zero. The default value is
-    appropriate for expected values of order unity. However, `atol` should
-    be carefully selected for the use case at hand. Typically the value
-    should be set to the accepted error tolerance. For GPS data the error
-    ranges from 0.01 m to 15 m.
+Notes
+-----
+The default value of `atol` is not zero, and is used to determine what
+small values should be considered close to zero. The default value is
+appropriate for expected values of order unity. However, `atol` should
+be carefully selected for the use case at hand. Typically the value
+should be set to the accepted error tolerance. For GPS data the error
+ranges from 0.01 m to 15 m.
 
-    Examples
-    --------
+Examples
+--------
+{0}
 
-    {0}
-
-    """.format(_examples.get_examples([10], OO=False))
+""".format(_examples.get_examples_no_header([10], OO=False))
 
 
 @use_docstring_from(_OnGreatCircle)
@@ -1227,39 +1235,38 @@ def on_great_circle(path, n_EB_E, radius=6371009.0, atol=1e-8):
 
 
 class _OnGreatCirclePath(object):
-    __doc__ = """ True if position B is on great circle and between endpoints of path A.
+    __doc__ = """Returns True if position B is on great circle and between endpoints of path A.
 
-    Parameters
-    ----------
-    path: tuple of 2 n-vectors
-        2 n-vectors of positions defining path A, decomposed in E.
-    n_EB_E:  3 x m array
-        n-vector(s) of position B to measure the cross track distance to.
-    radius: real scalar
-        radius of sphere. (default 6371009.0)
-    atol: real scalars
-        The absolute tolerance parameter (See notes).
+Parameters
+----------
+path: tuple of 2 n-vectors
+    2 n-vectors of positions defining path A, decomposed in E.
+n_EB_E:  3 x m array
+    n-vector(s) of position B to measure the cross track distance to.
+radius: real scalar
+    radius of sphere. (default 6371009.0)
+atol: real scalars
+    The absolute tolerance parameter (See notes).
 
-    Returns
-    -------
-    on : bool array of length max(n, m)
-        True if position B is on great circle and between endpoints of path A.
+Returns
+-------
+on : bool array of length max(n, m)
+    True if position B is on great circle and between endpoints of path A.
 
-    Notes
-    -----
-    The default value of `atol` is not zero, and is used to determine what
-    small values should be considered close to zero. The default value is
-    appropriate for expected values of order unity. However, `atol` should
-    be carefully selected for the use case at hand. Typically the value
-    should be set to the accepted error tolerance. For GPS data the error
-    ranges from 0.01 m to 15 m.
+Notes
+-----
+The default value of `atol` is not zero, and is used to determine what
+small values should be considered close to zero. The default value is
+appropriate for expected values of order unity. However, `atol` should
+be carefully selected for the use case at hand. Typically the value
+should be set to the accepted error tolerance. For GPS data the error
+ranges from 0.01 m to 15 m.
 
-    Examples
-    --------
+Examples
+--------
+{0}
 
-    {0}
-
-    """.format(_examples.get_examples([10], OO=False))
+""".format(_examples.get_examples_no_header([10], OO=False))
 
 
 @use_docstring_from(_OnGreatCirclePath)
@@ -1274,24 +1281,23 @@ def on_great_circle_path(path, n_EB_E, radius=6371009.0, atol=1e-8):
 class _ClosestPointOnGreatCircle(object):
     __doc__ = """Returns closest point C on great circle path A to position B.
 
-    Parameters
-    ----------
-    path: tuple of 2 n-vectors of 3 x n arrays
-        2 n-vectors of positions defining path A, decomposed in E.
-    n_EB_E:  3 x m array
-        n-vector(s) of position B to find the closest point to.
+Parameters
+----------
+path: tuple of 2 n-vectors of 3 x n arrays
+    2 n-vectors of positions defining path A, decomposed in E.
+n_EB_E:  3 x m array
+    n-vector(s) of position B to find the closest point to.
 
-    Returns
-    -------
-    n_EC_E:  3 x max(m, n) array
-        n-vector(s) of closest position C on great circle path A
+Returns
+-------
+n_EC_E:  3 x max(m, n) array
+    n-vector(s) of closest position C on great circle path A
 
-    Examples
-    --------
+Examples
+--------
+{0}
 
-    {0}
-
-    """.format(_examples.get_examples([10], OO=False))
+""".format(_examples.get_examples_no_header([10], OO=False))
 
 
 @use_docstring_from(_ClosestPointOnGreatCircle)
@@ -1308,22 +1314,21 @@ def closest_point_on_great_circle(path, n_EB_E):
 class _GreatCircleDistance(object):
     __doc__ = """Returns great circle distance between positions A and B
 
-    Parameters
-    ----------
-    n_EA_E, n_EB_E:  3 x n array
-        n-vector(s) [no unit] of position A and B, decomposed in E.
-    radius: real scalar
-        radius of sphere.
+Parameters
+----------
+n_EA_E, n_EB_E:  3 x n array
+    n-vector(s) [no unit] of position A and B, decomposed in E.
+radius: real scalar
+    radius of sphere.
 
-    Formulae is given by equation (16) in Gade (2010) and is well
-    conditioned for all angles.
+Formulae is given by equation (16) in Gade (2010) and is well
+conditioned for all angles.
 
-    Examples
-    --------
+Examples
+--------
+{0}
 
-    {0}
-
-    """.format(_examples.get_examples([5], OO=False))
+""".format(_examples.get_examples_no_header([5], OO=False))
 
 
 @use_docstring_from(_GreatCircleDistance)
@@ -1346,18 +1351,17 @@ def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
 class _EuclideanDistance(object):
     __doc__ = """Returns Euclidean distance between positions A and B
 
-    Parameters
-    ----------
-    n_EA_E, n_EB_E:  3 x n array
-        n-vector(s) [no unit] of position A and B, decomposed in E.
-    radius: real scalar
-        radius of sphere.
+Parameters
+----------
+n_EA_E, n_EB_E:  3 x n array
+    n-vector(s) [no unit] of position A and B, decomposed in E.
+radius: real scalar
+    radius of sphere.
 
-    Examples
-    --------
-
-    {0}
-    """.format(_examples.get_examples([5], OO=False))
+Examples
+--------
+{0}
+""".format(_examples.get_examples_no_header([5], OO=False))
 
 
 @use_docstring_from(_EuclideanDistance)
@@ -1412,29 +1416,27 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, 
 
 
 class _PositionBFromAzimuthAndDistanceFromPositionA(object):
-    __doc__ = """
-    Returns position B from azimuth and distance from position A
+    __doc__ = """Returns position B from azimuth and distance from position A
 
-    Parameters
-    ----------
-    n_EA_E:  3 x n array
-        n-vector(s) [no unit] of position A decomposed in E.
-    distance_rad: n, array
-        great circle distance [rad] from position A to B
-    azimuth: n array
-        Angle [rad] the line makes with a meridian, taken clockwise from north.
+Parameters
+----------
+n_EA_E:  3 x n array
+    n-vector(s) [no unit] of position A decomposed in E.
+distance_rad: n, array
+    great circle distance [rad] from position A to B
+azimuth: n array
+    Angle [rad] the line makes with a meridian, taken clockwise from north.
 
-    Returns
-    -------
-    n_EB_E:  3 x n array
-        n-vector(s) [no unit] of position B decomposed in E.
+Returns
+-------
+n_EB_E:  3 x n array
+    n-vector(s) [no unit] of position B decomposed in E.
 
-    Examples
-    --------
+Examples
+--------
+{0}
 
-    {0}
-
-    """.format(_examples.get_examples([8], OO=False))
+""".format(_examples.get_examples_no_header([8], OO=False))
 
 
 @use_docstring_from(_PositionBFromAzimuthAndDistanceFromPositionA)
@@ -1455,25 +1457,23 @@ def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth, R_Ee=None)
 
 
 class _MeanHorizontalPosition(object):
-    __doc__ = """
-    Returns the n-vector of the horizontal mean position.
+    __doc__ = """Returns the n-vector of the horizontal mean position.
 
-    Parameters
-    ----------
-    n_EB_E:  3 x n array
-        n-vectors [no unit] of positions Bi, decomposed in E.
+Parameters
+----------
+n_EB_E:  3 x n array
+    n-vectors [no unit] of positions Bi, decomposed in E.
 
-    Returns
-    -------
-    p_EM_E:  3 x 1 array
-        n-vector [no unit] of the mean positions of all Bi, decomposed in E.
+Returns
+-------
+p_EM_E:  3 x 1 array
+    n-vector [no unit] of the mean positions of all Bi, decomposed in E.
 
-    Examples
-    --------
+Examples
+--------
+{0}
 
-    {0}
-
-    """.format(_examples.get_examples([7], OO=False))
+""".format(_examples.get_examples_no_header([7], OO=False))
 
 
 @use_docstring_from(_MeanHorizontalPosition)

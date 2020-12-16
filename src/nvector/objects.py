@@ -190,36 +190,34 @@ def allclose(a, b, rtol=1.e-5, atol=1.e-8, equal_nan=False):
 
 
 class _DeltaE(object):
-    __doc__ = """
-    Returns cartesian delta vector from positions a to b decomposed in E.
+    __doc__ = """Returns cartesian delta vector from positions a to b decomposed in E.
 
-    Parameters
-    ----------
-    point_a, point_b: Nvector, GeoPoint or ECEFvector objects
-        position a and b, decomposed in E.
+Parameters
+----------
+point_a, point_b: Nvector, GeoPoint or ECEFvector objects
+    position a and b, decomposed in E.
 
-    Returns
-    -------
-    p_ab_E:  ECEFvector
-        Cartesian position vector(s) from a to b, decomposed in E.
+Returns
+-------
+p_ab_E:  ECEFvector
+    Cartesian position vector(s) from a to b, decomposed in E.
 
-    Notes
-    -----
-    The calculation is exact, taking the ellipsity of the Earth into account.
-    It is also non-singular as both n-vector and p-vector are non-singular
-    (except for the center of the Earth).
+Notes
+-----
+The calculation is exact, taking the ellipsity of the Earth into account.
+It is also non-singular as both n-vector and p-vector are non-singular
+(except for the center of the Earth).
 
-    Examples
-    --------
+Examples
+--------
+{0}
 
-    {0}
-
-    See also
-    --------
-    n_EA_E_and_p_AB_E2n_EB_E,
-    p_EB_E2n_EB_E,
-    n_EB_E2p_EB_E.
-    """.format(_examples.get_examples([1]))
+See also
+--------
+n_EA_E_and_p_AB_E2n_EB_E,
+p_EB_E2n_EB_E,
+n_EB_E2p_EB_E.
+""".format(_examples.get_examples_no_header([1]))
 
 
 @use_docstring_from(_DeltaE)
@@ -780,32 +778,30 @@ class Pvector(_Common):
 
 
 class ECEFvector(Pvector):
-    __doc__ = """
-    Geographical position given as cartesian position vector in frame E
+    __doc__ = """Geographical position given as cartesian position vector in frame E
 
-    Parameters
-    ----------
-    pvector: 3 x n array
-        Cartesian position vector(s) [m] from E to B, decomposed in E.
-    frame: FrameE object
-        reference ellipsoid. The default ellipsoid model used is WGS84, but
-        other ellipsoids/spheres might be specified.
+Parameters
+----------
+pvector: 3 x n array
+    Cartesian position vector(s) [m] from E to B, decomposed in E.
+frame: FrameE object
+    reference ellipsoid. The default ellipsoid model used is WGS84, but
+    other ellipsoids/spheres might be specified.
 
-    Notes
-    -----
-    The position of B (typically body) relative to E (typically Earth) is
-    given into this function as p-vector, p_EB_E relative to the center of the
-    frame.
+Notes
+-----
+The position of B (typically body) relative to E (typically Earth) is
+given into this function as p-vector, p_EB_E relative to the center of the
+frame.
 
-    Examples
-    --------
+Examples
+--------
+{0}
 
-    {0}
-
-    See also
-    --------
-    GeoPoint, ECEFvector, Pvector
-    """.format(_examples.get_examples([3, 4]))
+See also
+--------
+GeoPoint, ECEFvector, Pvector
+""".format(_examples.get_examples_no_header([3, 4]))
 
     def __init__(self, pvector, frame=None, scalar=None):
         super(ECEFvector, self).__init__(pvector, _default_frame(frame), scalar)
@@ -882,26 +878,24 @@ class ECEFvector(Pvector):
 
 
 class GeoPath(object):
-    __doc__ = """
-    Geographical path between two positions in Frame E
+    __doc__ = """Geographical path between two positions in Frame E
 
-    Parameters
-    ----------
-     point_a, point_b: Nvector, GeoPoint or ECEFvector objects
-        The path is defined by the line between position A and B, decomposed
-        in E.
+Parameters
+----------
+ point_a, point_b: Nvector, GeoPoint or ECEFvector objects
+    The path is defined by the line between position A and B, decomposed
+    in E.
 
-    Notes
-    -----
-    Please note that either position A or B or both might be a vector of points.
-    In this case the GeoPath instance represents all the paths between the positions
-    of A and the corresponding positions of B.
+Notes
+-----
+Please note that either position A or B or both might be a vector of points.
+In this case the GeoPath instance represents all the paths between the positions
+of A and the corresponding positions of B.
 
-    Examples
-    --------
-
-    {0}
-    """.format(_examples.get_examples([5, 6, 9, 10]))
+Examples
+--------
+{0}
+""".format(_examples.get_examples_no_header([5, 6, 9, 10]))
 
     def __init__(self, point_a, point_b):
         self.point_a = point_a
@@ -915,7 +909,7 @@ class GeoPath(object):
 
     @property
     def positionB(self):
-        """Deprecated use point_a instead"""
+        """Deprecated use point_b instead"""
         warnings.warn('Deprecated use point_b instead', category=DeprecationWarning, stacklevel=2)
         return self.point_b
 
@@ -1107,8 +1101,8 @@ class GeoPath(object):
         closest_point: GeoPoint
             closest point on path.
 
-        Example
-        -------
+        Examples
+        --------
         >>> import nvector as nv
         >>> wgs84 = nv.FrameE(name='WGS84')
         >>> point_a = wgs84.GeoPoint(51., 1., degrees=True)
@@ -1152,8 +1146,8 @@ class GeoPath(object):
         closest_point: GeoPoint
             closest point on path segment.
 
-        Example
-        -------
+        Examples
+        --------
         >>> import nvector as nv
         >>> wgs84 = nv.FrameE(name='WGS84')
         >>> pointA = wgs84.GeoPoint(51., 1., degrees=True)
@@ -1412,38 +1406,36 @@ class _LocalFrame(_Common):
 
 
 class FrameN(_LocalFrame):
-    __doc__ = """
-    North-East-Down frame
+    __doc__ = """North-East-Down frame
 
-    Parameters
-    ----------
-    point: ECEFvector, GeoPoint or Nvector object
-        position of the vehicle (B) which also defines the origin of the local
-        frame N. The origin is directly beneath or above the vehicle (B), at
-        Earth's surface (surface of ellipsoid model).
+Parameters
+----------
+point: ECEFvector, GeoPoint or Nvector object
+    position of the vehicle (B) which also defines the origin of the local
+    frame N. The origin is directly beneath or above the vehicle (B), at
+    Earth's surface (surface of ellipsoid model).
 
-    Notes
-    -----
-    The Cartesian frame is local and oriented North-East-Down, i.e.,
-    the x-axis points towards north, the y-axis points towards east (both are
-    horizontal), and the z-axis is pointing down.
+Notes
+-----
+The Cartesian frame is local and oriented North-East-Down, i.e.,
+the x-axis points towards north, the y-axis points towards east (both are
+horizontal), and the z-axis is pointing down.
 
-    When moving relative to the Earth, the frame rotates about its z-axis
-    to allow the x-axis to always point towards north. When getting close
-    to the poles this rotation rate will increase, being infinite at the
-    poles. The poles are thus singularities and the direction of the
-    x- and y-axes are not defined here. Hence, this coordinate frame is
-    NOT SUITABLE for general calculations.
+When moving relative to the Earth, the frame rotates about its z-axis
+to allow the x-axis to always point towards north. When getting close
+to the poles this rotation rate will increase, being infinite at the
+poles. The poles are thus singularities and the direction of the
+x- and y-axes are not defined here. Hence, this coordinate frame is
+NOT SUITABLE for general calculations.
 
-    Examples
-    --------
+Examples
+--------
+{0}
 
-    {0}
-
-    See also
-    --------
-    FrameE, FrameL, FrameB
-    """.format(_examples.get_examples([1]))
+See also
+--------
+FrameE, FrameL, FrameB
+""".format(_examples.get_examples_no_header([1]))
 
     def __init__(self, point):
         nvector = point.to_nvector()
@@ -1511,34 +1503,32 @@ class FrameL(FrameN):
 
 
 class FrameB(_LocalFrame):
-    __doc__ = """
-    Body frame
+    __doc__ = """Body frame
 
-    Parameters
-    ----------
-    point: ECEFvector, GeoPoint or Nvector object
-        position of the vehicle's reference point which also coincides with
-        the origin of the frame B.
-    yaw, pitch, roll: real scalars
-        defining the orientation of frame B in [deg] or [rad].
-    degrees : bool
-        if True yaw, pitch, roll are given in degrees otherwise in radians
+Parameters
+----------
+point: ECEFvector, GeoPoint or Nvector object
+    position of the vehicle's reference point which also coincides with
+    the origin of the frame B.
+yaw, pitch, roll: real scalars
+    defining the orientation of frame B in [deg] or [rad].
+degrees : bool
+    if True yaw, pitch, roll are given in degrees otherwise in radians
 
-    Notes
-    -----
-    The frame is fixed to the vehicle where the x-axis points forward, the
-    y-axis to the right (starboard) and the z-axis in the vehicle's down
-    direction.
+Notes
+-----
+The frame is fixed to the vehicle where the x-axis points forward, the
+y-axis to the right (starboard) and the z-axis in the vehicle's down
+direction.
 
-    Examples
-    --------
+Examples
+--------
+{0}
 
-    {0}
-
-    See also
-    --------
-    FrameE, FrameL, FrameN
-    """.format(_examples.get_examples([2]))
+See also
+--------
+FrameE, FrameL, FrameN
+""".format(_examples.get_examples_no_header([2]))
 
     def __init__(self, point, yaw=0, pitch=0, roll=0, degrees=False):
         self.nvector = point.to_nvector()

@@ -19,17 +19,4 @@ GeoPoint.distance_and_azimuth or GeoPoint.displace methods you should also cite 
 Karney :cite:`Karney2013Algorithms` because these methods call Karney's
 `geographiclib <https://pypi.python.org/pypi/geographiclib>`_ library to do the calculations.
 
-
-.. only:: readme
-
-    References
-    ==========
-
-    .. [Gad10] K. Gade, `A Nonsingular Horizontal Position Representation, J. Navigation, 63(3):395-417, 2010.
-               <http://www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf>`_
-    .. [Kar13] C.F.F. Karney. `Algorithms for geodesics. J. Geodesy, 87(1):43-55, 2013. <https://rdcu.be/cccgm>`_
-
-    .. [GB20] K. Gade and P.A. Brodtkorb, `Nvector Documentation for Python, 2020.
-               <https://nvector.readthedocs.io/en/v0.7.5>`_
-
 """

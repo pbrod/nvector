@@ -125,13 +125,13 @@ language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build', 'tests']
+exclude_patterns = ['_build', 'tests', '_*.py']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 # default_role = None
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
-add_function_parentheses = True
+add_function_parentheses = False
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
@@ -274,7 +274,7 @@ latex_elements = {
 latex_logo = "_static/logo.jpg"
 
 # If true, show page references after internal links.
-latex_show_pagerefs = True
+latex_show_pagerefs = False
 # If true, show URL addresses after external links.
 latex_show_urls = 'footnote'  # 'no', 'inline'
 

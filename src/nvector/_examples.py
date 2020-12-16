@@ -4,16 +4,21 @@ Created on 18. jan. 2016
 @author: pab
 """
 
+def navlab_example(number):
+    link = "<http://www.navlab.net/nvector/#example_{0}>".format(number)
+    return "`Example {0} at www.navlab.net {1}`_\n".format(number, link)
+
 
 def see_also(number):
-    link = "<http://www.navlab.net/nvector/#example_{0}>".format(number)
     return """See also
-    `Example {0} at www.navlab.net {1}`_\n\n""".format(number, link)
+    {0}\n""".format(navlab_example(number))
 
+
+example_1_header = """
+**Example 1: "A and B to delta"**
+---------------------------------"""
 
 example_1_txt = """
-**Example 1: "A and B to delta"**
----------------------------------
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex1img.png
 
@@ -31,7 +36,6 @@ different places.  A must be outside the poles for the north and east
 directions to be defined.)
 
 """
-
 
 example_1_obj_solution = """Solution:
     >>> import numpy as np
@@ -85,12 +89,15 @@ Step5: Also find the direction (azimuth) to B, relative to north:
 
 """
 
-example_2_txt = """
+
+example_2_header = """
 **Example 2: "B and delta to C"**
----------------------------------
+---------------------------------"""
+
+example_2_txt = """
+
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex2img.png
-
 
 A radar or sonar attached to a vehicle B (Body coordinate frame) measures the
 distance and direction to an object C. We assume that the distance and two
@@ -172,9 +179,12 @@ Step 6: Find the position of C, using the functions that goes from one
 
 """
 
-example_3_txt = """
+example_3_header = """
 **Example 3: "ECEF-vector to geodetic latitude"**
--------------------------------------------------
+-------------------------------------------------"""
+
+example_3_txt = """
+
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex3img.png
 
@@ -222,10 +232,11 @@ Solution:
 
 """
 
+example_4_header = """
+**Example 4: "Geodetic latitude to ECEF-vector"**
+-------------------------------------------------"""
 
 example_4_txt = """
-**Example 4: "Geodetic latitude to ECEF-vector"**
--------------------------------------------------
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex4img.png
 
@@ -263,10 +274,11 @@ Solution:
 
 """
 
+example_5_header = """
+**Example 5: "Surface distance"**
+---------------------------------"""
 
 example_5_txt = """
-**Example 5: "Surface distance"**
----------------------------------
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex5img.png
 
@@ -350,10 +362,11 @@ Exact solution for the WGS84 ellipsoid:
 
 """
 
+example_6_header = """
+**Example 6 "Interpolated position"**
+-------------------------------------"""
 
 example_6_txt = """
-**Example 6 "Interpolated position"**
--------------------------------------
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex6img.png
 
@@ -410,9 +423,11 @@ Solution:
 
 """
 
-example_7_txt = """
+example_7_header = """
 **Example 7: "Mean position"**
-------------------------------
+------------------------------"""
+
+example_7_txt = """
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex7img.png
 
@@ -462,10 +477,11 @@ or
 
 """
 
+example_8_header = """
+**Example 8: "A and azimuth/distance to B"**
+--------------------------------------------"""
 
 example_8_txt = """
-**Example 8: "A and azimuth/distance to B"**
---------------------------------------------
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex8img.png
 
@@ -521,10 +537,10 @@ Solution:
 
 """
 
-
-example_9_txt = """
+example_9_header = """
 **Example 9: "Intersection of two paths"**
-------------------------------------------
+------------------------------------------"""
+example_9_txt = """
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex9img.png
 
@@ -601,9 +617,11 @@ or alternatively
 """
 
 
-example_10_txt = """
+example_10_header = """
 **Example 10: "Cross track distance"**
---------------------------------------
+--------------------------------------"""
+
+example_10_txt = """
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex10img.png
 
@@ -686,10 +704,22 @@ Alternative solution 3:
 
 
 def get_examples(indices, OO=True):
+    """Returns examples with header"""
     d = dict(globals())
+    hdr = 'example_{}_header'
     txt = 'example_{}_txt'
     sol = 'example_{}_obj_solution' if OO else 'example_{}_fun_solution'
-    return ''.join((d[txt.format(i)] + d[sol.format(i)] + see_also(i)
+    return ''.join((d[hdr.format(i)] + d[txt.format(i)] + d[sol.format(i)] + see_also(i)
+                    for i in indices))
+
+
+def get_examples_no_header(indices, OO=True):
+    """Returns examples with no header"""
+    d = dict(globals())
+    hdr = 'example_{}_header'
+    txt = 'example_{}_txt'
+    sol = 'example_{}_obj_solution' if OO else 'example_{}_fun_solution'
+    return ''.join((''.join(d[hdr.format(i)].rpartition('\n')[:1]) + d[txt.format(i)] + d[sol.format(i)]
                     for i in indices))
 
 
@@ -700,13 +730,13 @@ Getting Started
 Below the object-oriented solution to some common geodesic problems are given.
 In the first example the functional solution is also given.
 The functional solutions to the remaining problems can be found in
-the :doc:`functional examples </tutorials/getting_started_functional>` section 
+the :doc:`functional examples </tutorials/getting_started_functional>` section
 of the tutorial.
 
-{0}{1}{2}{3}{4}{5}
+{0}{1}{2}{3}{4}{5}{6}
 
-""".format(example_1_txt, example_1_obj_solution, 'Functional ',
-           example_1_fun_solution, see_also(1),
+""".format(example_1_header, example_1_txt, example_1_obj_solution,
+           'Functional ', example_1_fun_solution, see_also(1),
            get_examples(range(2, 11), OO=True))
 
 
@@ -719,9 +749,9 @@ In the first example the object-oriented solution is also given.
 The object-oriented solutions to the remaining problems can be found in
 the :doc:`getting started </tutorials/getting_started>` section of the tutorial.
 
-{0}{1}{2}{3}{4}{5}
+{0}{1}{2}{3}{4}{5}{6}
 
-""".format(example_1_txt, example_1_fun_solution,
+""".format(example_1_header, example_1_txt, example_1_fun_solution,
            'OO-', example_1_obj_solution, see_also(1),
            get_examples(range(2, 11), OO=False))
 
