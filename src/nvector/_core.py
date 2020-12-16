@@ -976,7 +976,7 @@ def _atleast_3d(x, y, z):
     [[[[[[1]
          [2]]]]]] (1, 1, 1, 1, 2, 1)
     """
-    x, y, z = np.atleast_1d(x, y, z)
+    x, y, z = np.broadcast_arrays(*np.atleast_1d(x, y, z))
     return x[None, None, :], y[None, None, :], z[None, None, :]
 
 
