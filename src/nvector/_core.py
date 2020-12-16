@@ -223,6 +223,7 @@ def deg(*rad_angles):
 
     Examples
     --------
+    >>> import numpy as np
     >>> import nvector as nv
     >>> nv.deg(np.pi/2)
     90.0
@@ -254,6 +255,7 @@ def rad(*deg_angles):
 
     Examples
     --------
+    >>> import numpy as np
     >>> import nvector as nv
     >>> nv.deg(nv.rad(90))
     90.0

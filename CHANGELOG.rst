@@ -2,10 +2,15 @@
 Changelog
 =========
 
-Version 0.7.6, December 15, 2020
+Version 0.7.6, December 16, 2020
 ================================
 
-Per A Brodtkorb (15):
+Per A Brodtkorb (19):                                                                                                         
+	  * Fixed the documentation so that it shows correctly in the reference manual. 
+	  * Added logo.png and docs/reference/nvector.rst
+	  * Updated build_package.py so it generates a valid README.rst file.
+	  * Updated THANKS.rst
+	  * Updated CHANGELOG.rst and prepare for release 0.7.6
       * Added Nvector documentation ref https://nvector.readthedocs.io/en/v0.7.5 to refs1.bib and _acknowledgements.py
       * Updated README.rst
       * Renamed requirements.readthedocs.txt to docs/requirements.txt 

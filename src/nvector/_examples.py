@@ -669,6 +669,7 @@ example_10_fun_solution = """
 Solution:
     >>> import numpy as np
     >>> import nvector as nv
+    >>> from nvector import rad, deg
     >>> n_EA1_E = nv.lat_lon2n_E(rad(0), rad(0))
     >>> n_EA2_E = nv.lat_lon2n_E(rad(10), rad(0))
     >>> n_EB_E = nv.lat_lon2n_E(rad(1), rad(0.1))
