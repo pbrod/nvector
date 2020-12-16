@@ -846,6 +846,9 @@ def R2xyz(R_AB):
     See also
     --------
     xyz2R, R2zyx, xyz2R
+    https://en.wikipedia.org/wiki/Aircraft_principal_axes
+    https://en.wikipedia.org/wiki/Euler_angles
+    https://en.wikipedia.org/wiki/Axes_conventions
     """
     z = arctan2(-R_AB[0, 1, ...], R_AB[0, 0, ...])  # atan2: [-pi pi]
     x = arctan2(-R_AB[1, 2, ...], R_AB[2, 2, ...])
@@ -898,6 +901,9 @@ def R2zyx(R_AB):
     See also
     --------
     zyx2R, xyz2R, R2xyz
+    https://en.wikipedia.org/wiki/Aircraft_principal_axes
+    https://en.wikipedia.org/wiki/Euler_angles
+    https://en.wikipedia.org/wiki/Axes_conventions
     """
     x, y, z = R2xyz(np.rollaxis(R_AB, 1, 0))
     return -z, -y, -x
@@ -1009,6 +1015,9 @@ def xyz2R(x, y, z):
     See also
     --------
     R2xyz, zyx2R, R2zyx
+    https://en.wikipedia.org/wiki/Aircraft_principal_axes
+    https://en.wikipedia.org/wiki/Euler_angles
+    https://en.wikipedia.org/wiki/Axes_conventions
     """
     x, y, z = _atleast_3d(x, y, z)
     sx, sy, sz = sin(x), sin(y), sin(z)
@@ -1056,9 +1065,34 @@ def zyx2R(z, y, x):
     Note that if A is a north-east-down frame and B is a body frame, we
     have that z=yaw, y=pitch and x=roll.
 
+    Examples
+    --------
+    Suppose the yaw angle between coordinate system A and B is 45 degrees.
+    Convert position p1_b = (1, 0, 0) in B to a point in A.
+    Convert position p2_a =(0, 1, 0) in A to a point in B.
+
+    Solution:
+        >>> import numpy as np
+        >>> import nvector as nv
+        >>> x, y, z = nv.rad(0, 0, 45)
+        >>> R_AB = nv.zyx2R(z, y, x)
+
+        >>> p1_b = np.atleast_2d((1, 0, 0)).T
+        >>> p1_a = nv.mdot(R_AB, p1_b)
+        >>> np.allclose(p1_a, [[0.7071067811865476], [0.7071067811865476], [0.0]])
+        True
+
+        >>> p2_a = np.atleast_2d((0, 1, 0)).T
+        >>> p2_b = nv.mdot(R_AB.T, p2_a)
+        >>> np.allclose(p2_b, [[0.7071067811865476], [0.7071067811865476], [0.0]])
+        True
+
     See also
     --------
     R2zyx, xyz2R, R2xyz
+    https://en.wikipedia.org/wiki/Aircraft_principal_axes
+    https://en.wikipedia.org/wiki/Euler_angles
+    https://en.wikipedia.org/wiki/Axes_conventions
     """
     x, y, z = _atleast_3d(x, y, z)
     sx, sy, sz = sin(x), sin(y), sin(z)
