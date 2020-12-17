@@ -70,6 +70,175 @@ ELLIPSOID_IX = {'airy1858': 1,
                 'nad83': 18,
                 }
 
+
+def array_to_list_dict(data):
+    """
+    Convert dict arrays to dict of lists.
+
+    Parameters
+    ----------
+    data : dict of arrays or an array
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> data = dict(a=np.zeros((3,)), b=(1,2,3), c=[], d=1, e='test',
+    ...          f=np.nan, g=[1], h=[np.nan], i=None)
+    >>> e = array_to_list_dict(data)
+    >>> e == {'a': [0.0, 0.0, 0.0],  'b': [1, 2, 3], 'c': [],'d': 1,
+    ...       'e': 'test', 'f': np.nan, 'g': [1], 'h': [np.nan], 'i': None}
+    True
+
+    """
+    if isinstance(data, dict):
+        for key in data:
+            data[key] = array_to_list_dict(data[key])
+    elif isinstance(data, (list, tuple)):
+        data = [array_to_list_dict(item) for item in data]
+    else:
+        try:
+            data = data.tolist()
+        except AttributeError:
+            pass
+    return data
+
+
+def isclose(a, b, rtol=1e-9, atol=0.0, equal_nan=False):
+    """
+    Returns True where the two arrays `a` and `b` are element-wise equal within a tolerance.
+
+    Parameters
+    ----------
+    a, b : array_like
+        Input arrays to compare.
+    rtol : float
+        The relative tolerance parameter (see Notes).
+    atol : float
+        The absolute tolerance parameter (see Notes).
+    equal_nan : bool
+        Whether to compare NaN's as equal.  If True, NaN's in `a` will be
+        considered equal to NaN's in `b` in the output array.
+
+    Returns
+    -------
+    y : array_like
+        Returns a boolean array of where `a` and `b` are equal within the
+        given tolerance. If both `a` and `b` are scalars, returns a single
+        boolean value.
+
+    See Also
+    --------
+    allclose
+
+    Notes
+    -----
+    .. versionadded:: 0.7.5
+
+    For finite values, isclose uses the following equation to test whether
+    two floating point values are equivalent:
+
+     absolute(`a` - `b`) <= maximimum(`atol`, `rtol` * maximum(absolute(`a`), absolute(`b`)))
+
+    Like the built-in `math.isclose`, the above equation is symmetric
+    in `a` and `b`. Furthermore, `atol` should be carefully selected for
+    the use case at hand. A zero value for `atol` will result in `False`
+    if either `a` or `b` is zero.
+
+    Examples
+    --------
+    >>> import nvector.objects as no
+    >>> no.isclose([1e10,1e-7], [1.00001e10,1e-8])
+    array([False, False])
+    >>> no.isclose([1e10,1e-8], [1.00001e10,1e-9])
+    array([False, False])
+    >>> no.isclose([1e10,1e-8], [1.0001e10,1e-9])
+    array([False,  False])
+    >>> no.isclose([1.0, np.nan], [1.0, np.nan])
+    array([ True, False])
+    >>> no.isclose([1.0, np.nan], [1.0, np.nan], equal_nan=True)
+    array([ True, True])
+    >>> no.isclose([1e-8, 1e-7], [0.0, 0.0])
+    array([False, False])
+    >>> no.isclose([1e-100, 1e-7], [0.0, 0.0], atol=0.0)
+    array([False, False])
+    >>> no.isclose([1e-10, 1e-10], [1e-20, 0.0])
+    array([False,  False])
+    >>> no.isclose([1e-10, 1e-10], [1e-20, 0.999999e-10], atol=0.0)
+    array([False,  False])
+    """
+    a, b = np.broadcast_arrays(a, b)
+
+    mask = np.isfinite(a) & np.isfinite(b)
+
+    out = np.full(b.shape, False)
+    abs_tol = np.maximum(atol, rtol*np.maximum(np.abs(a[mask]), np.abs(b[mask])))
+    out[mask] = np.isclose(a[mask], b[mask], rtol=0, atol=abs_tol, equal_nan=equal_nan)
+    mask = ~mask
+    out[mask] = np.isclose(a[mask], b[mask], equal_nan=equal_nan)
+    return out
+
+
+def allclose(a, b, rtol=1.e-7, atol=1.e-14, equal_nan=False):
+    """
+    Returns True if two arrays are element-wise equal within a tolerance.
+
+    Parameters
+    ----------
+    a, b : array_like
+        Input arrays to compare.
+    rtol : float
+        The relative tolerance parameter (see Notes).
+    atol : float
+        The absolute tolerance parameter (see Notes).
+    equal_nan : bool
+        Whether to compare NaN's as equal.  If True, NaN's in `a` will be
+        considered equal to NaN's in `b` in the output array.
+
+        .. versionadded:: 1.10.0
+
+    Returns
+    -------
+    allclose : bool
+        Returns True if the two arrays are equal within the given
+        tolerance; False otherwise.
+
+    See Also
+    --------
+    isclose, all, any, equal
+
+    Notes
+    -----
+    For finite values, allclose uses the following equation to test whether
+    two floating point values are equivalent:
+
+     absolute(`a` - `b`) <= maximimum(`atol`, `rtol` * maximum(absolute(`a`), absolute(`b`)))
+
+    NaNs are treated as equal if they are in the same place and if
+    ``equal_nan=True``.  Infs are treated as equal if they are in the same
+    place and of the same sign in both arrays.
+
+    The comparison of `a` and `b` uses standard broadcasting, which
+    means that `a` and `b` need not have the same shape in order for
+    ``allclose(a, b)`` to evaluate to True.
+
+    Examples
+    --------
+    >>> import nvector.objects as no
+    >>> no.allclose([1e10, 1e-7], [1.00001e10, 1e-8])
+    False
+    >>> no.allclose([1e10, 1e-8], [1.00001e10, 1e-9])
+    False
+    >>> no.allclose([1e10, 1e-8], [1.0001e10, 1e-9])
+    False
+    >>> no.allclose([1.0, np.nan], [1.0, np.nan])
+    False
+    >>> no.allclose([1.0, np.nan], [1.0, np.nan], equal_nan=True)
+    True
+
+    """
+    return np.all(isclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan))
+
+
 def _check_length_deviation(n_E, limit=0.1):
     """
     n-vector should have length=1,  i.e. norm(n_E)=1.

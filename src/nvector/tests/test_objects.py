@@ -3,12 +3,16 @@ Created on 18. des. 2015
 
 @author: pab
 """
+from functools import partial
 import pytest
 import numpy as np
-from numpy.testing import assert_array_almost_equal  # @UnresolvedImport
-from nvector import FrameB, FrameE, FrameN, FrameL, GeoPoint, GeoPath, unit, delta_L
+from numpy.testing import assert_allclose  as _assert_allclose # @UnresolvedImport
+from nvector.util import unit
+from nvector.objects import FrameB, FrameE, FrameN, FrameL, GeoPoint, GeoPath, delta_L
+assert_allclose = partial(_assert_allclose, atol=1e-15)
 
 EARTH_RADIUS_M = 6371009.0
+
 
 @pytest.mark.parametrize("lat_a,lat_b,method", [(81, 80, 'ellipsoid'),
                                                 (79, 80, 'ellipsoid'),
@@ -164,8 +168,6 @@ class TestFrames:
         assert frame_N != frame_N2
         assert frame_N1 != frame_N2
 
-
-class TestExamples:
     @staticmethod
     def test_compute_delta_L_in_moving_frame_east():
         wgs84 = FrameE(name='WGS84')
@@ -177,7 +179,7 @@ class TestExamples:
         ship_positions0 = path.interpolate(ti[:-1])
         ship_positions1 = path.interpolate(ti[1:])
         headings = ship_positions0.delta_to(ship_positions1).azimuth_deg
-        assert_array_almost_equal(headings, 90, decimal=4)
+        assert_allclose(headings, 90, rtol=1e-4)  # , decimal=4)
 
         ship_positions = path.interpolate(ti)
 
@@ -193,11 +195,10 @@ class TestExamples:
         true_x = [278.2566243359911, 198.7547317612817, 119.25283909376164,
                   39.750946370747656, -39.75094637085409, -119.25283909387079,
                   -198.75473176137066, -278.2566243360949]
-        assert_array_almost_equal(x, true_x, decimal=3)
-        assert_array_almost_equal(y, -10, decimal=3)
-        assert_array_almost_equal(z, 0, decimal=2)
-        assert_array_almost_equal(azimuth,
-                                  [-2., -3., -5., -14., -166., -175., -177., -178.])
+        assert_allclose(x, true_x)  #, decimal=3)
+        assert_allclose(y, -10, rtol=1e-3)  # , decimal=3)
+        assert_allclose(azimuth, [-2., -3., -5., -14., -166., -175., -177., -178.])
+        _assert_allclose(z, 0, atol=1e-2)  #, decimal=2)
 
     @staticmethod
     def test_compute_delta_N_in_moving_frame_east():
@@ -210,7 +211,7 @@ class TestExamples:
         ship_positions0 = path.interpolate(ti[:-1])
         ship_positions1 = path.interpolate(ti[1:])
         headings = ship_positions0.delta_to(ship_positions1).azimuth_deg
-        assert_array_almost_equal(headings, 90, decimal=4)
+        assert_allclose(headings, 90, rtol=1e-4)  # , decimal=4)
 
         ship_positions = path.interpolate(ti)
 
@@ -226,12 +227,12 @@ class TestExamples:
         true_y = [278.2566243359911, 198.7547317612817, 119.25283909376164,
                   39.750946370747656, -39.75094637085409, -119.25283909387079,
                   -198.75473176137066, -278.2566243360949]
-        assert_array_almost_equal(x, 0, decimal=3)
-        assert_array_almost_equal(y, true_y)
-        assert_array_almost_equal(z, 0, decimal=2)
+        _assert_allclose(x, 0, atol=1e-3)  # decimal=3)
+        assert_allclose(y, true_y)
+        _assert_allclose(z, 0, atol=1e-2)  # , decimal=2)
         n2 = len(azimuth) // 2
-        assert_array_almost_equal(azimuth[:n2], 90)
-        assert_array_almost_equal(azimuth[n2:], -90)
+        assert_allclose(azimuth[:n2], 90)
+        assert_allclose(azimuth[n2:], -90)
 
     @staticmethod
     def test_compute_delta_L_in_moving_frame_north():
@@ -246,13 +247,13 @@ class TestExamples:
         ship_positions0 = path.interpolate(ti[:-1])
         ship_positions1 = path.interpolate(ti[1:])
         headings = ship_positions0.delta_to(ship_positions1).azimuth_deg
-        assert_array_almost_equal(headings, 0, decimal=8)
+        _assert_allclose(headings, 0, atol=1e-8)  # , decimal=8)
 
         ship_positions = path.interpolate(ti)
 
         delta0 = delta_L(ship_positions, sensor_position, wander_azimuth=0)
         delta = ship_positions.delta_to(sensor_position)
-        assert_array_almost_equal(delta0.pvector, delta.pvector)
+        assert_allclose(delta0.pvector, delta.pvector)
 
         x, y, z = delta.pvector
         azimuth = np.round(np.abs(delta.azimuth_deg))
@@ -264,12 +265,15 @@ class TestExamples:
         true_x = [276.436537069603, 197.45466985931083, 118.47280221160541,
                   39.49093416312986, -39.490934249581684, -118.47280298990226,
                   -197.454672021303, -276.4365413071498]
-        assert_array_almost_equal(x, true_x)
-        assert_array_almost_equal(y, 0, decimal=8)
-        assert_array_almost_equal(z, 0, decimal=2)
+        assert_allclose(x, true_x)
+        _assert_allclose(y, 0, atol=1e-8)  # , decimal=8)
+        _assert_allclose(z, 0, atol=1e-2)  # , decimal=2)
         n2 = len(azimuth) // 2
-        assert_array_almost_equal(azimuth[:n2], 0)
-        assert_array_almost_equal(azimuth[n2:], 180)
+        assert_allclose(azimuth[:n2], 0)
+        assert_allclose(azimuth[n2:], 180)
+
+
+class TestExamples:
 
     @staticmethod
     def test_Ex1_A_and_B_to_delta_in_frame_N():
@@ -288,11 +292,11 @@ class TestExamples:
         print('Ex1, delta north, east, down = {0}, {1}, {2}'.format(x, y, z))
         print('Ex1, azimuth = {0} deg'.format(azimuth))
 
-        assert_array_almost_equal(x, 331730.23478089)
-        assert_array_almost_equal(y, 332997.87498927)
-        assert_array_almost_equal(z, 17404.27136194)
-        assert_array_almost_equal(azimuth, 45.10926324)
-        assert_array_almost_equal(elevation, 2.12055861)
+        assert_allclose(x, 331730.23478089)
+        assert_allclose(y, 332997.87498927)
+        assert_allclose(z, 17404.27136194)
+        assert_allclose(azimuth, 45.10926324)
+        assert_allclose(elevation, 2.12055861)
 
     @staticmethod
     def test_Ex2_B_and_delta_in_frame_B_to_C_in_frame_E():
@@ -318,9 +322,9 @@ class TestExamples:
         msg = 'Ex2, Pos C: lat, lon = {},{} deg,  height = {} m'
         print(msg.format(lat, lon, -z))
 
-        assert_array_almost_equal(lat, 53.32637826)
-        assert_array_almost_equal(lon, 63.46812344)
-        assert_array_almost_equal(z, -406.00719607)
+        assert_allclose(lat, 53.32637826)
+        assert_allclose(lon, 63.46812344)
+        assert_allclose(z, -406.00719607)
 
     @staticmethod
     def test_Ex3_ECEF_vector_to_geodetic_latitude():
@@ -336,9 +340,9 @@ class TestExamples:
 
         msg = 'Ex3, Pos B: lat, lon = {} {} deg, height = {} m'
         print(msg.format(lat, lon, h))
-        assert_array_almost_equal(lat, 39.37874867)
-        assert_array_almost_equal(lon, -48.0127875)
-        assert_array_almost_equal(h, 4702059.83429485)
+        assert_allclose(lat, 39.37874867)
+        assert_allclose(lon, -48.0127875)
+        assert_allclose(h, 4702059.83429485)
 
     @staticmethod
     def test_Ex4_geodetic_latitude_to_ECEF_vector():
@@ -348,7 +352,7 @@ class TestExamples:
         p_EB_E = pointB.to_ecef_vector()
         print('Ex4: p_EB_E = {0} m'.format(p_EB_E.pvector.ravel()))
 
-        assert_array_almost_equal(p_EB_E.pvector.ravel(),
+        assert_allclose(p_EB_E.pvector.ravel(),
                                   [6373290.27721828, 222560.20067474,
                                    110568.82718179])
 
@@ -366,8 +370,8 @@ class TestExamples:
         msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
         print(msg.format(s_AB / 1000, d_AB / 1000))
 
-        assert_array_almost_equal(s_AB / 1000, 332.45644411)
-        assert_array_almost_equal(d_AB / 1000, 332.41872486)
+        assert_allclose(s_AB / 1000, 332.45644411)
+        assert_allclose(d_AB / 1000, 332.41872486)
 
     @staticmethod
     def test_alternative_great_circle_distance():
@@ -383,9 +387,9 @@ class TestExamples:
         msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
         print(msg.format(s_AB / 1000, d_AB / 1000))
 
-        assert_array_almost_equal(s_AB / 1000, 332.45644411)
-        assert_array_almost_equal(s1_AB / 1000, 332.45644411)
-        assert_array_almost_equal(d_AB / 1000, 332.41872486)
+        assert_allclose(s_AB / 1000, 332.45644411)
+        assert_allclose(s1_AB / 1000, 332.45644411)
+        assert_allclose(d_AB / 1000, 332.41872486)
 
     @staticmethod
     def test_exact_ellipsoidal_distance():
@@ -401,8 +405,8 @@ class TestExamples:
         msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
         print(msg.format(s_AB / 1000, d_AB / 1000))
 
-        assert_array_almost_equal(s_AB / 1000, 333.94750946834665)
-        assert_array_almost_equal(d_AB / 1000, 333.90962112)
+        assert_allclose(s_AB / 1000, 333.94750946834665)
+        assert_allclose(d_AB / 1000, 333.90962112)
 
     @staticmethod
     def test_Ex6_interpolated_position():
@@ -432,8 +436,8 @@ class TestExamples:
         msg = 'Ex6, Interpolated position: lat, long = {} deg, {} deg'
         print(msg.format(lat_ti, lon_ti))
 
-        assert_array_almost_equal(lat_ti, 89.7999805)
-        assert_array_almost_equal(lon_ti, 180.)
+        assert_allclose(lat_ti, 89.7999805)
+        assert_allclose(lon_ti, 180.)
 
         # Alternative solution
         path = GeoPath(n_EB_E_t0, n_EB_E_t1)
@@ -443,8 +447,8 @@ class TestExamples:
         msg = 'Ex6, Interpolated position: lat, long = {} deg, {} deg'
         print(msg.format(lat_ti, lon_ti))
 
-        assert_array_almost_equal(lat_ti, 89.7999805)
-        assert_array_almost_equal(lon_ti, 180.)
+        assert_allclose(lat_ti, 89.7999805)
+        assert_allclose(lon_ti, 180.)
 
     @staticmethod
     def test_Ex7_mean_position():
@@ -461,8 +465,9 @@ class TestExamples:
         nvectors = points.to_nvector()
         nmean = nvectors.mean()
         n_EM_E = nmean.normal
-        assert_array_almost_equal(n_EM_E.ravel(),
-                                  [0.384117, -0.046602, 0.922107])
+        # print(n_EM_E.ravel().tolist())
+        assert_allclose(n_EM_E.ravel(),
+                        [0.3841171702926, -0.046602405485689447, 0.9221074857571395])
 
     @staticmethod
     def test_Ex8_position_A_and_azimuth_and_distance_to_B():
@@ -472,13 +477,13 @@ class TestExamples:
                                             degrees=True)
         pointB2, _azimuthb = pointA.displace(distance=1000,
                                              azimuth=np.deg2rad(200))
-        assert_array_almost_equal(pointB.latlon, pointB2.latlon)
+        assert_allclose(pointB.latlon, pointB2.latlon)
 
         lat_B, lon_B = pointB.latitude_deg, pointB.longitude_deg
 
         print('Ex8, Destination: lat, long = {0} {1} deg'.format(lat_B, lon_B))
-        assert_array_almost_equal(lat_B, 79.99154867)
-        assert_array_almost_equal(lon_B, -90.01769837)
+        assert_allclose(lat_B, 79.99154867)
+        assert_allclose(lon_B, -90.01769837)
 
     @staticmethod
     def test_Ex9_intersect():
@@ -496,8 +501,8 @@ class TestExamples:
         lat, lon = pointC.latitude_deg, pointC.longitude_deg
         msg = 'Ex9, Intersection: lat, long = {} {} deg'
         print(msg.format(lat, lon))
-        assert_array_almost_equal(lat, 40.31864307)
-        assert_array_almost_equal(lon, 55.90186788)
+        assert_allclose(lat, 40.31864307)
+        assert_allclose(lon, 55.90186788)
 
     def test_intersect_on_parallell_paths(self):
 
@@ -540,9 +545,9 @@ class TestExamples:
         pointC3 = pathA.closest_point_on_path(pointB2)
         pointC4 = pathA.closest_point_on_path(pointB3)
         s_xt2, _az_bc, _az_cb = pointB.distance_and_azimuth(pointC)
-        assert_array_almost_equal(s_xt2, 11117.79911015)
-        assert_array_almost_equal(s_xt, 11117.79911015)
-        assert_array_almost_equal(d_xt, 11117.79346741)
+        assert_allclose(s_xt2, 11117.79911015)
+        assert_allclose(s_xt, 11117.79911015)
+        assert_allclose(d_xt, 11117.79346741)
 
         assert pathA.on_path(pointC)
         assert pathA.on_path(pointC, method='exact')

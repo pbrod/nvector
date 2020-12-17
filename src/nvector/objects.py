@@ -9,7 +9,7 @@ import warnings
 import numpy as np
 from numpy.linalg import norm
 from geographiclib.geodesic import Geodesic as _Geodesic
-from nvector.util import mdot, get_ellipsoid, rad, deg
+from nvector.util import mdot, get_ellipsoid, rad, deg, isclose, allclose, array_to_list_dict
 from nvector.rotation import zyx2R, n_E_and_wa2R_EL
 from nvector._core import (lat_lon2n_E, n_E2lat_lon, n_E2R_EN,
                            n_EB_E2p_EB_E, p_EB_E2n_EB_E, unit,
@@ -31,168 +31,6 @@ __all__ = ['delta_E', 'delta_L', 'delta_N',
            'ECEFvector',
            'Nvector',
            'Pvector']
-
-
-def array_to_list_dict(data):
-    """
-    Examples
-    --------
-    >>> import numpy as np
-    >>> data = dict(a=np.zeros((3,)), b=(1,2,3), c=[], d=1, e='test',
-    ...          f=np.nan, g=[1], h=[np.nan], i=None)
-    >>> e = array_to_list_dict(data)
-    >>> e == {'a': [0.0, 0.0, 0.0],  'b': [1, 2, 3], 'c': [],'d': 1,
-    ...       'e': 'test', 'f': np.nan, 'g': [1], 'h': [np.nan], 'i': None}
-    True
-
-    """
-    if isinstance(data, dict):
-        for key in data:
-            data[key] = array_to_list_dict(data[key])
-    elif isinstance(data, (list, tuple)):
-        data = [array_to_list_dict(item) for item in data]
-    else:
-        try:
-            data = data.tolist()
-        except AttributeError:
-            pass
-    return data
-
-
-def isclose(a, b, rtol=1e-9, atol=0.0, equal_nan=False):
-    """
-    Returns True where the two arrays `a` and `b` are element-wise equal within a tolerance.
-
-    Parameters
-    ----------
-    a, b : array_like
-        Input arrays to compare.
-    rtol : float
-        The relative tolerance parameter (see Notes).
-    atol : float
-        The absolute tolerance parameter (see Notes).
-    equal_nan : bool
-        Whether to compare NaN's as equal.  If True, NaN's in `a` will be
-        considered equal to NaN's in `b` in the output array.
-
-    Returns
-    -------
-    y : array_like
-        Returns a boolean array of where `a` and `b` are equal within the
-        given tolerance. If both `a` and `b` are scalars, returns a single
-        boolean value.
-
-    See Also
-    --------
-    allclose
-
-    Notes
-    -----
-    .. versionadded:: 0.7.5
-
-    For finite values, isclose uses the following equation to test whether
-    two floating point values are equivalent:
-
-     absolute(`a` - `b`) <= maximimum(`atol`, `rtol` * maximum(absolute(`a`), absolute(`b`)))
-
-    Like the built-in `math.isclose`, the above equation is symmetric
-    in `a` and `b`. Furthermore, `atol` should be carefully selected for
-    the use case at hand. A zero value for `atol` will result in `False`
-    if either `a` or `b` is zero.
-
-    Examples
-    --------
-    >>> import nvector.objects as no
-    >>> no.isclose([1e10,1e-7], [1.00001e10,1e-8])
-    array([False, False])
-    >>> no.isclose([1e10,1e-8], [1.00001e10,1e-9])
-    array([False, False])
-    >>> no.isclose([1e10,1e-8], [1.0001e10,1e-9])
-    array([False,  False])
-    >>> no.isclose([1.0, np.nan], [1.0, np.nan])
-    array([ True, False])
-    >>> no.isclose([1.0, np.nan], [1.0, np.nan], equal_nan=True)
-    array([ True, True])
-    >>> no.isclose([1e-8, 1e-7], [0.0, 0.0])
-    array([False, False])
-    >>> no.isclose([1e-100, 1e-7], [0.0, 0.0], atol=0.0)
-    array([False, False])
-    >>> no.isclose([1e-10, 1e-10], [1e-20, 0.0])
-    array([False,  False])
-    >>> no.isclose([1e-10, 1e-10], [1e-20, 0.999999e-10], atol=0.0)
-    array([False,  False])
-    """
-    a, b = np.broadcast_arrays(a, b)
-
-    mask = np.isfinite(a) & np.isfinite(b)
-
-    out = np.full(b.shape, False)
-    abs_tol = np.maximum(atol, rtol*np.maximum(np.abs(a[mask]), np.abs(b[mask])))
-    out[mask] = np.isclose(a[mask], b[mask], rtol=0, atol=abs_tol, equal_nan=equal_nan)
-    mask = ~mask
-    out[mask] = np.isclose(a[mask], b[mask], equal_nan=equal_nan)
-    return out
-
-
-def allclose(a, b, rtol=1.e-7, atol=1.e-14, equal_nan=False):
-    """
-    Returns True if two arrays are element-wise equal within a tolerance.
-
-    Parameters
-    ----------
-    a, b : array_like
-        Input arrays to compare.
-    rtol : float
-        The relative tolerance parameter (see Notes).
-    atol : float
-        The absolute tolerance parameter (see Notes).
-    equal_nan : bool
-        Whether to compare NaN's as equal.  If True, NaN's in `a` will be
-        considered equal to NaN's in `b` in the output array.
-
-        .. versionadded:: 1.10.0
-
-    Returns
-    -------
-    allclose : bool
-        Returns True if the two arrays are equal within the given
-        tolerance; False otherwise.
-
-    See Also
-    --------
-    isclose, all, any, equal
-
-    Notes
-    -----
-    For finite values, allclose uses the following equation to test whether
-    two floating point values are equivalent:
-
-     absolute(`a` - `b`) <= maximimum(`atol`, `rtol` * maximum(absolute(`a`), absolute(`b`)))
-
-    NaNs are treated as equal if they are in the same place and if
-    ``equal_nan=True``.  Infs are treated as equal if they are in the same
-    place and of the same sign in both arrays.
-
-    The comparison of `a` and `b` uses standard broadcasting, which
-    means that `a` and `b` need not have the same shape in order for
-    ``allclose(a, b)`` to evaluate to True.
-
-    Examples
-    --------
-    >>> import nvector.objects as no
-    >>> no.allclose([1e10, 1e-7], [1.00001e10, 1e-8])
-    False
-    >>> no.allclose([1e10, 1e-8], [1.00001e10, 1e-9])
-    False
-    >>> no.allclose([1e10, 1e-8], [1.0001e10, 1e-9])
-    False
-    >>> no.allclose([1.0, np.nan], [1.0, np.nan])
-    False
-    >>> no.allclose([1.0, np.nan], [1.0, np.nan], equal_nan=True)
-    True
-
-    """
-    return np.all(isclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan))
 
 
 class _DeltaE(object):
@@ -285,7 +123,7 @@ class _Common(object):
     def __repr__(self):
         cname = self.__class__.__name__
         fmt = ', '
-        dict_params = array_to_list_dict(self.__dict__)
+        dict_params = array_to_list_dict(self.__dict__.copy())
         params = fmt.join(['{}={!r}'.format(name, val)
                            for name, val in dict_params.items() if not name.startswith('_')])
 
@@ -666,8 +504,7 @@ class Nvector(_Common):
 
     def __sub__(self, other):
         _check_frames(self, other)
-        return self.frame.Nvector(self.normal - other.normal,
-                                  self.z - other.z)
+        return self.frame.Nvector(self.normal - other.normal, self.z - other.z)
 
     def __neg__(self):
         return self.frame.Nvector(-self.normal, -self.z)
