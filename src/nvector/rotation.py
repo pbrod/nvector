@@ -7,7 +7,7 @@ from __future__ import division, print_function
 import numpy as np
 from numpy import arctan2, sin, cos, array, sqrt
 from nvector._common import test_docstrings, _make_summary
-from nvector.util import mdot, unit, norm
+from nvector.util import mdot, unit, norm, _check_length_deviation
 from nvector import license as _license
 
 __all__ = ['E_rotation',
@@ -109,12 +109,14 @@ def R2xyz(R_AB):
     The signs of the angles are given by the directions of the axes and the
     right hand rule.
 
-    See also
-    --------
-    xyz2R, R2zyx, xyz2R
+    See also:
     https://en.wikipedia.org/wiki/Aircraft_principal_axes
     https://en.wikipedia.org/wiki/Euler_angles
     https://en.wikipedia.org/wiki/Axes_conventions
+
+    See also
+    --------
+    xyz2R, R2zyx, xyz2R
     """
     z = arctan2(-R_AB[0, 1, ...], R_AB[0, 0, ...])  # atan2: [-pi pi]
     x = arctan2(-R_AB[1, 2, ...], R_AB[2, 2, ...])
@@ -164,12 +166,14 @@ def R2zyx(R_AB):
     Note that if A is a north-east-down frame and B is a body frame, we
     have that z=yaw, y=pitch and x=roll.
 
-    See also
-    --------
-    zyx2R, xyz2R, R2xyz
+    See also:
     https://en.wikipedia.org/wiki/Aircraft_principal_axes
     https://en.wikipedia.org/wiki/Euler_angles
     https://en.wikipedia.org/wiki/Axes_conventions
+
+    See also
+    --------
+    zyx2R, xyz2R, R2xyz
     """
     x, y, z = R2xyz(np.swapaxes(R_AB, 1, 0))
     return -z, -y, -x
@@ -278,12 +282,14 @@ def xyz2R(x, y, z):
     The signs of the angles are given by the directions of the axes and the
     right hand rule.
 
-    See also
-    --------
-    R2xyz, zyx2R, R2zyx
+     See also:
     https://en.wikipedia.org/wiki/Aircraft_principal_axes
     https://en.wikipedia.org/wiki/Euler_angles
     https://en.wikipedia.org/wiki/Axes_conventions
+
+    See also
+    --------
+    R2xyz, zyx2R, R2zyx
     """
     x, y, z = _atleast_3d(x, y, z)
     sx, sy, sz = sin(x), sin(y), sin(z)
@@ -331,6 +337,11 @@ def zyx2R(z, y, x):
     Note that if A is a north-east-down frame and B is a body frame, we
     have that z=yaw, y=pitch and x=roll.
 
+    See also:
+    https://en.wikipedia.org/wiki/Aircraft_principal_axes
+    https://en.wikipedia.org/wiki/Euler_angles
+    https://en.wikipedia.org/wiki/Axes_conventions
+
     Examples
     --------
     Suppose the yaw angle between coordinate system A and B is 45 degrees.
@@ -356,9 +367,6 @@ def zyx2R(z, y, x):
     See also
     --------
     R2zyx, xyz2R, R2xyz
-    https://en.wikipedia.org/wiki/Aircraft_principal_axes
-    https://en.wikipedia.org/wiki/Euler_angles
-    https://en.wikipedia.org/wiki/Axes_conventions
     """
     x, y, z = _atleast_3d(x, y, z)
     sx, sy, sz = sin(x), sin(y), sin(z)
