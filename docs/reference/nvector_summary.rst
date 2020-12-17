@@ -10,6 +10,8 @@ Geodesic functions
     cross_track_distance
     euclidean_distance
     great_circle_distance
+    great_circle_normal
+    interpolate
     intersect
     lat_lon2n_E
     mean_horizontal_position
@@ -23,6 +25,7 @@ Geodesic functions
     on_great_circle
     on_great_circle_path
 
+.. currentmodule:: nvector.rotation
 
 Rotation matrices and angles
 ----------------------------
@@ -39,9 +42,10 @@ Rotation matrices and angles
     xyz2R
     zyx2R
 
+.. currentmodule:: nvector.util
 
-Misc functions
----------------
+Utility functions
+-----------------
 .. autosummary::
    :toctree: generated/
 
@@ -49,6 +53,7 @@ Misc functions
    mdot
    nthroot
    rad
+   get_ellipsoid
    select_ellipsoid
    unit
 
@@ -69,7 +74,7 @@ OO interface to Geodesic functions
    FrameE
    FrameN
    FrameL
-   GeoPoint
    GeoPath
+   GeoPoint
    Nvector
    Pvector
