@@ -1,17 +1,17 @@
 """
-Created on 29. des. 2015
+Object oriented interface to geodesic functions
+===============================================
 
-@author: pab
 """
 from __future__ import division, print_function
 from functools import partial
 import warnings
 import numpy as np
-from numpy import deprecate
 from numpy.linalg import norm
 from geographiclib.geodesic import Geodesic as _Geodesic
-from nvector._core import (mdot, select_ellipsoid, rad, deg, zyx2R,
-                           lat_lon2n_E, n_E2lat_lon, n_E2R_EN, n_E_and_wa2R_EL,
+from nvector.util import mdot, get_ellipsoid, rad, deg
+from nvector.rotation import zyx2R, n_E_and_wa2R_EL
+from nvector._core import (lat_lon2n_E, n_E2lat_lon, n_E2R_EN,
                            n_EB_E2p_EB_E, p_EB_E2n_EB_E, unit,
                            closest_point_on_great_circle,
                            great_circle_distance, euclidean_distance,
@@ -19,12 +19,18 @@ from nvector._core import (mdot, select_ellipsoid, rad, deg, zyx2R,
                            n_EA_E_distance_and_azimuth2n_EB_E,
                            mean_horizontal_position,
                            E_rotation, on_great_circle_path)
-from nvector import _examples
-from nvector._common import test_docstrings, use_docstring_from
+from nvector import _examples, license as _license
+from nvector._common import test_docstrings, use_docstring_from, _make_summary
 
-__all__ = ['FrameE', 'FrameB', 'FrameL', 'FrameN', 'GeoPoint', 'GeoPath',
-           'Nvector', 'ECEFvector', 'Pvector', 'diff_positions',
-           'delta_E', 'delta_N', 'delta_L']
+
+__all__ = ['delta_E', 'delta_L', 'delta_N',
+           'diff_positions',
+           'FrameB', 'FrameE', 'FrameN', 'FrameL',
+           'GeoPath',
+           'GeoPoint',
+           'ECEFvector',
+           'Nvector',
+           'Pvector']
 
 
 def array_to_list_dict(data):
@@ -128,7 +134,7 @@ def isclose(a, b, rtol=1e-9, atol=0.0, equal_nan=False):
     return out
 
 
-def allclose(a, b, rtol=1.e-5, atol=1.e-8, equal_nan=False):
+def allclose(a, b, rtol=1.e-7, atol=1.e-14, equal_nan=False):
     """
     Returns True if two arrays are element-wise equal within a tolerance.
 
@@ -174,11 +180,11 @@ def allclose(a, b, rtol=1.e-5, atol=1.e-8, equal_nan=False):
     Examples
     --------
     >>> import nvector.objects as no
-    >>> no.allclose([1e10,1e-7], [1.00001e10,1e-8])
+    >>> no.allclose([1e10, 1e-7], [1.00001e10, 1e-8])
     False
-    >>> no.allclose([1e10,1e-8], [1.00001e10,1e-9])
-    True
-    >>> no.allclose([1e10,1e-8], [1.0001e10,1e-9])
+    >>> no.allclose([1e10, 1e-8], [1.00001e10, 1e-9])
+    False
+    >>> no.allclose([1e10, 1e-8], [1.0001e10, 1e-9])
     False
     >>> no.allclose([1.0, np.nan], [1.0, np.nan])
     False
@@ -229,11 +235,7 @@ def delta_E(point_a, point_b):
     return p_AB_E
 
 
-@deprecate
-def diff_positions(point_a, point_b):
-    """Deprecated use delta_E instead.
-    """
-    return delta_E(point_a, point_b)
+diff_positions = np.deprecate(delta_E, old_name='diff_positions', new_name='delta_E')
 
 
 def delta_N(point_a, point_b):
@@ -529,7 +531,8 @@ class GeoPoint(_Common):
 
         References
         ----------
-        `C. F. F. Karney, Algorithms for geodesics, J. Geodesy 87(1), 43-55 (2013) <https://rdcu.be/cccgm>`_
+        `C. F. F. Karney, Algorithms for geodesics, J. Geodesy 87(1), 43-55 (2013)
+        <https://rdcu.be/cccgm>`_
 
         `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
         """
@@ -640,17 +643,16 @@ class Nvector(_Common):
         """Normalizes self to unit vector(s)"""
         self.normal = unit(self.normal)
 
-    @deprecate
-    def mean_horizontal_position(self):
-        """Deprecated. Use mean instead"""
-        return self.mean()
-
     def mean(self):
         """
         Returns mean position of the n-vectors.
         """
         average_nvector = mean_horizontal_position(self.normal)
         return self.frame.Nvector(average_nvector, z=np.mean(self.z))
+
+    mean_horizontal_position = np.deprecate(mean,
+                                            old_name='mean_horizontal_position',
+                                            new_name='mean')
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
         options = dict(rtol=rtol, atol=atol)
@@ -829,7 +831,7 @@ GeoPoint, ECEFvector, Pvector
         """
         _check_frames(self, frame.nvector)
         p_AB_E = self.pvector
-        p_AB_N = mdot(np.rollaxis(frame.R_EN, 1, 0), p_AB_E[:, None, ...])
+        p_AB_N = mdot(np.swapaxes(frame.R_EN, 1, 0), p_AB_E[:, None, ...])
         return Pvector(p_AB_N.reshape(3, -1), frame=frame, scalar=self.scalar)
 
     def to_ecef_vector(self):
@@ -903,14 +905,14 @@ Examples
 
     @property
     def positionA(self):
-        """Deprecated use point_a instead"""
-        warnings.warn('Deprecated use point_a instead', category=DeprecationWarning, stacklevel=2)
+        __doc__ = """positionA is deprecated, use point_a instead!"""  # @ReservedAssignment
+        warnings.warn(__doc__, category=DeprecationWarning, stacklevel=2)
         return self.point_a
 
     @property
     def positionB(self):
-        """Deprecated use point_b instead"""
-        warnings.warn('Deprecated use point_b instead', category=DeprecationWarning, stacklevel=2)
+        __doc__ = """positionB is deprecated, use point_b instead!"""  # @ReservedAssignment
+        warnings.warn(__doc__, category=DeprecationWarning, stacklevel=2)
         return self.point_b
 
     def nvectors(self):
@@ -989,13 +991,6 @@ Examples
             return distance_fun(n_EA_E, n_EB_E, radius)[0]  # scalar track distance
         return distance_fun(n_EA_E, n_EB_E, radius)
 
-    @deprecate
-    def intersection(self, path):
-        """
-        Deprecated use intersect instead
-        """
-        return self.intersect(path)
-
     def intersect(self, path):
         """
         Returns the intersection(s) between the great circles of the two paths
@@ -1015,6 +1010,10 @@ Examples
         path_b = path.nvector_normals()
         point_c = intersect(path_a, path_b)  # nvector
         return frame.Nvector(point_c)
+
+    intersection = np.deprecate(intersect,
+                                old_name='intersection',
+                                new_name='intersect')
 
     def _on_ellipsoid_path(self, point, rtol=1e-6, atol=1e-8):
         point_a, point_b = self.geo_points()
@@ -1234,7 +1233,7 @@ class FrameE(_Common):
 
     def __init__(self, a=None, f=None, name='WGS84', axes='e'):
         if a is None or f is None:
-            a, f, _full_name = select_ellipsoid(name)
+            a, f, _full_name = get_ellipsoid(name)
         self.a = a
         self.f = f
         self.name = name
@@ -1283,7 +1282,8 @@ class FrameE(_Common):
 
         References
         ----------
-        `C. F. F. Karney, Algorithms for geodesics, J. Geodesy 87(1), 43-55 (2013) <https://rdcu.be/cccgm>`_
+        `C. F. F. Karney, Algorithms for geodesics, J. Geodesy 87(1), 43-55 (2013)
+        <https://rdcu.be/cccgm>`_
 
         `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
 
@@ -1355,7 +1355,8 @@ class FrameE(_Common):
 
         References
         ----------
-        `C. F. F. Karney, Algorithms for geodesics, J. Geodesy 87(1), 43-55 (2013) <https://rdcu.be/cccgm>`_
+        `C. F. F. Karney, Algorithms for geodesics, J. Geodesy 87(1), 43-55 (2013)
+        <https://rdcu.be/cccgm>`_
 
         `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
         """
@@ -1563,6 +1564,13 @@ def _default_frame(frame):
     if frame is None:
         return FrameE()
     return frame
+
+
+_odict = globals()
+__doc__ = (__doc__  # @ReservedAssignment
+           + _make_summary(dict((n, _odict[n]) for n in __all__))
+           + 'License\n-------\n'
+           + _license.__doc__)
 
 
 if __name__ == "__main__":

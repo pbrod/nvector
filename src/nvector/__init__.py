@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 from ._info import __doc__  # @UnresolvedImport
+from .util import *
+from .rotation import *
 from ._core import *
 from .objects import *
 
