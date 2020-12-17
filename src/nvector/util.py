@@ -227,6 +227,7 @@ def nthroot(x, n):
     Returns the n'th root of x to machine precision
 
     Parameters
+    ----------
     x, n
 
     Examples

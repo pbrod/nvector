@@ -2,10 +2,26 @@
 Changelog
 =========
 
-Version 0.7.6, December 16, 2020
+Version 0.7.6, December 17, 2020
 ================================
 
-Per A Brodtkorb (19):                                                                                                      
+Per A Brodtkorb (26):
+      * Added missing functions great_circle_normal and interpolate to the nvector_summary.rst
+      * Moved the following functions related to rotation matrices from _core to rotation module:   
+         - E_rotation, n_E_and_wa2R_EL, n_E2R_EN, R_EL2n_E, R_EN2n_E, R2xyz, R2zyx, xyz2R, zyx2R
+      * Renamed select_ellipsoid to get_ellipsoid 
+      * Moved the following utility functions from _core to util module:   
+         - deg, rad, mdot, nthroot, get_ellipsoid, unit, _check_length_deviation 
+      * Added _get_h1line and _make_summary to _common.py 
+      * Replaced numpy.rollaxis with numpy.swapaxes to make the code clearer.
+      * _atleast_3d now broadcast the input against each other.
+      * Added examples to zyx2R 
+      * Added the following references to zyx2R, xyz2R, R2xyz, R2zyx: 
+         - https://en.wikipedia.org/wiki/Aircraft_principal_axes
+         - https://en.wikipedia.org/wiki/Euler_angles
+         - https://en.wikipedia.org/wiki/Axes_conventions
+      * Removed tabs from CHANGELOG.rst
+      * Updated CHANGELOG.rst and prepared for release v0.7.6
       * Fixed the documentation so that it shows correctly in the reference manual. 
       * Added logo.png and docs/reference/nvector.rst
       * Updated build_package.py so it generates a valid README.rst file.

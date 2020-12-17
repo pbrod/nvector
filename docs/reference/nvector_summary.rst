@@ -1,8 +1,29 @@
+.. currentmodule:: nvector.objects
+
+
+OO interface to Geodesic functions
+----------------------------------
+.. autosummary::
+   :toctree: generated/
+
+   delta_E
+   delta_N
+   delta_L
+   diff_positions
+   ECEFvector
+   FrameB
+   FrameE
+   FrameN
+   FrameL
+   GeoPath
+   GeoPoint
+   Nvector
+   Pvector
 
 .. currentmodule:: nvector._core
 
 Geodesic functions
--------------------
+------------------
 .. autosummary::
    :toctree: generated/
 
@@ -57,24 +78,3 @@ Utility functions
    select_ellipsoid
    unit
 
-.. currentmodule:: nvector.objects
-
-
-OO interface to Geodesic functions
------------------------------------
-.. autosummary::
-   :toctree: generated/
-
-   delta_E
-   delta_N
-   delta_L
-   diff_positions
-   ECEFvector
-   FrameB
-   FrameE
-   FrameN
-   FrameL
-   GeoPath
-   GeoPoint
-   Nvector
-   Pvector
