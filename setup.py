@@ -19,7 +19,7 @@ Build
 
 Recommended build
   git pull origin
-  git shortlog v0.6.0..HEAD -w80 --format="* %s" --reverse > log.txt
+  git shortlog v0.7.5..HEAD -w80 --format="* %s" --reverse > log.txt
   # update CHANGES.rst with info from log.txt
   # update nvector._info (this file will be the generated README.rst)
   python build_package.py 0.7.0rc0

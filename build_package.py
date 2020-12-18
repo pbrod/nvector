@@ -75,7 +75,7 @@ References
 .. [Kar13] C.F.F. Karney. `Algorithms for geodesics. J. Geodesy, 87(1):43-55, 2013. <https://rdcu.be/cccgm>`_
 
 .. [GB20] K. Gade and P.A. Brodtkorb, `Nvector Documentation for Python, 2020.
-           <https://nvector.readthedocs.io/en/v0.7.5>`_
+           <https://nvector.readthedocs.io/en/v0.7.6>`_
 """
     filename = os.path.join(ROOT, "README.rst")
     with open(filename, "w") as fid:
