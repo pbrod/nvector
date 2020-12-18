@@ -10,6 +10,8 @@ else:
     def indent(text, amount=4, ch=' '):
         return textwrap.indent(text, amount * ch)
 
+dedent = textwrap.dedent
+
 
 def _get_h1line(object_):
     """Returns the H1 line of the documentation of an object."""
@@ -37,17 +39,33 @@ def _make_summary(odict):
 
 
 def use_docstring_from(cls):
+    """This decorator modifies the decorated function's docstring by
+    with the docstring from the class `cls`.
+
+    If the function's docstring is None it is replaced with the supplied cls.__doc__.
+    otherwise it is set to old_docstring.format(super=cls.__doc__)
+
+    This is useful when you want to reuse the docstring from another class or
+    if you want modify the docstring of a function at runtime.
+
     """
-    This decorator modifies the decorated function's docstring by
-    replacing it with the docstring from the class `cls`.
+    return use_docstring(cls.__doc__)
+
+
+def use_docstring(docstring):
+    """This decorator modifies the decorated function's docstring with supplied docstring.
+
+    If the function's docstring is None it is replaced with the supplied docstring.
+    otherwise it is set to old_docstring.format(super=docstring)
+
+    This is useful when you want modify the docstring of a function at runtime.
     """
     def _doc(func):
-        cls_docstring = cls.__doc__
         func_docstring = func.__doc__
         if func_docstring is None:
-            func.__doc__ = cls_docstring
+            func.__doc__ = docstring
         else:
-            new_docstring = func_docstring % dict(super=cls_docstring)
+            new_docstring = dedent(func_docstring).format(super=docstring)
             func.__doc__ = new_docstring
         return func
     return _doc

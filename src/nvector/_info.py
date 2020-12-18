@@ -5,16 +5,17 @@ from nvector import (_intro,
                      _acknowledgements,
                      _images)
 
-__doc__ = ("""Introduction to nvector
+__doc__ = (  # @ReservedAssignment
+    """Introduction to nvector
 =======================
 """ + _intro.__doc__  # @UndefinedVariable @ReservedAssignment
-           + _documentation.__doc__  # @UndefinedVariable
-           + _installation.__doc__  # @UndefinedVariable
-           + _examples_object_oriented.__doc__
-           + """Acknowledgements
+    + _documentation.__doc__  # @UndefinedVariable
+    + _installation.__doc__  # @UndefinedVariable
+    + _examples_object_oriented.__doc__
+    + """Acknowledgements
 ================
 """ + _acknowledgements.__doc__  # @UndefinedVariable
-           + _images.__doc__)  # @UndefinedVariable
+    + _images.__doc__)  # @UndefinedVariable
 
 
 if __name__ == '__main__':

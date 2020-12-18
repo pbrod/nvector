@@ -25,6 +25,8 @@ E_ROTATION_MATRIX = dict(e=np.array([[0, 0, 1.0],
                                      [-1.0, 0, 0]]),
                          E=np.eye(3))
 
+# pylint: disable=invalid-name
+
 
 def E_rotation(axes='e'):
     """
@@ -49,7 +51,9 @@ def E_rotation(axes='e'):
     -----
     R_Ee controls the axes of the coordinate frame E (Earth-Centred,
     Earth-Fixed, ECEF) used by the other functions in this library.
-    It is very common in many fields to choose axes equal to 'e'.
+    It is very common in many fields to choose axes equal to 'e', which
+    is also the default in this library. Previously the old matlab toolbox
+    the default value was equal to 'E'.
     If you choose axes equal to 'E' the yz-plane coincides with the equatorial
     plane. This choice of axis ensures that at zero latitude and longitude,
     frame N (North-East-Down) has the same orientation as frame E. If

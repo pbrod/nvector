@@ -4,6 +4,7 @@ Created on 18. jan. 2016
 @author: pab
 """
 
+
 def navlab_example(number):
     link = "<http://www.navlab.net/nvector/#example_{0}>".format(number)
     return "`Example {0} at www.navlab.net {1}`_\n".format(number, link)
@@ -719,8 +720,9 @@ def get_examples_no_header(indices, OO=True):
     hdr = 'example_{}_header'
     txt = 'example_{}_txt'
     sol = 'example_{}_obj_solution' if OO else 'example_{}_fun_solution'
-    return ''.join((''.join(d[hdr.format(i)].rpartition('\n')[:1]) + d[txt.format(i)] + d[sol.format(i)]
-                    for i in indices))
+    return ''.join((''.join(
+        d[hdr.format(i)].rpartition('\n')[:1]) + d[txt.format(i)] + d[sol.format(i)]
+        for i in indices))
 
 
 getting_started = """

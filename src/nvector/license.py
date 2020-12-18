@@ -1,7 +1,4 @@
-from datetime import datetime
-CURRENT_YEAR = datetime.now().year
-
-__doc__ = """
+"""
 The content of this library is based on the following publication:
 
 Gade, K. (2010). A Nonsingular Horizontal Position Representation, The Journal
@@ -35,4 +32,11 @@ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
 INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
-THE POSSIBILITY OF SUCH DAMAGE.""".format(CURRENT_YEAR)
+THE POSSIBILITY OF SUCH DAMAGE.
+"""
+
+from datetime import datetime
+CURRENT_YEAR = datetime.now().year
+
+if __doc__:
+    __doc__ = __doc__.format(CURRENT_YEAR)  # @ReservedAssignment

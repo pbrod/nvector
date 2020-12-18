@@ -336,6 +336,7 @@ def test_Ex10_cross_track_distance():
     assert_allclose(s_xt, 11117.79911015)
     assert_allclose(d_xt, 11117.79346741)
 
+
 def test_small_and_large_cross_track_distance():
     radius = 6371e3  # m, mean Earth radius
     n_EA1_E = lat_lon2n_E(rad(5), rad(10))
