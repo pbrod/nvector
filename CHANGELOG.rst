@@ -2,16 +2,26 @@
 Changelog
 =========
 
-Version 0.7.6, December 17, 2020
+Version 0.7.6, December 18, 2020
 ================================
 
-Per A Brodtkorb (26):
+Per A Brodtkorb (30):
+      * Renamed _core.py to core.py 
+      * Removed the module index from the appendix because it was incomplete. 
+      * Removed nvector.tests package from the reference chapter. 
+      * Added indent function to _common.py to avoid failure on python 2.7.
+      * Moved isclose, allclose and array_to_list_dict from objects.py to util.py
+      * Moved the following function from test_nvector.py to test_rotation.py:
+          - test_n_E_and_wa2R_EL, test_R2zxy, test_R2zxy_x90, test_R2zxy_y90
+          - test_R2zxy_z90, test_R2zxy_0, test_R2xyz test_R2xyz_with_vectors 
+      * Replaced assert_array_almost_equal with assert_allclose in test_objects.py
+      * Renamed test_frames.py to test_objects.py
       * Added missing functions great_circle_normal and interpolate to the nvector_summary.rst
-      * Moved the following functions related to rotation matrices from _core to rotation module:   
+      * Moved the following functions related to rotation matrices from _core to rotation module:
          - E_rotation, n_E_and_wa2R_EL, n_E2R_EN, R_EL2n_E, R_EN2n_E, R2xyz, R2zyx, xyz2R, zyx2R
       * Renamed select_ellipsoid to get_ellipsoid 
-      * Moved the following utility functions from _core to util module:   
-         - deg, rad, mdot, nthroot, get_ellipsoid, unit, _check_length_deviation 
+      * Moved the following utility functions from _core to util module:
+         - deg, rad, mdot, nthroot, get_ellipsoid, unit, _check_length_deviation
       * Added _get_h1line and _make_summary to _common.py 
       * Replaced numpy.rollaxis with numpy.swapaxes to make the code clearer.
       * _atleast_3d now broadcast the input against each other.
