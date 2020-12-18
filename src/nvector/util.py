@@ -324,12 +324,7 @@ def rad(*deg_angles):
 def mdot(a, b):
     """
     Returns multiple matrix multiplications of two arrays
-    i.e.
-      dot(a, b)[i,j,k] = sum(a[i,:,j] * b[:,j,k])
-
-    if a and b have the same shape this is the same as:
-      np.concatenate([np.dot(a[...,i], b[...,i])[:, :, None]
-                      for i in range(n)], axis=2)
+    i.e. dot(a, b)[i,j,k] = sum(a[i,:,j] * b[:,j,k])
 
     Parameters
     ----------
@@ -337,6 +332,12 @@ def mdot(a, b):
         First argument.
     b : array_like
         Second argument.
+
+    Notes
+    -----
+    if a and b have the same shape this is the same as
+
+    np.concatenate([np.dot(a[...,i], b[...,i])[:, :, None] for i in range(n)], axis=2)
 
     Examples
     --------

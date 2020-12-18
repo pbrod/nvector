@@ -1,5 +1,14 @@
-import textwrap
 import inspect
+try:
+    import textwrap
+    textwrap.indent  # pylint: disable=pointless-statement
+except AttributeError:  # undefined function (wasn't added until Python 3.3)
+    def indent(text, amount=4, ch=' '):
+        padding = amount * ch
+        return ''.join(padding+line for line in text.splitlines(True))
+else:
+    def indent(text, amount=4, ch=' '):
+        return textwrap.indent(text, amount * ch)
 
 
 def _get_h1line(object_):
@@ -12,12 +21,11 @@ def _get_h1line(object_):
 
 def _make_summary(odict):
     """Return summary of all functions and classes in odict"""
-    prefix = '    '
 
-    class_summary = '\n'.join([':\n'.join((oname, textwrap.indent(_get_h1line(obj), prefix)))
+    class_summary = '\n'.join([':\n'.join((oname, indent(_get_h1line(obj))))
                                for oname, obj in odict.items() if inspect.isclass(obj)])
 
-    fun_summary = '\n'.join([':\n'.join((oname, textwrap.indent(_get_h1line(obj), prefix)))
+    fun_summary = '\n'.join([':\n'.join((oname, indent(_get_h1line(obj))))
                              for oname, obj in odict.items() if not inspect.isclass(obj)])
     fmt = "{} in module\n{}----------\n{}\n\n"
     summary = ''

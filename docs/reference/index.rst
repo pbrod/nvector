@@ -13,6 +13,6 @@ what they are and what they do.
     :maxdepth: 2
 
     nvector_summary
-    nvector
+    
 
     

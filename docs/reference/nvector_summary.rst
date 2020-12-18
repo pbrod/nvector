@@ -1,8 +1,10 @@
+
+
 .. currentmodule:: nvector.objects
 
 
-OO interface to Geodesic functions
-----------------------------------
+Object Oriented interface to Geodesic functions
+-----------------------------------------------
 .. autosummary::
    :toctree: generated/
 
@@ -20,7 +22,9 @@ OO interface to Geodesic functions
    Nvector
    Pvector
 
-.. currentmodule:: nvector._core
+
+
+.. currentmodule:: nvector.core
 
 Geodesic functions
 ------------------
@@ -46,6 +50,7 @@ Geodesic functions
     on_great_circle
     on_great_circle_path
 
+
 .. currentmodule:: nvector.rotation
 
 Rotation matrices and angles
@@ -63,6 +68,7 @@ Rotation matrices and angles
     xyz2R
     zyx2R
 
+
 .. currentmodule:: nvector.util
 
 Utility functions
@@ -77,4 +83,3 @@ Utility functions
    get_ellipsoid
    select_ellipsoid
    unit
-

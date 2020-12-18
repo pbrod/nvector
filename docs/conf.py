@@ -230,7 +230,7 @@ latex_appendices = ['appendix/changelog',
 
 # If false, no module index is generated.
 #
-latex_domain_indices = True
+latex_domain_indices = False
 
 # latex_engine = 'xelatex'
 latex_engine = 'pdflatex'

@@ -11,7 +11,7 @@ from numpy.linalg import norm
 from geographiclib.geodesic import Geodesic as _Geodesic
 from nvector.util import mdot, get_ellipsoid, rad, deg, isclose, allclose, array_to_list_dict
 from nvector.rotation import zyx2R, n_E_and_wa2R_EL
-from nvector._core import (lat_lon2n_E, n_E2lat_lon, n_E2R_EN,
+from nvector.core import (lat_lon2n_E, n_E2lat_lon, n_E2R_EN,
                            n_EB_E2p_EB_E, p_EB_E2n_EB_E, unit,
                            closest_point_on_great_circle,
                            great_circle_distance, euclidean_distance,
@@ -742,14 +742,16 @@ Examples
 
     @property
     def positionA(self):
-        __doc__ = """positionA is deprecated, use point_a instead!"""  # @ReservedAssignment
-        warnings.warn(__doc__, category=DeprecationWarning, stacklevel=2)
+        """positionA is deprecated, use point_a instead!"""  # @ReservedAssignment
+        warnings.warn("positionA is deprecated, use point_a instead!",
+                      category=DeprecationWarning, stacklevel=2)
         return self.point_a
 
     @property
     def positionB(self):
-        __doc__ = """positionB is deprecated, use point_b instead!"""  # @ReservedAssignment
-        warnings.warn(__doc__, category=DeprecationWarning, stacklevel=2)
+        """positionB is deprecated, use point_b instead!"""  # @ReservedAssignment
+        warnings.warn("positionB is deprecated, use point_b instead!",
+                      category=DeprecationWarning, stacklevel=2)
         return self.point_b
 
     def nvectors(self):

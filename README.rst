@@ -535,10 +535,10 @@ The `nvector package <http://pypi.python.org/pypi/nvector/>`_ for
 `FFI (The Norwegian Defence Research Establishment) <http://www.ffi.no/en>`_
 based on the `nvector toolbox <http://www.navlab.net/nvector/#download>`_ for
 `Matlab <http://www.mathworks.com>`_ written by the navigation group at
-`FFI <http://www.ffi.no/en>`_. The nvector._core module is a vectorized reimplementation
-of the matlab nvector toolbox while the nvector.objects module is a new easy to
-use object oriented user interface to the nvector core functionality
-documented in [GB20]_.
+`FFI <http://www.ffi.no/en>`_. The nvector.core and nvector.rotation module is a
+vectorized reimplementation of the matlab nvector toolbox while the nvector.objects
+module is a new easy to use object oriented user interface to the nvector core
+functionality documented in [GB20]_.
 
 Most of the content is based on the article by K. Gade [Gad10]_.
 
@@ -546,9 +546,10 @@ Thus this article should be cited in publications using this page or
 downloaded program code.
 
 However, if you use any of the FrameE.direct, FrameE.inverse,
-GeoPoint.distance_and_azimuth or GeoPoint.displace methods you should also cite the article by
-Karney [Kar13]_ because these methods call Karney's
-`geographiclib <https://pypi.python.org/pypi/geographiclib>`_ library to do the calculations.
+GeoPoint.distance_and_azimuth or GeoPoint.displace methods you should also cite
+the article by Karney [Kar13]_ because these methods call
+Karney's `geographiclib <https://pypi.python.org/pypi/geographiclib>`_ library
+to do the calculations.
 
 
 
