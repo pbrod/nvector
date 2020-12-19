@@ -65,8 +65,11 @@ def use_docstring(docstring):
         if func_docstring is None:
             func.__doc__ = docstring
         else:
-            new_docstring = dedent(func_docstring).format(super=docstring)
-            func.__doc__ = new_docstring
+            try:
+                new_docstring = dedent(func_docstring).format(super=docstring)
+                func.__doc__ = new_docstring
+            except Exception:
+                pass  # python 2 crashes if the docstring alreasy exists!
         return func
     return _doc
 

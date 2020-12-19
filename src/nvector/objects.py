@@ -281,13 +281,13 @@ class GeoPoint(_Common):
     def _displace_great_circle(self, distance, azimuth, degrees):
         """ Returns the great circle solution using the nvector method.
         """
-        nvector = self.to_nvector()
-        radius = nvector.to_ecef_vector().length
+        n_a = self.to_nvector()
+        radius = n_a.to_ecef_vector().length
         distance_rad = distance / radius
         azimuth_rad = azimuth if not degrees else rad(azimuth)
-        n_EB_E = n_EA_E_distance_and_azimuth2n_EB_E(nvector.normal, distance_rad, azimuth_rad)
-        point_b = Nvector(n_EB_E, self.z, self.frame).to_geo_point()
-        azimuth_b = self.delta_to(point_b).azimuth
+        normal_b = n_EA_E_distance_and_azimuth2n_EB_E(n_a.normal, distance_rad, azimuth_rad)
+        point_b = Nvector(normal_b, self.z, self.frame).to_geo_point()
+        azimuth_b = delta_N(point_b, self).azimuth
         if degrees:
             return point_b, deg(azimuth_b)
         return point_b, azimuth_b
@@ -803,6 +803,10 @@ class GeoPath(object):
         -------
         distance: real scalar or vector
             distance in [m]
+
+        Notes
+        -----
+        The result for spherical Earth is returned.
         """
         if radius is None:
             radius = self._get_average_radius()
@@ -830,12 +834,13 @@ class GeoPath(object):
             return s_ab
         if radius is None:
             radius = self._get_average_radius()
-        n_EA_E, n_EB_E = self.nvector_normals()
+        normal_a, normal_b = self.nvector_normals()
 
         distance_fun = euclidean_distance if method[:2] == "eu" else great_circle_distance
+        distance = distance_fun(normal_a, normal_b, radius)
         if np.ndim(radius) == 0:
-            return distance_fun(n_EA_E, n_EB_E, radius)[0]  # scalar track distance
-        return distance_fun(n_EA_E, n_EB_E, radius)
+            return distance[0]  # scalar track distance
+        return distance
 
     def intersect(self, path):
         """
@@ -850,12 +855,19 @@ class GeoPath(object):
         -------
         point: GeoPoint
             point of intersection between paths
+
+        Notes
+        -----
+        The result for spherical Earth is returned at the average height.
         """
         frame = self.point_a.frame
-        path_a = self.nvector_normals()
-        path_b = path.nvector_normals()
-        point_c = intersect(path_a, path_b)  # nvector
-        return frame.Nvector(point_c)
+        point_a1, point_a2 = self.nvectors()
+        point_b1, point_b2 = path.nvectors()
+        path_a = (point_a1.normal, point_a2.normal) # self.nvector_normals()
+        path_b = (point_b1.normal, point_b2.normal) # path.nvector_normals()
+        normal_c = intersect(path_a, path_b)  # nvector
+        depth = (point_a1.z + point_a2.z + point_b1.z + point_b2.z) / 4.
+        return frame.Nvector(normal_c, z=depth)
 
     intersection = np.deprecate(intersect,
                                 old_name='intersection',
@@ -863,11 +875,14 @@ class GeoPath(object):
 
     def _on_ellipsoid_path(self, point, rtol=1e-6, atol=1e-8):
         point_a, point_b = self.geo_points()
+        point_c = point.to_geo_point()
+        z = (point_a.z + point_b.z) * 0.5
         distance_ab, azimuth_ab, _azi_ba = point_a.distance_and_azimuth(point_b)
-        distance_ac, azimuth_ac, _azi_ca = point_a.distance_and_azimuth(point)
-        return (isclose(distance_ac, 0, atol=atol)
-                | ((distance_ab >= distance_ac)
-                   & isclose(azimuth_ac, azimuth_ab, rtol=rtol, atol=atol)))  #
+        distance_ac, azimuth_ac, _azi_ca = point_a.distance_and_azimuth(point_c)
+        return (isclose(z, point_c.z, rtol=rtol, atol=atol)
+                & (isclose(distance_ac, 0, atol=atol)
+                   | ((distance_ab >= distance_ac)
+                      & isclose(azimuth_ac, azimuth_ab, rtol=rtol, atol=atol))))
 
     def on_great_circle(self, point, atol=1e-8):
         """Returns True if point is on the great circle within a tolerance."""
@@ -877,12 +892,14 @@ class GeoPath(object):
             return result[()]
         return result
 
-    def _on_great_circle_path(self, point, radius=None, atol=1e-8):
+    def _on_great_circle_path(self, point, radius=None, rtol=1e-9, atol=1e-8):
         if radius is None:
             radius = self._get_average_radius()
-        path = self.nvector_normals()
-        point_c = point.to_nvector().normal
-        result = on_great_circle_path(path, point_c, radius, atol=atol)
+        n_a, n_b = self.nvectors()
+        path = (n_a.normal, n_b.normal)
+        n_c = point.to_nvector()
+        same_z = isclose(n_c.z, (n_a.z + n_b.z) * 0.5, rtol=rtol, atol=atol)
+        result = on_great_circle_path(path, n_c.normal, radius, atol=atol) & same_z
         if np.ndim(radius) == 0 and result.size == 1:
             return result[0]  # scalar outout
         return result
@@ -901,6 +918,11 @@ class GeoPath(object):
         Returns
         -------
         result: Bool scalar or boolean vector
+            True if the point is on the path at its average height.
+
+        Notes
+        -----
+        The result for spherical Earth is returned for method='greatcircle'.
 
         Examples
         --------
@@ -930,7 +952,16 @@ class GeoPath(object):
         """
         if method[:2] in {'ex', 'el'}:  # exact or ellipsoid
             return self._on_ellipsoid_path(point, rtol=rtol, atol=atol)
-        return self._on_great_circle_path(point, atol=atol)
+        return self._on_great_circle_path(point, rtol=rtol, atol=atol)
+
+
+    def _closest_point_on_great_circle(self, point):
+        point_c = point.to_nvector()
+        point_a, point_b = self.nvectors()
+        path = (point_a.normal, point_b.normal)
+        z = (point_a.z + point_b.z) * 0.5
+        normal_d = closest_point_on_great_circle(path, point_c.normal)
+        return point_c.frame.Nvector(normal_d, z)
 
     def closest_point_on_great_circle(self, point):
         """
@@ -945,6 +976,10 @@ class GeoPath(object):
         -------
         closest_point: GeoPoint
             closest point on path.
+
+        Notes
+        -----
+        The result for spherical Earth is returned at the average depth.
 
         Examples
         --------
@@ -966,12 +1001,8 @@ class GeoPath(object):
 
         """
 
-        nvector = point.to_nvector()
-
-        path = self.nvector_normals()
-        n = closest_point_on_great_circle(path, nvector.normal)
-
-        return nvector.frame.Nvector(n, nvector.z).to_geo_point()
+        point_d = self._closest_point_on_great_circle(point)
+        return point_d.to_geo_point()
 
     def closest_point_on_path(self, point):
         """
@@ -1014,7 +1045,7 @@ class GeoPath(object):
         return self._closest_point_on_path(point)
 
     def _closest_point_on_path(self, point):
-        point_c = self.closest_point_on_great_circle(point)
+        point_c = self._closest_point_on_great_circle(point)
         if self.on_path(point_c):
             return point_c
         n0 = point.to_nvector().normal
@@ -1421,9 +1452,9 @@ def _default_frame(frame):
     return frame
 
 
-_odict = globals()
+_ODICT = globals()
 __doc__ = (__doc__  # @ReservedAssignment
-           + _make_summary(dict((n, _odict[n]) for n in __all__))
+           + _make_summary(dict((n, _ODICT[n]) for n in __all__))
            + 'License\n-------\n'
            + _license.__doc__)
 

@@ -11,6 +11,8 @@ import warnings
 import numpy as np
 from numpy import arctan2, sin, cos, cross, dot, sqrt
 from numpy.linalg import norm
+from scipy.interpolate import interp1d
+from scipy.signal import savgol_filter
 from nvector import _examples, license as _license
 from nvector.rotation import E_rotation, n_E2R_EN, n_E2lat_lon  # @UnusedImport
 from nvector.util import mdot, nthroot, unit, _check_length_deviation
@@ -22,6 +24,7 @@ __all__ = ['closest_point_on_great_circle',
            'euclidean_distance',
            'great_circle_distance',
            'great_circle_normal',
+           'interp_nvectors',
            'interpolate',
            'intersect',
            'mean_horizontal_position',
@@ -348,6 +351,77 @@ def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137, f=1.0 / 298.2572
     p_EB_E = p_EA_E + p_AB_E
     n_EB_E, z_EB = p_EB_E2n_EB_E(p_EB_E, a, f, R_Ee)
     return n_EB_E, z_EB
+
+
+def interp_nvectors(t_i, t, nvectors, kind='linear', window_length=0, polyorder=2, mode='interp', cval=0.0):
+    """
+    Returns interpolated values from nvector data.
+
+    Parameters
+    ----------
+    t_i: real vector length m
+        Vector of interpolation times.
+    t: real vector length n
+        Vector of times.
+    nvectors: 3 x n array
+        n-vector(s) [no unit] decomposed in E.
+    kind: str or int, optional
+        Specifies the kind of interpolation as a string
+        ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic'
+        where 'zero', 'slinear', 'quadratic' and 'cubic' refer to a spline
+        interpolation of zeroth, first, second or third order) or as an
+        integer specifying the order of the spline interpolator to use.
+        Default is 'linear'.
+    window_length: positive odd integer
+        The length of the Savitzky-Golay filter window (i.e., the number of coefficients).
+        Default window_length=0, i.e. no smoothing.
+    polyorder: int
+        The order of the polynomial used to fit the samples.
+        polyorder must be less than window_length.
+    mode: 'mirror', 'constant', 'nearest', 'wrap' or 'interp'.
+        Determines the type of extension to use for the padded signal to
+        which the filter is applied.  When mode is 'constant', the padding
+        value is given by cval.
+        When the 'interp' mode is selected (the default), no extension
+        is used.  Instead, a degree polyorder polynomial is fit to the
+        last window_length values of the edges, and this polynomial is
+        used to evaluate the last window_length // 2 output values.
+    cval: scalar, optional
+        Value to fill past the edges of the input if mode is 'constant'.
+        Default is 0.0.
+
+    Returns
+    -------
+    result: 3 x m array
+        Interpolated n-vector(s) [no unit] decomposed in E.
+
+    Notes
+    -----
+    The result for spherical Earth is returned.
+
+    Examples
+    --------
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> import nvector as nv
+    >>> lat, lon = nv.rad(np.arange(0, 10)), np.sin(nv.rad(np.linspace(-90, 70, 10)))
+    >>> t = np.arange(len(lat))
+    >>> t_i = np.linspace(0, t[-1], 100)
+    >>> nvectors = nv.lat_lon2n_E(lat, lon)
+    >>> nvectors_i = nv.interp_nvectors(t_i, t, nvectors, kind='cubic')
+    >>> lati, loni = nv.deg(*nv.n_E2lat_lon(nvectors_i))
+    >>> plt.plot(nv.deg(lon), nv.deg(lat), 'o', loni, lati, '-')
+    >>> plt.show()
+    """
+    if window_length > 0:
+        window_length = window_length + (window_length+1) % 2  # make sure it is an odd integer
+        options = dict(axis=1, mode=mode, cval=cval)
+        normals = savgol_filter(nvectors, window_length, polyorder, **options)
+    else:
+        normals = nvectors
+    normal_i = interp1d(t, normals, axis=1, kind=kind, bounds_error=False)(t_i)
+
+    return unit(normal_i, norm_zero_vector=np.nan)
 
 
 def interpolate(path, ti):
