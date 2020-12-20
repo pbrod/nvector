@@ -36,6 +36,7 @@ Geodesic functions
     euclidean_distance
     great_circle_distance
     great_circle_normal
+    interp_nvectors
     interpolate
     intersect
     lat_lon2n_E
