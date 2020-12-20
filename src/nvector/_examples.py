@@ -33,7 +33,7 @@ Assume WGS-84 ellipsoid. The given depths are from the ellipsoid surface.
 Use position A to define north, east, and down directions.
 (Due to the curvature of Earth and different directions to the North Pole,
 the north, east, and down directions will change (relative to Earth) for
-different places.  A must be outside the poles for the north and east
+different places. Position A must be outside the poles for the north and east
 directions to be defined.)
 
 """
@@ -48,14 +48,16 @@ example_1_obj_solution = """Solution:
 Step1:  Find p_AB_N (delta decomposed in N).
     >>> p_AB_N = pointA.delta_to(pointB)
     >>> x, y, z = p_AB_N.pvector.ravel()
-    >>> valtxt = '{0:8.2f}, {1:8.2f}, {2:8.2f}'.format(x, y, z)
-    >>> 'Ex1: delta north, east, down = {}'.format(valtxt)
+    >>> 'Ex1: delta north, east, down = {0:8.2f}, {1:8.2f}, {2:8.2f}'.format(x, y, z)
     'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
 
 Step2: Also find the direction (azimuth) to B, relative to north:
-    >>> azimuth = p_AB_N.azimuth_deg
-    >>> 'azimuth = {0:4.2f} deg'.format(azimuth)
+    >>> 'azimuth = {0:4.2f} deg'.format(p_AB_N.azimuth_deg)
     'azimuth = 45.11 deg'
+    >>> 'elevation = {0:4.2f} deg'.format(p_AB_N.elevation_deg)
+    'elevation = 2.12 deg'
+    >>> 'distance = {0:4.2f} m'.format(p_AB_N.length)
+    'distance = 470356.72 m'
 
 """
 
@@ -79,14 +81,22 @@ Step3: Find R_EN for position A:
 
 Step4: Find p_AB_N (delta decomposed in N).
     >>> p_AB_N = np.dot(R_EN.T, p_AB_E).ravel()
-    >>> valtxt = '{0:8.2f}, {1:8.2f}, {2:8.2f}'.format(*p_AB_N)
-    >>> 'Ex1: delta north, east, down = {}'.format(valtxt)
+    >>> x, y, z = p_AB_N
+    >>> 'Ex1: delta north, east, down = {0:8.2f}, {1:8.2f}, {2:8.2f}'.format(x, y, z)
     'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
 
 Step5: Also find the direction (azimuth) to B, relative to north:
-    >>> azimuth = np.arctan2(p_AB_N[1], p_AB_N[0])
+    >>> azimuth = np.arctan2(y, x)
     >>> 'azimuth = {0:4.2f} deg'.format(deg(azimuth))
     'azimuth = 45.11 deg'
+
+    >>> distance = np.linalg.norm(p_AB_N)
+    >>> elevation = np.arcsin(z / distance)
+    >>> 'elevation = {0:4.2f} deg'.format(deg(elevation))
+    'elevation = 2.12 deg'
+
+    >>> 'distance = {0:4.2f} m'.format(distance)
+    'distance = 470356.72 m'
 
 """
 
@@ -135,9 +145,9 @@ Step 4: Find point C by adding delta BC to EB
     >>> pointC = p_EC_E.to_geo_point()
 
     >>> lat, lon, z = pointC.latlon_deg
-    >>> msg = 'Ex2: PosC: lat, lon = {:4.2f}, {:4.2f} deg,  height = {:4.2f} m'
+    >>> msg = 'Ex2: PosC: lat, lon = {:4.4f}, {:4.4f} deg,  height = {:4.2f} m'
     >>> msg.format(lat, lon, -z)
-    'Ex2: PosC: lat, lon = 53.33, 63.47 deg,  height = 406.01 m'
+    'Ex2: PosC: lat, lon = 53.3264, 63.4681 deg,  height = 406.01 m'
 
 """
 
@@ -173,9 +183,9 @@ Step 6: Find the position of C, using the functions that goes from one
 
     >>> lat_EC, lon_EC = nv.n_E2lat_lon(n_EC_E)
     >>> lat, lon, z = deg(lat_EC), deg(lon_EC), z_EC
-    >>> msg = 'Ex2: PosC: lat, lon = {:4.2f}, {:4.2f} deg,  height = {:4.2f} m'
+    >>> msg = 'Ex2: PosC: lat, lon = {:4.4f}, {:4.4f} deg,  height = {:4.2f} m'
     >>> msg.format(lat[0], lon[0], -z[0])
-    'Ex2: PosC: lat, lon = 53.33, 63.47 deg,  height = 406.01 m'
+    'Ex2: PosC: lat, lon = 53.3264, 63.4681 deg,  height = 406.01 m'
 
 """
 
@@ -205,9 +215,8 @@ Solution:
     >>> pointB = p_EB_E.to_geo_point()
 
     >>> lat, lon, z = pointB.latlon_deg
-    >>> msg = 'Ex3: Pos B: lat, lon = {:4.2f}, {:4.2f} deg, height = {:9.2f} m'
-    >>> msg.format(lat, lon, -z)
-    'Ex3: Pos B: lat, lon = 39.38, -48.01 deg, height = 4702059.83 m'
+    >>> 'Ex3: Pos B: lat, lon = {:4.4f}, {:4.4f} deg, height = {:9.3f} m'.format(lat, lon, -z)
+    'Ex3: Pos B: lat, lon = 39.3787, -48.0128 deg, height = 4702059.834 m'
 
 """
 
@@ -225,9 +234,9 @@ Solution:
     >>> h = -z_EB
     >>> lat, lon = deg(lat_EB), deg(lon_EB)
 
-    >>> msg = 'Ex3: Pos B: lat, lon = {:4.2f}, {:4.2f} deg, height = {:9.2f} m'
+    >>> msg = 'Ex3: Pos B: lat, lon = {:4.4f}, {:4.4f} deg, height = {:9.3f} m'
     >>> msg.format(lat[0], lon[0], h[0])
-    'Ex3: Pos B: lat, lon = 39.38, -48.01 deg, height = 4702059.83 m'
+    'Ex3: Pos B: lat, lon = 39.3787, -48.0128 deg, height = 4702059.834 m'
 
 """
 
@@ -397,6 +406,14 @@ Solution:
     >>> msg.format(lat_ti, lon_ti)
     'Ex6, Interpolated position: lat, lon = 89.8 deg, 180.0 deg'
 
+Vectorized solution:
+    >>> t = np.array([10, 20])
+    >>> nvectors = wgs84.GeoPoint([89, 89], [0, 180], degrees=True).to_nvector()
+    >>> nvectors_i = nvectors.interpolate(ti, t, kind='linear')
+    >>> lati, loni, zi = nvectors_i.to_geo_point().latlon_deg
+    >>> msg.format(lat_ti, lon_ti)
+    'Ex6, Interpolated position: lat, lon = 89.8 deg, 180.0 deg'
+
 """
 
 
@@ -416,7 +433,15 @@ Solution:
     >>> lat_EB_ti, lon_EB_ti = nv.n_E2lat_lon(n_EB_E_ti)
 
     >>> lat_ti, lon_ti = deg(lat_EB_ti), deg(lon_EB_ti)
-    >>> msg = 'Ex6, Interpolated position: lat, lon = {:2.1f} deg, {:2.1f} deg'
+    >>> msg = 'Ex6, Interpolated position: lat, lon = {:2.4f} deg, {:2.4f} deg'
+    >>> msg.format(lat_ti[0], lon_ti[0])
+    'Ex6, Interpolated position: lat, lon = 89.8 deg, 180.0 deg'
+
+Vectorized solution:
+    >>> nvectors = nv.lat_lon2n_E(rad([89, 89]), rad([0, 180]))
+    >>> t = np.array([10, 20])
+    >>> nvectors_i = nv.interp_nvectors(ti, t, nvectors, kind='linear')
+    >>> lati, loni = nv.deg(*nv.n_E2lat_lon(nvectors_i))
     >>> msg.format(lat_ti[0], lon_ti[0])
     'Ex6, Interpolated position: lat, lon = 89.8 deg, 180.0 deg'
 
@@ -446,9 +471,9 @@ Solution:
     >>> n_EM_E = nvectors.mean()
     >>> g_EM_E = n_EM_E.to_geo_point()
     >>> lat, lon = g_EM_E.latitude_deg, g_EM_E.longitude_deg
-    >>> msg = 'Ex7: Pos M: lat, lon = {:4.2f}, {:4.2f} deg'
+    >>> msg = 'Ex7: Pos M: lat, lon = {:4.4f}, {:4.4f} deg'
     >>> msg.format(lat, lon)
-    'Ex7: Pos M: lat, lon = 67.24, -6.92 deg'
+    'Ex7: Pos M: lat, lon = 67.2362, -6.9175 deg'
 
 """
 
@@ -470,9 +495,9 @@ or
 
     >>> lat, lon = nv.n_E2lat_lon(n_EM_E)
     >>> lat, lon = deg(lat), deg(lon)
-    >>> msg = 'Ex7: Pos M: lat, lon = {:4.2f}, {:4.2f} deg'
+    >>> msg = 'Ex7: Pos M: lat, lon = {:4.4f}, {:4.4f} deg'
     >>> msg.format(lat[0], lon[0])
-    'Ex7: Pos M: lat, lon = 67.24, -6.92 deg'
+    'Ex7: Pos M: lat, lon = 67.2362, -6.9175 deg'
 
 """
 
@@ -501,16 +526,22 @@ problem" for a sphere is already solved in Examples
 """
 
 example_8_obj_solution = """
-Solution:
+Exact solution:
     >>> import nvector as nv
     >>> frame = nv.FrameE(a=6371e3, f=0)
     >>> pointA = frame.GeoPoint(latitude=80, longitude=-90, degrees=True)
     >>> pointB, _azimuthb = pointA.displace(distance=1000, azimuth=200, degrees=True)
     >>> lat, lon = pointB.latitude_deg, pointB.longitude_deg
 
-    >>> msg = 'Ex8, Destination: lat, lon = {:4.2f} deg, {:4.2f} deg'
+    >>> msg = 'Ex8, Destination: lat, lon = {:4.4f} deg, {:4.4f} deg'
     >>> msg.format(lat, lon)
-    'Ex8, Destination: lat, lon = 79.99 deg, -90.02 deg'
+    'Ex8, Destination: lat, lon = 79.9915 deg, -90.0177 deg'
+
+Greatcircle solution:
+    >>> pointB2, _azimuthb = pointA.displace(distance=1000, azimuth=200, degrees=True, method='greatcircle')
+    >>> lat2, lon2 = pointB2.latitude_deg, pointB.longitude_deg
+    >>> msg.format(lat2, lon2)
+    'Ex8, Destination: lat, lon = 79.9915 deg, -90.0177 deg'
 
 """
 
@@ -530,9 +561,9 @@ Solution:
     >>> n_EB_E = nv.n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth)
     >>> lat_EB, lon_EB = nv.n_E2lat_lon(n_EB_E)
     >>> lat, lon = deg(lat_EB), deg(lon_EB)
-    >>> msg = 'Ex8, Destination: lat, lon = {:4.2f} deg, {:4.2f} deg'
+    >>> msg = 'Ex8, Destination: lat, lon = {:4.4f} deg, {:4.4f} deg'
     >>> msg.format(lat[0], lon[0])
-    'Ex8, Destination: lat, lon = 79.99 deg, -90.02 deg'
+    'Ex8, Destination: lat, lon = 79.9915 deg, -90.0177 deg'
 
 """
 
@@ -574,9 +605,9 @@ Solution:
     True
     >>> pointC = pointC.to_geo_point()
     >>> lat, lon = pointC.latitude_deg, pointC.longitude_deg
-    >>> msg = 'Ex9, Intersection: lat, lon = {:4.2f}, {:4.2f} deg'
+    >>> msg = 'Ex9, Intersection: lat, lon = {:4.4f}, {:4.4f} deg'
     >>> msg.format(lat, lon)
-    'Ex9, Intersection: lat, lon = 40.32, 55.90 deg'
+    'Ex9, Intersection: lat, lon = 40.3186, 55.9019 deg'
 
 """
 
@@ -604,9 +635,9 @@ or alternatively
     >>> lat_EC, lon_EC = nv.n_E2lat_lon(n_EC_E)
 
     >>> lat, lon = deg(lat_EC), deg(lon_EC)
-    >>> msg = 'Ex9, Intersection: lat, lon = {:4.2f}, {:4.2f} deg'
+    >>> msg = 'Ex9, Intersection: lat, lon = {:4.4f}, {:4.4f} deg'
     >>> msg.format(lat[0], lon[0])
-    'Ex9, Intersection: lat, lon = 40.32, 55.90 deg'
+    'Ex9, Intersection: lat, lon = 40.3186, 55.9019 deg'
 
     >>> np.allclose(nv.on_great_circle_path(path_a, n_EC_E),
     ...             nv.on_great_circle_path(path_b, n_EC_E))

@@ -25,7 +25,8 @@ from nvector.core import (lat_lon2n_E,
                           intersect,
                           n_EA_E_distance_and_azimuth2n_EB_E,
                           E_rotation,
-                          on_great_circle_path)
+                          on_great_circle_path,
+                          _interp_vectors)
 
 
 __all__ = ['delta_E', 'delta_L', 'delta_N',
@@ -72,7 +73,8 @@ def delta_E(point_a, point_b):
     # Function 1. in Section 5.4 in Gade (2010):
     p_EA_E = point_a.to_ecef_vector()
     p_EB_E = point_b.to_ecef_vector()
-    p_AB_E = -p_EA_E + p_EB_E
+    # p_AB_E = -p_EA_E + p_EB_E
+    p_AB_E = p_EB_E - p_EA_E
     return p_AB_E
 
 
@@ -435,6 +437,70 @@ class Nvector(_Common):
         self.z = z
         self.frame = _default_frame(frame)
 
+    def interpolate(self, t_i, t, kind='linear', window_length=0, polyorder=2, mode='interp', cval=0.0):
+        """
+        Returns interpolated values from nvector data.
+
+        Parameters
+        ----------
+        t_i: real vector length m
+            Vector of interpolation times.
+        t: real vector length n
+            Vector of times.
+        kind: str or int, optional
+            Specifies the kind of interpolation as a string
+            ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic'
+            where 'zero', 'slinear', 'quadratic' and 'cubic' refer to a spline
+            interpolation of zeroth, first, second or third order) or as an
+            integer specifying the order of the spline interpolator to use.
+            Default is 'linear'.
+        window_length: positive odd integer
+            The length of the Savitzky-Golay filter window (i.e., the number of coefficients).
+            Default window_length=0, i.e. no smoothing.
+        polyorder: int
+            The order of the polynomial used to fit the samples.
+            polyorder must be less than window_length.
+        mode: 'mirror', 'constant', 'nearest', 'wrap' or 'interp'.
+            Determines the type of extension to use for the padded signal to
+            which the filter is applied.  When mode is 'constant', the padding
+            value is given by cval.
+            When the 'interp' mode is selected (the default), no extension
+            is used.  Instead, a degree polyorder polynomial is fit to the
+            last window_length values of the edges, and this polynomial is
+            used to evaluate the last window_length // 2 output values.
+        cval: scalar, optional
+            Value to fill past the edges of the input if mode is 'constant'.
+            Default is 0.0.
+
+        Returns
+        -------
+        result: Nvector objest
+            Interpolated n-vector(s) [no unit] decomposed in E.
+
+        Notes
+        -----
+        The result for spherical Earth is returned.
+
+        Examples
+        --------
+        >>> import matplotlib.pyplot as plt
+        >>> import numpy as np
+        >>> import nvector as nv
+        >>> lat = np.arange(0, 10)
+        >>> lon = nv.deg(np.sin(nv.rad(np.linspace(-90, 70, 10))))
+        >>> nvectors = nv.GeoPoint(lat, lon, degrees=True).to_nvector()
+        >>> t = np.arange(10)
+        >>> t_i = np.linspace(0, t[-1], 100)
+        >>> nvectors_i = nvectors.interpolate(t_i, t, kind='cubic')
+        >>> lati, loni, zi = nvectors_i.to_geo_point().latlon_deg
+        >>> h = plt.plot(lon, lat, 'o', loni, lati, '-')
+        >>> plt.show()
+        """
+        vectors = np.vstack((self.normal, self.z))
+        vectors_i = _interp_vectors(t_i, t, vectors, kind, window_length, polyorder, mode, cval)
+        normal = unit(vectors_i[:3], norm_zero_vector=np.nan)
+        return Nvector(normal, z=vectors_i[3], frame=self.frame)
+
     def to_ecef_vector(self):
         """
         Returns position as ECEFvector object.
@@ -594,12 +660,12 @@ class Pvector(_Common):
 
     @property
     def azimuth_deg(self):
-        """Azimuth in degree."""
+        """Azimuth in degree clockwise relative to the x-axis."""
         return deg(self.azimuth)
 
     @property
     def azimuth(self):
-        """Azimuth in radian"""
+        """Azimuth in radian clockwise relative to the x-axis."""
         p_AB_N = self.pvector
         if self.scalar:
             return np.arctan2(p_AB_N[1], p_AB_N[0])[0]
@@ -607,12 +673,12 @@ class Pvector(_Common):
 
     @property
     def elevation_deg(self):
-        """Elevation in degree."""
+        """Elevation in degree relative to the xy-plane. (Positive downwards in a NED frame)"""
         return deg(self.elevation)
 
     @property
     def elevation(self):
-        """Elevation in radian."""
+        """Elevation in radian relative to the xy-plane. (Positive downwards in a NED frame)"""
         z = self.pvector[2]
         if self.scalar:
             return np.arcsin(z / self.length)[0]
@@ -1047,7 +1113,7 @@ class GeoPath(object):
     def _closest_point_on_path(self, point):
         point_c = self._closest_point_on_great_circle(point)
         if self.on_path(point_c):
-            return point_c
+            return point_c.to_geo_point()
         n0 = point.to_nvector().normal
         n1, n2 = self.nvector_normals()
         radius = self._get_average_radius()

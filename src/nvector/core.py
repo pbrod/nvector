@@ -26,6 +26,7 @@ __all__ = ['closest_point_on_great_circle',
            'great_circle_normal',
            'interp_nvectors',
            'interpolate',
+           'interp_nvectors',
            'intersect',
            'mean_horizontal_position',
            'lat_lon2n_E',
@@ -353,6 +354,18 @@ def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137, f=1.0 / 298.2572
     return n_EB_E, z_EB
 
 
+def _interp_vectors(t_i, t, nvectors, kind, window_length, polyorder, mode, cval):
+    if window_length > 0:
+        window_length = window_length + (window_length + 1) % 2 # make sure it is an odd integer
+        options = dict(axis=1, mode=mode, cval=cval)
+        normals = savgol_filter(nvectors, window_length, polyorder, **options)
+    else:
+        normals = nvectors
+
+    normal_i = interp1d(t, normals, axis=1, kind=kind, bounds_error=False)(t_i)
+    return normal_i.reshape(nvectors.shape[0], -1)
+
+
 def interp_nvectors(t_i, t, nvectors, kind='linear', window_length=0, polyorder=2, mode='interp', cval=0.0):
     """
     Returns interpolated values from nvector data.
@@ -413,13 +426,7 @@ def interp_nvectors(t_i, t, nvectors, kind='linear', window_length=0, polyorder=
     >>> plt.plot(nv.deg(lon), nv.deg(lat), 'o', loni, lati, '-')
     >>> plt.show()
     """
-    if window_length > 0:
-        window_length = window_length + (window_length+1) % 2  # make sure it is an odd integer
-        options = dict(axis=1, mode=mode, cval=cval)
-        normals = savgol_filter(nvectors, window_length, polyorder, **options)
-    else:
-        normals = nvectors
-    normal_i = interp1d(t, normals, axis=1, kind=kind, bounds_error=False)(t_i)
+    normal_i = _interp_vectors(t_i, t, nvectors, kind, window_length, polyorder, mode, cval)
 
     return unit(normal_i, norm_zero_vector=np.nan)
 
@@ -660,11 +667,11 @@ def closest_point_on_great_circle(path, n_EB_E):
 
     """
     n_EA1_E, n_EA2_E = path
+    c_E = great_circle_normal(n_EA1_E, n_EA2_E)
 
-    c1 = cross(n_EA1_E, n_EA2_E, axis=0)
-    c2 = cross(n_EB_E, c1, axis=0)
-    n_EC_E = unit(cross(c1, c2, axis=0))
-    return n_EC_E
+    c2 = cross(n_EB_E, c_E, axis=0)
+    n_EC_E = unit(cross(c_E, c2, axis=0))
+    return n_EC_E * np.sign(dot(n_EC_E.T, n_EB_E))
 
 
 @use_docstring(_examples.get_examples_no_header([5], OO=False))

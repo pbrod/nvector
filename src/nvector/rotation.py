@@ -286,7 +286,7 @@ def xyz2R(x, y, z):
     The signs of the angles are given by the directions of the axes and the
     right hand rule.
 
-     See also:
+    See also:
     https://en.wikipedia.org/wiki/Aircraft_principal_axes
     https://en.wikipedia.org/wiki/Euler_angles
     https://en.wikipedia.org/wiki/Axes_conventions
