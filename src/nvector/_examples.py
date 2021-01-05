@@ -595,7 +595,6 @@ Find the position C where the two great circles intersect.
 
 example_9_obj_solution = """
 Solution:
-    >>> import numpy as np
     >>> import nvector as nv
     >>> pointA1 = nv.GeoPoint(10, 20, degrees=True)
     >>> pointA2 = nv.GeoPoint(30, 40, degrees=True)
