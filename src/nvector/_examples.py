@@ -308,7 +308,7 @@ Solution for a sphere:
     >>> positionA = frame_E.GeoPoint(latitude=88, longitude=0, degrees=True)
     >>> positionB = frame_E.GeoPoint(latitude=89, longitude=-170, degrees=True)
 
-    >>> s_AB, _azia, _azib = positionA.distance_and_azimuth(positionB)
+    >>> s_AB, azia, azib = positionA.distance_and_azimuth(positionB)
     >>> p_AB_E = positionB.to_ecef_vector() - positionA.to_ecef_vector()
     >>> d_AB = p_AB_E.length
 
@@ -328,7 +328,7 @@ Exact solution for the WGS84 ellipsoid:
     >>> wgs84 = nv.FrameE(name='WGS84')
     >>> point1 = wgs84.GeoPoint(latitude=88, longitude=0, degrees=True)
     >>> point2 = wgs84.GeoPoint(latitude=89, longitude=-170, degrees=True)
-    >>> s_12, _azi1, _azi2 = point1.distance_and_azimuth(point2)
+    >>> s_12, azi1, azi2 = point1.distance_and_azimuth(point2)
 
     >>> p_12_E = point2.to_ecef_vector() - point1.to_ecef_vector()
     >>> d_12 = p_12_E.length
@@ -527,21 +527,28 @@ problem" for a sphere is already solved in Examples
 
 example_8_obj_solution = """
 Exact solution:
+    >>> import numpy as np
     >>> import nvector as nv
     >>> frame = nv.FrameE(a=6371e3, f=0)
     >>> pointA = frame.GeoPoint(latitude=80, longitude=-90, degrees=True)
-    >>> pointB, _azimuthb = pointA.displace(distance=1000, azimuth=200, degrees=True)
+    >>> pointB, azimuthb = pointA.displace(distance=1000, azimuth=200, degrees=True)
     >>> lat, lon = pointB.latitude_deg, pointB.longitude_deg
 
     >>> msg = 'Ex8, Destination: lat, lon = {:4.4f} deg, {:4.4f} deg'
     >>> msg.format(lat, lon)
     'Ex8, Destination: lat, lon = 79.9915 deg, -90.0177 deg'
 
+    >>> np.allclose(azimuthb, -160.01742926820506)
+    True
+
 Greatcircle solution:
-    >>> pointB2, _azimuthb = pointA.displace(distance=1000, azimuth=200, degrees=True, method='greatcircle')
+    >>> pointB2, azimuthb = pointA.displace(distance=1000, azimuth=200, degrees=True, method='greatcircle')
     >>> lat2, lon2 = pointB2.latitude_deg, pointB.longitude_deg
     >>> msg.format(lat2, lon2)
     'Ex8, Destination: lat, lon = 79.9915 deg, -90.0177 deg'
+
+    >>> np.allclose(azimuthb, -160.0174292682187)
+    True
 
 """
 

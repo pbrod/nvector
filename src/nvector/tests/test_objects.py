@@ -7,8 +7,10 @@ from functools import partial
 import pytest
 import numpy as np
 from numpy.testing import assert_allclose  as _assert_allclose # @UnresolvedImport
+import nvector as nv
 from nvector.util import unit
 from nvector.objects import FrameB, FrameE, FrameN, FrameL, GeoPoint, GeoPath, delta_L
+
 assert_allclose = partial(_assert_allclose, atol=1e-15)
 
 EARTH_RADIUS_M = 6371009.0
@@ -24,7 +26,7 @@ def test_geo_path_on_path(lat_a, lat_b, method):
     point_b = wgs84.GeoPoint(latitude=lat_b, longitude=0, degrees=True)
     point_c = wgs84.GeoPoint(latitude=0.5*(lat_a+lat_b), longitude=0, degrees=True)
 
-    path = GeoPath(point_a, point_b)
+    path = nv.GeoPath(point_a, point_b)
     for point in [point_a, point_b, point_c]:
         assert path.on_path(point, method=method)
 
@@ -98,6 +100,39 @@ class TestGeoPoint:
         assert np.ndim(ep1.length) == 1
         assert np.ndim(ep1.azimuth) == 1
         assert np.ndim(ep1.elevation) == 1
+
+    def test_direct_and_inverse(self):
+        wgs84 = FrameE(name='WGS84')
+        point1 = wgs84.GeoPoint(latitude=88, longitude=0, degrees=True)
+        point2 = wgs84.GeoPoint(latitude=89, longitude=-170, degrees=True)
+        s_12, azi1, azi2 = point1.distance_and_azimuth(point2)
+        assert_allclose(s_12, 333947.509468)
+        # print(nv.deg(azi1, azi2))
+        assert_allclose(nv.deg(azi1, azi2), (-3.3309161604062467, -173.327884597742))
+
+        p3, azib = point1.displace(s_12, azi1)
+        assert_allclose(nv.deg(azib), -173.327884597742)
+        # print(p3.latlon_deg)
+        assert_allclose(p3.latlon_deg, (89, -170, 0))
+
+        p4, azia = point2.displace(s_12, azi2 + np.pi)
+        assert_allclose(nv.deg(azia), -3.3309161604062467 + 180)
+        # print(p4.latlon_deg)
+        truth = (88, 0, 0)
+        assert_allclose(p4.latlon_deg, truth, atol=1e-12)  # pylint: disable=redundant-keyword-arg
+
+        # ------ greatcircle --------
+        s_12, azi1, azi2 = point1.distance_and_azimuth(point2, method='greatcircle')
+        assert_allclose(s_12, 331713.817039)
+        assert_allclose(nv.deg(azi1, azi2), (-3.330916, -173.327885))
+
+        p3, azib = point1.displace(s_12, azi1, method='greatcircle')
+        assert_allclose(nv.deg(azib), -173.32784)
+        assert_allclose(p3.latlon_deg, (89.000005, -169.999949, 0))
+
+        p4, azia = point2.displace(s_12, azi2 + np.pi, method='greatcircle')
+        assert_allclose(p4.latlon_deg, truth, atol=1e-4)  # Less than 0.4 meters
+        assert_allclose(nv.deg(azia), -3.3309161604062467+ 180)
 
 
 class TestFrames:

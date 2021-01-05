@@ -81,6 +81,11 @@ def delta_E(point_a, point_b):
 diff_positions = np.deprecate(delta_E, old_name='diff_positions', new_name='delta_E')
 
 
+def _base_angle(angle_rad):
+    """Returns angle so it is between $-\pi$ and $\pi$"""
+    return np.mod(angle_rad + np.pi, 2*np.pi) - np.pi
+
+
 def delta_N(point_a, point_b):
     """Returns cartesian delta vector from positions a to b decomposed in N.
 
@@ -284,12 +289,13 @@ class GeoPoint(_Common):
         """ Returns the great circle solution using the nvector method.
         """
         n_a = self.to_nvector()
-        radius = n_a.to_ecef_vector().length
+        e_a = n_a.to_ecef_vector()
+        radius = e_a.length
         distance_rad = distance / radius
         azimuth_rad = azimuth if not degrees else rad(azimuth)
         normal_b = n_EA_E_distance_and_azimuth2n_EB_E(n_a.normal, distance_rad, azimuth_rad)
         point_b = Nvector(normal_b, self.z, self.frame).to_geo_point()
-        azimuth_b = delta_N(point_b, self).azimuth
+        azimuth_b = _base_angle(delta_N(point_b, e_a).azimuth - np.pi)
         if degrees:
             return point_b, deg(azimuth_b)
         return point_b, azimuth_b
@@ -302,7 +308,7 @@ class GeoPoint(_Common):
         ----------
         distance: real scalar
             ellipsoidal or great circle distance [m] between position A and B.
-        azimuth_a:
+        azimuth:
             azimuth [rad or deg] of line at position A.
         long_unroll: bool
             Controls the treatment of longitude when method=='ellipsoid'.
@@ -341,7 +347,7 @@ class GeoPoint(_Common):
             return point_b, rad(azimuth_b)
         return point_b, azimuth_b
 
-    def distance_and_azimuth(self, point, long_unroll=False, degrees=False):
+    def distance_and_azimuth(self, point, long_unroll=False, degrees=False, method='ellipsoid'):
         """
         Returns ellipsoidal distance between positions as well as the direction.
 
@@ -356,6 +362,8 @@ class GeoPoint(_Common):
             how many times and in what sense the geodesic has encircled the ellipsoid.
         degrees: bool
             azimuths are returned in degrees if True otherwise in radians.
+        method: 'greatcircle' or 'ellipsoid'
+            defining the path distance.
 
         Returns
         -------
@@ -380,6 +388,28 @@ class GeoPoint(_Common):
         `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
         """
         _check_frames(self, point)
+        if method[0] == 'e':
+            return self._distance_and_azimuth_ellipsoid(point, long_unroll, degrees)
+        return self._distance_and_azimuth_greatcircle(point, degrees)
+
+    def _distance_and_azimuth_greatcircle(self, point, degrees):
+        n_a = self.to_nvector()
+        n_b = point.to_nvector()
+        e_a = n_a.to_ecef_vector()
+        e_b = n_b.to_ecef_vector()
+        radius = 0.5 * (e_a.length + e_b.length)
+        distance = great_circle_distance(n_a.normal, n_b.normal, radius)
+        azimuth_a = delta_N(e_a, e_b).azimuth
+        azimuth_b = _base_angle(delta_N(e_b, e_a).azimuth - np.pi)
+
+        if degrees:
+            azimuth_a, azimuth_b = deg(azimuth_a), deg(azimuth_b)
+
+        if np.ndim(radius) == 0:
+            return distance[0], azimuth_a, azimuth_b  # scalar track distance
+        return distance, azimuth_a, azimuth_b
+
+    def _distance_and_azimuth_ellipsoid(self, point, long_unroll, degrees):
         gpoint = point.to_geo_point()
         lat_a, lon_a = self.latitude, self.longitude
         lat_b, lon_b = gpoint.latitude, gpoint.longitude
@@ -1268,8 +1298,8 @@ class FrameE(_Common):
         ----------
         lat_a, lon_a:  real scalars or vectors of length n.
             Latitude and longitude [rad or deg] of position A.
-        azimuth_a:  real scalar or vector of length n.
-            azimuth [rad or deg] of line at position A.
+        azimuth:  real scalar or vector of length n.
+            azimuth [rad or deg] of line at position A relative to North.
         distance: real scalar or vector of length n.
             ellipsoidal distance [m] between position A and B.
         z: real scalar or vector of length n.
@@ -1287,7 +1317,7 @@ class FrameE(_Common):
         lat_b, lon_b:  real scalars or vectors of length n
             Latitude and longitude of position b.
         azimuth_b: real scalar or vector of length n.
-            azimuth [rad or deg] of line at position B.
+            azimuth [rad or deg] of line at position B relative to North.
 
         Notes
         -----
