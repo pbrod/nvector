@@ -605,16 +605,23 @@ Solution:
     >>> pathB = nv.GeoPath(pointB1, pointB2)
 
     >>> pointC = pathA.intersect(pathB)
-    >>> np.allclose(pathA.on_path(pointC), pathB.on_path(pointC))
-    True
-    >>> np.allclose(pathA.on_great_circle(pointC),
-    ...             pathB.on_great_circle(pointC))
-    True
     >>> pointC = pointC.to_geo_point()
     >>> lat, lon = pointC.latitude_deg, pointC.longitude_deg
     >>> msg = 'Ex9, Intersection: lat, lon = {:4.4f}, {:4.4f} deg'
     >>> msg.format(lat, lon)
     'Ex9, Intersection: lat, lon = 40.3186, 55.9019 deg'
+
+Check that PointC is not between A1 and A2 or B1 and B2:
+    >>> pathA.on_path(pointC)
+    False
+    >>> pathB.on_path(pointC)
+    False
+
+Check that PointC is on the great circle going through path A and path B:
+    >>> pathA.on_great_circle(pointC)
+    True
+    >>> pathB.on_great_circle(pointC)
+    True
 
 """
 
@@ -646,10 +653,13 @@ or alternatively
     >>> msg.format(lat[0], lon[0])
     'Ex9, Intersection: lat, lon = 40.3186, 55.9019 deg'
 
-    >>> np.allclose(nv.on_great_circle_path(path_a, n_EC_E),
-    ...             nv.on_great_circle_path(path_b, n_EC_E))
+Check that PointC is not between A1 and A2 or B1 and B2:
+    >>> np.allclose([nv.on_great_circle_path(path_a, n_EC_E),
+    ...             nv.on_great_circle_path(path_b, n_EC_E)], False)
     True
-    >>> np.allclose(nv.on_great_circle(path_a, n_EC_E), nv.on_great_circle(path_b, n_EC_E))
+
+Check that PointC is on the great circle going through path A and path B:
+    >>> np.allclose([nv.on_great_circle(path_a, n_EC_E), nv.on_great_circle(path_b, n_EC_E)], True)
     True
 
 """
