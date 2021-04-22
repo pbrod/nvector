@@ -6,7 +6,7 @@ Created on 18. des. 2015
 from functools import partial
 import pytest
 import numpy as np
-from numpy.testing import assert_allclose  as _assert_allclose # @UnresolvedImport
+from numpy.testing import assert_allclose as _assert_allclose  # @UnresolvedImport
 import nvector as nv
 from nvector.util import unit
 from nvector.objects import FrameB, FrameE, FrameN, FrameL, GeoPoint, GeoPath, delta_L
@@ -42,7 +42,6 @@ def test_geo_path_on_path(lat_a, lat_b, method):
     for point in [point_e, point_f]:
         assert not path.on_path(point, method=method)
 
-    # Test vectorized
 
 class TestGeoPoint:
 
@@ -72,7 +71,6 @@ class TestGeoPoint:
         assert np.ndim(ep1.length) == 0
         assert np.ndim(ep1.azimuth) == 0
         assert np.ndim(ep1.elevation) == 0
-
 
     def test_vector_geopoint_to_nvector_to_geopoint(self):
         wgs84 = FrameE(name='WGS84')
@@ -131,8 +129,8 @@ class TestGeoPoint:
         assert_allclose(p3.latlon_deg, (89.000005, -169.999949, 0))
 
         p4, azia = point2.displace(s_12, azi2 + np.pi, method='greatcircle')
-        assert_allclose(p4.latlon_deg, truth, atol=1e-4)  # Less than 0.4 meters
-        assert_allclose(nv.deg(azia), -3.3309161604062467+ 180)
+        _assert_allclose(p4.latlon_deg, truth, atol=1e-4)  # Less than 0.4 meters
+        assert_allclose(nv.deg(azia), -3.3309161604062467 + 180)
 
 
 class TestFrames:
@@ -220,16 +218,16 @@ class TestFrames:
         azimuth = np.round(delta.azimuth_deg)
         # positive angle about down-axis
 
-        print('Ex1, delta L = {0}'.format(delta.pvector.T))
-        print('Ex1, azimuth = {0} deg'.format(azimuth))
+        # print('Ex1, delta L = {0}'.format(delta.pvector.T))
+        # print('Ex1, azimuth = {0} deg'.format(azimuth))
 
         true_x = [278.2566243359911, 198.7547317612817, 119.25283909376164,
                   39.750946370747656, -39.75094637085409, -119.25283909387079,
                   -198.75473176137066, -278.2566243360949]
-        assert_allclose(x, true_x)  #, decimal=3)
-        assert_allclose(y, -10, rtol=1e-3)  # , decimal=3)
+        assert_allclose(x, true_x)  # decimal=3)
+        assert_allclose(y, -10, rtol=1e-3)  # decimal=3)
         assert_allclose(azimuth, [-2., -3., -5., -14., -166., -175., -177., -178.])
-        _assert_allclose(z, 0, atol=1e-2)  #, decimal=2)
+        _assert_allclose(z, 0, atol=1e-2)  # decimal=2)
 
     @staticmethod
     def test_compute_delta_N_in_moving_frame_east():
@@ -252,8 +250,8 @@ class TestFrames:
         azimuth = np.round(delta.azimuth_deg)
         # positive angle about down-axis
 
-        print('Ex1, delta north, east, down = {0}'.format(delta.pvector.T))
-        print('Ex1, azimuth = {0} deg'.format(azimuth))
+        # print('Ex1, delta north, east, down = {0}'.format(delta.pvector.T))
+        # print('Ex1, azimuth = {0} deg'.format(azimuth))
 
         true_y = [278.2566243359911, 198.7547317612817, 119.25283909376164,
                   39.750946370747656, -39.75094637085409, -119.25283909387079,
@@ -290,8 +288,8 @@ class TestFrames:
         azimuth = np.round(np.abs(delta.azimuth_deg))
         # positive angle about down-axis
 
-        print('Ex1, delta north, east, down = {0}'.format(delta.pvector.T))
-        print('Ex1, azimuth = {0} deg'.format(azimuth))
+        # print('Ex1, delta north, east, down = {0}'.format(delta.pvector.T))
+        # print('Ex1, azimuth = {0} deg'.format(azimuth))
 
         true_x = [276.436537069603, 197.45466985931083, 118.47280221160541,
                   39.49093416312986, -39.490934249581684, -118.47280298990226,
@@ -384,8 +382,7 @@ class TestExamples:
         print('Ex4: p_EB_E = {0} m'.format(p_EB_E.pvector.ravel()))
 
         assert_allclose(p_EB_E.pvector.ravel(),
-                                  [6373290.27721828, 222560.20067474,
-                                   110568.82718179])
+                        [6373290.27721828, 222560.20067474, 110568.82718179])
 
     @staticmethod
     def test_Ex5_great_circle_distance():
@@ -398,8 +395,8 @@ class TestExamples:
         # The Euclidean distance is given by:
         d_AB = p_AB_E.length
 
-        msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
-        print(msg.format(s_AB / 1000, d_AB / 1000))
+        # msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
+        # print(msg.format(s_AB / 1000, d_AB / 1000))
 
         assert_allclose(s_AB / 1000, 332.45644411)
         assert_allclose(d_AB / 1000, 332.41872486)
@@ -415,8 +412,8 @@ class TestExamples:
         d_AB = path.track_distance(method='euclidean')
         s1_AB = path.track_distance(method='exact')
 
-        msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
-        print(msg.format(s_AB / 1000, d_AB / 1000))
+        # msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
+        # print(msg.format(s_AB / 1000, d_AB / 1000))
 
         assert_allclose(s_AB / 1000, 332.45644411)
         assert_allclose(s1_AB / 1000, 332.45644411)
@@ -433,8 +430,8 @@ class TestExamples:
         # The Euclidean distance is given by:
         d_AB = p_AB_E.length
 
-        msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
-        print(msg.format(s_AB / 1000, d_AB / 1000))
+        # msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
+        # print(msg.format(s_AB / 1000, d_AB / 1000))
 
         assert_allclose(s_AB / 1000, 333.94750946834665)
         assert_allclose(d_AB / 1000, 333.90962112)
@@ -587,4 +584,3 @@ class TestExamples:
         assert not pathA.on_path(pointC2, method='exact')
         assert pointC3 == pointA2
         assert pointC4 == pointA1
-

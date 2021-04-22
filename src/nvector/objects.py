@@ -613,13 +613,13 @@ class Nvector(_Common):
 
         if not isinstance(scalar, Nvector):
             return self.frame.Nvector(self.normal * scalar, self.z * scalar)
-        raise NotImplementedError('Only scalar multiplication is implemented')
+        return NotImplemented  # 'Only scalar multiplication is implemented'
 
     def __div__(self, scalar):
         """elementwise division"""
         if not isinstance(scalar, Nvector):
             return self.frame.Nvector(self.normal / scalar, self.z / scalar)
-        raise NotImplementedError('Only scalar division is implemented')
+        return NotImplemented  # 'Only scalar division is implemented'
 
     __truediv__ = __div__
     __radd__ = __add__
