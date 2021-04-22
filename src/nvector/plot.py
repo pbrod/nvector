@@ -26,7 +26,7 @@ def _init_plotter(lat, lon):
         ax.add_feature(cpf.RIVERS)
         ax.set_global()
         ax.gridlines()
-        # vector_crs = ccrs.Geodetic()
+        # Alternatively: ccrs.Geodetic()
         vector_crs = ccrs.PlateCarree()
         return partial(ax.scatter, transform=vector_crs)
     ax = plt.figure().gca()
@@ -63,7 +63,9 @@ def plot_mean_position():
 
 
 if __name__ == '__main__':
-    from nvector._common import test_docstrings
-    test_docstrings(__file__)
-    # plot_mean_position()
-    # plt.show('hold')
+    if True:
+        from nvector._common import test_docstrings
+        test_docstrings(__file__)
+    else:
+        plot_mean_position()
+        plt.show()

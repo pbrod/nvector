@@ -73,7 +73,6 @@ def delta_E(point_a, point_b):
     # Function 1. in Section 5.4 in Gade (2010):
     p_EA_E = point_a.to_ecef_vector()
     p_EB_E = point_b.to_ecef_vector()
-    # p_AB_E = -p_EA_E + p_EB_E
     p_AB_E = p_EB_E - p_EA_E
     return p_AB_E
 
@@ -653,7 +652,7 @@ class Pvector(_Common):
 
         n_frame = self.frame
         p_AB_N = self.pvector
-        # p_AB_E = np.dot(n_frame.R_EN, p_AB_N)
+        # alternatively: np.dot(n_frame.R_EN, p_AB_N)
         p_AB_E = mdot(n_frame.R_EN, p_AB_N[:, None, ...]).reshape(3, -1)
         return ECEFvector(p_AB_E, frame=n_frame.nvector.frame, scalar=self.scalar)
 

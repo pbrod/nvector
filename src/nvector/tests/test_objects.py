@@ -105,17 +105,16 @@ class TestGeoPoint:
         point2 = wgs84.GeoPoint(latitude=89, longitude=-170, degrees=True)
         s_12, azi1, azi2 = point1.distance_and_azimuth(point2)
         assert_allclose(s_12, 333947.509468)
-        # print(nv.deg(azi1, azi2))
+
         assert_allclose(nv.deg(azi1, azi2), (-3.3309161604062467, -173.327884597742))
 
         p3, azib = point1.displace(s_12, azi1)
         assert_allclose(nv.deg(azib), -173.327884597742)
-        # print(p3.latlon_deg)
         assert_allclose(p3.latlon_deg, (89, -170, 0))
 
         p4, azia = point2.displace(s_12, azi2 + np.pi)
         assert_allclose(nv.deg(azia), -3.3309161604062467 + 180)
-        # print(p4.latlon_deg)
+
         truth = (88, 0, 0)
         assert_allclose(p4.latlon_deg, truth, atol=1e-12)  # pylint: disable=redundant-keyword-arg
 
@@ -218,9 +217,6 @@ class TestFrames:
         azimuth = np.round(delta.azimuth_deg)
         # positive angle about down-axis
 
-        # print('Ex1, delta L = {0}'.format(delta.pvector.T))
-        # print('Ex1, azimuth = {0} deg'.format(azimuth))
-
         true_x = [278.2566243359911, 198.7547317612817, 119.25283909376164,
                   39.750946370747656, -39.75094637085409, -119.25283909387079,
                   -198.75473176137066, -278.2566243360949]
@@ -249,9 +245,6 @@ class TestFrames:
         x, y, z = delta.pvector
         azimuth = np.round(delta.azimuth_deg)
         # positive angle about down-axis
-
-        # print('Ex1, delta north, east, down = {0}'.format(delta.pvector.T))
-        # print('Ex1, azimuth = {0} deg'.format(azimuth))
 
         true_y = [278.2566243359911, 198.7547317612817, 119.25283909376164,
                   39.750946370747656, -39.75094637085409, -119.25283909387079,
@@ -288,9 +281,6 @@ class TestFrames:
         azimuth = np.round(np.abs(delta.azimuth_deg))
         # positive angle about down-axis
 
-        # print('Ex1, delta north, east, down = {0}'.format(delta.pvector.T))
-        # print('Ex1, azimuth = {0} deg'.format(azimuth))
-
         true_x = [276.436537069603, 197.45466985931083, 118.47280221160541,
                   39.49093416312986, -39.490934249581684, -118.47280298990226,
                   -197.454672021303, -276.4365413071498]
@@ -318,8 +308,6 @@ class TestExamples:
         x, y, z = delta.pvector
         azimuth = delta.azimuth_deg
         elevation = delta.elevation_deg
-        print('Ex1, delta north, east, down = {0}, {1}, {2}'.format(x, y, z))
-        print('Ex1, azimuth = {0} deg'.format(azimuth))
 
         assert_allclose(x, 331730.23478089)
         assert_allclose(y, 332997.87498927)
@@ -348,8 +336,6 @@ class TestExamples:
 
         lat, lon, z = pointC.latlon_deg
         # Here we also assume that the user wants output height (= - depth):
-        msg = 'Ex2, Pos C: lat, lon = {},{} deg,  height = {} m'
-        print(msg.format(lat, lon, -z))
 
         assert_allclose(lat, 53.32637826)
         assert_allclose(lon, 63.46812344)
@@ -367,8 +353,6 @@ class TestExamples:
         pointB = p_EB_E.to_geo_point()
         lat, lon, h = pointB.latitude_deg, pointB.longitude_deg, -pointB.z
 
-        msg = 'Ex3, Pos B: lat, lon = {} {} deg, height = {} m'
-        print(msg.format(lat, lon, h))
         assert_allclose(lat, 39.37874867)
         assert_allclose(lon, -48.0127875)
         assert_allclose(h, 4702059.83429485)
@@ -379,7 +363,6 @@ class TestExamples:
         pointB = wgs84.GeoPoint(latitude=1, longitude=2, z=-3, degrees=True)
 
         p_EB_E = pointB.to_ecef_vector()
-        print('Ex4: p_EB_E = {0} m'.format(p_EB_E.pvector.ravel()))
 
         assert_allclose(p_EB_E.pvector.ravel(),
                         [6373290.27721828, 222560.20067474, 110568.82718179])
@@ -395,9 +378,6 @@ class TestExamples:
         # The Euclidean distance is given by:
         d_AB = p_AB_E.length
 
-        # msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
-        # print(msg.format(s_AB / 1000, d_AB / 1000))
-
         assert_allclose(s_AB / 1000, 332.45644411)
         assert_allclose(d_AB / 1000, 332.41872486)
 
@@ -411,9 +391,6 @@ class TestExamples:
         s_AB = path.track_distance(method='greatcircle')
         d_AB = path.track_distance(method='euclidean')
         s1_AB = path.track_distance(method='exact')
-
-        # msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
-        # print(msg.format(s_AB / 1000, d_AB / 1000))
 
         assert_allclose(s_AB / 1000, 332.45644411)
         assert_allclose(s1_AB / 1000, 332.45644411)
@@ -429,9 +406,6 @@ class TestExamples:
         p_AB_E = pointB.to_ecef_vector() - pointA.to_ecef_vector()
         # The Euclidean distance is given by:
         d_AB = p_AB_E.length
-
-        # msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
-        # print(msg.format(s_AB / 1000, d_AB / 1000))
 
         assert_allclose(s_AB / 1000, 333.94750946834665)
         assert_allclose(d_AB / 1000, 333.90962112)
@@ -461,8 +435,6 @@ class TestExamples:
         # convenient to see lat, long:
         g_EB_E_ti = n_EB_E_ti.to_geo_point()
         lat_ti, lon_ti = g_EB_E_ti.latitude_deg, g_EB_E_ti.longitude_deg
-        msg = 'Ex6, Interpolated position: lat, long = {} deg, {} deg'
-        print(msg.format(lat_ti, lon_ti))
 
         assert_allclose(lat_ti, 89.7999805)
         assert_allclose(lon_ti, 180.)
@@ -472,8 +444,6 @@ class TestExamples:
 
         g_EB_E_ti = path.interpolate(ti_n).to_geo_point()
         lat_ti, lon_ti = g_EB_E_ti.latitude_deg, g_EB_E_ti.longitude_deg
-        msg = 'Ex6, Interpolated position: lat, long = {} deg, {} deg'
-        print(msg.format(lat_ti, lon_ti))
 
         assert_allclose(lat_ti, 89.7999805)
         assert_allclose(lon_ti, 180.)
@@ -493,7 +463,7 @@ class TestExamples:
         nvectors = points.to_nvector()
         nmean = nvectors.mean()
         n_EM_E = nmean.normal
-        # print(n_EM_E.ravel().tolist())
+
         assert_allclose(n_EM_E.ravel(),
                         [0.3841171702926, -0.046602405485689447, 0.9221074857571395])
 
@@ -509,7 +479,6 @@ class TestExamples:
 
         lat_B, lon_B = pointB.latitude_deg, pointB.longitude_deg
 
-        print('Ex8, Destination: lat, long = {0} {1} deg'.format(lat_B, lon_B))
         assert_allclose(lat_B, 79.99154867)
         assert_allclose(lon_B, -90.01769837)
 
@@ -527,8 +496,7 @@ class TestExamples:
         pointC = pathA.intersect(pathB).to_geo_point()
 
         lat, lon = pointC.latitude_deg, pointC.longitude_deg
-        msg = 'Ex9, Intersection: lat, long = {} {} deg'
-        print(msg.format(lat, lon))
+
         assert_allclose(lat, 40.31864307)
         assert_allclose(lon, 55.90186788)
 
@@ -545,8 +513,7 @@ class TestExamples:
         pointC = pathA.intersect(pathB).to_geo_point()
 
         lat, lon = pointC.latitude_deg, pointC.longitude_deg
-        msg = 'Ex9, Intersection: lat, long = {} {} deg'
-        print(msg.format(lat, lon))
+
         assert np.isnan(lat)
         assert np.isnan(lon)
 
@@ -565,8 +532,6 @@ class TestExamples:
         # Find the cross track distance from path A to position B.
         s_xt = pathA.cross_track_distance(pointB, method='greatcircle')
         d_xt = pathA.cross_track_distance(pointB, method='euclidean')
-        msg = 'Ex10, Cross track distance = {} m, Euclidean = {} m'
-        print(msg.format(s_xt, d_xt))
 
         pointC = pathA.closest_point_on_great_circle(pointB)
         pointC2 = pathA.closest_point_on_great_circle(pointB2)
