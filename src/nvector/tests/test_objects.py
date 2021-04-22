@@ -140,7 +140,6 @@ class TestFrames:
         E = FrameE(name='WGS84')
         E2 = FrameE(a=E.a, f=E.f)
         assert E == E2
-        assert E == E
         E3 = FrameE(a=E.a, f=0)
         assert E != E3
 
@@ -150,7 +149,7 @@ class TestFrames:
 
         n_EB_E = E.Nvector(unit([[1], [2], [3]]), z=-400)
         B = FrameB(n_EB_E, yaw=10, pitch=20, roll=30, degrees=True)
-        assert B == B
+
         assert B != E
 
         B2 = FrameB(n_EB_E, yaw=1, pitch=20, roll=30, degrees=True)
@@ -178,8 +177,6 @@ class TestFrames:
         frame_L2 = FrameL(pointA, wander_azimuth=0)
         frame_L3 = FrameL(pointB, wander_azimuth=0)
 
-        assert frame_N == frame_N
-
         assert frame_N == frame_L1
         assert not (frame_N != frame_L1)
 
@@ -198,7 +195,6 @@ class TestFrames:
         frame_N1 = FrameL(pointA, wander_azimuth=10)
         frame_N2 = FrameL(pointB, wander_azimuth=10)
 
-        assert frame_N == frame_N
         assert frame_N != frame_N1
         assert frame_N != frame_N2
         assert frame_N1 != frame_N2
