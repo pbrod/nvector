@@ -74,10 +74,12 @@ script:
   # - coverage run --source=nvector setup.py test
   - coverage run --source=nvector -m py.test build/lib
 # see http://www.camillescott.org/2016/07/15/travis-pytest-scipyconf/
-  - coverage xml -o ./coverage-reports/coverage.xml
+# see https://community.sonarsource.com/t/sonarqube-reports-zero-coverage-from-coverage-xml-generated-by-coverage-py-in-  azure-devops/28817/7
 
 after_script:
   - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then
+        coverage xml -o ./coverage-reports/coverage.xml;
+        sed -i 's/build\/lib/src/g' ./coverage-reports/coverage.xml;
         sonar-scanner -X;
         ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT;
     fi
