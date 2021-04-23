@@ -524,7 +524,8 @@ class Nvector(_Common):
         >>> nvectors_i = nvectors.interpolate(t_i, t, kind='cubic')
         >>> lati, loni, zi = nvectors_i.to_geo_point().latlon_deg
         >>> h = plt.plot(lon, lat, 'o', loni, lati, '-')
-        >>> plt.show()
+
+        plt.show()
         """
         vectors = np.vstack((self.normal, self.z))
         vectors_i = _interp_vectors(t_i, t, vectors, kind, window_length, polyorder, mode, cval)

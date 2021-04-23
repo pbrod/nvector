@@ -423,8 +423,9 @@ def interp_nvectors(t_i, t, nvectors, kind='linear', window_length=0, polyorder=
     >>> nvectors = nv.lat_lon2n_E(lat, lon)
     >>> nvectors_i = nv.interp_nvectors(t_i, t, nvectors, kind='cubic')
     >>> lati, loni = nv.deg(*nv.n_E2lat_lon(nvectors_i))
-    >>> plt.plot(nv.deg(lon), nv.deg(lat), 'o', loni, lati, '-')
-    >>> plt.show()
+    >>> h = plt.plot(nv.deg(lon), nv.deg(lat), 'o', loni, lati, '-')
+
+    plt.show()
     """
     normal_i = _interp_vectors(t_i, t, nvectors, kind, window_length, polyorder, mode, cval)
 
