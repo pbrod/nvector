@@ -15,20 +15,24 @@ import numpy as np
 from nvector import rad, deg, lat_lon2n_E, unit, n_E2lat_lon
 
 
+def _init_earth_plotter(lat, lon):
+    ax = plt.figure().gca(projection=ccrs.Orthographic(int(lon), int(lat)))
+    ax.add_feature(cpf.OCEAN, zorder=0)
+    ax.add_feature(cpf.LAND, zorder=0, edgecolor='black')
+    ax.add_feature(cpf.COASTLINE)
+    ax.add_feature(cpf.BORDERS, linestyle=':')
+    ax.add_feature(cpf.LAKES, alpha=0.5)
+    ax.add_feature(cpf.RIVERS)
+    ax.set_global()
+    ax.gridlines()
+    # Alternatively: ccrs.Geodetic()
+    vector_crs = ccrs.PlateCarree()
+    return partial(ax.scatter, transform=vector_crs)
+
+
 def _init_plotter(lat, lon):
     if ccrs:  # Cartopy did load
-        ax = plt.figure().gca(projection=ccrs.Orthographic(int(lon), int(lat)))
-        ax.add_feature(cpf.OCEAN, zorder=0)
-        ax.add_feature(cpf.LAND, zorder=0, edgecolor='black')
-        ax.add_feature(cpf.COASTLINE)
-        ax.add_feature(cpf.BORDERS, linestyle=':')
-        ax.add_feature(cpf.LAKES, alpha=0.5)
-        ax.add_feature(cpf.RIVERS)
-        ax.set_global()
-        ax.gridlines()
-        # Alternatively: ccrs.Geodetic()
-        vector_crs = ccrs.PlateCarree()
-        return partial(ax.scatter, transform=vector_crs)
+        return _init_earth_plotter(lat, lon)
     ax = plt.figure().gca()
     return ax.scatter
 
@@ -39,6 +43,8 @@ def plot_mean_position():
     -------
     >>> plot_mean_position()
     Ex7, Average lat=67.2, lon=-6.9
+    >>> plt.show()  # doctest: +SKIP
+    >>> plt.close()
     """
     positions = np.array([(90, 0),
                           (60, 10),

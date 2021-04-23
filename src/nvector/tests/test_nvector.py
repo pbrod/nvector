@@ -235,7 +235,7 @@ def test_Ex7_mean_position():
     # The result is best viewed with a figure that shows the n-vectors
     # relative to an Earth-model:
     # print('Ex7, See figure')
-    # plot_Earth_figure(n_EA_E,n_EB_E,n_EC_E,n_EM_E)
+    # plot_earth_figure(n_EA_E,n_EB_E,n_EC_E,n_EM_E)
     # print(n_EM_E.ravel().tolist())
     assert_allclose(n_EM_E.ravel(), truth)
     # Alternatively:
