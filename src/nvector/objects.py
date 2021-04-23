@@ -128,13 +128,15 @@ def delta_L(point_a, point_b, wander_azimuth=0):
 
 
 class _Common(object):
+    _NAMES = ()
 
     def __repr__(self):
         cname = self.__class__.__name__
         fmt = ', '
+        names = self._NAMES if self._NAMES else list(self.__dict__)
         dict_params = array_to_list_dict(self.__dict__.copy())
-        params = fmt.join(['{}={!r}'.format(name, val)
-                           for name, val in dict_params.items() if not name.startswith('_')])
+        params = fmt.join(['{}={!r}'.format(name, dict_params[name])
+                           for name in names if not name.startswith('_')])
 
         return '{}({})'.format(cname, params)
 
@@ -201,6 +203,7 @@ class GeoPoint(_Common):
     'lat2 = 32.64, lon2 = 49.01, az2 = 140.37'
 
     """
+    _NAMES = ('latitude', 'longitude', 'z', 'frame')
 
     def __init__(self, latitude, longitude, z=0, frame=None, degrees=False):
         if degrees:
@@ -631,6 +634,9 @@ class Pvector(_Common):
     """
     Geographical position given as cartesian position vector in a frame.
     """
+
+    _NAMES = ('pvector', 'frame', 'scalar')
+
     def __init__(self, pvector, frame, scalar=None):
         if scalar is None:
             scalar = np.shape(pvector)[1] == 1
@@ -1418,6 +1424,8 @@ class FrameN(_LocalFrame):
     FrameE, FrameL, FrameB
     """
 
+    _NAMES = ('point',)
+
     def __init__(self, point):
         nvector = point.to_nvector()
         self.nvector = Nvector(nvector.normal, z=0, frame=nvector.frame)
@@ -1470,6 +1478,7 @@ class FrameL(FrameN):
     --------
     FrameE, FrameN, FrameB
     """
+    _NAMES = ('point', 'wander_azimuth')
 
     def __init__(self, point, wander_azimuth=0):
         super(FrameL, self).__init__(point)
@@ -1512,6 +1521,8 @@ class FrameB(_LocalFrame):
     --------
     FrameE, FrameL, FrameN
     """
+
+    _NAMES = ('point', 'yaw', 'pitch', 'roll', 'degrees')
 
     def __init__(self, point, yaw=0, pitch=0, roll=0, degrees=False):
         self.nvector = point.to_nvector()
