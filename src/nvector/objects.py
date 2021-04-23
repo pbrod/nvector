@@ -81,7 +81,7 @@ diff_positions = np.deprecate(delta_E, old_name='diff_positions', new_name='delt
 
 
 def _base_angle(angle_rad):
-    """Returns angle so it is between $-\pi$ and $\pi$"""
+    r"""Returns angle so it is between $-\pi$ and $\pi$"""
     return np.mod(angle_rad + np.pi, 2*np.pi) - np.pi
 
 
@@ -466,7 +466,8 @@ class Nvector(_Common):
         self.z = z
         self.frame = _default_frame(frame)
 
-    def interpolate(self, t_i, t, kind='linear', window_length=0, polyorder=2, mode='interp', cval=0.0):
+    def interpolate(self, t_i, t, kind='linear', window_length=0, polyorder=2,
+                    mode='interp', cval=0.0):
         """
         Returns interpolated values from nvector data.
 
@@ -958,8 +959,8 @@ class GeoPath(object):
         frame = self.point_a.frame
         point_a1, point_a2 = self.nvectors()
         point_b1, point_b2 = path.nvectors()
-        path_a = (point_a1.normal, point_a2.normal) # self.nvector_normals()
-        path_b = (point_b1.normal, point_b2.normal) # path.nvector_normals()
+        path_a = (point_a1.normal, point_a2.normal)  # self.nvector_normals()
+        path_b = (point_b1.normal, point_b2.normal)  # path.nvector_normals()
         normal_c = intersect(path_a, path_b)  # nvector
         depth = (point_a1.z + point_a2.z + point_b1.z + point_b2.z) / 4.
         return frame.Nvector(normal_c, z=depth)
@@ -1048,7 +1049,6 @@ class GeoPath(object):
         if method[:2] in {'ex', 'el'}:  # exact or ellipsoid
             return self._on_ellipsoid_path(point, rtol=rtol, atol=atol)
         return self._on_great_circle_path(point, rtol=rtol, atol=atol)
-
 
     def _closest_point_on_great_circle(self, point):
         point_c = point.to_nvector()
