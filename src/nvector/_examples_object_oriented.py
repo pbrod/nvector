@@ -1,6 +1,6 @@
 from __future__ import absolute_import
-from nvector._examples import getting_started
-__doc__ = getting_started  # @ReservedAssignment
+from nvector._examples import GETTING_STARTED
+__doc__ = GETTING_STARTED  # @ReservedAssignment
 
 
 if __name__ == '__main__':

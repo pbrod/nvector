@@ -72,7 +72,7 @@ def lat_lon2n_E(latitude, longitude, R_Ee=None):
     return n_E
 
 
-@use_docstring(_examples.get_examples_no_header([4], OO=False))
+@use_docstring(_examples.get_examples_no_header([4], oo_solution=False))
 def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     """
     Converts n-vector to Cartesian position vector in meters.
@@ -176,7 +176,7 @@ def _equation23(a, f, p_EB_E):
     return x_scale, yz_scale, -height
 
 
-@use_docstring(_examples.get_examples_no_header([3], OO=False))
+@use_docstring(_examples.get_examples_no_header([3], oo_solution=False))
 def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     """
     Converts Cartesian position vector in meters to n-vector.
@@ -298,7 +298,7 @@ def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
     return p_AB_E
 
 
-@use_docstring(_examples.get_examples_no_header([2], OO=False))
+@use_docstring(_examples.get_examples_no_header([2], oo_solution=False))
 def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     """
     Returns position B from position A and delta E vector.
@@ -460,7 +460,7 @@ def interpolate(path, ti):
     return n_EB_E_ti
 
 
-@use_docstring(_examples.get_examples_no_header([9], OO=False))
+@use_docstring(_examples.get_examples_no_header([9], oo_solution=False))
 def intersect(path_a, path_b):
     """
     Returns the intersection(s) between the great circles of the two paths
@@ -526,7 +526,7 @@ def _great_circle_cross_track_distance(sin_theta, radius=1):
     # return (np.arccos(-sin_theta) - np.pi / 2) * radius
 
 
-@use_docstring(_examples.get_examples_no_header([10], OO=False))
+@use_docstring(_examples.get_examples_no_header([10], oo_solution=False))
 def cross_track_distance(path, n_EB_E, method='greatcircle', radius=6371009.0):
     """
     Returns  cross track distance between path A and position B.
@@ -563,7 +563,7 @@ def cross_track_distance(path, n_EB_E, method='greatcircle', radius=6371009.0):
     return _great_circle_cross_track_distance(sin_theta, radius)
 
 
-@use_docstring(_examples.get_examples_no_header([10], OO=False))
+@use_docstring(_examples.get_examples_no_header([10], oo_solution=False))
 def on_great_circle(path, n_EB_E, radius=6371009.0, atol=1e-8):
     """
     Returns True if position B is on great circle through path A.
@@ -602,7 +602,7 @@ def on_great_circle(path, n_EB_E, radius=6371009.0, atol=1e-8):
     return distance <= atol
 
 
-@use_docstring(_examples.get_examples_no_header([10], OO=False))
+@use_docstring(_examples.get_examples_no_header([10], oo_solution=False))
 def on_great_circle_path(path, n_EB_E, radius=6371009.0, atol=1e-8):
     """
     Returns True if position B is on great circle and between endpoints of path A.
@@ -644,7 +644,7 @@ def on_great_circle_path(path, n_EB_E, radius=6371009.0, atol=1e-8):
     return (ti1 <= 1) & (ti2 <= 1) & on_great_circle(path, n_EB_E, radius, atol=atol)
 
 
-@use_docstring(_examples.get_examples_no_header([10], OO=False))
+@use_docstring(_examples.get_examples_no_header([10], oo_solution=False))
 def closest_point_on_great_circle(path, n_EB_E):
     """
     Returns closest point C on great circle path A to position B.
@@ -674,7 +674,7 @@ def closest_point_on_great_circle(path, n_EB_E):
     return n_EC_E * np.sign(dot(n_EC_E.T, n_EB_E))
 
 
-@use_docstring(_examples.get_examples_no_header([5], OO=False))
+@use_docstring(_examples.get_examples_no_header([5], oo_solution=False))
 def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
     """
     Returns great circle distance between positions A and B
@@ -711,7 +711,7 @@ def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
     return s_AB
 
 
-@use_docstring(_examples.get_examples_no_header([5], OO=False))
+@use_docstring(_examples.get_examples_no_header([5], oo_solution=False))
 def euclidean_distance(n_EA_E, n_EB_E, radius=6371009.0):
     """
     Returns Euclidean distance between positions A and B
@@ -776,7 +776,7 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, 
     return arctan2(p_AB_N[1], p_AB_N[0])
 
 
-@use_docstring(_examples.get_examples_no_header([8], OO=False))
+@use_docstring(_examples.get_examples_no_header([8], oo_solution=False))
 def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth, R_Ee=None):
     """
     Returns position B from azimuth and distance from position A
@@ -819,7 +819,7 @@ def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth, R_Ee=None)
     return n_EB_E
 
 
-@use_docstring(_examples.get_examples_no_header([7], OO=False))
+@use_docstring(_examples.get_examples_no_header([7], oo_solution=False))
 def mean_horizontal_position(n_EB_E):
     """
     Returns the n-vector of the horizontal mean position.

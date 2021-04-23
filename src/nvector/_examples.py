@@ -6,20 +6,22 @@ Created on 18. jan. 2016
 
 
 def navlab_example(number):
+    """Returns navlab example link on restructured text format."""
     link = "<http://www.navlab.net/nvector/#example_{0}>".format(number)
     return "`Example {0} at www.navlab.net {1}`_\n".format(number, link)
 
 
 def see_also(number):
+    """Returns 'see also' navlab example link on restructured text format."""
     return """See also
     {0}\n""".format(navlab_example(number))
 
 
-example_1_header = """
+EXAMPLE_1_HEADER = """
 **Example 1: "A and B to delta"**
 ---------------------------------"""
 
-example_1_txt = """
+EXAMPLE_1_TXT = """
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex1img.png
 
@@ -38,7 +40,7 @@ directions to be defined.)
 
 """
 
-example_1_obj_solution = """Solution:
+EXAMPLE_1_OBJ_SOLUTION = """Solution:
     >>> import numpy as np
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
@@ -61,7 +63,7 @@ Step2: Also find the direction (azimuth) to B, relative to north:
 
 """
 
-example_1_fun_solution = """Solution:
+EXAMPLE_1_FUN_SOLUTION = """Solution:
     >>> import numpy as np
     >>> import nvector as nv
     >>> from nvector import rad, deg
@@ -101,11 +103,11 @@ Step5: Also find the direction (azimuth) to B, relative to north:
 """
 
 
-example_2_header = """
+EXAMPLE_2_HEADER = """
 **Example 2: "B and delta to C"**
 ---------------------------------"""
 
-example_2_txt = """
+EXAMPLE_2_TXT = """
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex2img.png
 
@@ -122,7 +124,7 @@ use a = 6 378 135 m and f = 1/298.26.
 
 """
 
-example_2_obj_solution = """
+EXAMPLE_2_OBJ_SOLUTION = """
 Solution:
     >>> import numpy as np
     >>> import nvector as nv
@@ -151,7 +153,7 @@ Step 4: Find point C by adding delta BC to EB
 
 """
 
-example_2_fun_solution = """
+EXAMPLE_2_FUN_SOLUTION = """
 Solution:
     >>> import numpy as np
     >>> import nvector as nv
@@ -189,11 +191,11 @@ Step 6: Find the position of C, using the functions that goes from one
 
 """
 
-example_3_header = """
+EXAMPLE_3_HEADER = """
 **Example 3: "ECEF-vector to geodetic latitude"**
 -------------------------------------------------"""
 
-example_3_txt = """
+EXAMPLE_3_TXT = """
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex3img.png
 
@@ -205,7 +207,7 @@ assuming WGS-84 ellipsoid.
 
 """
 
-example_3_obj_solution = """
+EXAMPLE_3_OBJ_SOLUTION = """
 Solution:
     >>> import numpy as np
     >>> import nvector as nv
@@ -220,7 +222,7 @@ Solution:
 
 """
 
-example_3_fun_solution = """
+EXAMPLE_3_FUN_SOLUTION = """
 Solution:
     >>> import numpy as np
     >>> import nvector as nv
@@ -240,11 +242,11 @@ Solution:
 
 """
 
-example_4_header = """
+EXAMPLE_4_HEADER = """
 **Example 4: "Geodetic latitude to ECEF-vector"**
 -------------------------------------------------"""
 
-example_4_txt = """
+EXAMPLE_4_TXT = """
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex4img.png
 
@@ -254,7 +256,7 @@ lonEB and hEB, find the ECEF-vector for this position, p_EB_E.
 
 """
 
-example_4_obj_solution = """
+EXAMPLE_4_OBJ_SOLUTION = """
 Solution:
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
@@ -267,7 +269,7 @@ Solution:
 """
 
 
-example_4_fun_solution = """
+EXAMPLE_4_FUN_SOLUTION = """
 Solution:
     >>> import nvector as nv
     >>> from nvector import rad
@@ -282,11 +284,11 @@ Solution:
 
 """
 
-example_5_header = """
+EXAMPLE_5_HEADER = """
 **Example 5: "Surface distance"**
 ---------------------------------"""
 
-example_5_txt = """
+EXAMPLE_5_TXT = """
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex5img.png
 
@@ -300,7 +302,7 @@ Compare the results with exact calculations for the WGS-84 ellipsoid.
 
 """
 
-example_5_obj_solution = """
+EXAMPLE_5_OBJ_SOLUTION = """
 Solution for a sphere:
     >>> import numpy as np
     >>> import nvector as nv
@@ -338,7 +340,7 @@ Exact solution for the WGS84 ellipsoid:
 
 """
 
-example_5_fun_solution = """
+EXAMPLE_5_FUN_SOLUTION = """
 Solution for a sphere:
     >>> import numpy as np
     >>> import nvector as nv
@@ -370,11 +372,11 @@ Exact solution for the WGS84 ellipsoid:
 
 """
 
-example_6_header = """
+EXAMPLE_6_HEADER = """
 **Example 6 "Interpolated position"**
 -------------------------------------"""
 
-example_6_txt = """
+EXAMPLE_6_TXT = """
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex6img.png
 
@@ -386,7 +388,7 @@ as n-vectors.
 
 """
 
-example_6_obj_solution = """
+EXAMPLE_6_OBJ_SOLUTION = """
 Solution:
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
@@ -417,7 +419,7 @@ Vectorized solution:
 """
 
 
-example_6_fun_solution = """
+EXAMPLE_6_FUN_SOLUTION = """
 Solution:
     >>> import nvector as nv
     >>> from nvector import rad, deg
@@ -433,7 +435,7 @@ Solution:
     >>> lat_EB_ti, lon_EB_ti = nv.n_E2lat_lon(n_EB_E_ti)
 
     >>> lat_ti, lon_ti = deg(lat_EB_ti), deg(lon_EB_ti)
-    >>> msg = 'Ex6, Interpolated position: lat, lon = {:2.4f} deg, {:2.4f} deg'
+    >>> msg = 'Ex6, Interpolated position: lat, lon = {:2.1f} deg, {:2.1f} deg'
     >>> msg.format(lat_ti[0], lon_ti[0])
     'Ex6, Interpolated position: lat, lon = 89.8 deg, 180.0 deg'
 
@@ -447,11 +449,11 @@ Vectorized solution:
 
 """
 
-example_7_header = """
+EXAMPLE_7_HEADER = """
 **Example 7: "Mean position"**
 ------------------------------"""
 
-example_7_txt = """
+EXAMPLE_7_TXT = """
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex7img.png
 
@@ -462,7 +464,7 @@ Note that the calculation is independent of the depths of the positions.
 
 """
 
-example_7_obj_solution = """
+EXAMPLE_7_OBJ_SOLUTION = """
 Solution:
     >>> import nvector as nv
     >>> points = nv.GeoPoint(latitude=[90, 60, 50],
@@ -478,7 +480,7 @@ Solution:
 """
 
 
-example_7_fun_solution = """
+EXAMPLE_7_FUN_SOLUTION = """
 Solution:
     >>> import numpy as np
     >>> import nvector as nv
@@ -501,11 +503,11 @@ or
 
 """
 
-example_8_header = """
+EXAMPLE_8_HEADER = """
 **Example 8: "A and azimuth/distance to B"**
 --------------------------------------------"""
 
-example_8_txt = """
+EXAMPLE_8_TXT = """
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex8img.png
 
@@ -525,7 +527,7 @@ problem" for a sphere is already solved in Examples
 
 """
 
-example_8_obj_solution = """
+EXAMPLE_8_OBJ_SOLUTION = """
 Exact solution:
     >>> import numpy as np
     >>> import nvector as nv
@@ -542,7 +544,10 @@ Exact solution:
     True
 
 Greatcircle solution:
-    >>> pointB2, azimuthb = pointA.displace(distance=1000, azimuth=200, degrees=True, method='greatcircle')
+    >>> pointB2, azimuthb = pointA.displace(distance=1000,
+    ...                                     azimuth=200,
+    ...                                     degrees=True,
+    ...                                     method='greatcircle')
     >>> lat2, lon2 = pointB2.latitude_deg, pointB.longitude_deg
     >>> msg.format(lat2, lon2)
     'Ex8, Destination: lat, lon = 79.9915 deg, -90.0177 deg'
@@ -553,7 +558,7 @@ Greatcircle solution:
 """
 
 
-example_8_fun_solution = """
+EXAMPLE_8_FUN_SOLUTION = """
 Solution:
     >>> import nvector as nv
     >>> from nvector import rad, deg
@@ -574,11 +579,11 @@ Solution:
 
 """
 
-example_9_header = """
+EXAMPLE_9_HEADER = """
 **Example 9: "Intersection of two paths"**
 ------------------------------------------"""
 
-example_9_txt = """
+EXAMPLE_9_TXT = """
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex9img.png
 
@@ -593,7 +598,7 @@ Find the position C where the two great circles intersect.
 """
 
 
-example_9_obj_solution = """
+EXAMPLE_9_OBJ_SOLUTION = """
 Solution:
     >>> import nvector as nv
     >>> pointA1 = nv.GeoPoint(10, 20, degrees=True)
@@ -625,7 +630,7 @@ Check that PointC is on the great circle going through path A and path B:
 """
 
 
-example_9_fun_solution = """
+EXAMPLE_9_FUN_SOLUTION = """
 Solution:
     >>> import numpy as np
     >>> import nvector as nv
@@ -664,11 +669,11 @@ Check that PointC is on the great circle going through path A and path B:
 """
 
 
-example_10_header = """
+EXAMPLE_10_HEADER = """
 **Example 10: "Cross track distance"**
 --------------------------------------"""
 
-example_10_txt = """
+EXAMPLE_10_TXT = """
 
 .. image:: https://raw.githubusercontent.com/pbrod/Nvector/master/docs/tutorials/images/ex10img.png
 
@@ -688,7 +693,7 @@ between position A1 and A2.
 
 """
 
-example_10_obj_solution = """
+EXAMPLE_10_OBJ_SOLUTION = """
 Solution:
     >>> import numpy as np
     >>> import nvector as nv
@@ -712,7 +717,7 @@ Solution:
 """
 
 
-example_10_fun_solution = """
+EXAMPLE_10_FUN_SOLUTION = """
 Solution:
     >>> import numpy as np
     >>> import nvector as nv
@@ -751,28 +756,28 @@ Alternative solution 3:
 """
 
 
-def get_examples(indices, OO=True):
+def get_examples(indices, oo_solution=True):
     """Returns examples with header"""
-    d = dict(globals())
-    hdr = 'example_{}_header'
-    txt = 'example_{}_txt'
-    sol = 'example_{}_obj_solution' if OO else 'example_{}_fun_solution'
-    return ''.join((d[hdr.format(i)] + d[txt.format(i)] + d[sol.format(i)] + see_also(i)
+    dic = dict(globals())
+    hdr = 'EXAMPLE_{}_HEADER'
+    txt = 'EXAMPLE_{}_TXT'
+    sol = 'EXAMPLE_{}_OBJ_SOLUTION' if oo_solution else 'EXAMPLE_{}_FUN_SOLUTION'
+    return ''.join((dic[hdr.format(i)] + dic[txt.format(i)] + dic[sol.format(i)] + see_also(i)
                     for i in indices))
 
 
-def get_examples_no_header(indices, OO=True):
+def get_examples_no_header(indices, oo_solution=True):
     """Returns examples with no header"""
-    d = dict(globals())
-    hdr = 'example_{}_header'
-    txt = 'example_{}_txt'
-    sol = 'example_{}_obj_solution' if OO else 'example_{}_fun_solution'
+    dic = dict(globals())
+    hdr = 'EXAMPLE_{}_HEADER'
+    txt = 'EXAMPLE_{}_TXT'
+    sol = 'EXAMPLE_{}_OBJ_SOLUTION' if oo_solution else 'EXAMPLE_{}_FUN_SOLUTION'
     return ''.join((''.join(
-        d[hdr.format(i)].rpartition('\n')[:1]) + d[txt.format(i)] + d[sol.format(i)]
+        dic[hdr.format(i)].rpartition('\n')[:1]) + dic[txt.format(i)] + dic[sol.format(i)]
         for i in indices))
 
 
-getting_started = """
+GETTING_STARTED = """
 Getting Started
 ===============
 
@@ -784,12 +789,12 @@ of the tutorial.
 
 {0}{1}{2}{3}{4}{5}{6}
 
-""".format(example_1_header, example_1_txt, example_1_obj_solution,
-           'Functional ', example_1_fun_solution, see_also(1),
-           get_examples(range(2, 11), OO=True))
+""".format(EXAMPLE_1_HEADER, EXAMPLE_1_TXT, EXAMPLE_1_OBJ_SOLUTION,
+           'Functional ', EXAMPLE_1_FUN_SOLUTION, see_also(1),
+           get_examples(range(2, 11), oo_solution=True))
 
 
-getting_started_functional = """
+GETTING_STARTED_FUNCTIONAL = """
 Functional examples
 ===================
 
@@ -800,16 +805,20 @@ the :doc:`getting started </tutorials/getting_started>` section of the tutorial.
 
 {0}{1}{2}{3}{4}{5}{6}
 
-""".format(example_1_header, example_1_txt, example_1_fun_solution,
-           'OO-', example_1_obj_solution, see_also(1),
-           get_examples(range(2, 11), OO=False))
+""".format(EXAMPLE_1_HEADER, EXAMPLE_1_TXT, EXAMPLE_1_FUN_SOLUTION,
+           'OO-', EXAMPLE_1_OBJ_SOLUTION, see_also(1),
+           get_examples(range(2, 11), oo_solution=False))
 
 
-class _TestDocStrings(object):
-    __doc__ = getting_started
+class _DocTestOO(object):
+    __doc__ = GETTING_STARTED
+
+
+class _DocTestFunctional(object):
+    __doc__ = GETTING_STARTED_FUNCTIONAL
 
 
 if __name__ == '__main__':
     from nvector._common import test_docstrings
-    # print(getting_started)
+    # print(GETTING_STARTED)
     test_docstrings(__file__)
