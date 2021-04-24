@@ -1,4 +1,4 @@
-from nvector import (_intro,
+from nvector import (_intro,  # pylint: disable=no-name-in-module
                      _documentation,
                      _installation,
                      _examples_object_oriented,

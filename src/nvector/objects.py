@@ -184,7 +184,7 @@ class GeoPoint(_Common):
             frame=FrameE(a=6378137.0,
                          f=0.0033528106647474805,
                          name='WGS84',
-                         R_Ee=[[0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [-1.0, 0.0, 0.0]]))
+                         axes='e'))
 
     The geodesic inverse problem
 
@@ -456,13 +456,15 @@ class Nvector(_Common):
             frame=FrameE(a=6378137.0,
                         f=0.0033528106647474805,
                         name='WGS84',
-                        R_Ee=[[0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [-1.0, 0.0, 0.0]]))
+                        axes='e'))
 
 
     See also
     --------
     GeoPoint, ECEFvector, Pvector
     """
+
+    _NAMES = ('normal', 'z', 'frame')
 
     def __init__(self, normal, z=0, frame=None):
         self.normal = normal
@@ -1210,13 +1212,20 @@ class FrameE(_Common):
     FrameN, FrameL, FrameB
     """
 
+    _NAMES = ('a', 'f', 'name', 'axes')
+
     def __init__(self, a=None, f=None, name='WGS84', axes='e'):
         if a is None or f is None:
             a, f, _full_name = get_ellipsoid(name)
         self.a = a
         self.f = f
         self.name = name
-        self.R_Ee = E_rotation(axes)
+        self.axes = axes
+
+    @property
+    def R_Ee(self):
+        """Rotation matrix R_Ee defining the axes of the coordinate frame E"""
+        return E_rotation(self.axes)
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
         return (allclose(self.a, other.a, rtol=rtol, atol=atol)
@@ -1522,7 +1531,7 @@ class FrameB(_LocalFrame):
     FrameE, FrameL, FrameN
     """
 
-    _NAMES = ('point', 'yaw', 'pitch', 'roll', 'degrees')
+    _NAMES = ('point', 'yaw', 'pitch', 'roll')
 
     def __init__(self, point, yaw=0, pitch=0, roll=0, degrees=False):
         self.nvector = point.to_nvector()
