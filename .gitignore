@@ -39,3 +39,4 @@ docs/api/generated/*
 docs/_build/*
 cover/*
 MANIFEST
+/.pytest_cache/
