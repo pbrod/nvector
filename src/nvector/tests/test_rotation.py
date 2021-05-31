@@ -20,7 +20,6 @@ from numpy.testing import assert_allclose as _assert_allclose  # @UnresolvedImpo
 assert_allclose = partial(_assert_allclose, atol=1e-15)
 
 
-
 def test_R2xyz_with_vectors():
     x, y, z = rad(((10, 10), (20, 20), (30, 30)))
     R_AB1 = xyz2R(x, y, z)
