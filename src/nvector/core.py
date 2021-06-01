@@ -356,7 +356,7 @@ def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137, f=1.0 / 298.2572
 
 def _interp_vectors(t_i, t, nvectors, kind, window_length, polyorder, mode, cval):
     if window_length > 0:
-        window_length = window_length + (window_length + 1) % 2 # make sure it is an odd integer
+        window_length = window_length + (window_length + 1) % 2  # make sure it is an odd integer
         options = dict(axis=1, mode=mode, cval=cval)
         normals = savgol_filter(nvectors, window_length, polyorder, **options)
     else:
