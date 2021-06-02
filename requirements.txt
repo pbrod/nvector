@@ -4,3 +4,5 @@
 numpy>=1.9
 scipy>=0.9
 geographiclib
+matplotlib
+cartopy
