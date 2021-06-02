@@ -20,6 +20,7 @@ __all__ = ['E_rotation',
            'xyz2R',
            'zyx2R']
 
+_EPS = np.finfo(float).eps
 E_ROTATION_MATRIX = dict(e=np.array([[0, 0, 1.0],
                                      [0, 1.0, 0],
                                      [-1.0, 0, 0]]),
@@ -122,18 +123,25 @@ def R2xyz(R_AB):
     --------
     xyz2R, R2zyx, xyz2R
     """
-    z = arctan2(-R_AB[0, 1, ...], R_AB[0, 0, ...])  # atan2: [-pi pi]
-    x = arctan2(-R_AB[1, 2, ...], R_AB[2, 2, ...])
-
-    sin_y = R_AB[0, 2, ...]
-
     # cos_y is based on as many elements as possible, to average out
     # numerical errors. It is selected as the positive square root since
     # y: [-pi/2 pi/2]
     cos_y = sqrt((R_AB[0, 0, ...]**2 + R_AB[0, 1, ...]**2
                   + R_AB[1, 2, ...]**2 + R_AB[2, 2, ...]**2) / 2)
+    sin_y = R_AB[0, 2, ...]
+    non_singular = cos_y > 10 * _EPS  # atan2: [-pi pi]
 
-    y = arctan2(sin_y, cos_y)
+    x = np.where(non_singular,
+                 arctan2(-R_AB[1, 2, ...], R_AB[2, 2, ...]),
+                 0)  # Only the sum/difference of x and z is now given, choosing x = 0
+    y = np.where(non_singular,
+                 arctan2(sin_y, cos_y),
+                 np.sign(sin_y) * np.pi/2)  # Selecting y = +-pi/2, with correct sign
+    z = np.where(non_singular,
+                 arctan2(-R_AB[0, 1, ...], R_AB[0, 0, ...]),
+                 # Lower left 2x2 elements of R_AB now only consists of sin_z and cos_z.
+                 # Using the two whose signs are the same for both singularities:
+                 arctan2(R_AB[1, 0, ...], R_AB[1, 1, ...]))
     return x, y, z
 
 

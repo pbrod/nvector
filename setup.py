@@ -4,13 +4,11 @@
 Setup file for nvector.
 
 Usage:
-Run all tests:
-  python setup.py test
+Run doctests on documentation:
   python setup.py doctest
 
 Build documentation
   python setup.py docs
-  python setup.py latex
 
 Build
   python setup.py bdist_wininst
@@ -97,26 +95,6 @@ class Doctest(Command):
         sph.build()
 
 
-class Latex(Command):
-    description = 'Run latex with Sphinx'
-    user_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        from sphinx.application import Sphinx
-        sph = Sphinx('./docs',  # source directory
-                     './docs',  # directory containing conf.py
-                     './docs/_build/latex',  # output directory
-                     './docs/_build/doctrees',  # doctree directory
-                     'latex')  # finally, specify the latex builder
-        sph.build()
-
-
 def setup_package():
     version = find_version(os.path.join(ROOT, 'src', PACKAGE_NAME, "__init__.py"))
     print("Version: {}".format(version))
@@ -130,18 +108,16 @@ def setup_package():
         name=PACKAGE_NAME,
         version=version,
         install_requires=read(os.path.join(ROOT, 'requirements.txt'), lines=True),
-        extras_require={'build_sphinx': sphinx_requires,},
+        extras_require={'build_sphinx': sphinx_requires},
         setup_requires=["pytest-runner"] + sphinx,
         tests_require=['pytest',
                        'pytest-cov',
                        'pytest-pep8',
                        ],
-        cmdclass={'doctest': Doctest,
-                  'latex': Latex},
+        cmdclass={'doctest': Doctest},
     )
 
 
 if __name__ == "__main__":
-    # import sys
     # sys.argv.append('docs')
     setup_package()
