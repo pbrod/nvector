@@ -2,6 +2,46 @@
 Changelog
 =========
 
+Version 0.7.7, June 3, 2021
+================================
+Per A Brodtkorb (27):
+      * Added cartopy and matplotlib to requirements.txt
+      * Updated appveyor.yml, setup.cfg and setup.py
+      * Updated .gitignore to ignore .pytest_cache
+      * Corrected failing doctests in objects.py
+      * Updated version in _installation.py
+      * Updated failing docstrings for python 2.7 in objects.py.
+      * Added '# doctest: SKIP' to all plt.show() in order to avoid the doctests hangs on the testserver.
+      * Fixed a bug  in _info_functional.py
+      * Updated pycodestyle exlude section in setup.cfg Prettified _examples.py, _examples_object_oriented.py and core.py
+      * Updated pycodestyle ignore section in setup.cfg
+      * Added doctest option to setup.cfg
+      * Removed print statements in test_objects.py
+      * Return "NotImplemented" instead of raising "NotImplementedError" in Nvector._mul__ and Nvector.__div__ in objects.py
+      * Fixed .travis.yml so that he file paths in coverage.xml is discoverable
+         under the sonar.sources folder. The problem is that SonarQube is
+         analysing the checked-out source code (in src/nvector) but the actual
+         unit tests and coverage.py is run against the installed code (in
+         build/lib/nvector). Thus the absolute files paths to the installed code
+         in the generated coverage.xml were causing Sonar to show no coverage.
+         The workaround was to use sed in the pipeline to replace every path to
+         build/lib/nvector with src/nvector in coverage.xml.
+      * Fixed a bug: Identical expressions should not be used on both sides of a binary operator in test:objects.py.
+      * Updated solutions to example 9
+      * Added greatcircle method to GeoPoint.distance_and_azimuth in objects.py
+      * Added _base_angle function that makes sure an angle is between -pi and pi. 
+      * Added test_direct_and_inverse in test_objects.py
+      * Added interp_nvectors to docs/reference/nvector_summary.rst
+      * Added vectorized interpolation routines: interp_nvectors function to core.py and Nvector.interpolate to objects.py.
+      * Put try except around code in use_docstring to avoid attribute '__doc__'
+         of 'type' objects is not writable errors for  python2. 
+      * Added interp_nvectors 
+      * Reorganized _displace_great_circle 
+      * Added check that depths also are equal on in _on_ellipsoid_path and in _on_great_circle_path
+      * Refactored code from use_docstring_from function into the use_docstring
+         function in _common.py 
+      * Simplified the adding of examples to the docstrings of functions and classes in core.py and objects.py.
+
 Version 0.7.6, December 18, 2020
 ================================
 
