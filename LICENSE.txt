@@ -7,7 +7,7 @@ of Navigation, Volume 63, Issue 03, pp 395-417, July 2010.
 
 This paper should be cited in publications using this library.
 
-Copyright (c) 2015-2020, Norwegian Defence Research Establishment (FFI)
+Copyright (c) 2015-2021, Norwegian Defence Research Establishment (FFI)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
