@@ -324,7 +324,7 @@ def rad(*deg_angles):
 def mdot(a, b):
     """
     Returns multiple matrix multiplications of two arrays
-    i.e. dot(a, b)[i,j,k] = sum(a[i,:,j] * b[:,j,k])
+    i.e. dot(a, b)[i,j,k] = sum(a[i,:,k] * b[:,j,k])
 
     Parameters
     ----------
@@ -341,7 +341,7 @@ def mdot(a, b):
 
     Examples
     --------
-    3 x 3 x 2 times 3 x 3 x 2 array -> 3 x 2 x 2 array
+    3 x 3 x 2 times 3 x 3 x 2 array -> 3 x 3 x 2 array
         >>> import numpy as np
         >>> import nvector as nv
         >>> a = 1.0 * np.arange(18).reshape(3,3,2)
@@ -453,7 +453,7 @@ def get_ellipsoid(name):
     >>> nv.get_ellipsoid(name=18)
     Ellipsoid(a=6378137.0, f=0.0033528106647474805, name='GRS80 / WGS84  (NAD83)')
 
-    >>> wgs72 = nv.select_ellipsoid(name="WGS 72")
+    >>> wgs72 = nv.get_ellipsoid(name="WGS 72")
     >>> wgs72.a == 6378135.0
     True
     >>> wgs72.f == 0.003352779454167505
