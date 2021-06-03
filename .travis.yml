@@ -48,7 +48,6 @@ before_install:
   - conda create -q -n condaenv python=$TRAVIS_PYTHON_VERSION
   - conda install -n condaenv pip
 #  - conda config --add channels conda-forge
-#  - conda config --add channels https://conda.anaconda.org/qttesting
   - source activate condaenv
 # Install packages
 install:

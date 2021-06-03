@@ -45,10 +45,11 @@ install:
   - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
 
   - conda config --add channels conda-forge
-  - conda config --add channels https://conda.anaconda.org/qttesting
+#  - conda config --add channels https://conda.anaconda.org/qttesting
   - "conda create -q -n test-environment python=%PYTHON_VERSION% numpy scipy pytest pytest-runner pytest-pep8 pytest-cov matplotlib pip"
 
   - activate test-environment
+  - conda install -c conda-forge cartopy
   - "python -m pip install --upgrade pip"
   - "python -m pip install --upgrade setuptools"
   - "python -m pip install --upgrade pytest"
