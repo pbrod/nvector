@@ -2,6 +2,7 @@
 Unittests for the rotation module
 '''
 from functools import partial
+import pytest
 import numpy as np
 from nvector.util import rad
 from nvector.rotation import (xyz2R,
@@ -123,3 +124,49 @@ def test_n_E_and_wa2R_EL():
     n_E2 = R_EN2n_E(R_EN)
     assert_allclose(n_E, n_E1)
     assert_allclose(n_E, n_E2)
+
+
+@pytest.mark.parametrize("r_matrix", [[[0, 1, 0],
+                                       [0, 0, 1],
+                                       [1, 0, 0]],
+                                      [[0, 1, 0],
+                                       [0, 0, -1],
+                                       [-1, 0, 0]],
+                                      [[0, 0, -1],
+                                       [0, -1, 0],
+                                       [-1, 0, 0]],
+                                      [[0, 0, 1],
+                                       [1, 0, 0],
+                                       [0, 1, 0]],
+                                      [[0, 0, -1],
+                                       [1, 0, 0],
+                                       [0, -1, 0]],
+                                      ])
+def test_R2zyx_zyx2R_roundtrip(r_matrix):
+    """Test to see if zyx2R(*R2zyx(r_matrix)) == r_matrix"""
+    z, y, x = R2zyx(r_matrix)
+    r_matrix2 = zyx2R(z, y, x)
+    assert_allclose(r_matrix, r_matrix2)
+
+
+@pytest.mark.parametrize("r_matrix", [[[0, 1, 0],
+                                       [0, 0, 1],
+                                       [1, 0, 0]],
+                                      [[0, 1, 0],
+                                       [0, 0, -1],
+                                       [-1, 0, 0]],
+                                      [[0, 0, -1],
+                                       [0, -1, 0],
+                                       [-1, 0, 0]],
+                                      [[0, 0, 1],
+                                       [1, 0, 0],
+                                       [0, 1, 0]],
+                                      [[0, 0, -1],
+                                       [1, 0, 0],
+                                       [0, -1, 0]],
+                                      ])
+def test_R2xyz_xyz2R_roundtrip(r_matrix):
+    """Test to see if xyz2R(*R2xyz(r_matrix)) == r_matrix"""
+    x, y, z = R2xyz(r_matrix)
+    r_matrix2 = xyz2R(x, y, z)
+    assert_allclose(r_matrix, r_matrix2)
