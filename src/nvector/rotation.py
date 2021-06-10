@@ -207,6 +207,10 @@ def R_EL2n_E(R_EL):
     n_E: 3 x n array
         n-vector(s) [no unit] decomposed in E.
 
+    Notes
+    -----
+    n-vector is found from the rotation matrix (direction cosine matrix) R_EL.
+
     See also
     --------
     R_EN2n_E, n_E_and_wa2R_EL, n_E2R_EN
@@ -230,6 +234,10 @@ def R_EN2n_E(R_EN):
     -------
     n_E: 3 x n array
         n-vector [no unit] decomposed in E.
+
+    Notes
+    -----
+    n-vector is found from the rotation matrix (direction cosine matrix) R_EN.
 
     See also
     --------
@@ -413,6 +421,7 @@ def n_E2lat_lon(n_E, R_Ee=None):
     --------
     lat_lon2n_E
     """
+    n_E = np.atleast_2d(n_E)
     if R_Ee is None:
         R_Ee = E_rotation()
     _check_length_deviation(n_E)
@@ -455,6 +464,7 @@ def n_E2R_EN(n_E, R_Ee=None):
     """
     if R_Ee is None:
         R_Ee = E_rotation()
+    n_E = np.atleast_2d(n_E)
     _check_length_deviation(n_E)
     n_E = unit(np.dot(R_Ee, n_E))
 
@@ -504,8 +514,9 @@ def n_E_and_wa2R_EL(n_E, wander_azimuth, R_Ee=None):
 
     Notes
     -----
-    When wander_azimuth=0, we have that N=L.
-    (See Table 2 in Gade (2010) for details)
+    Calculates the rotation matrix (direction cosine matrix) R_EL using
+    n-vector (n_E) and the wander azimuth angle. When wander_azimuth=0, we
+    have that N=L. (See Table 2 in Gade (2010) for details)
 
     See also
     --------
@@ -515,6 +526,8 @@ def n_E_and_wa2R_EL(n_E, wander_azimuth, R_Ee=None):
         R_Ee = E_rotation()
     latitude, longitude = n_E2lat_lon(n_E, R_Ee)
 
+    # Longitude, -latitude, and wander azimuth are the x-y-z Euler angles (about
+    # new axes) for R_EL.
     # Reference: See start of Section 5.2 in Gade (2010):
     R_EL = mdot(R_Ee.T, xyz2R(longitude, -latitude, wander_azimuth))
     return np.squeeze(R_EL)

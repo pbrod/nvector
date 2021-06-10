@@ -110,7 +110,7 @@ def test_R2zxy():
 
 
 def test_n_E_and_wa2R_EL():
-    n_E = np.array([[0], [0], [1]])
+    n_E = [[0], [0], [1]]
     R_EL = n_E_and_wa2R_EL(n_E, wander_azimuth=np.pi / 2)
     R_EL1 = [[0, -1.0, 0],
              [-1.0, 0, 0],
@@ -119,6 +119,24 @@ def test_n_E_and_wa2R_EL():
 
     R_EN = n_E2R_EN(n_E)
     assert_allclose(R_EN, np.diag([-1, 1, -1]))
+
+    n_E1 = R_EL2n_E(R_EN)
+    n_E2 = R_EN2n_E(R_EN)
+    assert_allclose(n_E, n_E1)
+    assert_allclose(n_E, n_E2)
+
+
+def test_n_E_and_wa2R_EL_with_vectors():
+    n_E = [[0, 0], [0, 0], [1, 1]]
+    R_EL = n_E_and_wa2R_EL(n_E, wander_azimuth=np.pi / 2)
+    R_EL1 = [[0, -1.0, 0],
+             [-1.0, 0, 0],
+             [0, 0, -1.0]]
+    assert_allclose(R_EL, np.moveaxis([R_EL1, R_EL1], 0, 2))
+
+    R_EN = n_E2R_EN(n_E)
+    R_EN1 = np.diag([-1, 1, -1])
+    assert_allclose(R_EN, np.moveaxis([R_EN1, R_EN1], 0, 2))
 
     n_E1 = R_EL2n_E(R_EN)
     n_E2 = R_EN2n_E(R_EN)

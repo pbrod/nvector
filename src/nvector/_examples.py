@@ -659,11 +659,13 @@ or alternatively
 
 Check that PointC is not between A1 and A2 or B1 and B2:
     >>> np.allclose([nv.on_great_circle_path(path_a, n_EC_E),
-    ...             nv.on_great_circle_path(path_b, n_EC_E)], False)
+    ...              nv.on_great_circle_path(path_b, n_EC_E)], False)
     True
 
+
 Check that PointC is on the great circle going through path A and path B:
-    >>> np.allclose([nv.on_great_circle(path_a, n_EC_E), nv.on_great_circle(path_b, n_EC_E)], True)
+    >>> np.allclose([nv.on_great_circle(path_a, n_EC_E),
+    ...              nv.on_great_circle(path_b, n_EC_E)], True)
     True
 
 """

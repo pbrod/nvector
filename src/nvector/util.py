@@ -19,6 +19,7 @@ _EPS = np.finfo(float).eps  # machine precision (machine epsilon)
 _TINY = np.finfo(float).tiny
 Ellipsoid = namedtuple('Ellipsoid', 'a f name')
 
+
 ELLIPSOID = {
     1: Ellipsoid(a=6377563.3960, f=1.0 / 299.3249646, name='Airy 1858'),
     2: Ellipsoid(a=6377340.189, f=1.0 / 299.3249646, name='Airy Modified'),
@@ -415,7 +416,7 @@ def nthroot(x, n):
 
 def get_ellipsoid(name):
     """
-    Returns semi-major axis (a), flattening (f) and name of ellipsoid as a named tuple.
+    Returns semi-major axis (a), flattening (f) and name of reference ellipsoid as a named tuple.
 
     Parameters
     ----------
@@ -440,6 +441,13 @@ def get_ellipsoid(name):
         17) Clarke 1866    (NAD27)
         18) GRS80 / WGS84  (NAD83)
         19) ETRS89
+
+    Notes
+    -----
+    See also:
+    https://en.wikipedia.org/wiki/Geodetic_datum
+    https://en.wikipedia.org/wiki/Reference_ellipsoid
+
 
     Examples
     --------
@@ -490,7 +498,8 @@ def unit(vector, norm_zero_vector=1):
     Notes
     -----
     The column vector(s) that have zero length will be returned as unit vector(s)
-    pointing in the x-direction, i.e, [[1], [0], [0]]
+    pointing in the x-direction, i.e, [[1], [0], [0]] if norm_zero_vector is one,
+    otherwise NaN.
 
     Examples
     --------

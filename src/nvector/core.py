@@ -68,7 +68,8 @@ def lat_lon2n_E(latitude, longitude, R_Ee=None):
     nvec = np.vstack((sin(latitude),
                       sin(longitude) * cos(latitude),
                       -cos(longitude) * cos(latitude)))
-    n_E = dot(R_Ee.T, nvec)
+    # n_E = dot(R_Ee.T, nvec)
+    n_E = np.matmul(R_Ee.T, nvec)
     return n_E
 
 
@@ -122,7 +123,7 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     # Make sure to rotate the coordinates so that:
     # x -> north pole and yz-plane coincides with the equatorial
     # plane before using equation 22!
-    n_EB_e = unit(dot(R_Ee, n_EB_E))
+    n_EB_e = unit(np.matmul(R_Ee, n_EB_E))
     b = a * (1 - f)  # semi-minor axis
 
     # The following code implements equation (22) in Gade (2010):
@@ -137,7 +138,7 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
 
     p_EL_e = b / denominator * n_EB_e / scale**2
     # rotate back to the original coordinate system
-    p_EB_E = dot(R_Ee.T, p_EL_e - n_EB_e * depth)
+    p_EB_E = np.matmul(R_Ee.T, p_EL_e - n_EB_e * depth)
 
     return p_EB_E
 
@@ -228,7 +229,7 @@ def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     # Make sure to rotate the coordinates so that:
     # x -> north pole and yz-plane coincides with the equatorial
     # plane before using equation 23!
-    p_EB_e = dot(R_Ee, p_EB_E)
+    p_EB_e = np.matmul(R_Ee, p_EB_E)
 
     # The following code implements equation (23) from Gade (2010):
     x_scale, yz_scale, depth = _equation23(a, f, p_EB_e)
@@ -239,7 +240,7 @@ def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
 
     n_EB_e = np.vstack((n_EB_e_x, n_EB_e_y, n_EB_e_z))
     # Rotate back to the original coordinate system.
-    n_EB_E = unit(dot(R_Ee.T, n_EB_e))  # Ensure unit length
+    n_EB_E = unit(np.matmul(R_Ee.T, n_EB_e))  # Ensure unit length
 
     return n_EB_E, depth
 
@@ -426,6 +427,21 @@ def interp_nvectors(t_i, t, nvectors, kind='linear', window_length=0, polyorder=
     >>> h = plt.plot(nv.deg(lon), nv.deg(lat), 'o', loni, lati, '-')
     >>> plt.show()  # doctest: +SKIP
     >>> plt.close()
+
+    Interpolate noisy data
+    >>> n = 50
+    >>> lat = nv.rad(np.linspace(0, 9, n));
+    >>> lon = np.sin(nv.rad(np.linspace(-90, 70, n))) + 0.05* np.random.randn(n)
+    >>> t = np.arange(len(lat))
+    >>> t_i = np.linspace(0, t[-1], 100)
+    >>> nvectors = nv.lat_lon2n_E(lat, lon)
+    >>> nvectors_i = nv.interp_nvectors(t_i, t, nvectors, 'cubic', 31)
+    >>> [lati,loni] = nv.n_E2lat_lon(nvectors_i)
+    >>> h = plt.plot(nv.deg(lon), nv.deg(lat), 'o', nv.deg(loni), nv.deg(lati), '-')
+    >>> plt.show()  # doctest: +SKIP
+    >>> plt.close()
+
+
     """
     normal_i = _interp_vectors(t_i, t, nvectors, kind, window_length, polyorder, mode, cval)
 
@@ -468,7 +484,7 @@ def intersect(path_a, path_b):
 
     Parameters
     ----------
-    path_a, path_b: tuple of 2 n-vectors
+    path_a, path_b: tuple of two n-vectors
         defining path A and path B, respectively.
         Path A and B has shape 2 x 3 x n and 2 x 3 x m, respectively.
 
@@ -534,8 +550,8 @@ def cross_track_distance(path, n_EB_E, method='greatcircle', radius=6371009.0):
 
     Parameters
     ----------
-    path: tuple of 2 n-vectors
-        2 n-vectors of positions defining path A, decomposed in E.
+    path: tuple of two n-vectors
+        Two n-vectors of positions defining path A, decomposed in E.
     n_EB_E:  3 x m array
         n-vector(s) of position B to measure the cross track distance to.
     method: string
@@ -556,6 +572,12 @@ def cross_track_distance(path, n_EB_E, method='greatcircle', radius=6371009.0):
     --------
     {super}
 
+    See also
+    --------
+    great_circle_normal,
+    closest_point_on_great_circle,
+    on_great_circle,
+    on_great_circle_path
     """
     c_E = great_circle_normal(path[0], path[1])
     sin_theta = -np.dot(c_E.T, n_EB_E).ravel()
@@ -571,8 +593,8 @@ def on_great_circle(path, n_EB_E, radius=6371009.0, atol=1e-8):
 
     Parameters
     ----------
-    path: tuple of 2 n-vectors
-        2 n-vectors of positions defining path A, decomposed in E.
+    path: tuple of two n-vectors
+        Two n-vectors of positions defining path A, decomposed in E.
     n_EB_E:  3 x m array
         n-vector(s) of position B to check to.
     radius: real scalar
@@ -598,6 +620,9 @@ def on_great_circle(path, n_EB_E, radius=6371009.0, atol=1e-8):
     --------
     {super}
 
+    See also
+    --------
+    cross_track_distance
     """
     distance = np.abs(cross_track_distance(path, n_EB_E, radius=radius))
     return distance <= atol
@@ -637,6 +662,9 @@ def on_great_circle_path(path, n_EB_E, radius=6371009.0, atol=1e-8):
     --------
     {super}
 
+    See also
+    --------
+    cross_track_distance, on_great_circle
     """
     n_EA1_E, n_EA2_E = path
     scale = norm(n_EA2_E - n_EA1_E, axis=0)
@@ -653,7 +681,7 @@ def closest_point_on_great_circle(path, n_EB_E):
     Parameters
     ----------
     path: tuple of 2 n-vectors of 3 x n arrays
-        2 n-vectors of positions defining path A, decomposed in E.
+        Two n-vectors of positions defining path A, decomposed in E.
     n_EB_E:  3 x m array
         n-vector(s) of position B to find the closest point to.
 
@@ -666,19 +694,23 @@ def closest_point_on_great_circle(path, n_EB_E):
     --------
     {super}
 
+    See also
+    --------
+    cross_track_distance, great_circle_normal
+
     """
     n_EA1_E, n_EA2_E = path
     c_E = great_circle_normal(n_EA1_E, n_EA2_E)
 
     c2 = cross(n_EB_E, c_E, axis=0)
     n_EC_E = unit(cross(c_E, c2, axis=0))
-    return n_EC_E * np.sign(dot(n_EC_E.T, n_EB_E))
+    return n_EC_E * np.sign(np.sum(n_EC_E * n_EB_E, axis=0, keepdims=True))
 
 
 @use_docstring(_examples.get_examples_no_header([5], oo_solution=False))
 def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
     """
-    Returns great circle distance between positions A and B
+    Returns great circle distance between positions A and B on a sphere
 
     Parameters
     ----------
@@ -715,7 +747,7 @@ def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
 @use_docstring(_examples.get_examples_no_header([5], oo_solution=False))
 def euclidean_distance(n_EA_E, n_EB_E, radius=6371009.0):
     """
-    Returns Euclidean distance between positions A and B
+    Returns Euclidean distance between positions A and B on a sphere
 
     Parameters
     ----------
