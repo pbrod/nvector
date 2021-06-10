@@ -367,7 +367,8 @@ def _interp_vectors(t_i, t, nvectors, kind, window_length, polyorder, mode, cval
     return normal_i.reshape(nvectors.shape[0], -1)
 
 
-def interp_nvectors(t_i, t, nvectors, kind='linear', window_length=0, polyorder=2, mode='interp', cval=0.0):
+def interp_nvectors(t_i, t, nvectors, kind='linear', window_length=0, polyorder=2, mode='interp',
+                    cval=0.0):
     """
     Returns interpolated values from nvector data.
 

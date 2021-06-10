@@ -69,9 +69,6 @@ def plot_mean_position():
 
 
 if __name__ == '__main__':
-    if True:
-        from nvector._common import test_docstrings
-        test_docstrings(__file__)
-    else:
-        plot_mean_position()
-        plt.show()
+
+    from nvector._common import test_docstrings
+    test_docstrings(__file__)
