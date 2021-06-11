@@ -23,6 +23,7 @@ __all__ = ['closest_point_on_great_circle',
            'cross_track_distance',
            'euclidean_distance',
            'great_circle_distance',
+           'great_circle_distance_rad',
            'great_circle_normal',
            'interp_nvectors',
            'interpolate',
@@ -118,6 +119,8 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     """
     if R_Ee is None:
         R_Ee = E_rotation()
+
+    n_EB_E = np.atleast_2d(n_EB_E)
     _check_length_deviation(n_EB_E)
 
     # Make sure to rotate the coordinates so that:
@@ -347,7 +350,7 @@ def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137, f=1.0 / 298.2572
     """
     if R_Ee is None:
         R_Ee = E_rotation()
-
+    n_EA_E, p_AB_E = np.atleast_2d(n_EA_E, p_AB_E)
     # Function 2. in Section 5.4 in Gade (2010):
     p_EA_E = n_EB_E2p_EB_E(n_EA_E, z_EA, a, f, R_Ee)
     p_EB_E = p_EA_E + p_AB_E
@@ -581,7 +584,7 @@ def cross_track_distance(path, n_EB_E, method='greatcircle', radius=6371009.0):
     on_great_circle_path
     """
     c_E = great_circle_normal(path[0], path[1])
-    sin_theta = -np.dot(c_E.T, n_EB_E).ravel()
+    sin_theta = -np.sum(c_E * n_EB_E, axis=0)
     if method[0].lower() == 'e':
         return _euclidean_cross_track_distance(sin_theta, radius)
     return _great_circle_cross_track_distance(sin_theta, radius)
@@ -636,8 +639,8 @@ def on_great_circle_path(path, n_EB_E, radius=6371009.0, atol=1e-8):
 
     Parameters
     ----------
-    path: tuple of 2 n-vectors
-        2 n-vectors of positions defining path A, decomposed in E.
+    path: tuple of two n-vectors
+        Two n-vectors of positions defining path A, decomposed in E.
     n_EB_E:  3 x m array
         n-vector(s) of position B to measure the cross track distance to.
     radius: real scalar
@@ -667,7 +670,7 @@ def on_great_circle_path(path, n_EB_E, radius=6371009.0, atol=1e-8):
     --------
     cross_track_distance, on_great_circle
     """
-    n_EA1_E, n_EA2_E = path
+    n_EB_E, n_EA1_E, n_EA2_E = np.atleast_2d(n_EB_E, *path)
     scale = norm(n_EA2_E - n_EA1_E, axis=0)
     ti1 = norm(n_EB_E - n_EA1_E, axis=0) / scale
     ti2 = norm(n_EB_E - n_EA2_E, axis=0) / scale
@@ -708,6 +711,38 @@ def closest_point_on_great_circle(path, n_EB_E):
     return n_EC_E * np.sign(np.sum(n_EC_E * n_EB_E, axis=0, keepdims=True))
 
 
+def great_circle_distance_rad(n_EA_E, n_EB_E):
+    """
+    Returns great circle distance in radians between positions A and B on a sphere
+
+    Parameters
+    ----------
+    n_EA_E, n_EB_E:  3 x n array
+        n-vector(s) [no unit] of position A and B, decomposed in E.
+
+    Notes
+    -----
+    The result for spherical Earth is returned.
+    Formulae is given by equation (16) in Gade (2010) and is well
+    conditioned for all angles.
+    See also: https://en.wikipedia.org/wiki/Great-circle_distance.
+
+    See also
+    --------
+    great_circle_distance
+    """
+    n_EA_E, n_EB_E = np.atleast_2d(n_EA_E, n_EB_E)
+    sin_theta = norm(np.cross(n_EA_E, n_EB_E, axis=0), axis=0)
+    cos_theta = np.sum(n_EA_E * n_EB_E, axis=0)
+    # ill conditioned for small angles:
+    # distance_rad_version1 = arccos(dot(n_EA_E,n_EB_E))
+
+    # ill-conditioned for angles near pi/2 (and not valid above pi/2)
+    # distance_rad_version2 = arcsin(norm(cross(n_EA_E,n_EB_E)))
+
+    return np.arctan2(sin_theta, cos_theta)
+
+
 @use_docstring(_examples.get_examples_no_header([5], oo_solution=False))
 def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
     """
@@ -725,24 +760,17 @@ def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
     The result for spherical Earth is returned.
     Formulae is given by equation (16) in Gade (2010) and is well
     conditioned for all angles.
+    See also: https://en.wikipedia.org/wiki/Great-circle_distance.
 
     Examples
     --------
     {super}
 
+    See also
+    --------
+    great_circle_distance_rad
     """
-    sin_theta = norm(np.cross(n_EA_E, n_EB_E, axis=0), axis=0)
-    cos_theta = dot(n_EA_E.T, n_EB_E)
-    theta = np.arctan2(sin_theta, cos_theta).ravel()
-    s_AB = theta * radius
-
-    # ill conditioned for small angles:
-    # s_AB_version1 = arccos(dot(n_EA_E,n_EB_E))*radius
-
-    # ill-conditioned for angles near pi/2 (and not valid above pi/2)
-    # s_AB_version2 = arcsin(norm(cross(n_EA_E,n_EB_E)))*radius
-
-    return s_AB
+    return great_circle_distance_rad(n_EA_E, n_EB_E) * radius
 
 
 @use_docstring(_examples.get_examples_no_header([5], oo_solution=False))
@@ -761,6 +789,7 @@ def euclidean_distance(n_EA_E, n_EB_E, radius=6371009.0):
     --------
     {super}
     """
+    n_EB_E, n_EA_E = np.atleast_2d(n_EB_E, n_EA_E)
     d_AB = norm(n_EB_E - n_EA_E, axis=0).ravel() * radius
     return d_AB
 
@@ -772,8 +801,7 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, 
     Parameters
     ----------
     n_EA_E, n_EB_E:  3 x n array
-        n-vector(s) [no unit] of position A and B, respectively,
-        decomposed in E.
+        n-vector(s) [no unit] of position A and B, respectively, decomposed in E.
     a: real scalar, default WGS-84 ellipsoid.
         Semi-major axis of the Earth ellipsoid given in [m].
     f: real scalar, default WGS-84 ellipsoid.
@@ -786,9 +814,14 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, 
     -------
     azimuth: n array
         Angle [rad] the line makes with a meridian, taken clockwise from north.
+
+    See also
+    --------
+    great_circle_distance_rad, n_EA_E_distance_and_azimuth2n_EB_E
     """
     if R_Ee is None:
         R_Ee = E_rotation()
+
     # Step2: Find p_AB_E (delta decomposed in E).
     p_AB_E = n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=a, f=f, R_Ee=R_Ee)
 
@@ -807,6 +840,7 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, 
     # R_EN'=R_NE)
 
     # Step5: Also find the direction (azimuth) to B, relative to north:
+
     return arctan2(p_AB_N[1], p_AB_N[0])
 
 
@@ -837,10 +871,14 @@ def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth, R_Ee=None)
     --------
     {super}
 
+    See also
+    --------
+    n_EA_E_and_n_EB_E2azimuth, great_circle_distance_rad
     """
 
     if R_Ee is None:
         R_Ee = E_rotation()
+    n_EA_E, distance_rad, azimuth = np.atleast_1d(n_EA_E, distance_rad, azimuth)
     # Step1: Find unit vectors for north and east:
     k_east_E = unit(cross(dot(R_Ee.T, [[1], [0], [0]]), n_EA_E, axis=0))
     k_north_E = cross(n_EA_E, k_east_E, axis=0)
@@ -850,6 +888,14 @@ def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth, R_Ee=None)
 
     # Step3: Find n_EB_E:
     n_EB_E = n_EA_E * cos(distance_rad) + d_E * sin(distance_rad)
+
+#     north_pole = lat_lon2n_E(np.pi/2, 0, R_Ee)
+#
+#     start_on_pole = np.all(np.isclose(north_pole, n_EA_E), axis=0)
+#
+#     if np.any(start_on_pole):
+#         n_EB_E[:, start_on_pole] = np.nan
+
     return n_EB_E
 
 
