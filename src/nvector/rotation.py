@@ -278,7 +278,7 @@ def xyz2R(x, y, z):
 
     Parameters
     ----------
-    x,y,z: real scalars or array of lengths n
+    x, y, z: real scalars or array of lengths n
         Angles [rad] of rotation about new axes.
 
     Returns
