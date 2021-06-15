@@ -29,8 +29,9 @@ EXAMPLE_1_TXT = """
 Given two positions, A and B as latitudes, longitudes and depths relative to
 Earth, E.
 
-Find the exact vector between the two positions, given in meters north, east,
-and down, and find the direction (azimuth) to B, relative to north.
+Find the exact vector between the two positions, given in meters north, east, and down, and
+find the direction (azimuth) to B, relative to north, as well as elevation and distance.
+
 Assume WGS-84 ellipsoid. The given depths are from the ellipsoid surface.
 Use position A to define north, east, and down directions.
 (Due to the curvature of Earth and different directions to the North Pole,
@@ -53,7 +54,7 @@ Step1:  Find p_AB_N (delta decomposed in N).
     >>> 'Ex1: delta north, east, down = {0:8.2f}, {1:8.2f}, {2:8.2f}'.format(x, y, z)
     'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
 
-Step2: Also find the direction (azimuth) to B, relative to north:
+Step2: Find the direction (azimuth) to B, relative to north, as well as elevation and distance:
     >>> 'azimuth = {0:4.2f} deg'.format(p_AB_N.azimuth_deg)
     'azimuth = 45.11 deg'
     >>> 'elevation = {0:4.2f} deg'.format(p_AB_N.elevation_deg)
@@ -75,7 +76,7 @@ Step1: Convert to n-vectors:
     >>> n_EA_E = nv.lat_lon2n_E(lat_EA, lon_EA)
     >>> n_EB_E = nv.lat_lon2n_E(lat_EB, lon_EB)
 
-Step2: Find p_AB_E (delta decomposed in E).WGS-84 ellipsoid is default:
+Step2: Find p_AB_E (delta decomposed in E). WGS-84 ellipsoid is default:
     >>> p_AB_E = nv.n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA, z_EB)
 
 Step3: Find R_EN for position A:
@@ -87,7 +88,7 @@ Step4: Find p_AB_N (delta decomposed in N).
     >>> 'Ex1: delta north, east, down = {0:8.2f}, {1:8.2f}, {2:8.2f}'.format(x, y, z)
     'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
 
-Step5: Also find the direction (azimuth) to B, relative to north:
+Step5: Find the direction (azimuth) to B, relative to north as well as elevation and distance:
     >>> azimuth = np.arctan2(y, x)
     >>> 'azimuth = {0:4.2f} deg'.format(deg(azimuth))
     'azimuth = 45.11 deg'
@@ -180,9 +181,11 @@ Step 4: Find R_EB, from R_EN and R_NB:
 Step 5: Decompose the delta BC vector in E:
     >>> p_BC_E = np.dot(R_EB, p_BC_B)
 
-Step 6: Find the position of C, using the functions that goes from one
+Step 6: Find the position of C, using the functions that goes from one position and a delta,
+    to a new position:
     >>> n_EC_E, z_EC = nv.n_EA_E_and_p_AB_E2n_EB_E(n_EB_E, p_BC_E, z_EB, **wgs72)
 
+Step 7: Convert position C to latitude and longitude to make it more convenient to see for humans:
     >>> lat_EC, lon_EC = nv.n_E2lat_lon(n_EC_E)
     >>> lat, lon, z = deg(lat_EC), deg(lon_EC), z_EC
     >>> msg = 'Ex2: PosC: lat, lon = {:4.4f}, {:4.4f} deg,  height = {:4.2f} m'
@@ -214,6 +217,8 @@ Solution:
     >>> wgs84 = nv.FrameE(name='WGS84')
     >>> position_B = 6371e3 * np.vstack((0.9, -1, 1.1))  # m
     >>> p_EB_E = wgs84.ECEFvector(position_B)
+
+Step 1: Find geodetic latitude and depth from the p-vector:
     >>> pointB = p_EB_E.to_geo_point()
 
     >>> lat, lon, z = pointB.latlon_deg
@@ -230,8 +235,10 @@ Solution:
     >>> wgs84 = dict(a=6378137.0, f=1.0/298.257223563)
     >>> p_EB_E = 6371e3 * np.vstack((0.9, -1, 1.1))  # m
 
+Step 1: Find n-vector and depth from the p-vector:
     >>> n_EB_E, z_EB = nv.p_EB_E2n_EB_E(p_EB_E, **wgs84)
 
+Step 2: Convert to latitude, longitude and height:
     >>> lat_EB, lon_EB = nv.n_E2lat_lon(n_EB_E)
     >>> h = -z_EB
     >>> lat, lon = deg(lat_EB), deg(lon_EB)
@@ -359,16 +366,12 @@ Solution for a sphere:
     'Ex5: Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
 Exact solution for the WGS84 ellipsoid:
-    >>> wgs84 = nv.FrameE(name='WGS84')
-    >>> point1 = wgs84.GeoPoint(latitude=88, longitude=0, degrees=True)
-    >>> point2 = wgs84.GeoPoint(latitude=89, longitude=-170, degrees=True)
-    >>> s_12, _azi1, _azi2 = point1.distance_and_azimuth(point2)
+    >>> p_EA_E = nv.n_EB_E2p_EB_E(n_EA_E, 0)
+    >>> p_EB_E = nv.n_EB_E2p_EB_E(n_EB_E, 0)
+    >>> d_12 = np.linalg.norm(p_EA_E-p_EB_E);
 
-    >>> p_12_E = point2.to_ecef_vector() - point1.to_ecef_vector()
-    >>> d_12 = p_12_E.length
-    >>> msg = 'Ellipsoidal and Euclidean distance = {:5.2f} km, {:5.2f} km'
-    >>> msg.format(s_12 / 1000, d_12 / 1000)
-    'Ellipsoidal and Euclidean distance = 333.95 km, 333.91 km'
+    >>> 'Euclidean distance on WGS84 = {:5.2f} km'.format(d_12 / 1000)
+    'Euclidean distance on WGS84 = 333.91 km'
 
 """
 
