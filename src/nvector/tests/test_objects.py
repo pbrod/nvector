@@ -131,6 +131,16 @@ class TestGeoPoint:
         _assert_allclose(p4.latlon_deg, truth, atol=1e-4)  # Less than 0.4 meters
         assert_allclose(nv.deg(azia), -3.3309161604062467 + 180)
 
+    def test_geopoint_repr(self):
+
+        wgs84 = FrameE(name='WGS84')
+        pointA = wgs84.GeoPoint(latitude=1, longitude=2, z=3, degrees=True)
+        pointB = wgs84.GeoPoint(latitude=4, longitude=5, z=6, degrees=True)
+        p_AB_N = pointA.delta_to(pointB)
+        r = str(p_AB_N)
+        print(r)
+        assert False
+
 
 class TestFrames:
     def test_compare_E_frames(self):

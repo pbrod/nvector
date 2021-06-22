@@ -135,6 +135,8 @@ class _Common(object):
         fmt = ', '
         names = self._NAMES if self._NAMES else list(self.__dict__)
         dict_params = array_to_list_dict(self.__dict__.copy())
+        if 'nvector' in dict_params:
+            dict_params['point'] = dict_params['nvector']
         params = fmt.join(['{}={!r}'.format(name, dict_params[name])
                            for name in names if not name.startswith('_')])
 
