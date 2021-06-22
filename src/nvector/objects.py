@@ -19,6 +19,7 @@ from nvector.core import (lat_lon2n_E,
                           n_EB_E2p_EB_E,
                           p_EB_E2n_EB_E,
                           closest_point_on_great_circle,
+                          course_over_ground,
                           great_circle_distance,
                           euclidean_distance,
                           cross_track_distance,
@@ -66,9 +67,7 @@ def delta_E(point_a, point_b):
 
     See also
     --------
-    n_EA_E_and_p_AB_E2n_EB_E,
-    p_EB_E2n_EB_E,
-    n_EB_E2p_EB_E.
+    n_EA_E_and_p_AB_E2n_EB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E
     """
     # Function 1. in Section 5.4 in Gade (2010):
     p_EA_E = point_a.to_ecef_vector()
@@ -427,7 +426,7 @@ class GeoPoint(_Common):
 
 class Nvector(_Common):
     """
-    Geographical position given as n-vector and depth in frame E
+    Geographical position(s) given as n-vector(s) and depth(s) in frame E
 
     Parameters
     ----------
@@ -587,6 +586,72 @@ class Nvector(_Common):
     def unit(self):
         """Normalizes self to unit vector(s)"""
         self.normal = unit(self.normal)
+
+    def course_over_ground(self, window_length=0, polyorder=2, mode='nearest', cval=0.0):
+        """Returns course over ground in radians from nvector positions
+
+        Parameters
+        ----------
+        window_length: positive odd integer
+            The length of the Savitzky-Golay filter window (i.e., the number of coefficients).
+            Default window_length=0, i.e. no smoothing.
+        polyorder: int
+            The order of the polynomial used to fit the samples.
+            polyorder must be less than window_length.
+        mode: 'mirror', 'constant', 'nearest', 'wrap' or 'interp'.
+            Determines the type of extension to use for the padded signal to
+            which the filter is applied.  When mode is 'constant', the padding
+            value is given by cval. When the 'nearest' mode is selected (the default)
+            the extension contains the nearest input value.
+            When the 'interp' mode is selected, no extension
+            is used.  Instead, a degree polyorder polynomial is fit to the
+            last window_length values of the edges, and this polynomial is
+            used to evaluate the last window_length // 2 output values.
+        cval: scalar, optional
+            Value to fill past the edges of the input if mode is 'constant'.
+            Default is 0.0.
+
+        Returns
+        -------
+        cog: numpy array
+            angle in radians clockwise from True North to the direction towards
+            which the vehicle travels.
+
+        Notes
+        -----
+        Please be aware that this method requires the vehicle positions to be very smooth!
+        If they are not you should probably smooth it by a window_length corresponding
+        to a few seconds or so.
+
+        See https://www.navlab.net/Publications/The_Seven_Ways_to_Find_Heading.pdf
+        for an overview of methods to find accurate headings.
+
+        Examples
+        --------
+        >>> import matplotlib.pyplot as plt
+        >>> import nvector as nv
+        >>> points = nv.GeoPoint((59.381509, 59.387647),(10.496590, 10.494713), degrees=True)
+        >>> nvec = points.to_nvector()
+        >>> COG_rad = nvec.course_over_ground()
+        >>> dx, dy = np.sin(COG_rad[0]), np.cos(COG_rad[0])
+        >>> COG = nv.deg(COG_rad)
+        >>> p_AB_N = nv.n_EA_E_and_n_EB_E2p_AB_N(nvec.normal[:, :1], nvec.normal[:, 1:]).ravel()
+        >>> ax = plt.figure().gca()
+        >>> _ = ax.plot(0, 0, 'bo', label='A')
+        >>> _ = ax.arrow(0,0, dx*300, dy*300, head_width=20)
+        >>> _ = ax.plot(p_AB_N[1], p_AB_N[0], 'go', label='B')
+        >>> _ = ax.set_title(f'COG={COG} degrees')
+        >>> _ = ax.set_xlabel('East [m]')
+        >>> _ = ax.set_ylabel('North [m]')
+        >>> _ = ax.set_xlim(-500, 200)
+        >>> _ = ax.set_aspect('equal', adjustable='box')
+        >>> _ = ax.legend()
+        >>> plt.show() # doctest + SKIP
+        >>> plt.close()
+        """
+        frame = self.frame
+        options = dict(a=frame.a, f=frame.f, R_Ee=frame.R_Ee)
+        return course_over_ground(self.normal, window_length, polyorder, mode, cval, **options)
 
     def mean(self):
         """
@@ -774,9 +839,7 @@ class ECEFvector(Pvector):
 
         See also
         --------
-        n_EB_E2p_EB_E,
-        n_EA_E_and_p_AB_E2n_EB_E,
-        n_EA_E_and_n_EB_E2p_AB_E.
+        n_EB_E2p_EB_E, n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_E.
         """
         _check_frames(self, frame.nvector)
         p_AB_E = self.pvector

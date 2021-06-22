@@ -16,6 +16,7 @@ from nvector.core import (lat_lon2n_E, n_E2lat_lon,
                           euclidean_distance,
                           cross_track_distance,
                           closest_point_on_great_circle,
+                          course_over_ground,
                           on_great_circle_path,
                           n_EA_E_distance_and_azimuth2n_EB_E,
                           n_EA_E_and_n_EB_E2azimuth)
@@ -212,6 +213,25 @@ def test_n_EA_E_and_n_EB_E2azimuth():
     assert_allclose(azimuth, [np.pi/2, 0])
     assert_allclose(azimuth2, [-np.pi/2, np.pi])
     assert_allclose(distance_rad, [np.pi/2, np.pi/2])
+
+
+def test_course_over_ground():
+    a = [[1.0, 1.0],
+         [0.0, 0.0],
+         [0.0, 0.0]]
+    b = [[0.0, 1.0],
+         [1.0, 0.0],
+         [0.0, 0.0]]
+    c = [[1],
+         [0],
+         [0]]
+    cog_a = course_over_ground(a)
+    cog_b = course_over_ground(b)
+    cog_c = course_over_ground(c)
+
+    assert_allclose(cog_a, [0, 0])
+    assert_allclose(cog_b, [-np.pi/2, -np.pi/2])
+    assert np.isnan(cog_c)
 
 
 if __name__ == '__main__':

@@ -21,6 +21,7 @@ from nvector._common import test_docstrings, use_docstring, _make_summary
 
 __all__ = ['closest_point_on_great_circle',
            'cross_track_distance',
+           'course_over_ground',
            'euclidean_distance',
            'great_circle_distance',
            'great_circle_distance_rad',
@@ -33,7 +34,9 @@ __all__ = ['closest_point_on_great_circle',
            'lat_lon2n_E',
            'n_E2lat_lon',
            'n_EA_E_and_n_EB_E2p_AB_E',
+           'n_EA_E_and_n_EB_E2p_AB_N',
            'n_EA_E_and_p_AB_E2n_EB_E',
+           'n_EA_E_and_p_AB_N2n_EB_E',
            'n_EB_E2p_EB_E',
            'p_EB_E2n_EB_E',
            'n_EA_E_distance_and_azimuth2n_EB_E',
@@ -96,7 +99,7 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     Returns
     -------
     p_EB_E:  3 x n array
-        Cartesian position vector(s) from E to B, decomposed in E.
+        Cartesian position vector(s) [m] from E to B, decomposed in E.
 
     Notes
     -----
@@ -188,7 +191,7 @@ def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     Parameters
     ----------
     p_EB_E:  3 x n array
-        Cartesian position vector(s) from E to B, decomposed in E.
+        Cartesian position vector(s) [m] from E to B, decomposed in E.
     a: real scalar, default WGS-84 ellipsoid.
         Semi-major axis of the Earth ellipsoid given in [m].
     f: real scalar, default WGS-84 ellipsoid.
@@ -272,7 +275,7 @@ def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
     Returns
     -------
     p_AB_E:  3 x n array
-        Cartesian position vector(s) from A to B, decomposed in E.
+        Cartesian position vector(s) [m] from A to B, decomposed in E.
 
     Notes
     -----
@@ -326,7 +329,7 @@ def n_EA_E_and_n_EB_E2p_AB_N(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
     Returns
     -------
     p_AB_N:  3 x n array
-        Cartesian position vector(s) from A to B, decomposed in N.
+        Cartesian position vector(s) [m] from A to B, decomposed in N.
 
     Notes
     -----
@@ -374,7 +377,7 @@ def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137, f=1.0 / 298.2572
     n_EA_E:  3 x n array
         n-vector(s) [no unit] of position A, decomposed in E.
     p_AB_E:  3 x n array
-        Cartesian position vector(s) from A to B, decomposed in E.
+        Cartesian position vector(s) [m] from A to B, decomposed in E.
     z_EA:  1 x n array
         Depth(s) [m] of system A, relative to the ellipsoid. (z_EA = -height)
     a: real scalar, default WGS-84 ellipsoid.
@@ -430,7 +433,7 @@ def n_EA_E_and_p_AB_N2n_EB_E(n_EA_E, p_AB_N, z_EA=0, a=6378137, f=1.0 / 298.2572
     n_EA_E:  3 x n array
         n-vector(s) [no unit] of position A, decomposed in E.
     p_AB_N:  3 x n array
-        Cartesian position vector(s) from A to B, decomposed in N.
+        Cartesian position vector(s) [m] from A to B, decomposed in N.
     z_EA:  1 x n array
         Depth(s) [m] of system A, relative to the ellipsoid. (z_EA = -height)
     a: real scalar, default WGS-84 ellipsoid.
@@ -504,7 +507,7 @@ def interp_nvectors(t_i, t, nvectors, kind='linear', window_length=0, polyorder=
     t: real vector length n
         Vector of times.
     nvectors: 3 x n array
-        n-vector(s) [no unit] decomposed in E.
+        n-vectors [no unit] decomposed in E.
     kind: str or int, optional
         Specifies the kind of interpolation as a string
         ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic'
@@ -562,7 +565,7 @@ def interp_nvectors(t_i, t, nvectors, kind='linear', window_length=0, polyorder=
     >>> t_i = np.linspace(0, t[-1], 100)
     >>> nvectors = nv.lat_lon2n_E(lat, lon)
     >>> nvectors_i = nv.interp_nvectors(t_i, t, nvectors, 'cubic', 31)
-    >>> [lati,loni] = nv.n_E2lat_lon(nvectors_i)
+    >>> [lati, loni] = nv.n_E2lat_lon(nvectors_i)
     >>> h = plt.plot(nv.deg(lon), nv.deg(lat), 'o', nv.deg(loni), nv.deg(lati), '-')
     >>> plt.show()  # doctest: +SKIP
     >>> plt.close()
@@ -644,6 +647,109 @@ def intersect(path_a, path_b):
         warnings.warn('Paths are Equal. Intersection point undefined. '
                       'NaN returned.')
     return n_EC_E
+
+
+def _check_window_length(window_length, data):
+    """Make sure window length is odd and shorter than the length of the data"""
+    n = len(data)
+    window_length = window_length + (window_length + 1) % 2  # make sure it is an odd integer
+    if window_length >= n:
+        new_length = max(n - 1 - n % 2, 1)
+        warnings.warn(f'Window length must be smaller than {n}, but got {window_length}!'
+                      f' Truncating to {new_length}!')
+        window_length = new_length
+    return window_length
+
+
+def course_over_ground(nvectors, window_length=0, polyorder=2, mode='nearest', cval=0.0, **options):
+    """Returns course over ground in radians from nvector positions
+
+    Parameters
+    ----------
+    nvectors:  3 x n array
+        Positions of vehicle given as n-vectors [no unit] decomposed in E.
+    window_length: positive odd integer
+        The length of the Savitzky-Golay filter window (i.e., the number of coefficients).
+        Default window_length=0, i.e. no smoothing.
+    polyorder: int
+        The order of the polynomial used to fit the samples.
+        polyorder must be less than window_length.
+    mode: 'mirror', 'constant', 'nearest', 'wrap' or 'interp'.
+        Determines the type of extension to use for the padded signal to
+        which the filter is applied.  When mode is 'constant', the padding
+        value is given by cval. When the 'nearest' mode is selected (the default)
+        the extension contains the nearest input value.
+        When the 'interp' mode is selected, no extension
+        is used.  Instead, a degree polyorder polynomial is fit to the
+        last window_length values of the edges, and this polynomial is
+        used to evaluate the last window_length // 2 output values.
+    cval: scalar, optional
+        Value to fill past the edges of the input if mode is 'constant'.
+        Default is 0.0.
+    a: real scalar, default WGS-84 ellipsoid.
+        Semi-major axis of the Earth ellipsoid given in [m].
+    f: real scalar, default WGS-84 ellipsoid.
+        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+        Earth with radius a is used in stead of WGS-84.
+    R_Ee : 3 x 3 array
+        rotation matrix defining the axes of the coordinate frame E.
+
+
+    Returns
+    -------
+    cog: numpy array
+        angle in radians clockwise from True North to the direction towards
+        which the vehicle travels.
+
+    Notes
+    -----
+    Please be aware that this method requires the vehicle positions to be very smooth!
+    If they are not you should probably smooth it by a window_length corresponding
+    to a few seconds or so.
+
+    See https://www.navlab.net/Publications/The_Seven_Ways_to_Find_Heading.pdf
+    for an overview of methods to find accurate headings.
+
+    Examples
+    --------
+    >>> import matplotlib.pyplot as plt
+    >>> import nvector as nv
+    >>> lats = nv.rad(59.381509, 59.387647)
+    >>> lons = nv.rad(10.496590, 10.494713)
+    >>> nvec = nv.lat_lon2n_E(lats, lons)
+    >>> COG_rad = nv.course_over_ground(nvec)
+    >>> dx, dy = np.sin(COG_rad[0]), np.cos(COG_rad[0])
+    >>> COG = nv.deg(COG_rad)
+    >>> p_AB_N = n_EA_E_and_n_EB_E2p_AB_N(nvec[:, :1], nvec[:, 1:]).ravel()
+    >>> ax = plt.figure().gca()
+    >>> _ = ax.plot(0, 0, 'bo', label='A')
+    >>> _ = ax.arrow(0,0, dx*300, dy*300, head_width=20)
+    >>> _ = ax.plot(p_AB_N[1], p_AB_N[0], 'go', label='B')
+    >>> _ = ax.set_title(f'COG={COG} degrees')
+    >>> _ = ax.set_xlabel('East [m]')
+    >>> _ = ax.set_ylabel('North [m]')
+    >>> _ = ax.set_xlim(-500, 200)
+    >>> _ = ax.set_aspect('equal', adjustable='box')
+    >>> _ = ax.legend()
+    >>> plt.show() # doctest + SKIP
+    >>> plt.close()
+    """
+    nvectors = np.atleast_2d(nvectors)
+    if nvectors.shape[1] < 2:
+        return np.nan
+
+    if window_length > 0:
+        window_length = _check_window_length(window_length, nvectors[0])
+        if mode not in {'nearest', 'interp'}:
+            warnings.warn(f'Using {mode} is not a recommended mode for filtering headings data!'
+                          ' Use "interp" or "nearest" mode instead!')
+        options = dict(axis=1, mode=mode, cval=cval)
+        normal = savgol_filter(nvectors, window_length, polyorder, **options)
+    else:
+        normal = nvectors
+    n_vecs = np.hstack((normal[:, :1], unit(normal[:, :-1] + normal[:, 1:]), normal[:, -1:]))
+
+    return n_EA_E_and_n_EB_E2azimuth(n_vecs[:, :-1], n_vecs[:, 1:], **options)
 
 
 def great_circle_normal(n_EA_E, n_EB_E):

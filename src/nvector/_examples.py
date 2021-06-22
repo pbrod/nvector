@@ -78,7 +78,7 @@ Step1: Convert to n-vectors:
 
 Step2: Find p_AB_N (delta decomposed in N). WGS-84 ellipsoid is default:
     >>> p_AB_N = nv.n_EA_E_and_n_EB_E2p_AB_N(n_EA_E, n_EB_E, z_EA, z_EB)
-    >>> x, y, z = p_AB_N
+    >>> x, y, z = p_AB_N.ravel()
     >>> 'Ex1: delta north, east, down = {0:8.2f}, {1:8.2f}, {2:8.2f}'.format(x, y, z)
     'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
 
