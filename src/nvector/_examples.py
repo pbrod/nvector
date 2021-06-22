@@ -76,19 +76,13 @@ Step1: Convert to n-vectors:
     >>> n_EA_E = nv.lat_lon2n_E(lat_EA, lon_EA)
     >>> n_EB_E = nv.lat_lon2n_E(lat_EB, lon_EB)
 
-Step2: Find p_AB_E (delta decomposed in E). WGS-84 ellipsoid is default:
-    >>> p_AB_E = nv.n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA, z_EB)
-
-Step3: Find R_EN for position A:
-    >>> R_EN = nv.n_E2R_EN(n_EA_E)
-
-Step4: Find p_AB_N (delta decomposed in N).
-    >>> p_AB_N = np.dot(R_EN.T, p_AB_E).ravel()
+Step2: Find p_AB_N (delta decomposed in N). WGS-84 ellipsoid is default:
+    >>> p_AB_N = nv.n_EA_E_and_n_EB_E2p_AB_N(n_EA_E, n_EB_E, z_EA, z_EB)
     >>> x, y, z = p_AB_N
     >>> 'Ex1: delta north, east, down = {0:8.2f}, {1:8.2f}, {2:8.2f}'.format(x, y, z)
     'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
 
-Step5: Find the direction (azimuth) to B, relative to north as well as elevation and distance:
+Step3: Find the direction (azimuth) to B, relative to north as well as elevation and distance:
     >>> azimuth = np.arctan2(y, x)
     >>> 'azimuth = {0:4.2f} deg'.format(deg(azimuth))
     'azimuth = 45.11 deg'

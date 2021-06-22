@@ -7,7 +7,7 @@ from __future__ import division, print_function
 import numpy as np
 from numpy import arctan2, sin, cos, array, sqrt
 from nvector._common import test_docstrings, _make_summary
-from nvector.util import mdot, unit, norm, _check_length_deviation
+from nvector.util import mdot, unit, norm, _nvector_check_length
 from nvector import license as _license
 
 __all__ = ['E_rotation',
@@ -86,7 +86,7 @@ def E_rotation(axes='e'):
 
 def R2xyz(R_AB):
     """
-    Returns the angles about new axes in the xyz-order from a rotation matrix.
+    Returns the Euler angles in the xyz-order from a rotation matrix.
 
     Parameters
     ----------
@@ -149,7 +149,7 @@ def R2xyz(R_AB):
 
 def R2zyx(R_AB):
     """
-    Returns the angles about new axes in the zxy-order from a rotation matrix.
+    Returns the Euler angles in the zxy-order from a rotation matrix.
 
     Parameters
     ----------
@@ -274,7 +274,7 @@ def _atleast_3d(x, y, z):
 
 def xyz2R(x, y, z):
     """
-    Returns rotation matrix from 3 angles about new axes in the xyz-order.
+    Returns rotation matrix from Euler angles in the xyz-order.
 
     Parameters
     ----------
@@ -326,7 +326,7 @@ def xyz2R(x, y, z):
 
 def zyx2R(z, y, x):
     """
-    Returns rotation matrix from 3 angles about new axes in the zyx-order.
+    Returns rotation matrix from Euler angles in the zyx-order.
 
     Parameters
     ----------
@@ -424,7 +424,7 @@ def n_E2lat_lon(n_E, R_Ee=None):
     n_E = np.atleast_2d(n_E)
     if R_Ee is None:
         R_Ee = E_rotation()
-    _check_length_deviation(n_E)
+    _nvector_check_length(n_E)
     n_E0 = np.dot(R_Ee, n_E)
 
     # Equation (5) in Gade (2010):
@@ -465,7 +465,7 @@ def n_E2R_EN(n_E, R_Ee=None):
     if R_Ee is None:
         R_Ee = E_rotation()
     n_E = np.atleast_2d(n_E)
-    _check_length_deviation(n_E)
+    _nvector_check_length(n_E)
     n_E = unit(np.dot(R_Ee, n_E))
 
     # N coordinate frame (North-East-Down) is defined in Table 2 in Gade (2010)

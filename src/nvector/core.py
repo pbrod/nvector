@@ -15,7 +15,7 @@ from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
 from nvector import _examples, license as _license
 from nvector.rotation import E_rotation, n_E2R_EN, n_E2lat_lon  # @UnusedImport
-from nvector.util import mdot, nthroot, unit, _check_length_deviation
+from nvector.util import mdot, nthroot, unit, _nvector_check_length
 from nvector._common import test_docstrings, use_docstring, _make_summary
 
 
@@ -121,7 +121,7 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
         R_Ee = E_rotation()
 
     n_EB_E = np.atleast_2d(n_EB_E)
-    _check_length_deviation(n_EB_E)
+    _nvector_check_length(n_EB_E)
 
     # Make sure to rotate the coordinates so that:
     # x -> north pole and yz-plane coincides with the equatorial
@@ -291,7 +291,7 @@ def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
 
     See also
     --------
-    n_EA_E_and_p_AB_E2n_EB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E
+    n_EA_E_and_p_AB_E2n_EB_E, n_EA_E_and_n_EB_E2p_AB_N, n_EB_E2p_EB_E,
 
     """
 
@@ -302,10 +302,72 @@ def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
     return p_AB_E
 
 
+@use_docstring(_examples.get_examples_no_header([1], False))
+def n_EA_E_and_n_EB_E2p_AB_N(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
+                             f=1.0 / 298.257223563, R_Ee=None):
+    """
+    Returns the delta vector from position A to B decomposed in N.
+
+    Parameters
+    ----------
+    n_EA_E, n_EB_E:  3 x n array
+        n-vector(s) [no unit] of position A and B, decomposed in E.
+    z_EA, z_EB:  1 x n array
+        Depth(s) [m] of system A and B, relative to the ellipsoid.
+        (z_EA = -height, z_EB = -height)
+    a: real scalar, default WGS-84 ellipsoid.
+        Semi-major axis of the Earth ellipsoid given in [m].
+    f: real scalar, default WGS-84 ellipsoid.
+        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+        Earth with radius a is used in stead of WGS-84.
+    R_Ee : 3 x 3 array
+        rotation matrix defining the axes of the coordinate frame E.
+
+    Returns
+    -------
+    p_AB_N:  3 x n array
+        Cartesian position vector(s) from A to B, decomposed in N.
+
+    Notes
+    -----
+    The n-vectors for positions A (n_EA_E) and B (n_EB_E) are given. The
+    output is the delta vector from A to B (p_AB_E).
+    The calculation is excact, taking the ellipsity of the Earth into account.
+    It is also non-singular as both n-vector and p-vector are non-singular
+    (except for the center of the Earth).
+    The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
+    might be specified.
+
+    Examples
+    --------
+    {super}
+
+
+    See also
+    --------
+    n_EA_E_and_p_AB_E2n_EB_E, p_EB_E2n_EB_E, n_EB_E2p_EB_E, n_EA_E_and_n_EB_E2p_AB_E
+
+    """
+    p_AB_E = n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA, z_EB, a, f, R_Ee)
+
+    R_EN = n_E2R_EN(n_EA_E, R_Ee=R_Ee)
+
+    # p_AB_N = dot(R_EN.T, p_AB_E)
+    p_AB_N = mdot(np.swapaxes(R_EN, 1, 0), p_AB_E[:, None, ...]).reshape(3, -1)
+    # (Note the transpose of R_EN: The "closest-rule" says that when
+    # decomposing, the frame in the subscript of the rotation matrix that
+    # is closest to the vector, should equal the frame where the vector is
+    # decomposed. Thus the calculation np.dot(R_NE, p_AB_E) is correct,
+    # since the vector is decomposed in E, and E is closest to the vector.
+    # In the example we only had R_EN, and thus we must transpose it:
+    # R_EN'=R_NE)
+    return p_AB_N
+
+
 @use_docstring(_examples.get_examples_no_header([2], oo_solution=False))
 def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     """
-    Returns position B from position A and delta E vector.
+    Returns position B from position A and delta vector decomposed in E.
 
     Parameters
     ----------
@@ -356,6 +418,66 @@ def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137, f=1.0 / 298.2572
     p_EB_E = p_EA_E + p_AB_E
     n_EB_E, z_EB = p_EB_E2n_EB_E(p_EB_E, a, f, R_Ee)
     return n_EB_E, z_EB
+
+
+@use_docstring(_examples.get_examples_no_header([2], oo_solution=False))
+def n_EA_E_and_p_AB_N2n_EB_E(n_EA_E, p_AB_N, z_EA=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
+    """
+    Returns position B from position A and delta vector decomposed in N.
+
+    Parameters
+    ----------
+    n_EA_E:  3 x n array
+        n-vector(s) [no unit] of position A, decomposed in E.
+    p_AB_N:  3 x n array
+        Cartesian position vector(s) from A to B, decomposed in N.
+    z_EA:  1 x n array
+        Depth(s) [m] of system A, relative to the ellipsoid. (z_EA = -height)
+    a: real scalar, default WGS-84 ellipsoid.
+        Semi-major axis of the Earth ellipsoid given in [m].
+    f: real scalar, default WGS-84 ellipsoid.
+        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+        Earth with radius a is used in stead of WGS-84.
+    R_Ee : 3 x 3 array
+        rotation matrix defining the axes of the coordinate frame E.
+
+    Returns
+    -------
+    n_EB_E:  3 x n array
+        n-vector(s) [no unit] of position B, decomposed in E.
+    z_EB:  1 x n array
+        Depth(s) [m] of system B, relative to the ellipsoid.
+        (z_EB = -height)
+
+    Notes
+    -----
+    The n-vector for position A (n_EA_E) and the position-vector from position
+    A to position B (p_AB_N) are given. The output is the n-vector of position
+    B (n_EB_E) and depth of B (z_EB).
+    The calculation is excact, taking the ellipsity of the Earth into account.
+    It is also non-singular as both n-vector and p-vector are non-singular
+    (except for the center of the Earth).
+    The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
+    might be specified.
+
+    {super}
+
+    See also
+    --------
+    n_EA_E_and_n_EB_E2p_AB_N,
+    n_EA_E_and_p_AB_E2n_EB_E,
+    n_E2R_EN
+    """
+    if R_Ee is None:
+        R_Ee = E_rotation()
+    n_EA_E, p_AB_N = np.atleast_2d(n_EA_E, p_AB_N)
+
+    R_EN = n_E2R_EN(n_EA_E, R_Ee=R_Ee)
+
+    # p_AB_E = dot(R_EN, p_AB_N)
+    p_AB_E = mdot(R_EN, p_AB_N[:, None, ...]).reshape(3, -1)
+
+    return n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA, a=a, f=f, R_Ee=R_Ee)
 
 
 def _interp_vectors(t_i, t, nvectors, kind, window_length, polyorder, mode, cval):
@@ -822,24 +944,10 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, 
     if R_Ee is None:
         R_Ee = E_rotation()
 
-    # Step2: Find p_AB_E (delta decomposed in E).
-    p_AB_E = n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=a, f=f, R_Ee=R_Ee)
+    #  Find p_AB_N (delta decomposed in N).
+    p_AB_N = n_EA_E_and_n_EB_E2p_AB_N(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=a, f=f, R_Ee=R_Ee)
 
-    # Step3: Find R_EN for position A:
-    R_EN = n_E2R_EN(n_EA_E, R_Ee=R_Ee)
-
-    # Step4: Find p_AB_N
-    # p_AB_N = dot(R_EN.T, p_AB_E)
-    p_AB_N = mdot(np.swapaxes(R_EN, 1, 0), p_AB_E[:, None, ...]).reshape(3, -1)
-    # (Note the transpose of R_EN: The "closest-rule" says that when
-    # decomposing, the frame in the subscript of the rotation matrix that
-    # is closest to the vector, should equal the frame where the vector is
-    # decomposed. Thus the calculation np.dot(R_NE, p_AB_E) is correct,
-    # since the vector is decomposed in E, and E is closest to the vector.
-    # In the example we only had R_EN, and thus we must transpose it:
-    # R_EN'=R_NE)
-
-    # Step5: Also find the direction (azimuth) to B, relative to north:
+    # Find the direction (azimuth) to B, relative to north:
 
     return arctan2(p_AB_N[1], p_AB_N[0])
 

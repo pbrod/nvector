@@ -39,8 +39,8 @@ position calculations can be solved with simple vector algebra
 Converting between n-vector and latitude/longitude is unambiguous and easy
 using the provided functions.
 
-n_E is n-vector in the program code, while in documents we use nE. E denotes
-an Earth-fixed coordinate frame, and it indicates that the three components of
+n_E is n-vector in the program code, while in documents we use :math:`\mathbf{n}^{E}`. 
+E denotes an Earth-fixed coordinate frame, and it indicates that the three components of
 n-vector are along the three axes of E. More details about the notation and
 reference frames can be found in the `documentation. 
 <https://www.navlab.net/nvector/#vector_symbols>`_

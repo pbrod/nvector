@@ -240,11 +240,23 @@ def allclose(a, b, rtol=1.e-7, atol=1.e-14, equal_nan=False):
     return np.all(isclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan))
 
 
-def _check_length_deviation(n_E, limit=0.1):
+def _nvector_check_length(n_E, atol=0.1):
     """
-    n-vector should have length=1,  i.e. norm(n_E)=1.
+    Emits a warning if nvector deviates significantly from unit length.
 
-    A deviation from 1 exceeding this limit gives a warning.
+    Parameters
+    ----------
+    n_E: 3 x n array
+        nvector
+    atol: real scalar, default 0.1
+          The absolute tolerance parameter (see Notes).
+
+    Notes
+    -----
+    All n-vector should have unit length,  i.e. norm(n_E)=1.
+
+    A significant deviation from that value gives a warning, i.e. when
+    abs(norm(n_E)-1) > atol.
     This function only depends of the direction of n-vector, thus the warning
     is included only to give a notice in cases where a wrong input is given
     unintentionally (i.e. the input is not even approximately a unit vector).
@@ -253,7 +265,7 @@ def _check_length_deviation(n_E, limit=0.1):
     (assuming advanced users input correct n-vectors)
     """
     length_deviation = abs(norm(n_E[:, 0]) - 1)
-    if length_deviation > limit:
+    if length_deviation > atol:
         warnings.warn('n-vector should have unit length: '
                       'norm(n_E)~=1 ! Error is: {}'.format(length_deviation))
 

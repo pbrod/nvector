@@ -46,6 +46,8 @@ Geodesic functions
     p_EB_E2n_EB_E
     n_EA_E_and_n_EB_E2p_AB_E
     n_EA_E_and_p_AB_E2n_EB_E
+    n_EA_E_and_n_EB_E2p_AB_N
+    n_EA_E_and_p_AB_N2n_EB_E
     n_EA_E_and_n_EB_E2azimuth
     n_EA_E_distance_and_azimuth2n_EB_E    
     on_great_circle
@@ -58,7 +60,7 @@ Rotation matrices and angles
 ----------------------------
 .. autosummary::
    :toctree: generated/
-	
+
     E_rotation
     n_E2R_EN
     n_E_and_wa2R_EL
