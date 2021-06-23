@@ -661,7 +661,7 @@ def _check_window_length(window_length, data):
     return window_length
 
 
-def course_over_ground(nvectors, window_length=0, polyorder=2, mode='nearest', cval=0.0, **options):
+def course_over_ground(nvectors, window_length=0, polyorder=2, mode='nearest', cval=0.0, **datum):
     """Returns course over ground in radians from nvector positions
 
     Parameters
@@ -723,7 +723,7 @@ def course_over_ground(nvectors, window_length=0, polyorder=2, mode='nearest', c
     >>> p_AB_N = n_EA_E_and_n_EB_E2p_AB_N(nvec[:, :1], nvec[:, 1:]).ravel()
     >>> ax = plt.figure().gca()
     >>> _ = ax.plot(0, 0, 'bo', label='A')
-    >>> _ = ax.arrow(0,0, dx*300, dy*300, head_width=20)
+    >>> _ = ax.arrow(0,0, dx*300, dy*300, head_width=20, label='COG')
     >>> _ = ax.plot(p_AB_N[1], p_AB_N[0], 'go', label='B')
     >>> _ = ax.set_title(f'COG={COG} degrees')
     >>> _ = ax.set_xlabel('East [m]')
@@ -733,6 +733,10 @@ def course_over_ground(nvectors, window_length=0, polyorder=2, mode='nearest', c
     >>> _ = ax.legend()
     >>> plt.show() # doctest + SKIP
     >>> plt.close()
+
+    See also
+    --------
+    n_EA_E_and_n_EB_E2azimuth
     """
     nvectors = np.atleast_2d(nvectors)
     if nvectors.shape[1] < 2:
@@ -743,13 +747,12 @@ def course_over_ground(nvectors, window_length=0, polyorder=2, mode='nearest', c
         if mode not in {'nearest', 'interp'}:
             warnings.warn(f'Using {mode} is not a recommended mode for filtering headings data!'
                           ' Use "interp" or "nearest" mode instead!')
-        options = dict(axis=1, mode=mode, cval=cval)
-        normal = savgol_filter(nvectors, window_length, polyorder, **options)
+        normal = savgol_filter(nvectors, window_length, polyorder, axis=1, mode=mode, cval=cval)
     else:
         normal = nvectors
     n_vecs = np.hstack((normal[:, :1], unit(normal[:, :-1] + normal[:, 1:]), normal[:, -1:]))
 
-    return n_EA_E_and_n_EB_E2azimuth(n_vecs[:, :-1], n_vecs[:, 1:], **options)
+    return n_EA_E_and_n_EB_E2azimuth(n_vecs[:, :-1], n_vecs[:, 1:], **datum)
 
 
 def great_circle_normal(n_EA_E, n_EB_E):
@@ -1045,7 +1048,7 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, 
 
     See also
     --------
-    great_circle_distance_rad, n_EA_E_distance_and_azimuth2n_EB_E
+    great_circle_distance_rad, n_EA_E_distance_and_azimuth2n_EB_E, course_over_ground
     """
     if R_Ee is None:
         R_Ee = E_rotation()

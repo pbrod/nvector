@@ -23,7 +23,7 @@ Ellipsoid = namedtuple('Ellipsoid', 'a f name')
 ELLIPSOID = {
     1: Ellipsoid(a=6377563.3960, f=1.0 / 299.3249646, name='Airy 1858'),
     2: Ellipsoid(a=6377340.189, f=1.0 / 299.3249646, name='Airy Modified'),
-    3: Ellipsoid(a=6378160, f=1.0 / 298.25, name='Australian National'),
+    3: Ellipsoid(a=6378160.0, f=1.0 / 298.25, name='Australian National'),
     4: Ellipsoid(a=6377397.155, f=1.0 / 299.1528128, name='Bessel 1841'),
     5: Ellipsoid(a=6378249.145, f=1.0 / 293.465, name='Clarke 1880'),
     6: Ellipsoid(a=6377276.345, f=1.0 / 300.8017, name='Everest 1830'),
@@ -33,13 +33,14 @@ ELLIPSOID = {
     10: Ellipsoid(a=6378270.0, f=1.0 / 297, name='Hough 1956'),
     11: Ellipsoid(a=6378388.0, f=1.0 / 297, name='International (Hayford)/European Datum (ED50)'),
     12: Ellipsoid(a=6378245.0, f=1.0 / 298.3, name='Krassovsky 1938'),
-    13: Ellipsoid(a=6378145., f=1.0 / 298.25, name='NWL-9D  (WGS 66)'),
-    14: Ellipsoid(a=6378160., f=1.0 / 298.25, name='South American 1969 (SAD69'),
-    15: Ellipsoid(a=6378136, f=1.0 / 298.257, name='Soviet Geod. System 1985'),
-    16: Ellipsoid(a=6378135., f=1.0 / 298.26, name='WGS 72'),
+    13: Ellipsoid(a=6378145.0, f=1.0 / 298.25, name='NWL-9D  (WGS 66)'),
+    14: Ellipsoid(a=6378160.0, f=1.0 / 298.25, name='South American 1969 (SAD69'),
+    15: Ellipsoid(a=6378136.0, f=1.0 / 298.257, name='Soviet Geod. System 1985'),
+    16: Ellipsoid(a=6378135.0, f=1.0 / 298.26, name='WGS 72'),
     17: Ellipsoid(a=6378206.4, f=1.0 / 294.9786982138, name='Clarke 1866    (NAD27)'),
     18: Ellipsoid(a=6378137.0, f=1.0 / 298.257223563, name='GRS80 / WGS84  (NAD83)'),
-    19: Ellipsoid(a=6378137, f=298.257222101, name='ETRS89')
+    19: Ellipsoid(a=6378137.0, f=298.257222101, name='ETRS89 (EUREF89)'),
+    20: Ellipsoid(a=6377492.0176, f=1/299.15281285, name='NGO1948')
 }
 ELLIPSOID_IX = {'airy1858': 1,
                 'airymodified': 2,
@@ -69,6 +70,9 @@ ELLIPSOID_IX = {'airy1858': 1,
                 'grs80': 18,
                 'wgs84': 18,
                 'nad83': 18,
+                'euref89': 19,
+                'etrs89': 19,
+                'ngo1948': 20
                 }
 
 
@@ -452,7 +456,8 @@ def get_ellipsoid(name):
         16) WGS 72
         17) Clarke 1866    (NAD27)
         18) GRS80 / WGS84  (NAD83)
-        19) ETRS89
+        19) ETRS89 (EUREF89)
+        20) NGO1948
 
     Notes
     -----
