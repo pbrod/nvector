@@ -31,15 +31,16 @@ ELLIPSOID = {
     8: Ellipsoid(a=6378166.0, f=1.0 / 298.3, name='Fisher 1960'),
     9: Ellipsoid(a=6378150.0, f=1.0 / 298.3, name='Fisher 1968'),
     10: Ellipsoid(a=6378270.0, f=1.0 / 297, name='Hough 1956'),
-    11: Ellipsoid(a=6378388.0, f=1.0 / 297, name='International (Hayford)/European Datum (ED50)'),
+    11: Ellipsoid(a=6378388.0, f=1.0 / 297,
+                  name='Hayford/International ellipsoid 1924/European Datum 1950/ED50'),
     12: Ellipsoid(a=6378245.0, f=1.0 / 298.3, name='Krassovsky 1938'),
-    13: Ellipsoid(a=6378145.0, f=1.0 / 298.25, name='NWL-9D  (WGS 66)'),
-    14: Ellipsoid(a=6378160.0, f=1.0 / 298.25, name='South American 1969 (SAD69'),
+    13: Ellipsoid(a=6378145.0, f=1.0 / 298.25, name='NWL-9D / WGS 66'),
+    14: Ellipsoid(a=6378160.0, f=1.0 / 298.25, name='South American 1969 / SAD69'),
     15: Ellipsoid(a=6378136.0, f=1.0 / 298.257, name='Soviet Geod. System 1985'),
     16: Ellipsoid(a=6378135.0, f=1.0 / 298.26, name='WGS 72'),
-    17: Ellipsoid(a=6378206.4, f=1.0 / 294.9786982138, name='Clarke 1866    (NAD27)'),
-    18: Ellipsoid(a=6378137.0, f=1.0 / 298.257223563, name='GRS80 / WGS84  (NAD83)'),
-    19: Ellipsoid(a=6378137.0, f=298.257222101, name='ETRS89 (EUREF89)'),
+    17: Ellipsoid(a=6378206.4, f=1.0 / 294.9786982138, name='Clarke 1866 / NAD27'),
+    18: Ellipsoid(a=6378137.0, f=1.0 / 298.257223563, name='GRS80 / WGS84 / NAD83'),
+    19: Ellipsoid(a=6378137.0, f=298.257222101, name='ETRS89 / EUREF89'),
     20: Ellipsoid(a=6377492.0176, f=1/299.15281285, name='NGO1948')
 }
 ELLIPSOID_IX = {'airy1858': 1,
@@ -54,8 +55,10 @@ ELLIPSOID_IX = {'airy1858': 1,
                 'fisher1968': 9,
                 'hough1956': 10,
                 'hough': 10,
-                'international': 11,
                 'hayford': 11,
+                'international': 11,
+                'internationalellipsoid1924': 11,
+                'europeandatum1950': 11,
                 'ed50': 11,
                 'krassovsky': 12,
                 'krassovsky1938': 12,
@@ -415,7 +418,8 @@ def nthroot(x, n):
 
     Parameters
     ----------
-    x, n
+    x : real scalar or numpy array
+    n : scalar integer
 
     Examples
     --------
@@ -425,9 +429,15 @@ def nthroot(x, n):
     True
 
     """
+    shape = np.shape(x)
+    x = np.atleast_1d(x)
     y = x**(1. / n)
-    return np.where((x != 0) & (_EPS * np.abs(x) < 1),
-                    y - (y**n - x) / (n * y**(n - 1)), y)
+    mask = (x != 0) & (_EPS * np.abs(x) < 1)
+    ym = y[mask]
+    y[mask] -= (ym**n - x[mask]) / (n * ym**(n - 1))
+    if shape == ():
+        return y[()]
+    return y
 
 
 def get_ellipsoid(name):
@@ -448,15 +458,15 @@ def get_ellipsoid(name):
         8) Fisher 1960
         9) Fisher 1968
         10) Hough 1956
-        11) International (Hayford)/European Datum (ED50)
+        11) Hayford / International ellipsoid 1924 / European Datum 1950 / ED50
         12) Krassovsky 1938
-        13) NWL-9D (WGS 66)
+        13) NWL-9D / WGS 66
         14) South American 1969
         15) Soviet Geod. System 1985
         16) WGS 72
-        17) Clarke 1866    (NAD27)
-        18) GRS80 / WGS84  (NAD83)
-        19) ETRS89 (EUREF89)
+        17) Clarke 1866 / NAD27
+        18) GRS80 / WGS84 / NAD83
+        19) ETRS89 / EUREF89
         20) NGO1948
 
     Notes
@@ -470,13 +480,13 @@ def get_ellipsoid(name):
     --------
     >>> import nvector as nv
     >>> nv.get_ellipsoid(name='wgs84')
-    Ellipsoid(a=6378137.0, f=0.0033528106647474805, name='GRS80 / WGS84  (NAD83)')
+    Ellipsoid(a=6378137.0, f=0.0033528106647474805, name='GRS80 / WGS84 / NAD83')
     >>> nv.get_ellipsoid(name='GRS80')
-    Ellipsoid(a=6378137.0, f=0.0033528106647474805, name='GRS80 / WGS84  (NAD83)')
+    Ellipsoid(a=6378137.0, f=0.0033528106647474805, name='GRS80 / WGS84 / NAD83')
     >>> nv.get_ellipsoid(name='NAD83')
-    Ellipsoid(a=6378137.0, f=0.0033528106647474805, name='GRS80 / WGS84  (NAD83)')
+    Ellipsoid(a=6378137.0, f=0.0033528106647474805, name='GRS80 / WGS84 / NAD83')
     >>> nv.get_ellipsoid(name=18)
-    Ellipsoid(a=6378137.0, f=0.0033528106647474805, name='GRS80 / WGS84  (NAD83)')
+    Ellipsoid(a=6378137.0, f=0.0033528106647474805, name='GRS80 / WGS84 / NAD83')
 
     >>> wgs72 = nv.get_ellipsoid(name="WGS 72")
     >>> wgs72.a == 6378135.0
@@ -489,7 +499,7 @@ def get_ellipsoid(name):
     True
     """
     if isinstance(name, str):
-        name = name.lower().replace(' ', '')
+        name = name.lower().replace(' ', '').partition('/')[0]
     ellipsoid_id = ELLIPSOID_IX.get(name, name)
 
     return ELLIPSOID[ellipsoid_id]
@@ -527,10 +537,13 @@ def unit(vector, norm_zero_vector=1):
     ...                                               [ 0.57735027, 0]])
     True
     """
-    current_norm = norm(vector, axis=0, keepdims=True)
-    idx = np.flatnonzero(current_norm == 0)
-    unit_vector = vector / (current_norm + _TINY)
+    # Scale to avoid overflow
+    unit_vector = np.atleast_1d(vector) / (np.max(np.abs(vector), axis=0, keepdims=True) + _TINY)
 
+    current_norm = norm(unit_vector, axis=0, keepdims=True)
+    unit_vector /= (current_norm + _TINY)
+
+    idx = np.flatnonzero(current_norm == 0)
     unit_vector[:, idx] = 0 * norm_zero_vector
     unit_vector[0, idx] = 1 * norm_zero_vector
     return unit_vector
