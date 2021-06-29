@@ -1161,11 +1161,11 @@ class GeoPath(object):
         >>> point = path.closest_point_on_great_circle(point_c)
         >>> path.on_path(point)
         False
-        >>> np.allclose((point.latitude_deg, point.longitude_deg),
+        >>> nv.allclose((point.latitude_deg, point.longitude_deg),
         ...             (50.99270338, 2.89977984))
         True
 
-        >>> np.allclose(GeoPath(point_c, point).track_distance(),  810.76312076)
+        >>> nv.allclose(GeoPath(point_c, point).track_distance(),  810.76312076)
         True
 
         """

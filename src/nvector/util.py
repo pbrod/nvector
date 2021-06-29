@@ -12,7 +12,8 @@ from numpy.linalg import norm
 from nvector._common import test_docstrings, _make_summary
 from nvector import license as _license
 
-__all__ = ['deg', 'rad', 'mdot', 'nthroot', 'get_ellipsoid', 'select_ellipsoid', 'unit']
+__all__ = ['deg', 'rad', 'mdot', 'nthroot', 'get_ellipsoid', 'select_ellipsoid', 'unit',
+           'allclose']
 
 
 _EPS = np.finfo(float).eps  # machine precision (machine epsilon)
@@ -371,7 +372,7 @@ def mdot(a, b):
         >>> tm = nv.mdot(a, b)
         >>> tm.shape
         (3, 3, 2)
-        >>> np.allclose(t, tm)
+        >>> nv.allclose(t, tm)
         True
 
     3 x 3 x 2 times 3 x 1 array -> 3 x 1 x 2 array
@@ -381,28 +382,28 @@ def mdot(a, b):
         >>> tm1 = nv.mdot(a, b[:,0,0].reshape(-1,1))
         >>> tm1.shape
         (3, 1, 2)
-        >>> np.allclose(t1, tm1)
+        >>> nv.allclose(t1, tm1)
         True
 
     3 x 3  times 3 x 3 array -> 3 x 3 array
         >>> tt0 = nv.mdot(a[...,0], b[...,0])
         >>> tt0.shape
         (3, 3)
-        >>> np.allclose(t[...,0], tt0)
+        >>> nv.allclose(t[...,0], tt0)
         True
 
     3 x 3  times 3 x 1 array -> 3 x 1 array
         >>> tt0 = nv.mdot(a[...,0], b[:,:1,0])
         >>> tt0.shape
         (3, 1)
-        >>> np.allclose(t[:,:1,0], tt0)
+        >>> nv.allclose(t[:,:1,0], tt0)
         True
 
     3 x 3  times 3 x 1 x 2 array -> 3 x 1 x 2 array
         >>> tt0 = nv.mdot(a[..., 0], b[:, :2, 0][:, None])
         >>> tt0.shape
         (3, 1, 2)
-        >>> np.allclose(t[:,:2,0][:,None], tt0)
+        >>> nv.allclose(t[:,:2,0][:,None], tt0)
         True
 
     See also
@@ -423,9 +424,8 @@ def nthroot(x, n):
 
     Examples
     --------
-    >>> import numpy as np
     >>> import nvector as nv
-    >>> np.allclose(nv.nthroot(27.0, 3), 3.0)
+    >>> nv.allclose(nv.nthroot(27.0, 3), 3.0)
     True
 
     """
@@ -530,9 +530,8 @@ def unit(vector, norm_zero_vector=1):
 
     Examples
     --------
-    >>> import numpy as np
     >>> import nvector as nv
-    >>> np.allclose(nv.unit([[1, 0],[1, 0],[1, 0]]), [[ 0.57735027, 1],
+    >>> nv.allclose(nv.unit([[1, 0],[1, 0],[1, 0]]), [[ 0.57735027, 1],
     ...                                               [ 0.57735027, 0],
     ...                                               [ 0.57735027, 0]])
     True

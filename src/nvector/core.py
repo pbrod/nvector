@@ -62,6 +62,29 @@ def lat_lon2n_E(latitude, longitude, R_Ee=None):
     n_E: 3 x n array
         n-vector(s) [no unit] decomposed in E.
 
+    Examples
+    --------
+    >>> import nvector as nv
+    >>> pi = 3.141592653589793
+
+    Scalar call
+    >>> nv.allclose(nv.lat_lon2n_E(0, 0), [[1.],
+    ...                                    [0.],
+    ...                                    [0.]])
+    True
+
+    Vectorized call
+    >>> nv.allclose(nv.lat_lon2n_E([0., 0.], [0., pi/2]), [[1., 0.],
+    ...                                                   [0., 1.],
+    ...                                                   [0., 0.]])
+    True
+
+    Broadcasting call
+    >>> nv.allclose(nv.lat_lon2n_E(0., [0, pi/2]), [[1., 0.],
+    ...                                           [0., 1.],
+    ...                                           [0., 0.]])
+    True
+
     See also
     --------
     n_E2lat_lon
@@ -69,7 +92,7 @@ def lat_lon2n_E(latitude, longitude, R_Ee=None):
     if R_Ee is None:
         R_Ee = E_rotation()
     # Equation (3) from Gade (2010):
-    nvec = np.vstack((sin(latitude),
+    nvec = np.vstack((sin(latitude) * np.ones_like(longitude),
                       sin(longitude) * cos(latitude),
                       -cos(longitude) * cos(latitude)))
     # n_E = dot(R_Ee.T, nvec)
@@ -84,7 +107,7 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
 
     Parameters
     ----------
-    n_EB_E:  3 x n array
+    n_EB_E:  3 x m array
         n-vector(s) [no unit] of position B, decomposed in E.
     depth:  1 x n array
         Depth(s) [m] of system B, relative to the ellipsoid (depth = -height)
@@ -98,7 +121,7 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
 
     Returns
     -------
-    p_EB_E:  3 x n array
+    p_EB_E:  3 x max(m,n) array
         Cartesian position vector(s) [m] from E to B, decomposed in E.
 
     Notes
@@ -111,6 +134,7 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     (except for the center of the Earth).
     The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
     might be specified.
+    The shape of the output p_EB_E is the broadcasted shapes of n_EB_E and depth.
 
     Examples
     --------
@@ -259,9 +283,9 @@ def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
 
     Parameters
     ----------
-    n_EA_E, n_EB_E:  3 x n array
+    n_EA_E, n_EB_E:  3 x j  and 3 x k arrays
         n-vector(s) [no unit] of position A and B, decomposed in E.
-    z_EA, z_EB:  1 x n array
+    z_EA, z_EB:  3 x m  and 3 x n arrays
         Depth(s) [m] of system A and B, relative to the ellipsoid.
         (z_EA = -height, z_EB = -height)
     a: real scalar, default WGS-84 ellipsoid.
@@ -274,7 +298,7 @@ def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
 
     Returns
     -------
-    p_AB_E:  3 x n array
+    p_AB_E:  3 x max(j,k,m,n) array
         Cartesian position vector(s) [m] from A to B, decomposed in E.
 
     Notes
@@ -286,6 +310,8 @@ def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
     (except for the center of the Earth).
     The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
     might be specified.
+    The shape of the output p_AB_E is the broadcasted shapes of n_EA_E, n_EB_E,
+    z_EA and z_EB.
 
     Examples
     --------
@@ -313,9 +339,9 @@ def n_EA_E_and_n_EB_E2p_AB_N(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
 
     Parameters
     ----------
-    n_EA_E, n_EB_E:  3 x n array
+    n_EA_E, n_EB_E:  3 x j and 3 x k arrays
         n-vector(s) [no unit] of position A and B, decomposed in E.
-    z_EA, z_EB:  1 x n array
+    z_EA, z_EB:  3 x m and 3 x n arrays
         Depth(s) [m] of system A and B, relative to the ellipsoid.
         (z_EA = -height, z_EB = -height)
     a: real scalar, default WGS-84 ellipsoid.
@@ -328,7 +354,7 @@ def n_EA_E_and_n_EB_E2p_AB_N(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
 
     Returns
     -------
-    p_AB_N:  3 x n array
+    p_AB_N:  3 x max(j,k,m,n) array
         Cartesian position vector(s) [m] from A to B, decomposed in N.
 
     Notes
@@ -340,6 +366,8 @@ def n_EA_E_and_n_EB_E2p_AB_N(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
     (except for the center of the Earth).
     The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
     might be specified.
+    The shape of the output p_AB_N is the broadcasted shapes of n_EA_E, n_EB_E,
+    z_EA and z_EB.
 
     Examples
     --------
@@ -374,9 +402,9 @@ def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137, f=1.0 / 298.2572
 
     Parameters
     ----------
-    n_EA_E:  3 x n array
+    n_EA_E:  3 x k array
         n-vector(s) [no unit] of position A, decomposed in E.
-    p_AB_E:  3 x n array
+    p_AB_E:  3 x m array
         Cartesian position vector(s) [m] from A to B, decomposed in E.
     z_EA:  1 x n array
         Depth(s) [m] of system A, relative to the ellipsoid. (z_EA = -height)
@@ -390,9 +418,9 @@ def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137, f=1.0 / 298.2572
 
     Returns
     -------
-    n_EB_E:  3 x n array
+    n_EB_E:  3 x max(k,m,n) array
         n-vector(s) [no unit] of position B, decomposed in E.
-    z_EB:  1 x n array
+    z_EB:  1 x max(k,m,n) array
         Depth(s) [m] of system B, relative to the ellipsoid.
         (z_EB = -height)
 
@@ -406,7 +434,11 @@ def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137, f=1.0 / 298.2572
     (except for the center of the Earth).
     The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
     might be specified.
+    The shape of the output n_EB_E and z_EB is the broadcasted shapes of n_EA_E,
+    p_AB_E and z_EA.
 
+    Examples
+    --------
     {super}
 
     See also
@@ -430,9 +462,9 @@ def n_EA_E_and_p_AB_N2n_EB_E(n_EA_E, p_AB_N, z_EA=0, a=6378137, f=1.0 / 298.2572
 
     Parameters
     ----------
-    n_EA_E:  3 x n array
+    n_EA_E:  3 x k array
         n-vector(s) [no unit] of position A, decomposed in E.
-    p_AB_N:  3 x n array
+    p_AB_N:  3 x m array
         Cartesian position vector(s) [m] from A to B, decomposed in N.
     z_EA:  1 x n array
         Depth(s) [m] of system A, relative to the ellipsoid. (z_EA = -height)
@@ -446,9 +478,9 @@ def n_EA_E_and_p_AB_N2n_EB_E(n_EA_E, p_AB_N, z_EA=0, a=6378137, f=1.0 / 298.2572
 
     Returns
     -------
-    n_EB_E:  3 x n array
+    n_EB_E:  3 x max(k,m,n) array
         n-vector(s) [no unit] of position B, decomposed in E.
-    z_EB:  1 x n array
+    z_EB:  1 x max(k,m,n) array
         Depth(s) [m] of system B, relative to the ellipsoid.
         (z_EB = -height)
 
@@ -462,7 +494,11 @@ def n_EA_E_and_p_AB_N2n_EB_E(n_EA_E, p_AB_N, z_EA=0, a=6378137, f=1.0 / 298.2572
     (except for the center of the Earth).
     The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
     might be specified.
+    The shape of the output n_EB_E and z_EB is the broadcasted shapes of n_EA_E,
+    p_AB_N and z_EA.
 
+    Examples
+    --------
     {super}
 
     See also
@@ -502,9 +538,9 @@ def interp_nvectors(t_i, t, nvectors, kind='linear', window_length=0, polyorder=
 
     Parameters
     ----------
-    t_i: real vector length m
+    t_i: real vector of length m
         Vector of interpolation times.
-    t: real vector length n
+    t: real vector of length n
         Vector of times.
     nvectors: 3 x n array
         n-vectors [no unit] decomposed in E.
@@ -613,7 +649,7 @@ def intersect(path_a, path_b):
 
     Parameters
     ----------
-    path_a, path_b: tuple of two n-vectors
+    path_a, path_b: tuples of two n-vectors
         defining path A and path B, respectively.
         Path A and B has shape 2 x 3 x n and 2 x 3 x m, respectively.
 
@@ -626,6 +662,7 @@ def intersect(path_a, path_b):
     Notes
     -----
     The result for spherical Earth is returned.
+    The shape of the output `n_EC_E` is the broadcasted shapes of `path_a` and `path_b`.
 
     Examples
     --------
@@ -697,7 +734,7 @@ def course_over_ground(nvectors, window_length=0, polyorder=2, mode='nearest', c
 
     Returns
     -------
-    cog: numpy array
+    cog: array of length n
         angle in radians clockwise from True North to the direction towards
         which the vehicle travels.
 
@@ -731,7 +768,7 @@ def course_over_ground(nvectors, window_length=0, polyorder=2, mode='nearest', c
     >>> _ = ax.set_xlim(-500, 200)
     >>> _ = ax.set_aspect('equal', adjustable='box')
     >>> _ = ax.legend()
-    >>> plt.show() # doctest + SKIP
+    >>> plt.show()  # doctest + SKIP
     >>> plt.close()
 
     See also
@@ -761,9 +798,17 @@ def great_circle_normal(n_EA_E, n_EB_E):
 
     Parameters
     ----------
-    n_EA_E, n_EB_E:  3 x n array
+    n_EA_E, n_EB_E:  3 x k and 3 x m arrays
         n-vector(s) [no unit] of position A and B, decomposed in E.
 
+    Returns
+    -------
+    normal : 3 x max(k, m) array
+        Unit normal(s)
+
+    Notes
+    -----
+    The shape of the output `normal` is the broadcasted shapes of `n_EA_E`and `n_EB_E`.
     """
     return unit(cross(n_EA_E, n_EB_E, axis=0), norm_zero_vector=np.nan)
 
@@ -785,23 +830,25 @@ def cross_track_distance(path, n_EB_E, method='greatcircle', radius=6371009.0):
 
     Parameters
     ----------
-    path: tuple of two n-vectors
+    path: tuple of two n-vectors of shape 3 x k and 3 x m
         Two n-vectors of positions defining path A, decomposed in E.
-    n_EB_E:  3 x m array
+    n_EB_E:  3 x n array
         n-vector(s) of position B to measure the cross track distance to.
     method: string
         defining distance calculated. Options are: 'greatcircle' or 'euclidean'
     radius: real scalar
-        radius of sphere. (default 6371009.0)
+        radius of sphere [m]. (default 6371009.0)
+
+    Returns
+    -------
+    distance : array of length max(k, m, n)
+        cross track distance(s)
 
     Notes
     -----
     The result for spherical Earth is returned.
-
-    Returns
-    -------
-    distance : array of length max(n, m)
-        cross track distance(s)
+    The shape of the output `distance` is the broadcasted shapes of `n_EB_E` and
+    the n-vectors defining path A.
 
     Examples
     --------
@@ -809,10 +856,7 @@ def cross_track_distance(path, n_EB_E, method='greatcircle', radius=6371009.0):
 
     See also
     --------
-    great_circle_normal,
-    closest_point_on_great_circle,
-    on_great_circle,
-    on_great_circle_path
+    great_circle_normal, closest_point_on_great_circle, on_great_circle, on_great_circle_path
     """
     c_E = great_circle_normal(path[0], path[1])
     sin_theta = -np.sum(c_E * n_EB_E, axis=0)
@@ -828,9 +872,9 @@ def on_great_circle(path, n_EB_E, radius=6371009.0, atol=1e-8):
 
     Parameters
     ----------
-    path: tuple of two n-vectors
+    path: tuple of two n-vectors of shapes 3 x k and 3 x m.
         Two n-vectors of positions defining path A, decomposed in E.
-    n_EB_E:  3 x m array
+    n_EB_E:  3 x n array
         n-vector(s) of position B to check to.
     radius: real scalar
         radius of sphere. (default 6371009.0)
@@ -839,7 +883,7 @@ def on_great_circle(path, n_EB_E, radius=6371009.0, atol=1e-8):
 
     Returns
     -------
-    on : bool array of length max(n, m)
+    on : max(k, m, n) bool array
         True if position B is on great circle through path A.
 
     Notes
@@ -850,6 +894,7 @@ def on_great_circle(path, n_EB_E, radius=6371009.0, atol=1e-8):
     be carefully selected for the use case at hand. Typically the value
     should be set to the accepted error tolerance. For GPS data the error
     ranges from 0.01 m to 15 m.
+    The shape of the output `on` is the broadcasted size of `n_EB_E` and `path`.
 
     Examples
     --------
@@ -870,9 +915,9 @@ def on_great_circle_path(path, n_EB_E, radius=6371009.0, atol=1e-8):
 
     Parameters
     ----------
-    path: tuple of two n-vectors
+    path: tuple of two n-vectors of shapes 3 x k and 3 x m.
         Two n-vectors of positions defining path A, decomposed in E.
-    n_EB_E:  3 x m array
+    n_EB_E:  3 x n array
         n-vector(s) of position B to measure the cross track distance to.
     radius: real scalar
         radius of sphere. (default 6371009.0)
@@ -881,7 +926,7 @@ def on_great_circle_path(path, n_EB_E, radius=6371009.0, atol=1e-8):
 
     Returns
     -------
-    on : bool array of length max(n, m)
+    on : max(k, m, n) bool array
         True if position B is on great circle and between endpoints of path A.
 
     Notes
@@ -892,6 +937,7 @@ def on_great_circle_path(path, n_EB_E, radius=6371009.0, atol=1e-8):
     be carefully selected for the use case at hand. Typically the value
     should be set to the accepted error tolerance. For GPS data the error
     ranges from 0.01 m to 15 m.
+    The shape of the output `on` is the broadcasted shapes of `n_EB_E` and `path`.
 
     Examples
     --------
@@ -915,15 +961,20 @@ def closest_point_on_great_circle(path, n_EB_E):
 
     Parameters
     ----------
-    path: tuple of 2 n-vectors of 3 x n arrays
+    path: tuple of two n-vectors of shape 3 x k  and 3 x m
         Two n-vectors of positions defining path A, decomposed in E.
-    n_EB_E:  3 x m array
+    n_EB_E:  3 x n array
         n-vector(s) of position B to find the closest point to.
 
     Returns
     -------
-    n_EC_E:  3 x max(m, n) array
+    n_EC_E:  3 x max(k, m, n) array
         n-vector(s) of closest position C on great circle path A
+
+    Notes
+    -----
+    The shape of the output `n_EC_E` is the broadcasted shapes of `n_EB_E` and
+    the n-vectors defining path A.
 
     Examples
     --------
@@ -948,12 +999,18 @@ def great_circle_distance_rad(n_EA_E, n_EB_E):
 
     Parameters
     ----------
-    n_EA_E, n_EB_E:  3 x n array
+    n_EA_E, n_EB_E:  3 x k and 3 x m arrays
         n-vector(s) [no unit] of position A and B, decomposed in E.
+
+    Returns
+    -------
+    distance_rad : array of length max(k, m)
+        Great circle distance(s) in radians
 
     Notes
     -----
     The result for spherical Earth is returned.
+    The shape of the output `distance_rad` is the broadcasted shapes of `n_EA_E`and `n_EB_E`.
     Formulae is given by equation (16) in Gade (2010) and is well
     conditioned for all angles.
     See also: https://en.wikipedia.org/wiki/Great-circle_distance.
@@ -981,14 +1038,20 @@ def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
 
     Parameters
     ----------
-    n_EA_E, n_EB_E:  3 x n array
+    n_EA_E, n_EB_E:  3 x k and 3 x m arrays
         n-vector(s) [no unit] of position A and B, decomposed in E.
     radius: real scalar
-        radius of sphere.
+        radius of sphere [m]. (default 6371009.0)
+
+    Returns
+    -------
+    distance : array of length max(k, m)
+        Great circle distance(s) in meters
 
     Notes
     -----
     The result for spherical Earth is returned.
+    The shape of the output `distance` is the broadcasted shapes of `n_EA_E` and `n_EB_E`.
     Formulae is given by equation (16) in Gade (2010) and is well
     conditioned for all angles.
     See also: https://en.wikipedia.org/wiki/Great-circle_distance.
@@ -1011,10 +1074,19 @@ def euclidean_distance(n_EA_E, n_EB_E, radius=6371009.0):
 
     Parameters
     ----------
-    n_EA_E, n_EB_E:  3 x n array
+    n_EA_E, n_EB_E:  3 x k and 3 x m arrays
         n-vector(s) [no unit] of position A and B, decomposed in E.
     radius: real scalar
-        radius of sphere.
+        radius of sphere [m]. (default 6371009.0)
+
+    Returns
+    -------
+    distance : array of length max(k, m)
+        Euclidean distance(s)
+
+    Notes
+    -----
+    The shape of the output `distance` is the broadcasted shapes of `n_EB_E` and `n_EB_E`.
 
     Examples
     --------
@@ -1031,7 +1103,7 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, 
 
     Parameters
     ----------
-    n_EA_E, n_EB_E:  3 x n array
+    n_EA_E, n_EB_E:  3 x m  and 3 x n arrays
         n-vector(s) [no unit] of position A and B, respectively, decomposed in E.
     a: real scalar, default WGS-84 ellipsoid.
         Semi-major axis of the Earth ellipsoid given in [m].
@@ -1043,8 +1115,12 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, 
 
     Returns
     -------
-    azimuth: n array
+    azimuth: max(m, n) array
         Angle [rad] the line makes with a meridian, taken clockwise from north.
+
+    Notes
+    -----
+    The shape of the output azimuth is the broadcasted shapes of n_EA_E and n_EB_E.
 
     See also
     --------
@@ -1068,21 +1144,23 @@ def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth, R_Ee=None)
 
     Parameters
     ----------
-    n_EA_E:  3 x n array
+    n_EA_E:  3 x k array
         n-vector(s) [no unit] of position A decomposed in E.
-    distance_rad: n, array
+    distance_rad: m array
         great circle distance [rad] from position A to B
     azimuth: n array
         Angle [rad] the line makes with a meridian, taken clockwise from north.
 
     Returns
     -------
-    n_EB_E:  3 x n array
+    n_EB_E:  3 x max(k,m,n) array
         n-vector(s) [no unit] of position B decomposed in E.
 
     Notes
     -----
     The result for spherical Earth is returned.
+    The shape of the output n_EB_E is the broadcasted shapes of n_EA_E,
+     distance_rad and azimuth.
 
     Examples
     --------
