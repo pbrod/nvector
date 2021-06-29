@@ -127,14 +127,15 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     Notes
     -----
     The position of B (typically body) relative to E (typically Earth) is
-    given into this function as n-vector, n_EB_E. The function converts
-    to cartesian position vector ("ECEF-vector"), p_EB_E, in meters.
+    given into this function as n-vector, `n_EB_E`. The function converts
+    to cartesian position vector ("ECEF-vector"), `p_EB_E`, in meters.
     The calculation is exact, taking the ellipsity of the Earth into account.
     It is also non-singular as both n-vector and p-vector are non-singular
     (except for the center of the Earth).
     The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
     might be specified.
-    The shape of the output p_EB_E is the broadcasted shapes of n_EB_E and depth.
+    The shape of the output `p_EB_E` is the broadcasted shapes of `n_EB_E`
+    and `depth`.
 
     Examples
     --------
@@ -234,9 +235,8 @@ def p_EB_E2n_EB_E(p_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     Notes
     -----
     The position of B (typically body) relative to E (typically Earth) is
-    given into this function as cartesian position vector p_EB_E, in meters.
-    ("ECEF-vector"). The function converts to n-vector, n_EB_E and its
-    depth, depth.
+    given into this function as cartesian position vector `p_EB_E`, in meters.
+    ("ECEF-vector"). The function converts to n-vector, `n_EB_E` and its `depth`.
     The calculation is excact, taking the ellipsity of the Earth into account.
     It is also non-singular as both n-vector and p-vector are non-singular
     (except for the center of the Earth).
@@ -303,15 +303,15 @@ def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
 
     Notes
     -----
-    The n-vectors for positions A (n_EA_E) and B (n_EB_E) are given. The
-    output is the delta vector from A to B (p_AB_E).
+    The n-vectors for positions A (`n_EA_E`) and B (`n_EB_E`) are given. The
+    output is the delta vector from A to B decompose in E (`p_AB_E`).
     The calculation is excact, taking the ellipsity of the Earth into account.
     It is also non-singular as both n-vector and p-vector are non-singular
     (except for the center of the Earth).
     The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
     might be specified.
-    The shape of the output p_AB_E is the broadcasted shapes of n_EA_E, n_EB_E,
-    z_EA and z_EB.
+    The shape of the output `p_AB_E` is the broadcasted shapes of `n_EA_E`, `n_EB_E`,
+    `z_EA` and `z_EB`.
 
     Examples
     --------
@@ -359,15 +359,15 @@ def n_EA_E_and_n_EB_E2p_AB_N(n_EA_E, n_EB_E, z_EA=0, z_EB=0, a=6378137,
 
     Notes
     -----
-    The n-vectors for positions A (n_EA_E) and B (n_EB_E) are given. The
-    output is the delta vector from A to B (p_AB_E).
+    The n-vectors for positions A (`n_EA_E`) and B (`n_EB_E`) are given. The
+    output is the delta vector from A to B decomposed in N (`p_AB_N`).
     The calculation is excact, taking the ellipsity of the Earth into account.
     It is also non-singular as both n-vector and p-vector are non-singular
     (except for the center of the Earth).
     The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
     might be specified.
-    The shape of the output p_AB_N is the broadcasted shapes of n_EA_E, n_EB_E,
-    z_EA and z_EB.
+    The shape of the output p_AB_N is the broadcasted shapes of `n_EA_E`, `n_EB_E`,
+    `z_EA` and `z_EB`.
 
     Examples
     --------
@@ -426,16 +426,16 @@ def n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA=0, a=6378137, f=1.0 / 298.2572
 
     Notes
     -----
-    The n-vector for position A (n_EA_E) and the position-vector from position
-    A to position B (p_AB_E) are given. The output is the n-vector of position
-    B (n_EB_E) and depth of B (z_EB).
+    The n-vector for position A (`n_EA_E`) and the delta vector from position
+    A to position B decomposed in E (`p_AB_E`) are given. The output is the
+    n-vector of position B (`n_EB_E`) and depth of B (`z_EB`).
     The calculation is excact, taking the ellipsity of the Earth into account.
     It is also non-singular as both n-vector and p-vector are non-singular
     (except for the center of the Earth).
     The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
     might be specified.
-    The shape of the output n_EB_E and z_EB is the broadcasted shapes of n_EA_E,
-    p_AB_E and z_EA.
+    The shape of the output `n_EB_E` and `z_EB` is the broadcasted shapes of
+    `n_EA_E`, `p_AB_E` and `z_EA`.
 
     Examples
     --------
@@ -486,16 +486,16 @@ def n_EA_E_and_p_AB_N2n_EB_E(n_EA_E, p_AB_N, z_EA=0, a=6378137, f=1.0 / 298.2572
 
     Notes
     -----
-    The n-vector for position A (n_EA_E) and the position-vector from position
-    A to position B (p_AB_N) are given. The output is the n-vector of position
-    B (n_EB_E) and depth of B (z_EB).
+    The n-vector for position A (n_EA_E) and the delta vector from position
+    A to position B decomposed in N (p_AB_N) are given. The output is the
+    n-vector of position B (`n_EB_E`) and depth of B (`z_EB`).
     The calculation is excact, taking the ellipsity of the Earth into account.
     It is also non-singular as both n-vector and p-vector are non-singular
     (except for the center of the Earth).
     The default ellipsoid model used is WGS-84, but other ellipsoids/spheres
     might be specified.
-    The shape of the output n_EB_E and z_EB is the broadcasted shapes of n_EA_E,
-    p_AB_N and z_EA.
+    The shape of the output `n_EB_E` and `z_EB` is the broadcasted shapes of
+    `n_EA_E`, `p_AB_N` and `z_EA`.
 
     Examples
     --------
@@ -1120,7 +1120,7 @@ def n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, 
 
     Notes
     -----
-    The shape of the output azimuth is the broadcasted shapes of n_EA_E and n_EB_E.
+    The shape of the output `azimuth` is the broadcasted shapes of `n_EA_E` and `n_EB_E`.
 
     See also
     --------
@@ -1159,8 +1159,8 @@ def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth, R_Ee=None)
     Notes
     -----
     The result for spherical Earth is returned.
-    The shape of the output n_EB_E is the broadcasted shapes of n_EA_E,
-     distance_rad and azimuth.
+    The shape of the output `n_EB_E` is the broadcasted shapes of `n_EA_E`,
+    `distance_rad` and `azimuth.
 
     Examples
     --------
