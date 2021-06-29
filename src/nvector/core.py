@@ -64,26 +64,26 @@ def lat_lon2n_E(latitude, longitude, R_Ee=None):
 
     Examples
     --------
-    >>> import nvector as nv
-    >>> pi = 3.141592653589793
+      >>> import nvector as nv
+      >>> pi = 3.141592653589793
 
     Scalar call
-    >>> nv.allclose(nv.lat_lon2n_E(0, 0), [[1.],
-    ...                                    [0.],
-    ...                                    [0.]])
+      >>> nv.allclose(nv.lat_lon2n_E(0, 0), [[1.],
+      ...                                    [0.],
+      ...                                    [0.]])
     True
 
     Vectorized call
-    >>> nv.allclose(nv.lat_lon2n_E([0., 0.], [0., pi/2]), [[1., 0.],
-    ...                                                   [0., 1.],
-    ...                                                   [0., 0.]])
-    True
+      >>> nv.allclose(nv.lat_lon2n_E([0., 0.], [0., pi/2]), [[1., 0.],
+      ...                                                   [0., 1.],
+      ...                                                   [0., 0.]])
+      True
 
     Broadcasting call
-    >>> nv.allclose(nv.lat_lon2n_E(0., [0, pi/2]), [[1., 0.],
-    ...                                           [0., 1.],
-    ...                                           [0., 0.]])
-    True
+      >>> nv.allclose(nv.lat_lon2n_E(0., [0, pi/2]), [[1., 0.],
+      ...                                           [0., 1.],
+      ...                                           [0., 0.]])
+      True
 
     See also
     --------
