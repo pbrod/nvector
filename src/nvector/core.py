@@ -23,6 +23,7 @@ __all__ = ['closest_point_on_great_circle',
            'cross_track_distance',
            'course_over_ground',
            'euclidean_distance',
+           'geodesic_distance',
            'great_circle_distance',
            'great_circle_distance_rad',
            'great_circle_normal',
@@ -64,26 +65,26 @@ def lat_lon2n_E(latitude, longitude, R_Ee=None):
 
     Examples
     --------
-      >>> import nvector as nv
-      >>> pi = 3.141592653589793
+    >>> import nvector as nv
+    >>> pi = 3.141592653589793
 
     Scalar call
-      >>> nv.allclose(nv.lat_lon2n_E(0, 0), [[1.],
-      ...                                    [0.],
-      ...                                    [0.]])
+    >>> nv.allclose(nv.lat_lon2n_E(0, 0), [[1.],
+    ...                                    [0.],
+    ...                                    [0.]])
     True
 
     Vectorized call
-      >>> nv.allclose(nv.lat_lon2n_E([0., 0.], [0., pi/2]), [[1., 0.],
-      ...                                                   [0., 1.],
-      ...                                                   [0., 0.]])
-      True
+    >>> nv.allclose(nv.lat_lon2n_E([0., 0.], [0., pi/2]), [[1., 0.],
+    ...                                                   [0., 1.],
+    ...                                                   [0., 0.]])
+    True
 
     Broadcasting call
-      >>> nv.allclose(nv.lat_lon2n_E(0., [0, pi/2]), [[1., 0.],
-      ...                                           [0., 1.],
-      ...                                           [0., 0.]])
-      True
+    >>> nv.allclose(nv.lat_lon2n_E(0., [0, pi/2]), [[1., 0.],
+    ...                                           [0., 1.],
+    ...                                           [0., 0.]])
+    True
 
     See also
     --------
@@ -1065,6 +1066,55 @@ def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
     great_circle_distance_rad
     """
     return great_circle_distance_rad(n_EA_E, n_EB_E) * radius
+
+
+def geodesic_distance(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
+    """
+    Returns surface distance between positions A and B on an ellipsoid.
+
+    Parameters
+    ----------
+    n_EA_E, n_EB_E:  3 x m  and 3 x n arrays
+        n-vector(s) [no unit] of position A and B, decomposed in E.
+    a: real scalar, default WGS-84 ellipsoid.
+        Semi-major axis of the Earth ellipsoid given in [m].
+    f: real scalar, default WGS-84 ellipsoid.
+        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+        Earth with radius a is used in stead of WGS-84.
+    R_Ee : 3 x 3 array
+        rotation matrix defining the axes of the coordinate frame E.
+
+    Returns
+    -------
+    distance:  max(m,n) array
+        Surface distance [m] from A to B on the ellipsoid
+
+    Examples
+    --------
+    >>> import nvector as nv
+    >>> n_EA_E = nv.lat_lon2n_E(0,0)
+    >>> n_EB_E = nv.lat_lon2n_E(*nv.rad(0.5, 179.5))
+    >>> nv.allclose(nv.geodesic_distance(n_EA_E, n_EB_E), 19936288.579)
+    True
+
+    See also
+    --------
+    euclidean_distance, great_circle_distance, n_EB_E2p_EB_E
+
+    """
+    z_EA = 0
+    z_EB = 0
+
+    p_EA_E = n_EB_E2p_EB_E(n_EA_E, z_EA, a, f, R_Ee)
+    p_EB_E = n_EB_E2p_EB_E(n_EB_E, z_EB, a, f, R_Ee)
+
+    radius = 0.5 * (norm(p_EA_E, axis=0) + norm(p_EB_E, axis=0)).ravel()
+
+    d_ab = norm(p_EB_E-p_EA_E, axis=0).ravel()
+    d_ab0 = euclidean_distance(n_EA_E, n_EB_E, radius)
+    s_ab0 = great_circle_distance(n_EA_E, n_EB_E, radius)
+    s_ab = d_ab * (s_ab0 / d_ab0)
+    return s_ab
 
 
 @use_docstring(_examples.get_examples_no_header([5], oo_solution=False))

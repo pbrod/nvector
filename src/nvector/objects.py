@@ -383,6 +383,15 @@ class GeoPoint(_Common):
         * Latitudes outside this range will be set to NaNs.
         * The flattening f should be between -1/50 and 1/50 inn order to retain full accuracy.
 
+        Examples
+        --------
+        >>> import nvector as nv
+        >>> point1 = nv.GeoPoint(0, 0)
+        >>> point2 = nv.GeoPoint(0.5, 179.5, degrees=True)
+        >>> s_12, az1, azi2 = point1.distance_and_azimuth(point2)
+        >>> nv.allclose(s_12, 19936288.579)
+        True
+
         References
         ----------
         `C. F. F. Karney, Algorithms for geodesics, J. Geodesy 87(1), 43-55 (2013)
