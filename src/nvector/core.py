@@ -13,6 +13,7 @@ from numpy import arctan2, sin, cos, cross, dot, sqrt
 from numpy.linalg import norm
 from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
+import scipy.special as special
 from nvector import _examples, license as _license
 from nvector.rotation import E_rotation, n_E2R_EN, n_E2lat_lon  # @UnusedImport
 from nvector.util import mdot, nthroot, unit, _nvector_check_length
@@ -1068,6 +1069,22 @@ def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
     return great_circle_distance_rad(n_EA_E, n_EB_E) * radius
 
 
+def _i3(f, k, sigma):
+    a = 1-f
+    c_0 = a**2-1
+    c_1 = np.sqrt(c_0)
+    c_2 = np.sqrt(a**2*(k**2+1)-1)
+    m = -k**2
+    n = m*a**2/c_0
+    return (a + 1) * (special.ellipkinc(sigma, m) / a
+                      + ellippi(n, sigma, m) / (a * c_0)
+                      - np.arctan(c_2 / c_1 * np.tan(sigma)) / (c_1 * c_2))
+
+def ellippi(n, phi, m):
+    """Elliptic integral of the third kind"""
+    pass
+
+
 def geodesic_distance(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     """
     Returns surface distance between positions A and B on an ellipsoid.
@@ -1094,7 +1111,10 @@ def geodesic_distance(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=Non
     >>> import nvector as nv
     >>> n_EA_E = nv.lat_lon2n_E(0,0)
     >>> n_EB_E = nv.lat_lon2n_E(*nv.rad(0.5, 179.5))
-    >>> nv.allclose(nv.geodesic_distance(n_EA_E, n_EB_E), 19936288.579)
+    >>> nv.geodesic_distance(n_EA_E, n_EB_E)
+    19942317.47942947
+
+     19936288.579)
     True
 
     See also
@@ -1102,6 +1122,30 @@ def geodesic_distance(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=Non
     euclidean_distance, great_circle_distance, n_EB_E2p_EB_E
 
     """
+    # From C.F.F. Karney (2011) "Algorithms for geodesics":
+    lat1, lon1 = n_E2lat_lon(n_EA_E, R_Ee)
+    lat2, lon2 = n_E2lat_lon(n_EB_E, R_Ee)
+    blat1 = np.arctan((1-f)*np.tan(lat1))
+    blat2 = np.arctan((1-f)*np.tan(lat2))
+    n_E1_E = lat_lon2n_E(blat1, lon1, R_Ee)
+    n_E2_E = lat_lon2n_E(blat2, lon2, R_Ee)
+    sigma = great_circle_distance_rad(n_E1_E, n_E2_E)
+
+    # Lamberts formula: https://en.wikipedia.org/wiki/Geographical_distance#Ellipsoidal-surface_formulae
+#     lat1, lon1 = n_E2lat_lon(n_EA_E, R_Ee)
+#     lat2, lon2 = n_E2lat_lon(n_EB_E, R_Ee)
+#     blat1 = np.arctan((1-f)*np.tan(lat1))
+#     blat2 = np.arctan((1-f)*np.tan(lat2))
+#     n_E1_E = lat_lon2n_E(blat1, lon1, R_Ee)
+#     n_E2_E = lat_lon2n_E(blat2, lon2, R_Ee)
+#     sigma = great_circle_distance_rad(n_E1_E, n_E2_E)
+#     p = 0.5 * (blat2+blat1)
+#     q = 0.5 * (blat2+blat1)
+#     x = (sigma-sin(sigma))*(sin(p)*cos(q)/cos(sigma/2))**2
+#     y = (sigma+sin(sigma))*(cos(p)*sin(q)/sin(sigma/2))**2
+#     s_12 = a*(sigma-0.5*f*(x+y))
+#     return s_12
+
     z_EA = 0
     z_EB = 0
 

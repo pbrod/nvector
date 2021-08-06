@@ -5,6 +5,7 @@ Created on 10. jun. 2021
 '''
 from functools import partial
 import numpy as np
+from numpy.testing import assert_allclose as _assert_allclose  # @UnresolvedImport
 from nvector.util import unit, deg, rad
 from nvector.core import (lat_lon2n_E, n_E2lat_lon,
                           n_EA_E_and_n_EB_E2p_AB_E,
@@ -20,7 +21,6 @@ from nvector.core import (lat_lon2n_E, n_E2lat_lon,
                           on_great_circle_path,
                           n_EA_E_distance_and_azimuth2n_EB_E,
                           n_EA_E_and_n_EB_E2azimuth)
-from numpy.testing import assert_allclose as _assert_allclose  # @UnresolvedImport
 
 assert_allclose = partial(_assert_allclose, atol=1e-8)
 

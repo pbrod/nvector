@@ -362,10 +362,12 @@ Solution for a sphere:
 Exact solution for the WGS84 ellipsoid:
     >>> p_EA_E = nv.n_EB_E2p_EB_E(n_EA_E, 0)
     >>> p_EB_E = nv.n_EB_E2p_EB_E(n_EB_E, 0)
-    >>> d_12 = np.linalg.norm(p_EA_E-p_EB_E);
+    >>> d_12 = np.linalg.norm(p_EA_E-p_EB_E)
+    >>> s_12 = nv.geodesic_distance(n_EA_E, n_EB_E)[0]
 
-    >>> 'Euclidean distance on WGS84 = {:5.2f} km'.format(d_12 / 1000)
-    'Euclidean distance on WGS84 = 333.91 km'
+    >>> msg = 'Ellipsoidal and Euclidean distance = {:5.2f} km, {:5.2f} km'
+    >>> msg.format(s_12 / 1000, d_12 / 1000)
+    'Ellipsoidal and Euclidean distance = 333.95 km, 333.91 km'
 
 """
 
