@@ -325,7 +325,7 @@ class GeoPoint(_Common):
         -------
         point_b:  GeoPoint object
             latitude and longitude of position B.
-        azimuth_b
+        azimuth_b: real scalars or vectors of length n.
             azimuth [rad or deg] of line at position B.
 
         """

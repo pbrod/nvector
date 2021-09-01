@@ -345,7 +345,7 @@ def test_small_and_large_cross_track_distance():
     path = (n_EA1_E, n_EA2_E)
     n_EB1_E = closest_point_on_great_circle(path, n_EB0_E)
 
-    for s_xt0 in [np.pi / 3 * radius, 10., 0.1, 1e-4, 1e-8]:
+    for s_xt0 in [np.pi * radius, np.pi / 3 * radius, 10., 0.1, 1e-3, 1e-4, 1e-5, 1e-8]:
         distance_rad = s_xt0 / radius
         n_EB_E = n_EA_E_distance_and_azimuth2n_EB_E(n_EB1_E, distance_rad, np.pi / 2)
 
@@ -359,11 +359,12 @@ def test_small_and_large_cross_track_distance():
         s_xt4 = np.arctan2(-np.dot(c_E.T, n_EB_E),
                            np.linalg.norm(np.cross(c_E, n_EB_E, axis=0), axis=0)) * radius
         rtol = 10**(-min(9 + np.log10(s_xt0), 15))
-        assert_allclose(n_EB2_E, n_EB1_E)
+        if s_xt0 <= np.pi / 3 * radius:
+            assert_allclose(n_EB2_E, n_EB1_E)
+            assert_allclose(s_xt2, s_xt0, rtol=rtol)
+            assert_allclose(s_xt3, s_xt0, rtol=rtol)
+            assert_allclose(s_xt4, s_xt0, rtol=rtol)
         assert_allclose(s_xt, s_xt0, rtol=rtol)
-        assert_allclose(s_xt2, s_xt0, rtol=rtol)
-        assert_allclose(s_xt3, s_xt0, rtol=rtol)
-        assert_allclose(s_xt4, s_xt0, rtol=rtol)
 
 
 def test_n_EA_E_and_n_EB_E2azimuth():

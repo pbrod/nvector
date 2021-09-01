@@ -18,7 +18,9 @@ __all__ = ['E_rotation',
            'R2xyz',
            'R2zyx',
            'xyz2R',
-           'zyx2R']
+           'zyx2R',
+           'change_axes_to_E'
+           ]
 
 _EPS = np.finfo(float).eps
 E_ROTATION_MATRIX = dict(e=np.array([[0, 0, 1.0],
@@ -40,7 +42,7 @@ def E_rotation(axes='e'):
         If axes is 'e' then z-axis points to the North Pole along the Earth's
         rotation axis, x-axis points towards the point where latitude = longitude = 0.
         If axes is 'E' then x-axis points to the North Pole along the Earth's
-        rotation axis, y-axis points towards longitude +90deg (east) and latitude = 0.
+        rotation axis, y-axis points towards where longitude +90deg (east) and latitude = 0.
 
     Returns
     -------
@@ -156,7 +158,7 @@ def R2zyx(R_AB):
     R_AB:  3x3 array
         rotation matrix [no unit] (direction cosine matrix) such that the
         relation between a vector v decomposed in A and B is given by:
-        v_A = np.dot(R_AB, v_B)
+        v_A = mdot(R_AB, v_B)
 
     Returns
     -------
@@ -421,25 +423,55 @@ def n_E2lat_lon(n_E, R_Ee=None):
     --------
     lat_lon2n_E
     """
-    n_E = np.atleast_2d(n_E)
-    if R_Ee is None:
-        R_Ee = E_rotation()
-    _nvector_check_length(n_E)
-    n_E0 = np.dot(R_Ee, n_E)
+
+    n_e = change_axes_to_E(n_E, R_Ee)
 
     # Equation (5) in Gade (2010):
-    longitude = arctan2(n_E0[1, :], -n_E0[2, :])
+    longitude = arctan2(n_e[1, ...], -n_e[2, ...])
 
     # Equation (6) in Gade (2010) (Robust numerical solution)
-    equatorial_component = sqrt(n_E0[1, :]**2 + n_E0[2, :]**2)
+    cos_latitude = sqrt(n_e[1, ...]**2 + n_e[2, ...]**2)
     # vector component in the equatorial plane
-    latitude = arctan2(n_E0[0, :], equatorial_component)
+    sin_latitude = n_e[0, ...]
+    latitude = arctan2(sin_latitude, cos_latitude)
     # atan() could also be used since latitude is within [-pi/2,pi/2]
 
-    # latitude=asin(n_E0[0] is a theoretical solution, but close to the Poles
+    # latitude=asin(n_e[0] is a theoretical solution, but close to the Poles
     # it is ill-conditioned which may lead to numerical inaccuracies (and it
     # will give imaginary results for norm(n_E)>1)
     return latitude, longitude
+
+
+def change_axes_to_E(n_E, R_Ee=None):
+    """
+    Change axes of the nvector from 'e' to 'E'.
+
+    Parameters
+    ----------
+    n_E: 3 x n array
+        n-vector [no unit] decomposed in E.
+    R_Ee : 3 x 3 array
+        rotation matrix defining the axes of the coordinate frame E.
+    Returns
+    -------
+    n_e: 3 x n array
+        n-vector [no unit] decomposed in e.
+
+    Notes
+    -----
+    The function make sure to rotate the coordinates so that axes is 'E':
+    then x-axis points to the North Pole along the Earth's rotation axis,
+    and yz-plane coincides with the equatorial plane, i.e.,
+    y-axis points towards longitude +90deg (east) and latitude = 0.
+    """
+    if R_Ee is None:
+        R_Ee = E_rotation()
+
+    n_E = np.atleast_2d(n_E)
+    _nvector_check_length(n_E)
+
+    n_e = unit(np.matmul(R_Ee, n_E))
+    return n_e
 
 
 def n_E2R_EN(n_E, R_Ee=None):
@@ -464,32 +496,33 @@ def n_E2R_EN(n_E, R_Ee=None):
     """
     if R_Ee is None:
         R_Ee = E_rotation()
-    n_E = np.atleast_2d(n_E)
-    _nvector_check_length(n_E)
-    n_E = unit(np.dot(R_Ee, n_E))
+    #     n_E = np.atleast_2d(n_E)
+    #     _nvector_check_length(n_E)
+    #     n_E = unit(np.matmul(R_Ee, n_E))
+    n_e = change_axes_to_E(n_E, R_Ee)
 
     # N coordinate frame (North-East-Down) is defined in Table 2 in Gade (2010)
     # Find z-axis of N (Nz):
-    Nz_E = -n_E  # z-axis of N (down) points opposite to n-vector
+    Nz_e = -n_e  # z-axis of N (down) points opposite to n-vector
 
     # Find y-axis of N (East)(remember that N is singular at Poles)
     # Equation (9) in Gade (2010):
     # Ny points perpendicular to the plane
-    Ny_E_direction = np.cross([[1], [0], [0]], n_E, axis=0)
+    Ny_e_direction = np.cross([[1], [0], [0]], n_e, axis=0)
     # formed by n-vector and Earth's spin axis
-    on_poles = np.flatnonzero(norm(Ny_E_direction, axis=0) == 0)
-    Ny_E = unit(Ny_E_direction)
-    Ny_E[:, on_poles] = array([[0], [1], [0]])  # selected y-axis direction
+    on_poles = np.flatnonzero(norm(Ny_e_direction, axis=0) == 0)
+    Ny_e = unit(Ny_e_direction)
+    Ny_e[:, on_poles] = array([[0], [1], [0]])  # selected y-axis direction
 
     # Find x-axis of N (North):
-    Nx_E = np.cross(Ny_E, Nz_E, axis=0)  # Final axis found by right hand rule
+    Nx_e = np.cross(Ny_e, Nz_e, axis=0)  # Final axis found by right hand rule
 
     # Form R_EN from the unit vectors:
-    # R_EN = dot(R_Ee.T, np.hstack((Nx_E, Ny_E, Nz_E)))
-    Nxyz_E = np.hstack((Nx_E[:, None, ...],
-                        Ny_E[:, None, ...],
-                        Nz_E[:, None, ...]))
-    R_EN = mdot(np.swapaxes(R_Ee, 1, 0), Nxyz_E)
+    # R_EN = dot(R_Ee.T, np.hstack((Nx_e, Ny_e, Nz_e)))
+    Nxyz_e = np.hstack((Nx_e[:, None, ...],
+                        Ny_e[:, None, ...],
+                        Nz_e[:, None, ...]))
+    R_EN = mdot(np.swapaxes(R_Ee, 1, 0), Nxyz_e)
 
     return np.squeeze(R_EN)
 

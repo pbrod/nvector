@@ -13,7 +13,7 @@ from nvector._common import test_docstrings, _make_summary
 from nvector import license as _license
 
 __all__ = ['deg', 'rad', 'mdot', 'nthroot', 'get_ellipsoid', 'select_ellipsoid', 'unit',
-           'allclose']
+           'allclose', 'eccentricity2', 'polar_radius', 'third_flattening']
 
 
 _EPS = np.finfo(float).eps  # machine precision (machine epsilon)
@@ -78,6 +78,83 @@ ELLIPSOID_IX = {'airy1858': 1,
                 'etrs89': 19,
                 'ngo1948': 20
                 }
+
+
+def rsum(u, v):
+    """
+    Returns the rounded sum of u + v as well as the error.
+
+    Parameters
+    ----------
+    u,v: array-like
+        Values to sum
+
+    Returns
+    -------
+    s, error: array-likes
+        The sum s
+
+    Notes
+    -----
+    This function returns the rounded sum of u + v in s and the error, such that
+    s + error = u + v, exactly.
+
+    Examples
+    --------
+    >>> rsum(0.1, 0.1)
+
+    References
+    ----------
+    D. E. Knuth (1998),
+    "The Art Of Computer Programming", Third edition,
+    Vol 2, Chapter 4.2.2 Theorem B on page 236.
+
+    """
+    s = u + v
+    um = s - v
+    vmm = s - um
+    um -= u
+    vmm -= v
+    error = -(um + vmm)
+    return s, error
+
+
+def eccentricity2(f):
+    """Returns the first and second eccentricity squared given the flattening, f.
+
+    Notes
+    -----
+    The (first) eccentricity squared is defined as e2 = f*(2-f).
+    The second eccentricity squared is defined as e2m = e2 / (1 - e2).
+    """
+    e2 = (2.0 - f) * f  # = 1-b**2/a**
+    e2m = e2 / (1.0 - e2)
+    return e2, e2m
+
+
+def polar_radius(a, f):
+    """Returns the polar radius b given the equatorial radius a and flattening f of the ellipsoid.
+
+    Notes
+    -----
+    The semi minor half axis (polar radius) is defined as b = (1 - f) * a
+    where a is the semi major half axis (equatorial radius) and f is the flattening
+    of the ellipsoid.
+
+    """
+    b = a * (1.0 - f)
+    return b
+
+
+def third_flattening(f):
+    """Returns the third flattening, n, given the flattening, f.
+
+    Notes
+    -----
+    The third flattening is defined as n = f / (2 - f).
+    """
+
+    return f / (2.0 - f)
 
 
 def array_to_list_dict(data):
@@ -508,7 +585,7 @@ def get_ellipsoid(name):
 select_ellipsoid = deprecate(get_ellipsoid, old_name='select_ellipsoid', new_name='get_ellipsoid')
 
 
-def unit(vector, norm_zero_vector=1):
+def unit(vector, norm_zero_vector=1, norm_zero_axis=0):
     """
     Convert input vector to a vector of unit length.
 
@@ -516,6 +593,11 @@ def unit(vector, norm_zero_vector=1):
     ----------
     vector : 3 x m array
         m column vectors
+    norm_zero_vector : one or NaN
+        Defines the fill value used for zero length vectors.
+    norm_zero_axis : 0, 1 or 2
+        Defines the direction that zero length vectors will point after
+        the normalization is done.
 
     Returns
     -------
@@ -544,7 +626,8 @@ def unit(vector, norm_zero_vector=1):
 
     idx = np.flatnonzero(current_norm == 0)
     unit_vector[:, idx] = 0 * norm_zero_vector
-    unit_vector[0, idx] = 1 * norm_zero_vector
+    unit_vector[norm_zero_axis, idx] = 1 * norm_zero_vector
+
     return unit_vector
 
 

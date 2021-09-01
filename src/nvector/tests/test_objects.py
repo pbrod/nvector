@@ -99,12 +99,37 @@ class TestGeoPoint:
         assert np.ndim(ep1.azimuth) == 1
         assert np.ndim(ep1.elevation) == 1
 
-    def test_direct_and_inverse(self):
+    def test_distance_and_azimuth(self):
         wgs84 = FrameE(name='WGS84')
+        point1 = wgs84.GeoPoint(latitude=-30, longitude=0, degrees=True)
+        point2 = wgs84.GeoPoint(latitude=29.9, longitude=179.8, degrees=True)
+        s_12, azi1, azi2 = point1.distance_and_azimuth(point2)
+        n_a = point1.to_nvector()
+        n_b = point2.to_nvector()
+        s_ab, azia, azib = nv.geodesic_distance(n_a.normal, n_b.normal, wgs84.a, wgs84.f)
+        assert_allclose(s_12, 19989832.82761)
+
+        point1 = wgs84.GeoPoint(latitude=0, longitude=0, degrees=True)
+        point2 = wgs84.GeoPoint(latitude=0.5, longitude=179.5, degrees=True)
+        s_12, azi1, azi2 = point1.distance_and_azimuth(point2)
+        assert_allclose(s_12, 19936288.578965)
+        n_a = point1.to_nvector()
+        n_b = point2.to_nvector()
+        s_ab, azia, azib = nv.geodesic_distance(n_a.normal, n_b.normal, wgs84.a, wgs84.f)
+        assert_allclose(s_ab, 19909099.44101977)
+
         point1 = wgs84.GeoPoint(latitude=88, longitude=0, degrees=True)
         point2 = wgs84.GeoPoint(latitude=89, longitude=-170, degrees=True)
         s_12, azi1, azi2 = point1.distance_and_azimuth(point2)
         assert_allclose(s_12, 333947.509468)
+
+        n_a = point1.to_nvector()
+        n_b = point2.to_nvector()
+
+        s_ab, azia, azib = nv.geodesic_distance(n_a.normal, n_b.normal, wgs84.a, wgs84.f)
+#         n_EA_E = nv.lat_lon2n_E(0,0)
+#         n_EB_E = nv.lat_lon2n_E(*nv.rad(0.5, 179.5))
+#         np.allclose(nv.geodesic_distance(n_EA_E, n_EB_E), 19909099.44101977)
 
         assert_allclose(nv.deg(azi1, azi2), (-3.3309161604062467, -173.327884597742))
 
@@ -131,15 +156,43 @@ class TestGeoPoint:
         _assert_allclose(p4.latlon_deg, truth, atol=1e-4)  # Less than 0.4 meters
         assert_allclose(nv.deg(azia), -3.3309161604062467 + 180)
 
+    def test_displace(self):
+        wgs84 = FrameE(name='WGS84')
+        # Test example in Karney table 2:
+        s_ab = 10000000
+        azi_a = np.deg2rad(30)
+        point1 = wgs84.GeoPoint(latitude=40, longitude=0, degrees=True)
+        point22, azi222 = point1.displace(s_ab, azi_a)
+        nbb = point22.to_nvector()
+        point2 = wgs84.GeoPoint(latitude=41.79331020506, longitude=137.84490004377, degrees=True)
+        s_12, azi1, azi2 = point1.distance_and_azimuth(point2)
+
+        assert_allclose(s_12, s_ab)
+        assert_allclose(azi1, azi_a)
+
+        n_a = point1.to_nvector()
+        n_b = point2.to_nvector()
+#         s_ab = nv.geodesic_distance(n_a.normal, n_b.normal, wgs84.a, wgs84.f)
+#         assert_allclose(s_12, 19909099.44101977)
+        n_eb_e, azi22 = nv.geodesic_reckon(n_a.normal, s_ab, azi_a, wgs84.a, wgs84.f)
+        assert_allclose(azi22, azi2)
+        assert_allclose(azi222, azi2)
+        da = azi22 - azi2
+        dn = n_eb_e - n_b.normal
+        dn2 = n_eb_e - nbb.normal
+        assert_allclose(n_eb_e, n_b.normal)
+        assert_allclose(n_eb_e, nbb.normal)
+
     def test_geopoint_repr(self):
 
         wgs84 = FrameE(name='WGS84')
-        pointA = wgs84.GeoPoint(latitude=1, longitude=2, z=3, degrees=True)
-        pointB = wgs84.GeoPoint(latitude=4, longitude=5, z=6, degrees=True)
-        p_AB_N = pointA.delta_to(pointB)
+        point_a = wgs84.GeoPoint(latitude=1, longitude=2, z=3, degrees=True)
+        r0 = str(point_a)
+        assert r0 == "GeoPoint(latitude=0.017453292519943295, longitude=0.03490658503988659, z=3, frame=FrameE(a=6378137.0, f=0.0033528106647474805, name='WGS84', axes='e'))"
+        point_b = wgs84.GeoPoint(latitude=4, longitude=5, z=6, degrees=True)
+        p_AB_N = point_a.delta_to(point_b)
         r = str(p_AB_N)
-        print(r)
-        assert False
+        assert r.startswith("Pvector(pvector=[[331730.2")
 
 
 class TestFrames:
