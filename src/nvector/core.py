@@ -13,10 +13,10 @@ from numpy import arctan2, sin, cos, cross, dot, sqrt
 from numpy.linalg import norm
 from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
-import scipy.special as special
 from nvector import _examples, license as _license
-from nvector.rotation import E_rotation, n_E2R_EN, n_E2lat_lon  # @UnusedImport
-from nvector.util import mdot, nthroot, unit, _nvector_check_length
+from nvector.rotation import E_rotation, n_E2R_EN, n_E2lat_lon, change_axes_to_E, zyx2R  # @UnusedImport
+from nvector.util import mdot, nthroot, unit, eccentricity2, polar_radius
+from nvector.karney import geodesic_reckon as _geodesic_reckon, geodesic_distance as _geodesic_distance
 from nvector._common import test_docstrings, use_docstring, _make_summary
 
 
@@ -25,6 +25,7 @@ __all__ = ['closest_point_on_great_circle',
            'course_over_ground',
            'euclidean_distance',
            'geodesic_distance',
+           'geodesic_reckon',
            'great_circle_distance',
            'great_circle_distance_rad',
            'great_circle_normal',
@@ -93,12 +94,12 @@ def lat_lon2n_E(latitude, longitude, R_Ee=None):
     """
     if R_Ee is None:
         R_Ee = E_rotation()
-    # Equation (3) from Gade (2010):
-    nvec = np.vstack((sin(latitude) * np.ones_like(longitude),
-                      sin(longitude) * cos(latitude),
-                      -cos(longitude) * cos(latitude)))
-    # n_E = dot(R_Ee.T, nvec)
-    n_E = np.matmul(R_Ee.T, nvec)
+    # Equation (3) from Gade (2010):  n-vector decomposed in E with axes='e'
+    n_e = np.vstack((sin(latitude) * np.ones_like(longitude),
+                     cos(latitude) * sin(longitude),
+                     -cos(latitude) * cos(longitude)))
+    # n_E = dot(R_Ee.T, n_e)
+    n_E = np.matmul(R_Ee.T, n_e)  # n-vector decomposed in E with axes 'E'
     return n_E
 
 
@@ -150,14 +151,15 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     if R_Ee is None:
         R_Ee = E_rotation()
 
-    n_EB_E = np.atleast_2d(n_EB_E)
-    _nvector_check_length(n_EB_E)
+    #     n_EB_E = np.atleast_2d(n_EB_E)
+    #     _nvector_check_length(n_EB_E)
+    #     n_EB_e = unit(np.matmul(R_Ee, n_EB_E))
 
     # Make sure to rotate the coordinates so that:
     # x -> north pole and yz-plane coincides with the equatorial
     # plane before using equation 22!
-    n_EB_e = unit(np.matmul(R_Ee, n_EB_E))
-    b = a * (1 - f)  # semi-minor axis
+    n_EB_e = change_axes_to_E(n_EB_E, R_Ee)
+    b = polar_radius(a, f)  # semi-minor axis
 
     # The following code implements equation (22) in Gade (2010):
     scale = np.vstack((1,
@@ -166,7 +168,7 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     denominator = norm(n_EB_e / scale, axis=0, keepdims=True)
 
     # We first calculate the position at the origin of coordinate system L,
-    # which has the same n-vector as B (n_EL_E = n_EB_E),
+    # which has the same n-vector as B (n_EL_e = n_EB_e),
     # but lies at the surface of the Earth (z_EL = 0).
 
     p_EL_e = b / denominator * n_EB_e / scale**2
@@ -176,13 +178,8 @@ def n_EB_E2p_EB_E(n_EB_E, depth=0, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
     return p_EB_E
 
 
-def _eccentricity2(f):
-    """Returns the eccentricity squared"""
-    return (2 - f) * f  # = 1-b**2/a**2
-
-
 def _compute_k(a, e_2, q, Ryz_2):
-    """returns the k value in equation (23) from Gade (2010)"""
+    """Returns the k value in equation (23) from Gade (2010)"""
     p = Ryz_2 / a ** 2
     r = (p + q - e_2 ** 2) / 6
     s = e_2 ** 2 * p * q / (4 * r ** 3)
@@ -198,7 +195,7 @@ def _equation23(a, f, p_EB_E):
     """equation (23) from Gade (2010)"""
     Ryz_2 = p_EB_E[1, :]**2 + p_EB_E[2, :]**2
     Rx_2 = p_EB_E[0, :]**2
-    e_2 = _eccentricity2(f)
+    e_2 = eccentricity2(f)[0]
     q = (1 - e_2) / (a ** 2) * Rx_2
     Ryz = sqrt(Ryz_2)  # Ryz = component of p_EB_E in the equatorial plane
     k = _compute_k(a, e_2, q, Ryz_2)
@@ -828,7 +825,7 @@ def _great_circle_cross_track_distance(sin_theta, radius=1):
 @use_docstring(_examples.get_examples_no_header([10], oo_solution=False))
 def cross_track_distance(path, n_EB_E, method='greatcircle', radius=6371009.0):
     """
-    Returns  cross track distance between path A and position B.
+    Returns cross track distance between path A and position B.
 
     Parameters
     ----------
@@ -995,7 +992,30 @@ def closest_point_on_great_circle(path, n_EB_E):
     return n_EC_E * np.sign(np.sum(n_EC_E * n_EB_E, axis=0, keepdims=True))
 
 
-def great_circle_distance_rad(n_EA_E, n_EB_E):
+def _azimuth_sphere(n_EA_E, n_EB_E, R_Ee=None):
+    """Returns azimuths from A to B and B to A, relative to North on a sphere
+
+
+    See also
+    https://en.wikipedia.org/wiki/Azimuth
+    """
+    lat1, lon1 = n_E2lat_lon(n_EA_E, R_Ee)
+    lat2, lon2 = n_E2lat_lon(n_EB_E, R_Ee)
+
+    w = lon2 - lon1
+    cos_b1, sin_b1 = cos(lat1), sin(lat1)
+    cos_b2, sin_b2 = cos(lat2), sin(lat2)
+    cos_w, sin_w = cos(w), sin(w)
+
+    cos_alpha1 = cos_b1 * sin_b2 - sin_b1 * cos_b2 * cos_w
+    sin_alpha1 = cos_b2 * sin_w
+
+    cos_alpha2 = cos_b2 * sin_b1 - sin_b2 * cos_b1 * cos_w
+    sin_alpha2 = -cos_b1 * sin_w
+    return np.arctan2(sin_alpha1, cos_alpha1), np.arctan2(sin_alpha2, cos_alpha2)
+
+
+def great_circle_distance_rad(n_EA_E, n_EB_E, R_Ee=None):
     """
     Returns great circle distance in radians between positions A and B on a sphere
 
@@ -1021,9 +1041,13 @@ def great_circle_distance_rad(n_EA_E, n_EB_E):
     --------
     great_circle_distance
     """
+    if R_Ee is None:
+        R_Ee = E_rotation()
     n_EA_E, n_EB_E = np.atleast_2d(n_EA_E, n_EB_E)
+
     sin_theta = norm(np.cross(n_EA_E, n_EB_E, axis=0), axis=0)
     cos_theta = np.sum(n_EA_E * n_EB_E, axis=0)
+
     # ill conditioned for small angles:
     # distance_rad_version1 = arccos(dot(n_EA_E,n_EB_E))
 
@@ -1069,20 +1093,53 @@ def great_circle_distance(n_EA_E, n_EB_E, radius=6371009.0):
     return great_circle_distance_rad(n_EA_E, n_EB_E) * radius
 
 
-def _i3(f, k, sigma):
-    a = 1-f
-    c_0 = a**2-1
-    c_1 = np.sqrt(c_0)
-    c_2 = np.sqrt(a**2*(k**2+1)-1)
-    m = -k**2
-    n = m*a**2/c_0
-    return (a + 1) * (special.ellipkinc(sigma, m) / a
-                      + ellippi(n, sigma, m) / (a * c_0)
-                      - np.arctan(c_2 / c_1 * np.tan(sigma)) / (c_1 * c_2))
+def geodesic_reckon(n_EA_E, distance, azimuth, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
+    """
+    Returns position B computed from position A, distance and azimuth.
 
-def ellippi(n, phi, m):
-    """Elliptic integral of the third kind"""
-    pass
+    Parameters
+    ----------
+
+
+    Returns position B given surface distance between positions A and B on an ellipsoid.
+
+    Parameters
+    ----------
+    n_EA_E:  3 x m arrays
+        n-vector(s) [no unit] of position A, decomposed in E.
+    distance: real scalar or vector of length n.
+        ellipsoidal distance [m] between position A and B.
+    azimuth: real scalar or vector of length n.
+        azimuth [rad or deg] of line at position A.
+    a: real scalar, default WGS-84 ellipsoid.
+        Semi-major axis of the Earth ellipsoid given in [m].
+    f: real scalar, default WGS-84 ellipsoid.
+        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+        Earth with radius a is used in stead of WGS-84.
+    R_Ee : 3 x 3 array
+        rotation matrix defining the axes of the coordinate frame E.
+
+    Returns
+    -------
+    n_EB_E:  3 x max(m,n) arrays
+        n-vector(s) [no unit] of position B, decomposed in E.
+    azimuth_b: real scalars or vectors of length max(m,n).
+        azimuth [rad or deg] of line at position B.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import nvector as nv
+    """
+
+    lat1, lon1 = n_E2lat_lon(n_EA_E, R_Ee)
+    lat2, lon2, alpha2 = _geodesic_reckon(lat1, lon1, distance, azimuth, a, f)
+#     n1_e = change_axes_to_E(n_EA_E, R_Ee)
+#     sin_lat1 = n1_e[0, :]
+#     cos_lat1 = sqrt(n1_e[1, :]**2 + n1_e[2, :]**2)
+
+    n_EB_E = lat_lon2n_E(lat2, lon2, R_Ee)
+    return n_EB_E, alpha2
 
 
 def geodesic_distance(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=None):
@@ -1103,18 +1160,24 @@ def geodesic_distance(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=Non
 
     Returns
     -------
-    distance:  max(m,n) array
+    distance:  real scalars or vectors of length max(m,n).
         Surface distance [m] from A to B on the ellipsoid
+    azimuth_a, azimuth_b: real scalars or vectors of length max(m,n).
+        direction [rad or deg] of line at position a and b relative to
+        North, respectively.
 
     Examples
     --------
+    >>> import numpy as np
     >>> import nvector as nv
     >>> n_EA_E = nv.lat_lon2n_E(0,0)
     >>> n_EB_E = nv.lat_lon2n_E(*nv.rad(0.5, 179.5))
     >>> nv.geodesic_distance(n_EA_E, n_EB_E)
-    19942317.47942947
 
-     19936288.579)
+    19958794.08393471
+    19909099.44101977)
+
+    19936288.578965)
     True
 
     See also
@@ -1123,28 +1186,15 @@ def geodesic_distance(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=Non
 
     """
     # From C.F.F. Karney (2011) "Algorithms for geodesics":
+    # See also https://en.wikipedia.org/wiki/Geodesics_on_an_ellipsoid
     lat1, lon1 = n_E2lat_lon(n_EA_E, R_Ee)
     lat2, lon2 = n_E2lat_lon(n_EB_E, R_Ee)
-    blat1 = np.arctan((1-f)*np.tan(lat1))
-    blat2 = np.arctan((1-f)*np.tan(lat2))
-    n_E1_E = lat_lon2n_E(blat1, lon1, R_Ee)
-    n_E2_E = lat_lon2n_E(blat2, lon2, R_Ee)
-    sigma = great_circle_distance_rad(n_E1_E, n_E2_E)
+    s12, az1, az2 = _geodesic_distance(lat1, lon1, lat2, lon2, a, f)
+    return s12, az1, az2
 
-    # Lamberts formula: https://en.wikipedia.org/wiki/Geographical_distance#Ellipsoidal-surface_formulae
-#     lat1, lon1 = n_E2lat_lon(n_EA_E, R_Ee)
-#     lat2, lon2 = n_E2lat_lon(n_EB_E, R_Ee)
-#     blat1 = np.arctan((1-f)*np.tan(lat1))
-#     blat2 = np.arctan((1-f)*np.tan(lat2))
-#     n_E1_E = lat_lon2n_E(blat1, lon1, R_Ee)
-#     n_E2_E = lat_lon2n_E(blat2, lon2, R_Ee)
-#     sigma = great_circle_distance_rad(n_E1_E, n_E2_E)
-#     p = 0.5 * (blat2+blat1)
-#     q = 0.5 * (blat2+blat1)
-#     x = (sigma-sin(sigma))*(sin(p)*cos(q)/cos(sigma/2))**2
-#     y = (sigma+sin(sigma))*(cos(p)*sin(q)/sin(sigma/2))**2
-#     s_12 = a*(sigma-0.5*f*(x+y))
-#     return s_12
+    # alpha11, alpha22 = _azimuth_sphere(n_EA_E, n_EB_E, R_Ee)
+    alpha1 = n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a, f, R_Ee)
+    alpha2 = n_EA_E_and_n_EB_E2azimuth(n_EB_E, n_EA_E, a, f, R_Ee) + np.pi
 
     z_EA = 0
     z_EB = 0
@@ -1158,7 +1208,7 @@ def geodesic_distance(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=Non
     d_ab0 = euclidean_distance(n_EA_E, n_EB_E, radius)
     s_ab0 = great_circle_distance(n_EA_E, n_EB_E, radius)
     s_ab = d_ab * (s_ab0 / d_ab0)
-    return s_ab
+    return s_ab, alpha1, alpha2
 
 
 @use_docstring(_examples.get_examples_no_header([5], oo_solution=False))
@@ -1277,13 +1327,6 @@ def n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth, R_Ee=None)
 
     # Step3: Find n_EB_E:
     n_EB_E = n_EA_E * cos(distance_rad) + d_E * sin(distance_rad)
-
-#     north_pole = lat_lon2n_E(np.pi/2, 0, R_Ee)
-#
-#     start_on_pole = np.all(np.isclose(north_pole, n_EA_E), axis=0)
-#
-#     if np.any(start_on_pole):
-#         n_EB_E[:, start_on_pole] = np.nan
 
     return n_EB_E
 

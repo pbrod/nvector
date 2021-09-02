@@ -116,7 +116,7 @@ class TestGeoPoint:
         n_a = point1.to_nvector()
         n_b = point2.to_nvector()
         s_ab, azia, azib = nv.geodesic_distance(n_a.normal, n_b.normal, wgs84.a, wgs84.f)
-        assert_allclose(s_ab, 19909099.44101977)
+        assert_allclose(s_ab, 19936288.578965)
 
         point1 = wgs84.GeoPoint(latitude=88, longitude=0, degrees=True)
         point2 = wgs84.GeoPoint(latitude=89, longitude=-170, degrees=True)
