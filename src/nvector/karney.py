@@ -519,7 +519,7 @@ def _solve_alpha1(alpha1, blat1, blat2, true_lamda12, a, f, tol=1e-13):
     sin_blat1, cos_blat1 = sin(blat1), cos(blat1)
     sin_blat2, cos_blat2 = sin(blat2), cos(blat2)
 
-    def _newton_step(alpha1, tol=1e-13):
+    def _newton_step(alpha1):
         """ See table 5 in Karney"""
         sigma1, w1, cos_alpha0, sin_alpha0 = _solve_triangle_NEA(blat1, alpha1)
         sigma2, w2, alpha2 = _solve_triangle_NEB(cos_blat1, cos_blat2, sin_blat2, sin_alpha0, alpha1)
@@ -557,10 +557,12 @@ def _solve_alpha1(alpha1, blat1, blat2, true_lamda12, a, f, tol=1e-13):
         return dalpha1
 
     for i in range(20):
-        dalpha1 = _newton_step(alpha1, tol=1e-13)
+        dalpha1 = _newton_step(alpha1)
         alpha1 += dalpha1
         if np.all(np.abs(dalpha1) < 1e-12):
             break
+    else:
+        warnings.warn('Max iterations reached. Newton method did not converge.')
     return alpha1
 
 
