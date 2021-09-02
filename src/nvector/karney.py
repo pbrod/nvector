@@ -79,8 +79,8 @@ def _astroid(x, y):
 
       K^4 + 2 * K^3 - (X^2 + Y^2 - 1) * K^2 - 2*Y^2 * K - Y^2 = 0
 
-    for the positive root K.  X and Y are column vectors of the same size
-    and the returned value K has the same size.
+    for the positive root K.  X and Y are arrays of the same shape
+    and the returned value K has the same shape.
     """
     x, y = np.atleast_1d(x, y)
     k = np.zeros(x.shape)
@@ -590,6 +590,11 @@ def geodesic_distance(lat1, lon1, lat2, lon2, a=6378137, f=1.0 / 298.257223563):
         direction [rad or deg] of line at position a and b relative to
         North, respectively.
 
+    Notes
+    -----
+    Solves the inverse geodesic problem of finding the length and azimuths of the
+    shortest geodesic between points specified by lat1, lon1, lat2, lon2 on an ellipsoid.
+
     See also
     --------
     sphere_distance_rad
@@ -645,9 +650,9 @@ def geodesic_distance(lat1, lon1, lat2, lon2, a=6378137, f=1.0 / 298.257223563):
         lamda1 = w1 - f * sin_alpha0 * fun_i3(sigma1)  # Eq. 8
         lamda2 = w2 - f * sin_alpha0 * fun_i3(sigma2)  # Eq. 8
         lamda12 = lamda2-lamda1
-        if np.any(np.abs(lamda12-true_lamda12)>1e-12):
+        if np.any(np.abs(lamda12 - true_lamda12) > 1e-8):
             warnings.warn('Some positions did not converge using newton method!....')
-        return s12, alpha2, lamda12
+        return s12, alpha2
 
     s12, alpha1, alpha2, sigma12 = vincenty()
     tol = 1e-12
