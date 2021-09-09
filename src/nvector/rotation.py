@@ -426,13 +426,14 @@ def n_E2lat_lon(n_E, R_Ee=None):
 
     n_e = change_axes_to_E(n_E, R_Ee)
 
-    # Equation (5) in Gade (2010):
-    longitude = arctan2(n_e[1, ...], -n_e[2, ...])
-
-    # Equation (6) in Gade (2010) (Robust numerical solution)
-    cos_latitude = sqrt(n_e[1, ...]**2 + n_e[2, ...]**2)
-    # vector component in the equatorial plane
     sin_latitude = n_e[0, ...]
+    cos_latitude = sqrt(n_e[1, ...]**2 + n_e[2, ...]**2)
+    sin_longitude_cos_latitude = n_e[1, ...]
+    cos_longitude_cos_latitude = -n_e[2, ...]
+
+    # Equation (5) in Gade (2010):
+    longitude = arctan2(sin_longitude_cos_latitude, cos_longitude_cos_latitude)
+    # Equation (6) in Gade (2010) (Robust numerical solution)
     latitude = arctan2(sin_latitude, cos_latitude)
     # atan() could also be used since latitude is within [-pi/2,pi/2]
 

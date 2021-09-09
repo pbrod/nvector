@@ -1007,12 +1007,12 @@ def _azimuth_sphere(n_EA_E, n_EB_E, R_Ee=None):
     cos_b2, sin_b2 = cos(lat2), sin(lat2)
     cos_w, sin_w = cos(w), sin(w)
 
-    cos_alpha1 = cos_b1 * sin_b2 - sin_b1 * cos_b2 * cos_w
-    sin_alpha1 = cos_b2 * sin_w
+    cos_az1 = cos_b1 * sin_b2 - sin_b1 * cos_b2 * cos_w
+    sin_az1 = cos_b2 * sin_w
 
-    cos_alpha2 = cos_b2 * sin_b1 - sin_b2 * cos_b1 * cos_w
-    sin_alpha2 = -cos_b1 * sin_w
-    return np.arctan2(sin_alpha1, cos_alpha1), np.arctan2(sin_alpha2, cos_alpha2)
+    cos_az2 = cos_b2 * sin_b1 - sin_b2 * cos_b1 * cos_w
+    sin_az2 = -cos_b1 * sin_w
+    return np.arctan2(sin_az1, cos_az1), np.arctan2(sin_az2, cos_az2)
 
 
 def great_circle_distance_rad(n_EA_E, n_EB_E, R_Ee=None):
@@ -1047,6 +1047,11 @@ def great_circle_distance_rad(n_EA_E, n_EB_E, R_Ee=None):
 
     sin_theta = norm(np.cross(n_EA_E, n_EB_E, axis=0), axis=0)
     cos_theta = np.sum(n_EA_E * n_EB_E, axis=0)
+
+    # Alternatively:
+    # sin_phi = norm(n_EA_E+n_EB_E, axis=0)/2  # phi = theta/2
+    # cos_phi = norm(n_EA_E-n_EB_E, axis=0)/2
+    # theta = 2 * np.arctan2(sin_phi, cos_phi)
 
     # ill conditioned for small angles:
     # distance_rad_version1 = arccos(dot(n_EA_E,n_EB_E))

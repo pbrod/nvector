@@ -19,6 +19,7 @@ from numpy import arctan2, sin, cos, tan, arctan, sqrt
 # from scipy.special import ellipeinc, ellipkinc  # pylint: disable=no-name-in-module
 from nvector.util import nthroot, eccentricity2, third_flattening, polar_radius
 
+TINY = 1e-150
 
 # A1 coefficients defined in eq. 17 in Karney:
 A1_COEFFICIENTS = (1. / 256, 1. / 64., 1. / 4., 1.)
@@ -71,7 +72,7 @@ C3_COEFFICIENTS = (
 )
 
 
-def _astroid(x, y):
+def __astroid(x, y):
     """
     ASTROID  Solve the astroid equation
 
@@ -99,7 +100,7 @@ def _astroid(x, y):
     fl2 = disc >= 0
     T3 = S[fl2] + r3[fl2]
     T3 = T3 + (1 - 2 * (T3 < 0)) * sqrt(disc[fl2])
-    T = nthroot(T3, 3)
+    T = np.sign(T3)*nthroot(np.abs(T3), 3)
     u[fl2] = u[fl2] + T + r2[fl2] / np.where(T != 0, T, np.inf)
     ang = arctan2(sqrt(-disc[~fl2]), -(S[~fl2] + r3[~fl2]))
     u[~fl2] = u[~fl2] + 2 * r[~fl2] * cos(ang / 3)
@@ -110,6 +111,22 @@ def _astroid(x, y):
     w = (uv - q) / (2 * v)
     k[fl1] = uv / (sqrt(uv + w**2) + w)
     return k
+
+
+def _astroid(x, y, f):
+    mu = __astroid(x, y)
+    alpha1o = np.where(y == 0,
+                       arctan2(-x, sqrt(np.maximum(1 - x**2, 0))),
+                       arctan2(-x * mu / (1 + mu), y))  # Eq. 56 and 57
+    alpha1p = np.where(y == 0,
+                       arctan2(sqrt(np.maximum(1 - x**2, 0)), -x),
+                       arctan2(-y, x * mu / (1 + mu)))
+    shape = alpha1o.shape
+    alpha11 = np.where((f < 0)*np.ones(shape), alpha1p, alpha1o)
+#     alpha11 = np.where(y == 0,
+#                       arctan2(-x, sqrt(np.maximum(1 - x**2, 0))),
+#                       arctan2(-x * mu / (1 + mu), y))  # Eq. 56 and 57
+    return alpha11
 
 
 def _eval_cij_coefs(coefficients, epsi, squared=True):
@@ -352,7 +369,9 @@ def truncate_small(x, small=0.06):
 
 def normalize_angle(angle):
     """Normalize angle to range (-pi, pi]"""
-    nangle = np.mod(angle+np.pi, 2*np.pi)-np.pi
+    mask = np.isfinite(angle)
+    nangle = np.copy(angle)
+    nangle[mask] = np.mod(angle[mask]+np.pi, 2*np.pi)-np.pi
     return np.where(nangle <= -np.pi, np.pi, nangle)
 
 
@@ -366,15 +385,15 @@ def _normalize_equatorial_azimuth(cos_alpha0, e2m):
     return epsi
 
 
-def _solve_triangle_NEA_direct(lat1, alpha1, f):
+def _solve_triangle_nea_direct(lat1, alpha1, f):
     """Returns alpha0, sigma1, w1, cos(alpha0), sin(alpha0)"""
     blat1 = arctan((1 - f) * tan(truncate_small(lat1)))  # Eq. 6
-    return _solve_triangle_NEA(blat1, alpha1)
+    return _solve_triangle_nea(blat1, alpha1)
 
 
-def _solve_triangle_NEA(blat1, alpha1):
+def _solve_triangle_nea(blat1, alpha1):
     cos_alpha1, sin_alpha1 = cos(alpha1), sin(alpha1)
-    cos_blat1, sin_blat1 = cos(blat1), sin(blat1)
+    cos_blat1, sin_blat1 = cos(blat1)+TINY, sin(blat1)
     sin_alpha0 = sin_alpha1 * cos_blat1  # Eq. 5
     cos_alpha0 = np.abs(cos_alpha1 + 1j * sin_alpha1 * sin_blat1)
     # alpha0 = arctan2(sin_alpha0, cos_alpha0)  # Eq 10
@@ -383,7 +402,7 @@ def _solve_triangle_NEA(blat1, alpha1):
     return sigma1, w1, cos_alpha0, sin_alpha0
 
 
-def _solve_triangle_NEB_direct(sigma2, cos_alpha0, sin_alpha0):
+def _solve_triangle_neb_direct(sigma2, cos_alpha0, sin_alpha0):
     """Returns alpha2, blat2, w2"""
     cos_sigma2, sin_sigma2 = cos(sigma2), sin(sigma2)
     sin_blat2 = cos_alpha0 * sin_sigma2
@@ -394,13 +413,18 @@ def _solve_triangle_NEB_direct(sigma2, cos_alpha0, sin_alpha0):
     return alpha2, blat2, w2
 
 
-def _solve_triangle_NEB(cos_blat1, cos_blat2, sin_blat2, sin_alpha0, alpha1):
-    cos_alpha2_cos_blat2 = np.sqrt(cos(alpha1)**2 * cos_blat1**2 + (cos_blat2**2 - cos_blat1**2))
+def _solve_triangle_neb(cos_blat1, cos_blat2, sin_blat2, sin_alpha0, alpha1):
+    # sgn is -1 to make sure sigma2==pi for antipodal points on equator:
+    sgn = np.where((sin_blat2 == 0) & (cos_blat1 == 1), -1, 1)
+    cos_alpha2_cos_blat2 = sgn*np.sqrt(cos(alpha1)**2 * cos_blat1**2
+                                       + (cos_blat2**2 - cos_blat1**2))
+
     sin_alpha2_cos_blat2 = sin(alpha1)*cos_blat1
-    alpha2 = arctan2(sin_alpha2_cos_blat2, cos_alpha2_cos_blat2)  # stable at both 0 and pi/2 angles
+    alpha2 = arctan2(sin_alpha2_cos_blat2, cos_alpha2_cos_blat2)  # stable at both 0 and pi/2 angle
     # alpha20 = np.arccos(cos_alpha2_cos_blat2 / cos_blat2)  # Eq 45. in Karney
     sigma2 = arctan2(sin_blat2, cos_alpha2_cos_blat2)  # Eq 11
-    w2 = arctan2(sin_alpha0 * sin(sigma2), cos(sigma2))  # Eq 12
+    w2 = np.sign(sigma2)*np.abs(arctan2(sin_alpha0 * sin(sigma2), cos(sigma2)))  # Eq 12
+
     return sigma2, w2, alpha2
 
 
@@ -452,7 +476,7 @@ def sphere_distance_rad(lat1, lon1, lat2, lon2):
     return distance_rad, azimuth_a, azimuth_b
 
 
-def geodesic_reckon(lat1, lon1, distance, azimuth, a=6378137, f=1.0 / 298.257223563):
+def geodesic_reckon(lat1, lon1, distance, azimuth, a=6378137, f=1.0 / 298.257223563, long_unroll=False):
     """
     Returns position B computed from position A, distance and azimuth.
 
@@ -469,11 +493,16 @@ def geodesic_reckon(lat1, lon1, distance, azimuth, a=6378137, f=1.0 / 298.257223
     f: real scalar, default WGS-84 ellipsoid.
         Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
         Earth with radius a is used in stead of WGS-84.
+    long_unroll: bool
+        Controls the treatment of longitude. If it is False then the lon_a and lon_b
+        are both reduced to the range [-180, 180). If it is True, then lon_a
+        is as given in the function call and (lon_b - lon_a) determines how many times
+        and in what sense the geodesic has encircled the ellipsoid.
 
     Returns
     -------
     lat2, lon2:  arrays of length max(k,m,n).
-        latitude(s) and longitude(s) of position A.
+        latitude(s) and longitude(s) of position B.
     azimuth_b: real scalars or vectors of length max(k,m,n).
         azimuth [rad] of line at position B.
 
@@ -482,9 +511,9 @@ def geodesic_reckon(lat1, lon1, distance, azimuth, a=6378137, f=1.0 / 298.257223
     >>> import numpy as np
     >>> import nvector as nv
     """
-
+    lat1, lon1, distance, azimuth, a = np.broadcast_arrays(lat1, lon1, distance, azimuth, a)
     alpha1 = truncate_small(azimuth)
-    sigma1, w1, cos_alpha0, sin_alpha0 = _solve_triangle_NEA_direct(lat1, alpha1, f)
+    sigma1, w1, cos_alpha0, sin_alpha0 = _solve_triangle_nea_direct(lat1, alpha1, f)
 
     # Determine sigma2:
     n = third_flattening(f)
@@ -497,32 +526,39 @@ def geodesic_reckon(lat1, lon1, distance, azimuth, a=6378137, f=1.0 / 298.257223
     s2 = s1 + distance
     sigma2 = i1inv(s2/b)  # Eq. 20: Inverse of I1 where I1 is defined in Eq. 7.
 
-    alpha2, blat2, w2 = _solve_triangle_NEB_direct(sigma2, cos_alpha0, sin_alpha0)
+    alpha2, blat2, w2 = _solve_triangle_neb_direct(sigma2, cos_alpha0, sin_alpha0)
 
     # Determine lamda12
     fun_i3 = _get_i3_fun(epsi, n)
-    lamda1 = w1 - f * sin_alpha0 * fun_i3(sigma1)  # Eq. 8
-    lamda2 = w2 - f * sin_alpha0 * fun_i3(sigma2)  # Eq. 8
+    # lamda1 = w1 - f * sin_alpha0 * fun_i3(sigma1)  # Eq. 8
+    # lamda2 = w2 - f * sin_alpha0 * fun_i3(sigma2)  # Eq. 8
 
-    lamda12 = lamda2 - lamda1
-    lon2 = lon1 + lamda12
+    lamda12 = w2-w1 + f * sin_alpha0 * (fun_i3(sigma1) - fun_i3(sigma2))
+
+    if long_unroll:
+        correction = (sigma2 - arctan2(sin(sigma2), cos(sigma2))
+                      - sigma1 + arctan2(sin(sigma1), cos(sigma1)))
+        lon2 = lon1 + lamda12 + np.sign(sin_alpha0) * correction
+    else:
+        lon2 = normalize_angle(lon1 + lamda12)
     lat2 = arctan(tan(blat2)/(1-f))  # Eq. 6
 
     return lat2, lon2, alpha2
 
 
-def _solve_alpha1(alpha1, blat1, blat2, true_lamda12, a, f, tol=1e-13):
+def _solve_alpha1(alpha1, blat1, blat2, true_lamda12, a, f, tol=1e-15):
     b = polar_radius(a, f)
     eta = third_flattening(f)
     e2, e2m = eccentricity2(f)
 
-    sin_blat1, cos_blat1 = sin(blat1), cos(blat1)
+    sin_blat1, cos_blat1 = sin(blat1)-TINY, cos(blat1)
     sin_blat2, cos_blat2 = sin(blat2), cos(blat2)
 
     def _newton_step(alpha1):
         """ See table 5 in Karney"""
-        sigma1, w1, cos_alpha0, sin_alpha0 = _solve_triangle_NEA(blat1, alpha1)
-        sigma2, w2, alpha2 = _solve_triangle_NEB(cos_blat1, cos_blat2, sin_blat2, sin_alpha0, alpha1)
+        sigma1, w1, cos_alpha0, sin_alpha0 = _solve_triangle_nea(blat1, alpha1)
+
+        sigma2, w2, alpha2 = _solve_triangle_neb(cos_blat1, cos_blat2, sin_blat2, sin_alpha0, alpha1)
 
         # Determine lamda12
         epsi = _normalize_equatorial_azimuth(cos_alpha0, e2m)
@@ -547,23 +583,54 @@ def _solve_alpha1(alpha1, blat1, blat2, true_lamda12, a, f, tol=1e-13):
         #        - sin_sigma1 * cos_sigma2 * delta_j / k_sin_s1)  # Eq 39
         cos_alpha2 = cos(alpha2)
         dlamda12_dalpha1 = np.where(np.abs(cos_alpha2) < tol,
-                                    -sqrt(1 - e2 * cos_blat1**2) / sin_blat1 *
-                                    (1 - np.sign(cos(alpha1))),
+                                    -sqrt(1 - e2 * cos_blat1**2) / sin_blat1 * 2, # (1 - np.sign(cos(alpha1)))
                                     m12 / a / (cos_alpha2 * cos_blat2))
         dlamda12 = true_lamda12-lamda12
 
         dalpha1 = dlamda12/dlamda12_dalpha1
 
-        return dalpha1
+        return dalpha1, dlamda12
 
+    dalpha_old = np.zeros_like(alpha1)
     for i in range(20):
-        dalpha1 = _newton_step(alpha1)
-        alpha1 += dalpha1
-        if np.all(np.abs(dalpha1) < 1e-12):
+        dalpha1, dlamda12 = _newton_step(alpha1)
+        if np.any(np.isnan(dalpha1)):
+            dalpha_old *= 0.5
+            alpha1 -= dalpha_old
+        else:
+            alpha1 = (alpha1 + dalpha1).clip(0, np.pi)  # alpha1 must be in [0, pi]
+            dalpha_old = dalpha1
+        if np.all(np.abs(dlamda12) < 1e-12):
             break
     else:
         warnings.warn('Max iterations reached. Newton method did not converge.')
     return alpha1
+
+
+def _canonical(blat1, blat2, lamda12):
+    """Return canonical problem where blat1 <=0, blat1 <= blat2 <= -blat1 and 0<=lamda12<=pi. """
+    blat1, blat2 = truncate_small(blat1), truncate_small(blat2)
+    swap_bmask = np.abs(blat1) < np.abs(blat2)
+    blat11, blat22 = np.where(swap_bmask, blat2, blat1), np.where(swap_bmask, blat1, blat2)
+    negate_blat11 = blat11 > 0
+    blat11[negate_blat11] *= -1
+    blat22[negate_blat11] *= -1
+    true_lamda = truncate_small(normalize_angle(lamda12))
+    negate_lamda = true_lamda < 0
+    true_lamda[negate_lamda] *= -1
+
+    swap_alpha = np.logical_xor(swap_bmask, negate_blat11)
+
+    def restore(alpha1, alpha2):
+        """Restore computed values"""
+        az1, az2 = np.where(swap_bmask, alpha2, alpha1), np.where(swap_bmask, alpha1, alpha2)
+        az1, az2 = np.where(swap_alpha, np.pi-az1, az1), np.where(swap_alpha, np.pi-az2, az2)
+        az1[negate_lamda] *= -1
+        az2[negate_lamda] *= -1
+
+        return normalize_angle(az1), normalize_angle(az2)
+
+    return blat11, blat22, true_lamda,  restore
 
 
 def geodesic_distance(lat1, lon1, lat2, lon2, a=6378137, f=1.0 / 298.257223563):
@@ -581,8 +648,6 @@ def geodesic_distance(lat1, lon1, lat2, lon2, a=6378137, f=1.0 / 298.257223563):
     f: real scalar, default WGS-84 ellipsoid.
         Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
         Earth with radius a is used in stead of WGS-84.
-    R_Ee : 3 x 3 array
-        rotation matrix defining the axes of the coordinate frame E.
 
     Returns
     -------
@@ -602,19 +667,18 @@ def geodesic_distance(lat1, lon1, lat2, lon2, a=6378137, f=1.0 / 298.257223563):
     sphere_distance_rad
 
     """
-    lat1, lon1, lat2, lon2 = np.broadcast_arrays(lat1, lon1, lat2, lon2)
-    # assume lat1<=0 and lat1 < lat2 < -lat1
+    lat1, lon1, lat2, lon2, a, f = np.broadcast_arrays(*np.atleast_1d(lat1, lon1, lat2, lon2, a, f))
+    blat1, blat2, true_lamda12, restore = _canonical(arctan((1 - f) * tan(lat1)),  # Eq 6
+                                                     arctan((1 - f) * tan(lat2)),  # Eq 6
+                                                     lon2 - lon1)
     b = polar_radius(a, f)
     eta = third_flattening(f)
     e2, e2m = eccentricity2(f)
 
-    blat1 = arctan((1 - f) * tan(lat1))  # Eq 6
-    blat2 = arctan((1 - f) * tan(lat2))  # Eq 6
+    # assume lat1<=0 and lat1 < lat2 < -lat1 and <= true_lamda12 <= pi/2
 
-    sin_blat1, cos_blat1 = sin(blat1), cos(blat1)
-    sin_blat2, cos_blat2 = sin(blat2), cos(blat2)
-
-    true_lamda12 = lon2 - lon1
+    cos_blat1 = cos(blat1) + TINY
+    sin_blat2, cos_blat2 = sin(blat2), cos(blat2)+TINY
 
     def vincenty():
         """See table 3 in Karney"""
@@ -627,19 +691,19 @@ def geodesic_distance(lat1, lon1, lat2, lon2, a=6378137, f=1.0 / 298.257223563):
 
     def _solve_astroid():
         """See table 4 in Karney"""
-        delta = f * a * np.pi * cos_blat1**2
-        x = (true_lamda12 - np.pi) * a * cos_blat1 / delta
-        y = (blat1 + blat2) * a / delta
-        mu = _astroid(x, y)
-        alpha1 = np.where(y == 0,
-                          arctan2(-x, sqrt(np.maximum(1 - x**2, 0))),
-                          arctan2(-x / (1 + mu), y / mu))  # Eq. 56 and 57
-        return alpha1
+        delta = np.where(f == 0, 1, np.abs(f * np.pi * cos_blat1**2) + TINY)
+        x = (true_lamda12 - np.pi) * cos_blat1 / delta
+        y = (blat1 + blat2) / delta
+
+        alpha11 = _astroid(x, y, f)
+
+        return alpha11
 
     def _solve_hybrid(alpha1):
         """See table 6 in Karney"""
-        sigma1, w1, cos_alpha0, sin_alpha0 = _solve_triangle_NEA(blat1, alpha1)
-        sigma2, w2, alpha2 = _solve_triangle_NEB(cos_blat1, cos_blat2, sin_blat2, sin_alpha0, alpha1)
+        sigma1, w1, cos_alpha0, sin_alpha0 = _solve_triangle_nea(blat1, alpha1)
+
+        sigma2, w2, alpha2 = _solve_triangle_neb(cos_blat1, cos_blat2, sin_blat2, sin_alpha0, alpha1)
 
         # Determine s12:
         epsi = _normalize_equatorial_azimuth(cos_alpha0, e2m)
@@ -657,24 +721,40 @@ def geodesic_distance(lat1, lon1, lat2, lon2, a=6378137, f=1.0 / 298.257223563):
         return s12, alpha2
 
     s12, alpha1, alpha2, sigma12 = vincenty()
+    finite_mask = ~np.isnan(s12)
+    if not np.any(finite_mask):
+        return s12, alpha1, alpha2
     tol = 1e-12
     sin_lamda12 = sin(true_lamda12)
-    meridional = np.abs(sin_lamda12) <= tol  # alpha1 = lamda12
-    equatorial = (np.abs(lat1-lat2) <= tol) & (np.abs(lat1) <= tol)  # alpha1 = sign(lamda12)*pi
-    nearly_antipodal = sigma12 > np.pi*(1-3*f*cos_blat1**2)
+    sphere = (f == 0)
+
+    meridional = (np.abs(sin_lamda12) <= tol)  # alpha1 = 0 or pi #lamda12
+    delta_blat = blat2 - blat1
+    equatorial = ((np.abs(delta_blat) <= tol)
+                  & (np.abs(blat1) <= tol)
+                  & (true_lamda12 <= (1-f)*np.pi))  # alpha1 = pi/2
+    oblate = (f >= 0)
+    prolate = (f < 0)
+    mask = equatorial & ~(meridional & oblate)
+    alpha1[mask] = np.pi/2
+    alpha2[mask] = alpha1[mask]
+    mask = meridional & ~(equatorial & prolate)
+    alpha11 = np.sign(delta_blat)*true_lamda12
+    alpha1[mask] = alpha11[mask]
+    alpha2[mask] = np.pi-alpha1[mask]
+    nearly_antipodal = ~sphere & ~equatorial & (sigma12 >= np.pi*(1-3*np.abs(f)*cos_blat1**2))
+
     alpha1 = np.where(nearly_antipodal, _solve_astroid(), alpha1)
-    alpha1 = np.where(meridional, true_lamda12, alpha1)
-    alpha1 = np.where(equatorial, np.sign(true_lamda12)*np.pi, alpha1)
     # alpha1 = np.deg2rad(161.914)
     short_distance = (s12 < a*1e-4)
-    mask = ~(meridional | equatorial | short_distance)
+    mask = ~(equatorial | meridional | short_distance | sphere) | nearly_antipodal
+    mask *= finite_mask
 
     alpha1[mask] = _solve_alpha1(alpha1[mask], blat1[mask], blat2[mask], true_lamda12[mask], a, f)
-
-    mask = ~short_distance
-
     s12[mask], alpha2[mask] = _solve_hybrid(alpha1[mask])
-    return s12, alpha1, alpha2
+    az1, az2 = restore(alpha1, alpha2)
+
+    return s12, az1, az2
 
 
 if __name__ == '__main__':
