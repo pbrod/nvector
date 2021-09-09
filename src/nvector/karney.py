@@ -583,7 +583,7 @@ def _solve_alpha1(alpha1, blat1, blat2, true_lamda12, a, f, tol=1e-15):
         #        - sin_sigma1 * cos_sigma2 * delta_j / k_sin_s1)  # Eq 39
         cos_alpha2 = cos(alpha2)
         dlamda12_dalpha1 = np.where(np.abs(cos_alpha2) < tol,
-                                    -sqrt(1 - e2 * cos_blat1**2) / sin_blat1 * 2, # (1 - np.sign(cos(alpha1)))
+                                    -sqrt(1 - e2 * cos_blat1**2) / sin_blat1 * 2,
                                     m12 / a / (cos_alpha2 * cos_blat2))
         dlamda12 = true_lamda12-lamda12
 
@@ -675,7 +675,7 @@ def geodesic_distance(lat1, lon1, lat2, lon2, a=6378137, f=1.0 / 298.257223563):
     eta = third_flattening(f)
     e2, e2m = eccentricity2(f)
 
-    # assume lat1<=0 and lat1 < lat2 < -lat1 and <= true_lamda12 <= pi/2
+    # assume lat1<=0 and lat1 < lat2 < -lat1 and  0 <= true_lamda12 <= pi
 
     cos_blat1 = cos(blat1) + TINY
     sin_blat2, cos_blat2 = sin(blat2), cos(blat2)+TINY
