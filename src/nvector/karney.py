@@ -115,9 +115,11 @@ def __astroid(x, y):
 
 def _astroid(x, y, f):
     mu = __astroid(x, y)
+    # Oblate solution
     alpha1o = np.where(y == 0,
                        arctan2(-x, sqrt(np.maximum(1 - x**2, 0))),
                        arctan2(-x * mu / (1 + mu), y))  # Eq. 56 and 57
+    # Prolate solution
     alpha1p = np.where(y == 0,
                        arctan2(sqrt(np.maximum(1 - x**2, 0)), -x),
                        arctan2(-y, x * mu / (1 + mu)))
@@ -494,10 +496,10 @@ def geodesic_reckon(lat1, lon1, distance, azimuth, a=6378137, f=1.0 / 298.257223
         Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
         Earth with radius a is used in stead of WGS-84.
     long_unroll: bool
-        Controls the treatment of longitude. If it is False then the lon_a and lon_b
-        are both reduced to the range [-180, 180). If it is True, then lon_a
-        is as given in the function call and (lon_b - lon_a) determines how many times
-        and in what sense the geodesic has encircled the ellipsoid.
+        Controls the treatment of longitude. If it is False then the lon2
+        is reduced to the range [-180, 180). If it is True, then (lon2 - lon1)
+        determines how many times and in what sense the geodesic has encircled
+        the ellipsoid.
 
     Returns
     -------
@@ -538,7 +540,8 @@ def geodesic_reckon(lat1, lon1, distance, azimuth, a=6378137, f=1.0 / 298.257223
     if long_unroll:
         correction = (sigma2 - arctan2(sin(sigma2), cos(sigma2))
                       - sigma1 + arctan2(sin(sigma1), cos(sigma1)))
-        lon2 = lon1 + lamda12 + np.sign(sin_alpha0) * correction
+        sgn = np.where(sin_alpha0 >= 0, 1, -1)
+        lon2 = lon1 + lamda12 + sgn * correction
     else:
         lon2 = normalize_angle(lon1 + lamda12)
     lat2 = arctan(tan(blat2)/(1-f))  # Eq. 6
@@ -682,16 +685,17 @@ def geodesic_distance(lat1, lon1, lat2, lon2, a=6378137, f=1.0 / 298.257223563):
 
     def vincenty():
         """See table 3 in Karney"""
-        wbar = sqrt(1-e2*(0.5*(cos_blat1+cos_blat2))**2)  # Eq. 48
-        w12 = true_lamda12/wbar
-        # Determine sigma2:
+        wbar = sqrt(1 - e2 * (0.5 * (cos_blat1 + cos_blat2))**2)  # Eq. 48
+        w12 = true_lamda12 / wbar
+        # Determine sigma2-sigma1 on the auxiliary sphere:
         sigma12, alpha1, alpha2 = sphere_distance_rad(blat1, 0, blat2, w12)
-        s12 = a*wbar*sigma12
+        s12 = a * wbar * sigma12
         return s12, alpha1, alpha2, sigma12
 
     def _solve_astroid():
         """See table 4 in Karney"""
-        delta = np.where(f == 0, 1, np.abs(f * np.pi * cos_blat1**2) + TINY)
+        delta = np.where(f == 0, 1, np.abs(f * np.pi * cos_blat1**2))
+
         x = (true_lamda12 - np.pi) * cos_blat1 / delta
         y = (blat1 + blat2) / delta
 

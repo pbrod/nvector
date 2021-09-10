@@ -1049,8 +1049,8 @@ def great_circle_distance_rad(n_EA_E, n_EB_E, R_Ee=None):
     cos_theta = np.sum(n_EA_E * n_EB_E, axis=0)
 
     # Alternatively:
-    # sin_phi = norm(n_EA_E+n_EB_E, axis=0)/2  # phi = theta/2
-    # cos_phi = norm(n_EA_E-n_EB_E, axis=0)/2
+    # sin_phi = norm(n_EA_E-n_EB_E, axis=0)/2  # phi = theta/2
+    # cos_phi = norm(n_EA_E+n_EB_E, axis=0)/2
     # theta = 2 * np.arctan2(sin_phi, cos_phi)
 
     # ill conditioned for small angles:

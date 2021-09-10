@@ -148,7 +148,6 @@ def test_wgs84_inverse(testcase):
     point1 = GeoPoint(lat1, lon1, **options)
     point2 = GeoPoint(lat2, lon2, **options)
     s_ab, az_a, az_b = point1.distance_and_azimuth(point2,
-                                                   long_unroll=True,
                                                    degrees=True)
     assert az_a == approx(azi1, abs=2e-13)
     assert az_b == approx(azi2, abs=1e-13)
@@ -343,8 +342,6 @@ def test_geo_solve29():
     assert s_ab == approx(222639, abs=0.5)
     assert az_a == approx(90)
     assert az_b == approx(90)
-    s_ab, _az_a, _az_b = WGS84.inverse(0, 539, 0, 181, degrees=True)
-    assert s_ab == approx(222639, abs=0.5)
 
 
 @pytest.mark.parametrize("datum, lat1, lon1, lat2, lon2, s12, az1, az2",

@@ -351,7 +351,7 @@ class GeoPoint(_Common):
             return point_b, rad(azimuth_b)
         return point_b, azimuth_b
 
-    def distance_and_azimuth(self, point, long_unroll=False, degrees=False, method='ellipsoid'):
+    def distance_and_azimuth(self, point, degrees=False, method='ellipsoid'):
         """
         Returns ellipsoidal distance between positions as well as the direction.
 
@@ -359,11 +359,6 @@ class GeoPoint(_Common):
         ----------
         point:  GeoPoint object
             Latitude and longitude of position b.
-        long_unroll: bool
-            Controls the treatment of longitude. If it is False then the lon_a and
-            lon_b are both reduced to the range [-180, 180). If it is True, then
-            lon_a is as given in the function call and (lon_b - lon_a) determines
-            how many times and in what sense the geodesic has encircled the ellipsoid.
         degrees: bool
             azimuths are returned in degrees if True otherwise in radians.
         method: 'greatcircle' or 'ellipsoid'
@@ -402,7 +397,7 @@ class GeoPoint(_Common):
         """
         _check_frames(self, point)
         if method[0] == 'e':
-            return self._distance_and_azimuth_ellipsoid(point, long_unroll, degrees)
+            return self._distance_and_azimuth_ellipsoid(point, degrees)
         return self._distance_and_azimuth_greatcircle(point, degrees)
 
     def _distance_and_azimuth_greatcircle(self, point, degrees):
@@ -422,7 +417,7 @@ class GeoPoint(_Common):
             return distance[0], azimuth_a, azimuth_b  # scalar track distance
         return distance, azimuth_a, azimuth_b
 
-    def _distance_and_azimuth_ellipsoid(self, point, long_unroll, degrees):
+    def _distance_and_azimuth_ellipsoid(self, point, degrees):
         gpoint = point.to_geo_point()
         lat_a, lon_a = self.latitude, self.longitude
         lat_b, lon_b = gpoint.latitude, gpoint.longitude
@@ -431,7 +426,7 @@ class GeoPoint(_Common):
         if degrees:
             lat_a, lon_a, lat_b, lon_b = deg(lat_a, lon_a, lat_b, lon_b)
 
-        return self.frame.inverse(lat_a, lon_a, lat_b, lon_b, z, long_unroll, degrees)
+        return self.frame.inverse(lat_a, lon_a, lat_b, lon_b, z, degrees)
 
 
 class Nvector(_Common):
@@ -1307,7 +1302,7 @@ class FrameE(_Common):
                 and allclose(self.f, other.f, rtol=rtol, atol=atol)
                 and allclose(self.R_Ee, other.R_Ee, rtol=rtol, atol=atol))
 
-    def inverse(self, lat_a, lon_a, lat_b, lon_b, z=0, long_unroll=False, degrees=False):
+    def inverse(self, lat_a, lon_a, lat_b, lon_b, z=0, degrees=False):
         """
         Returns ellipsoidal distance between positions as well as the direction.
 
@@ -1319,11 +1314,6 @@ class FrameE(_Common):
             Latitude and longitude of position b.
         z : real scalar or vector
             depth relative to Earth ellipsoid.
-        long_unroll: bool
-            Controls the treatment of longitude. If it is False then the lon_a and lon_b
-            are both reduced to the range [-180, 180). If it is True, then lon_a
-            is as given in the function call and (lon_b - lon_a) determines how many times
-            and in what sense the geodesic has encircled the ellipsoid.
         degrees: bool
             angles are given in degrees if True otherwise in radians.
 
@@ -1351,23 +1341,23 @@ class FrameE(_Common):
         `geographiclib <https://pypi.python.org/pypi/geographiclib>`_
 
         """
-        a1, f = self.a - z, self.f
-        lat1, lon1, lat2, lon2, a1 = np.broadcast_arrays(lat_a, lon_a, lat_b, lon_b, a1)
-        if degrees:
-            lat1, lon1, lat2, lon2 = rad(lat1, lon1, lat2, lon2)
-
-        s_ab, azimuth_a, azimuth_b = geodesic_distance(lat1, lon1, lat2, lon2, a1, f)
-        if degrees:
-            azimuth_a, azimuth_b = deg(azimuth_a, azimuth_b)
-        if np.ndim(lat_a) == 0:
-            return s_ab[0], azimuth_a[0], azimuth_b[0]
-        return s_ab, azimuth_a, azimuth_b
+#         a1, f = self.a - z, self.f
+#         lat1, lon1, lat2, lon2, a1 = np.broadcast_arrays(lat_a, lon_a, lat_b, lon_b, a1)
+#         if degrees:
+#             lat1, lon1, lat2, lon2 = rad(lat1, lon1, lat2, lon2)
+#
+#         s_ab, azimuth_a, azimuth_b = geodesic_distance(lat1, lon1, lat2, lon2, a1, f)
+#         if degrees:
+#             azimuth_a, azimuth_b = deg(azimuth_a, azimuth_b)
+#         if np.ndim(lat_a) == 0:
+#             return s_ab[0], azimuth_a[0], azimuth_b[0]
+#         return s_ab, azimuth_a, azimuth_b
 # TODO: remove this:
         if not degrees:
             lat_a, lon_a, lat_b, lon_b = deg(lat_a, lon_a, lat_b, lon_b)
 
         lat_a, lon_a, lat_b, lon_b, z = np.broadcast_arrays(lat_a, lon_a, lat_b, lon_b, z)
-        fun = partial(self._inverse, outmask=self._outmask(long_unroll))
+        fun = self._inverse
         items = zip(*np.atleast_1d(lat_a, lon_a, lat_b, lon_b, z))
         sab, azia, azib = np.transpose([fun(lat_ai, lon_ai, lat_bi, lon_bi, z=zi)
                                         for lat_ai, lon_ai, lat_bi, lon_bi, zi in items])
@@ -1381,9 +1371,9 @@ class FrameE(_Common):
             return s_ab[0], azimuth_a[0], azimuth_b[0]
         return s_ab, azimuth_a, azimuth_b
 
-    def _inverse(self, lat_a, lon_a, lat_b, lon_b, z=0, outmask=None):
+    def _inverse(self, lat_a, lon_a, lat_b, lon_b, z=0):
         geo = _Geodesic(self.a - z, self.f)
-        result = geo.Inverse(lat_a, lon_a, lat_b, lon_b, outmask=outmask)
+        result = geo.Inverse(lat_a, lon_a, lat_b, lon_b, outmask=_Geodesic.STANDARD)
         return result['s12'], result['azi1'], result['azi2']
 
     @staticmethod
