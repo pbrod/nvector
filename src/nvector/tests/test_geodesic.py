@@ -346,7 +346,7 @@ def test_geo_solve33(datum, lat1, lon1, lat2, lon2, s12, az1, az2):
                           (0, 0, 1, np.nan)])
 def test_nan_propagation(lat1, lon1, lat2, lon2):
     """Check that WGS84.inverse return nans when input is nan."""
-    s_ab, az_a, az_b = WGS84.inverse(0, 0, 1, np.nan, degrees=True)
+    s_ab, az_a, az_b = WGS84.inverse(lat1, lon1, lat2, lon2, degrees=True)
     assert np.isnan(az_a)
     assert np.isnan(az_b)
     assert np.isnan(s_ab)
