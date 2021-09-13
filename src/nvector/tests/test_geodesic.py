@@ -1,3 +1,6 @@
+"""
+Module that checks that the geodesic direct and inverse methods is working correctly.
+"""
 import pytest
 from pytest import approx
 
@@ -145,6 +148,7 @@ PROLATE30_TESTCASES = [
 
 @pytest.mark.parametrize("testcase", WGS84_TESTCASES)
 def test_wgs84_inverse(testcase):
+    """Test inverse method on the WGS84 ellipsoid"""
     options = dict(frame=WGS84, degrees=True)
 
     (lat1, lon1, azi1, lat2, lon2, azi2, s12) = testcase[:7]
@@ -159,6 +163,7 @@ def test_wgs84_inverse(testcase):
 
 @pytest.mark.parametrize("testcase", WGS84_TESTCASES)
 def test_wgs84_direct(testcase):
+    """Test direct method on the WGS84 ellipsoid"""
     options = dict(frame=WGS84, degrees=True)
 
     (lat1, lon1, azi1, lat2, lon2, azi2, s12) = testcase[:7]
@@ -174,6 +179,7 @@ def test_wgs84_direct(testcase):
 
 @pytest.mark.parametrize("testcase", PROLATE15_TESTCASES)
 def test_prolate15_direct(testcase):
+    """Test direct method on the prolate15 ellipsoid"""
     options = dict(frame=PROLATE15, degrees=True)
 
     (lat1, lon1, azi1, lat2, lon2, azi2, s12) = testcase[:7]
@@ -189,6 +195,7 @@ def test_prolate15_direct(testcase):
 
 @pytest.mark.parametrize("testcase", PROLATE30_TESTCASES)
 def test_prolate30_direct(testcase):
+    """Test direct method on the prolate 30 ellipsoid"""
     options = dict(frame=PROLATE30, degrees=True)
 
     (lat1, lon1, azi1, lat2, lon2, azi2, s12) = testcase[:7]
@@ -227,10 +234,10 @@ def test_geo_solve4():
 
 
 def test_geo_solve5():
-    # Check fix for point2=pole bug found 2010-05-03
+    """Check fix for point2=pole bug found 2010-05-03"""
     # (0.01777745589997, 30., 0., 90., 210., 0., 10e6),
     lat1, lon1, az1 = (0.01777745589997, 30, 0)
-    lat_b, lon_b, az_b = WGS84.direct(lat1, lon1, az1, 1.000000000000001e7, long_unroll=False, degrees=True)
+    lat_b, lon_b, az_b = WGS84.direct(lat1, lon1, az1, 1.0e7, long_unroll=False, degrees=True)
 
     assert lat_b == approx(90, abs=0.5e-5)
     if lon_b < 0: # just passed the north pole
@@ -241,52 +248,23 @@ def test_geo_solve5():
         assert az_b == approx(0, abs=0.5e-5)
 
 
-def test_geo_solve6():
-    # Check fix for volatile sbet12a bug found 2011-06-25 (gcc 4.4.4
-    # x86 -O3).  Found again on 2012-03-27 with tdm-mingw32 (g++ 4.6.1).
-
-    lat1, lon1, lat2, lon2 = np.deg2rad((88.202499451857, 0,
-                                         -88.202499451857,
-                                         179.981022032992859592))
-    s_ab, _az_a, _az_b = WGS84.inverse(lat1, lon1, lat2, lon2)
-    assert s_ab == approx(20003898.214, abs=0.5e-3)
-
-    lat1, lon1, lat2, lon2 = np.deg2rad((89.262080389218, 0,
-                                         -89.262080389218,
-                                         179.992207982775375662))
-    s_ab, _az_a, _az_b = WGS84.inverse(lat1, lon1, lat2, lon2)
-    assert s_ab == approx(20003925.854, abs=0.5e-3)
-
-    lat1, lon1, lat2, lon2 = np.deg2rad((89.333123580033, 0,
-                                         -89.333123580032997687,
-                                         179.99295812360148422))
-    s_ab, _az_a, _az_b = WGS84.inverse(lat1, lon1, lat2, lon2)
-    assert s_ab == approx(20003926.881, abs=0.5e-3)
+@pytest.mark.parametrize(
+    "lat1, lon1, lat2, lon2, s12, az1, az2",
+    [(88.202499451857, 0, -88.202499451857, 179.981022032992859592, 20003898.214, 90, 90),
+     (89.262080389218, 0, -89.262080389218, 179.992207982775375662, 20003925.854, 90, 90),
+     (89.333123580033, 0, -89.333123580032997687, 179.99295812360148422, 20003926.881, 90, 90),
+     (56.320923501171, 0, -56.320923501171, 179.664747671772880215, 19993558.287, 90, 90),
+     (52.784459512564, 0, -52.784459512563990912, 179.634407464943777557, 19991596.095, 90, 90),
+     (48.522876735459, 0, -48.52287673545898293, 179.599720456223079643, 19989144.774, 90, 90)
+     ])
+def test_inverse_cornercases(lat1, lon1, lat2, lon2, s12, az1, az2):
+    """Check cornercases."""
 
 
-def test_geo_solve9():
-    # Check fix for volatile x bug found 2011-06-25 (gcc 4.4.4 x86 -O3)
-    lat1, lon1, lat2, lon2 = np.deg2rad((56.320923501171, 0,
-                                         -56.320923501171,
-                                         179.664747671772880215))
-    s_ab, _az_a, _az_b = WGS84.inverse(lat1, lon1, lat2, lon2)
-    assert s_ab == approx(19993558.287, abs=0.5e-3)
-
-
-def test_geo_solve10():
-    # Check fix for adjust tol1_ bug found 2011-06-25 (Visual Studio
-    # 10 rel + debug)
-    lat1, lon1, lat2, lon2 = (52.784459512564, 0, -52.784459512563990912, 179.634407464943777557)
-    s_ab, _az_a, _az_b = WGS84.inverse(lat1, lon1, lat2, lon2, degrees=True)
-    assert s_ab == approx(19991596.095, abs=0.5e-3)
-
-
-def test_geo_solve11():
-    # Check fix for bet2 = -bet1 bug found 2011-06-25 (Visual Studio
-    # 10 rel + debug)
-    lat1, lon1, lat2, lon2 = (48.522876735459, 0, -48.52287673545898293, 179.599720456223079643)
-    s_ab, _az_a, _az_b = WGS84.inverse(lat1, lon1, lat2, lon2, degrees=True)
-    assert s_ab == approx(19989144.774, abs=0.5e-3)
+    s_ab, az_a, az_b = WGS84.inverse(lat1, lon1, lat2, lon2, degrees=True)
+    assert s_ab == approx(s12, abs=0.5e-3)
+    assert az_a == approx(az1, abs=0.5e-3)
+    assert az_b == approx(az2, abs=0.5e-3)
 
 
 def test_geo_solve12():
@@ -351,18 +329,3 @@ def test_nan_propagation(lat1, lon1, lat2, lon2):
     assert np.isnan(az_b)
     assert np.isnan(s_ab)
 
-
-# def test_make_testcases():
-#     options = dict(frame=PROLATE30, degrees=True)
-#     for testcase in WGS84_TESTCASES:
-#         (lat1, lon1, azi1, lat2, lon2, azi2, s12) = testcase[:7]
-#         #print(lat1, lon1, azi1, lat2, lon2, azi2, s12)
-#         #print(testcase[:7], ',')
-#         point1 = GeoPoint(lat1, lon1, **options)
-#         point2 = GeoPoint(lat2, lon2, **options)
-#         s_ab, az_a, az_b = point1.distance_and_azimuth(point2,
-#                                                        long_unroll=True,
-#                                                        degrees=True)
-#         new_testcase = (lat1, lon1, az_a, lat2, lon2, az_b, s_ab)
-#         print(new_testcase, ',')
-#     assert False
