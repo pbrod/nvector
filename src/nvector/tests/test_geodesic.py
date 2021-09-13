@@ -12,6 +12,9 @@ PROLATE30 = FrameE(6.4e6, -1 / 300.0, name='prolate spheroid')
 
 WGS84_TESTCASES = [
     # lat1, lon1, azi1, lat2, lon2, azi2, s12
+    #(0.01777745589997, 30., 0., 90., 210., 0., 10e6),
+    (40.6, -73.8, 53.47021823943233, 49.01666667, 2.55, 111.5936695140232, 5853226.255613291),
+    (0, 539, 90, 0, 541, 90, 222638.9815865333),
     (35.60777, -139.44815, 111.09874842956033, -11.17491, -69.95921, 129.28927088970877,
      8935244.56048183),
     (55.52454, 106.05087, 22.0200598809828, 77.03196, 197.18234, 109.11204111067151,
@@ -149,9 +152,9 @@ def test_wgs84_inverse(testcase):
     point2 = GeoPoint(lat2, lon2, **options)
     s_ab, az_a, az_b = point1.distance_and_azimuth(point2,
                                                    degrees=True)
+    assert s_ab == approx(s12, rel=1e-14)
     assert az_a == approx(azi1, abs=2e-13)
     assert az_b == approx(azi2, abs=1e-13)
-    assert s_ab == approx(s12, rel=5e-15)
 
 
 @pytest.mark.parametrize("testcase", WGS84_TESTCASES)
@@ -199,24 +202,6 @@ def test_prolate30_direct(testcase):
     assert az_b == approx(azi2, abs=1e-13)
 
 
-def test_geo_solve0():
-    point1 = GeoPoint(40.6, -73.8, frame=WGS84, degrees=True)
-    point2 = GeoPoint(49.01666667, 2.55, frame=WGS84, degrees=True)
-    s_ab, az_a, az_b = point1.distance_and_azimuth(point2, degrees=True)
-    assert az_a == approx(53.47022, abs=0.5e-5)
-    assert az_b == approx(111.59367, abs=0.5e-5)
-    assert s_ab == approx(5853226, abs=0.5)
-
-
-def test_geo_solve1():
-    lat1, lon1, az1 = np.deg2rad((40.63972222, -73.77888889, 53.5,))
-    lat_b, lon_b, az_b = WGS84.direct(lat1, lon1, az1, 5850e3)
-    lat_b, lon_b, az_b = np.rad2deg((lat_b, lon_b, az_b))
-    assert lat_b == approx(49.01467, abs=0.5e-5)
-    assert lon_b == approx(2.56106, abs=0.5e-5)
-    assert az_b == approx(111.62947, abs=0.5e-5)
-
-
 @pytest.mark.parametrize("lat1, lon1, lat2, lon2, s12, az1, az2",
                          [(0.07476, 0, -0.07476, 180, 20106193, 90.00078, 90.00078),
                           (0.1, 0, -0.1, 180, 20106193, 90.00105, 90.00105)])
@@ -243,14 +228,15 @@ def test_geo_solve4():
 
 def test_geo_solve5():
     # Check fix for point2=pole bug found 2010-05-03
-    lat1, lon1, az1 = np.deg2rad((0.01777745589997, 30, 0))
-    lat_b, lon_b, az_b = WGS84.direct(lat1, lon1, az1, 10e6)
-    lat_b, lon_b, az_b = np.rad2deg((lat_b, lon_b, az_b))
+    # (0.01777745589997, 30., 0., 90., 210., 0., 10e6),
+    lat1, lon1, az1 = (0.01777745589997, 30, 0)
+    lat_b, lon_b, az_b = WGS84.direct(lat1, lon1, az1, 1.000000000000001e7, long_unroll=False, degrees=True)
+
     assert lat_b == approx(90, abs=0.5e-5)
-    if lon_b < 0:
+    if lon_b < 0: # just passed the north pole
         assert lon_b == approx(-150, abs=0.5e-5)
         assert az_b == approx(180, abs=0.5e-5)
-    else:
+    else:  # Just stopped before the north pole
         assert lon_b == approx(30, abs=0.5e-5)
         assert az_b == approx(0, abs=0.5e-5)
 
@@ -290,20 +276,16 @@ def test_geo_solve9():
 def test_geo_solve10():
     # Check fix for adjust tol1_ bug found 2011-06-25 (Visual Studio
     # 10 rel + debug)
-    lat1, lon1, lat2, lon2 = np.deg2rad((52.784459512564, 0,
-                                         -52.784459512563990912,
-                                         179.634407464943777557))
-    s_ab, _az_a, _az_b = WGS84.inverse(lat1, lon1, lat2, lon2)
+    lat1, lon1, lat2, lon2 = (52.784459512564, 0, -52.784459512563990912, 179.634407464943777557)
+    s_ab, _az_a, _az_b = WGS84.inverse(lat1, lon1, lat2, lon2, degrees=True)
     assert s_ab == approx(19991596.095, abs=0.5e-3)
 
 
 def test_geo_solve11():
     # Check fix for bet2 = -bet1 bug found 2011-06-25 (Visual Studio
     # 10 rel + debug)
-    lat1, lon1, lat2, lon2 = np.deg2rad((48.522876735459, 0,
-                                         -48.52287673545898293,
-                                         179.599720456223079643))
-    s_ab, _az_a, _az_b = WGS84.inverse(lat1, lon1, lat2, lon2)
+    lat1, lon1, lat2, lon2 = (48.522876735459, 0, -48.52287673545898293, 179.599720456223079643)
+    s_ab, _az_a, _az_b = WGS84.inverse(lat1, lon1, lat2, lon2, degrees=True)
     assert s_ab == approx(19989144.774, abs=0.5e-3)
 
 
@@ -311,19 +293,17 @@ def test_geo_solve12():
     # Check fix for inverse geodesics on extreme prolate/oblate
     # ellipsoids Reported 2012-08-29 Stefan Guenther
     # <stefan.gunther@embl.de>; fixed 2012-10-07
-    geod = FrameE(89.8, -1.83)
-    lat1, lon1, lat2, lon2 = np.deg2rad((0, 0, -10, 160))
-    s_ab, az_a, az_b = geod.inverse(lat1, lon1, lat2, lon2)
-    az_a, az_b = np.rad2deg((az_a, az_b))
+    prolate_geod = FrameE(89.8, -1.83)
+    lat1, lon1, lat2, lon2 = (0, 0, -10, 160)
+    s_ab, az_a, az_b = prolate_geod.inverse(lat1, lon1, lat2, lon2, degrees=True)
     assert az_a == approx(120.27, abs=1e-2)
     assert az_b == approx(105.15, abs=1e-2)
     assert s_ab == approx(266.7, abs=1e-1)
 
 
-def test_geo_solve17():
-    # Check fix for LONG_UNROLL bug found on 2015-05-07
-    lat_b, lon_b, az_b = WGS84.direct(40, -75, -10, 2e7, long_unroll=True,
-                                      degrees=True)
+def test_wgs84direct_long_unroll():
+    """Check wgs84direct with and without long unroll"""
+    lat_b, lon_b, az_b = WGS84.direct(40, -75, -10, 2e7, long_unroll=True, degrees=True)
 
     assert lat_b == approx(-39, abs=1)
     assert lon_b == approx(-254, abs=1)
@@ -333,15 +313,6 @@ def test_geo_solve17():
     assert lat_b == approx(-39, abs=1)
     assert lon_b == approx(105, abs=1)
     assert az_b == approx(-170, abs=1)
-
-
-def test_geo_solve29():
-    # Check longitude unrolling with inverse calculation 2015-09-16
-    s_ab, az_a, az_b = WGS84.inverse(0, 539, 0, 181, degrees=True)
-
-    assert s_ab == approx(222639, abs=0.5)
-    assert az_a == approx(90)
-    assert az_b == approx(90)
 
 
 @pytest.mark.parametrize("datum, lat1, lon1, lat2, lon2, s12, az1, az2",
