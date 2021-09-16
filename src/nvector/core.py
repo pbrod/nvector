@@ -692,8 +692,8 @@ def _check_window_length(window_length, data):
     window_length = window_length + (window_length + 1) % 2  # make sure it is an odd integer
     if window_length >= n:
         new_length = max(n - 1 - n % 2, 1)
-        warnings.warn(f'Window length must be smaller than {n}, but got {window_length}!'
-                      f' Truncating to {new_length}!')
+        warnings.warn('Window length must be smaller than {}, but got {}!'
+                      ' Truncating to {}!'.format(n, window_length, new_length))
         window_length = new_length
     return window_length
 
