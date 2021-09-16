@@ -15,7 +15,6 @@ PROLATE30 = FrameE(6.4e6, -1 / 300.0, name='prolate spheroid')
 
 WGS84_TESTCASES = [
     # lat1, lon1, azi1, lat2, lon2, azi2, s12
-    #(0.01777745589997, 30., 0., 90., 210., 0., 10e6),
     (40.6, -73.8, 53.47021823943233, 49.01666667, 2.55, 111.5936695140232, 5853226.255613291),
     (0, 539, 90, 0, 541, 90, 222638.9815865333),
     (35.60777, -139.44815, 111.09874842956033, -11.17491, -69.95921, 129.28927088970877,
@@ -190,7 +189,7 @@ def test_prolate15_direct(testcase):
 
     assert lat_b == approx(lat2, abs=1e-13)
     assert lon_b == approx(lon2, abs=2e-13)
-    assert az_b == approx(azi2, abs=1e-13)
+    assert az_b == approx(azi2, abs=2e-13)
 
 
 @pytest.mark.parametrize("testcase", PROLATE30_TESTCASES)
