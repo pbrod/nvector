@@ -16,7 +16,8 @@ from nvector import rad, deg, lat_lon2n_E, unit, n_E2lat_lon
 
 
 def _init_earth_plotter(lat, lon):
-    ax = plt.figure().gca(projection=ccrs.Orthographic(int(lon), int(lat)))
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1, projection=ccrs.Orthographic(int(lon), int(lat)))
     ax.add_feature(cpf.OCEAN, zorder=0)
     ax.add_feature(cpf.LAND, zorder=0, edgecolor='black')
     ax.add_feature(cpf.COASTLINE)
