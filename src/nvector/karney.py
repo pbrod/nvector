@@ -672,6 +672,7 @@ def geodesic_distance(lat1, lon1, lat2, lon2, a=6378137, f=1.0 / 298.257223563):
     sphere_distance_rad
 
     """
+    scalar_result = np.ndim(a) == 0
     lat1, lon1, lat2, lon2, a, f = np.broadcast_arrays(*np.atleast_1d(lat1, lon1, lat2, lon2, a, f))
     blat1, blat2, true_lamda12, restore = _canonical(arctan((1 - f) * tan(lat1)),  # Eq 6
                                                      arctan((1 - f) * tan(lat2)),  # Eq 6
@@ -764,6 +765,8 @@ def geodesic_distance(lat1, lon1, lat2, lon2, a=6378137, f=1.0 / 298.257223563):
     s12[mask], alpha2[mask] = _solve_hybrid(alpha1[mask])
     az1, az2 = restore(alpha1, alpha2)
 
+    if scalar_result and s12.size == 1:
+        return s12[0], az1[0], az2[0]
     return s12, az1, az2
 
 

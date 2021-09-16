@@ -1342,15 +1342,13 @@ class FrameE(_Common):
 
         """
         a1, f = self.a - z, self.f
-        lat1, lon1, lat2, lon2, a1 = np.broadcast_arrays(lat_a, lon_a, lat_b, lon_b, a1)
-        if degrees:
-            lat1, lon1, lat2, lon2 = rad(lat1, lon1, lat2, lon2)
 
-        s_ab, azimuth_a, azimuth_b = geodesic_distance(lat1, lon1, lat2, lon2, a1, f)
+        if degrees:
+            lat_a, lon_a, lat_b, lon_b = rad(lat_a, lon_a, lat_b, lon_b)
+
+        s_ab, azimuth_a, azimuth_b = geodesic_distance(lat_a, lon_a, lat_b, lon_b, a1, f)
         if degrees:
             azimuth_a, azimuth_b = deg(azimuth_a, azimuth_b)
-        if np.ndim(lat_a) == 0:
-            return s_ab[0], azimuth_a[0], azimuth_b[0]
         return s_ab, azimuth_a, azimuth_b
 # TODO: remove this:
         if not degrees:

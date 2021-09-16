@@ -14,9 +14,10 @@ from numpy.linalg import norm
 from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
 from nvector import _examples, license as _license
-from nvector.rotation import E_rotation, n_E2R_EN, n_E2lat_lon, change_axes_to_E, zyx2R  # @UnusedImport
+from nvector.rotation import E_rotation, n_E2R_EN, n_E2lat_lon, change_axes_to_E
 from nvector.util import mdot, nthroot, unit, eccentricity2, polar_radius
-from nvector.karney import geodesic_reckon as _geodesic_reckon, geodesic_distance as _geodesic_distance
+from nvector.karney import (geodesic_reckon as _geodesic_reckon,
+                            geodesic_distance as _geodesic_distance)
 from nvector._common import test_docstrings, use_docstring, _make_summary
 
 
@@ -697,20 +698,27 @@ def _check_window_length(window_length, data):
     return window_length
 
 
-def course_over_ground(nvectors, window_length=0, polyorder=2, mode='nearest', cval=0.0, **datum):
+def course_over_ground(nvectors, a=6378137, f=1.0 / 298.257223563, R_Ee=None, **options):
     """Returns course over ground in radians from nvector positions
 
     Parameters
     ----------
     nvectors:  3 x n array
         Positions of vehicle given as n-vectors [no unit] decomposed in E.
-    window_length: positive odd integer
+    a: real scalar, default WGS-84 ellipsoid.
+        Semi-major axis of the Earth ellipsoid given in [m].
+    f: real scalar, default WGS-84 ellipsoid.
+        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+        Earth with radius a is used in stead of WGS-84.
+    R_Ee : 3 x 3 array
+        rotation matrix defining the axes of the coordinate frame E.
+    window_length: positive odd integer {0}
         The length of the Savitzky-Golay filter window (i.e., the number of coefficients).
         Default window_length=0, i.e. no smoothing.
-    polyorder: int
+    polyorder: int {2}
         The order of the polynomial used to fit the samples.
         polyorder must be less than window_length.
-    mode: 'mirror', 'constant', 'nearest', 'wrap' or 'interp'.
+    mode: 'mirror', 'constant', {'nearest'}, 'wrap' or 'interp'.
         Determines the type of extension to use for the padded signal to
         which the filter is applied.  When mode is 'constant', the padding
         value is given by cval. When the 'nearest' mode is selected (the default)
@@ -722,14 +730,6 @@ def course_over_ground(nvectors, window_length=0, polyorder=2, mode='nearest', c
     cval: scalar, optional
         Value to fill past the edges of the input if mode is 'constant'.
         Default is 0.0.
-    a: real scalar, default WGS-84 ellipsoid.
-        Semi-major axis of the Earth ellipsoid given in [m].
-    f: real scalar, default WGS-84 ellipsoid.
-        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
-        Earth with radius a is used in stead of WGS-84.
-    R_Ee : 3 x 3 array
-        rotation matrix defining the axes of the coordinate frame E.
-
 
     Returns
     -------
@@ -777,18 +777,21 @@ def course_over_ground(nvectors, window_length=0, polyorder=2, mode='nearest', c
     nvectors = np.atleast_2d(nvectors)
     if nvectors.shape[1] < 2:
         return np.nan
-
+    window_length = options.pop('window_length', 0)
     if window_length > 0:
         window_length = _check_window_length(window_length, nvectors[0])
+        polyorder = options.pop('polyorder', 2)
+        mode = options.pop('mode', 'nearest')
         if mode not in {'nearest', 'interp'}:
             warnings.warn(f'Using {mode} is not a recommended mode for filtering headings data!'
                           ' Use "interp" or "nearest" mode instead!')
+        cval = options.pop('cval', 0.0)
         normal = savgol_filter(nvectors, window_length, polyorder, axis=1, mode=mode, cval=cval)
     else:
         normal = nvectors
     n_vecs = np.hstack((normal[:, :1], unit(normal[:, :-1] + normal[:, 1:]), normal[:, -1:]))
 
-    return n_EA_E_and_n_EB_E2azimuth(n_vecs[:, :-1], n_vecs[:, 1:], **datum)
+    return n_EA_E_and_n_EB_E2azimuth(n_vecs[:, :-1], n_vecs[:, 1:], a=a, f=f, R_Ee=R_Ee)
 
 
 def great_circle_normal(n_EA_E, n_EB_E):
@@ -1177,12 +1180,10 @@ def geodesic_distance(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=Non
     >>> import nvector as nv
     >>> n_EA_E = nv.lat_lon2n_E(0,0)
     >>> n_EB_E = nv.lat_lon2n_E(*nv.rad(0.5, 179.5))
-    >>> nv.geodesic_distance(n_EA_E, n_EB_E)
-
-    19958794.08393471
-    19909099.44101977)
-
-    19936288.578965)
+    >>> s12, az1, az2 = nv.geodesic_distance(n_EA_E, n_EB_E)
+    >>> np.allclose(s12, 19936288.578965)
+    True
+    >>> np.allclose(nv.deg(az1, az2), (25.67187286829021, 154.32708546994326))
     True
 
     See also
