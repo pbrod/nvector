@@ -23,6 +23,7 @@ python:
   - 3.6
   - 3.7
   - 3.8
+  - 3.9
 
 services:
     - xvfb
@@ -63,12 +64,14 @@ before_script:
   - git fetch --unshallow --quiet
   - git config --global user.email "per.andreas.brodtkorb@gmail.com"
   - git config --global user.name "pbrod"
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.7" ]]; then
         curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter;
         chmod +x ./cc-test-reporter;
         ./cc-test-reporter before-build;
     fi
 script:
+  - pwd
+  - ls
   - coverage erase
   # - coverage run --source=nvector setup.py test
   - coverage run --source=nvector -m py.test build/lib
@@ -76,7 +79,7 @@ script:
 # see https://community.sonarsource.com/t/sonarqube-reports-zero-coverage-from-coverage-xml-generated-by-coverage-py-in-  azure-devops/28817/7
 
 after_script:
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.7" ]]; then
         coverage xml -o ./coverage-reports/coverage.xml;
         sed -i 's/build\/lib/src/g' ./coverage-reports/coverage.xml;
         sonar-scanner -X;
