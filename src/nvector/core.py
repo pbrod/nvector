@@ -761,7 +761,7 @@ def course_over_ground(nvectors, a=6378137, f=1.0 / 298.257223563, R_Ee=None, **
     >>> _ = ax.plot(0, 0, 'bo', label='A')
     >>> _ = ax.arrow(0,0, dx*300, dy*300, head_width=20, label='COG')
     >>> _ = ax.plot(p_AB_N[1], p_AB_N[0], 'go', label='B')
-    >>> _ = ax.set_title(f'COG={COG} degrees')
+    >>> _ = ax.set_title('COG={} degrees'.format(COG))
     >>> _ = ax.set_xlabel('East [m]')
     >>> _ = ax.set_ylabel('North [m]')
     >>> _ = ax.set_xlim(-500, 200)

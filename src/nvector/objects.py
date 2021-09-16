@@ -645,7 +645,7 @@ class Nvector(_Common):
         >>> _ = ax.plot(0, 0, 'bo', label='A')
         >>> _ = ax.arrow(0,0, dx*300, dy*300, head_width=20)
         >>> _ = ax.plot(p_AB_N[1], p_AB_N[0], 'go', label='B')
-        >>> _ = ax.set_title(f'COG={COG} degrees')
+        >>> _ = ax.set_title('COG={} degrees'.format(COG))
         >>> _ = ax.set_xlabel('East [m]')
         >>> _ = ax.set_ylabel('North [m]')
         >>> _ = ax.set_xlim(-500, 200)
