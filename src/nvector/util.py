@@ -80,44 +80,6 @@ ELLIPSOID_IX = {'airy1858': 1,
                 }
 
 
-def rsum(u, v):
-    """
-    Returns the rounded sum of u + v as well as the error.
-
-    Parameters
-    ----------
-    u,v: array-like
-        Values to sum
-
-    Returns
-    -------
-    s, error: array-likes
-        The sum s
-
-    Notes
-    -----
-    This function returns the rounded sum of u + v in s and the error, such that
-    s + error = u + v, exactly.
-
-    Examples
-    --------
-    >>> rsum(0.1, 0.1)
-
-    References
-    ----------
-    D. E. Knuth (1998),
-    "The Art Of Computer Programming", Third edition,
-    Vol 2, Chapter 4.2.2 Theorem B on page 236.
-
-    """
-    s = u + v
-    um = s - v
-    vmm = s - um
-    um -= u
-    vmm -= v
-    error = -(um + vmm)
-    return s, error
-
 
 def eccentricity2(f):
     """Returns the first and second eccentricity squared given the flattening, f.
