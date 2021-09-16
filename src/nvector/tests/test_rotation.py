@@ -143,22 +143,25 @@ def test_n_E_and_wa2R_EL_with_vectors():
     assert_allclose(n_E, n_E2)
 
 
-@pytest.mark.parametrize("r_matrix", [[[0, 1, 0],
-                                       [0, 0, 1],
-                                       [1, 0, 0]],
-                                      [[0, 1, 0],
-                                       [0, 0, -1],
-                                       [-1, 0, 0]],
-                                      [[0, 0, -1],
-                                       [0, -1, 0],
-                                       [-1, 0, 0]],
-                                      [[0, 0, 1],
-                                       [1, 0, 0],
-                                       [0, 1, 0]],
-                                      [[0, 0, -1],
-                                       [1, 0, 0],
-                                       [0, -1, 0]],
-                                      ])
+RMATRIX_TESTCASES = [[[0, 1, 0],
+                      [0, 0, 1],
+                      [1, 0, 0]],
+                     [[0, 1, 0],
+                      [0, 0, -1],
+                      [-1, 0, 0]],
+                     [[0, 0, -1],
+                      [0, -1, 0],
+                      [-1, 0, 0]],
+                     [[0, 0, 1],
+                      [1, 0, 0],
+                      [0, 1, 0]],
+                     [[0, 0, -1],
+                      [1, 0, 0],
+                      [0, -1, 0]],
+                     ]
+
+
+@pytest.mark.parametrize("r_matrix", RMATRIX_TESTCASES)
 def test_R2zyx_zyx2R_roundtrip(r_matrix):
     """Test to see if zyx2R(*R2zyx(r_matrix)) == r_matrix"""
     z, y, x = R2zyx(r_matrix)
@@ -166,22 +169,7 @@ def test_R2zyx_zyx2R_roundtrip(r_matrix):
     assert_allclose(r_matrix, r_matrix2)
 
 
-@pytest.mark.parametrize("r_matrix", [[[0, 1, 0],
-                                       [0, 0, 1],
-                                       [1, 0, 0]],
-                                      [[0, 1, 0],
-                                       [0, 0, -1],
-                                       [-1, 0, 0]],
-                                      [[0, 0, -1],
-                                       [0, -1, 0],
-                                       [-1, 0, 0]],
-                                      [[0, 0, 1],
-                                       [1, 0, 0],
-                                       [0, 1, 0]],
-                                      [[0, 0, -1],
-                                       [1, 0, 0],
-                                       [0, -1, 0]],
-                                      ])
+@pytest.mark.parametrize("r_matrix", RMATRIX_TESTCASES)
 def test_R2xyz_xyz2R_roundtrip(r_matrix):
     """Test to see if xyz2R(*R2xyz(r_matrix)) == r_matrix"""
     x, y, z = R2xyz(r_matrix)
