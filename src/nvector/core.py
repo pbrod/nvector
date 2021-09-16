@@ -783,8 +783,8 @@ def course_over_ground(nvectors, a=6378137, f=1.0 / 298.257223563, R_Ee=None, **
         polyorder = options.pop('polyorder', 2)
         mode = options.pop('mode', 'nearest')
         if mode not in {'nearest', 'interp'}:
-            warnings.warn(f'Using {mode} is not a recommended mode for filtering headings data!'
-                          ' Use "interp" or "nearest" mode instead!')
+            warnings.warn('Using {} is not a recommended mode for filtering headings data!'
+                          ' Use "interp" or "nearest" mode instead!'.format(mode))
         cval = options.pop('cval', 0.0)
         normal = savgol_filter(nvectors, window_length, polyorder, axis=1, mode=mode, cval=cval)
     else:
