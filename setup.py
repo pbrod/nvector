@@ -113,6 +113,7 @@ def setup_package():
         tests_require=['pytest',
                        'pytest-cov',
                        'pytest-pep8',
+                       'hypothesis',
                        ],
         cmdclass={'doctest': Doctest},
     )
