@@ -1350,28 +1350,28 @@ class FrameE(_Common):
             azimuth_a, azimuth_b = deg(azimuth_a, azimuth_b)
         return s_ab, azimuth_a, azimuth_b
 # TODO: remove this:
-        if not degrees:
-            lat_a, lon_a, lat_b, lon_b = deg(lat_a, lon_a, lat_b, lon_b)
-
-        lat_a, lon_a, lat_b, lon_b, z = np.broadcast_arrays(lat_a, lon_a, lat_b, lon_b, z)
-        fun = self._inverse
-        items = zip(*np.atleast_1d(lat_a, lon_a, lat_b, lon_b, z))
-        sab, azia, azib = np.transpose([fun(lat_ai, lon_ai, lat_bi, lon_bi, z=zi)
-                                        for lat_ai, lon_ai, lat_bi, lon_bi, zi in items])
-
-        if not degrees:
-            s_ab, azimuth_a, azimuth_b = sab.ravel(), rad(azia.ravel()), rad(azib.ravel())
-        else:
-            s_ab, azimuth_a, azimuth_b = sab.ravel(), azia.ravel(), azib.ravel()
-
-        if np.ndim(lat_a) == 0:
-            return s_ab[0], azimuth_a[0], azimuth_b[0]
-        return s_ab, azimuth_a, azimuth_b
-
-    def _inverse(self, lat_a, lon_a, lat_b, lon_b, z=0):
-        geo = _Geodesic(self.a - z, self.f)
-        result = geo.Inverse(lat_a, lon_a, lat_b, lon_b, outmask=_Geodesic.STANDARD)
-        return result['s12'], result['azi1'], result['azi2']
+#         if not degrees:
+#             lat_a, lon_a, lat_b, lon_b = deg(lat_a, lon_a, lat_b, lon_b)
+#
+#         lat_a, lon_a, lat_b, lon_b, z = np.broadcast_arrays(lat_a, lon_a, lat_b, lon_b, z)
+#         fun = self._inverse
+#         items = zip(*np.atleast_1d(lat_a, lon_a, lat_b, lon_b, z))
+#         sab, azia, azib = np.transpose([fun(lat_ai, lon_ai, lat_bi, lon_bi, z=zi)
+#                                         for lat_ai, lon_ai, lat_bi, lon_bi, zi in items])
+#
+#         if not degrees:
+#             s_ab, azimuth_a, azimuth_b = sab.ravel(), rad(azia.ravel()), rad(azib.ravel())
+#         else:
+#             s_ab, azimuth_a, azimuth_b = sab.ravel(), azia.ravel(), azib.ravel()
+#
+#         if np.ndim(lat_a) == 0:
+#             return s_ab[0], azimuth_a[0], azimuth_b[0]
+#         return s_ab, azimuth_a, azimuth_b
+#
+#     def _inverse(self, lat_a, lon_a, lat_b, lon_b, z=0):
+#         geo = _Geodesic(self.a - z, self.f)
+#         result = geo.Inverse(lat_a, lon_a, lat_b, lon_b, outmask=_Geodesic.STANDARD)
+#         return result['s12'], result['azi1'], result['azi2']
 
     @staticmethod
     def _outmask(long_unroll):
@@ -1431,34 +1431,32 @@ class FrameE(_Common):
         else:
             lat2, lon2, az2 = geodesic_reckon(lat1, lon1, distance, az1, a1, f, long_unroll)
 
-        if np.ndim(lat_a) == 0:
-            return lat2[0], lon2[0], az2[0]
         return lat2, lon2, az2
 
 # TODO: remove this:
-        if not degrees:
-            lat_a, lon_a, azimuth = deg(lat_a, lon_a, azimuth)
-
-        broadcast = np.broadcast_arrays
-        lat_a, lon_a, azimuth, distance, z = broadcast(lat_a, lon_a, azimuth, distance, z)
-        fun = partial(self._direct, outmask=self._outmask(long_unroll))
-
-        items = zip(*np.atleast_1d(lat_a, lon_a, azimuth, distance, z))
-        lab, lob, azib = np.transpose([fun(lat_ai, lon_ai, azimuthi, distancei, z=zi)
-                                       for lat_ai, lon_ai, azimuthi, distancei, zi in items])
-        if not degrees:
-            latb, lonb, azimuth_b = rad(lab.ravel(), lob.ravel(), azib.ravel())
-        else:
-            latb, lonb, azimuth_b = lab.ravel(), lob.ravel(), azib.ravel()
-        if np.ndim(lat_a) == 0:
-            return latb[0], lonb[0], azimuth_b[0]
-        return latb, lonb, azimuth_b
-
-    def _direct(self, lat_a, lon_a, azimuth, distance, z=0, outmask=None):
-        geo = _Geodesic(self.a - z, self.f)
-        result = geo.Direct(lat_a, lon_a, azimuth, distance, outmask=outmask)
-        latb, lonb, azimuth_b = result['lat2'], result['lon2'], result['azi2']
-        return latb, lonb, azimuth_b
+#         if not degrees:
+#             lat_a, lon_a, azimuth = deg(lat_a, lon_a, azimuth)
+#
+#         broadcast = np.broadcast_arrays
+#         lat_a, lon_a, azimuth, distance, z = broadcast(lat_a, lon_a, azimuth, distance, z)
+#         fun = partial(self._direct, outmask=self._outmask(long_unroll))
+#
+#         items = zip(*np.atleast_1d(lat_a, lon_a, azimuth, distance, z))
+#         lab, lob, azib = np.transpose([fun(lat_ai, lon_ai, azimuthi, distancei, z=zi)
+#                                        for lat_ai, lon_ai, azimuthi, distancei, zi in items])
+#         if not degrees:
+#             latb, lonb, azimuth_b = rad(lab.ravel(), lob.ravel(), azib.ravel())
+#         else:
+#             latb, lonb, azimuth_b = lab.ravel(), lob.ravel(), azib.ravel()
+#         if np.ndim(lat_a) == 0:
+#             return latb[0], lonb[0], azimuth_b[0]
+#         return latb, lonb, azimuth_b
+#
+#     def _direct(self, lat_a, lon_a, azimuth, distance, z=0, outmask=None):
+#         geo = _Geodesic(self.a - z, self.f)
+#         result = geo.Direct(lat_a, lon_a, azimuth, distance, outmask=outmask)
+#         latb, lonb, azimuth_b = result['lat2'], result['lon2'], result['azi2']
+#         return latb, lonb, azimuth_b
 
     @use_docstring_from(GeoPoint)
     def GeoPoint(self, *args, **kwds):

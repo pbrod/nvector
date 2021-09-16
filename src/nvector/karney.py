@@ -478,14 +478,14 @@ def sphere_distance_rad(lat1, lon1, lat2, lon2):
     return distance_rad, azimuth_a, azimuth_b
 
 
-def geodesic_reckon(lat1, lon1, distance, azimuth, a=6378137, f=1.0 / 298.257223563,
+def geodesic_reckon(lat_a, lon_b, distance, azimuth, a=6378137, f=1.0 / 298.257223563,
                     long_unroll=False):
     """
     Returns position B computed from position A, distance and azimuth.
 
     Parameters
     ----------
-    lat1, lon1: real scalars or vectors of length k.
+    lat_a, lon_b: real scalars or vectors of length k.
         latitude(s) and longitude(s) of position A.
     distance: real scalar or vector of length m.
         ellipsoidal distance [m] between position A and B.
@@ -514,8 +514,8 @@ def geodesic_reckon(lat1, lon1, distance, azimuth, a=6378137, f=1.0 / 298.257223
     >>> import numpy as np
     >>> import nvector as nv
     """
-    lat1, lon1, distance, azimuth, a = np.broadcast_arrays(lat1, lon1, distance, azimuth, a)
-    alpha1 = truncate_small(azimuth)
+    lat1, lon1, distance, az1, a = np.broadcast_arrays(lat_a, lon_b, distance, azimuth, a)
+    alpha1 = truncate_small(az1)
     sigma1, w_1, cos_alpha0, sin_alpha0 = _solve_triangle_nea_direct(lat1, alpha1, f)
 
     # Determine sigma2:
@@ -547,6 +547,8 @@ def geodesic_reckon(lat1, lon1, distance, azimuth, a=6378137, f=1.0 / 298.257223
         lon2 = normalize_angle(lon1 + lamda12)
     lat2 = arctan(tan(blat2)/(1-f))  # Eq. 6
 
+    if np.ndim(lat1) == 0:
+        return lat2[0], lon2[0], alpha2[0]
     return lat2, lon2, alpha2
 
 
@@ -638,15 +640,15 @@ def _canonical(blat1, blat2, lamda12):
     return blat11, blat22, true_lamda,  restore
 
 
-def geodesic_distance(lat1, lon1, lat2, lon2, a=6378137, f=1.0 / 298.257223563):
+def geodesic_distance(lat_a, lon_a, lat_b, lon_b, a=6378137, f=1.0 / 298.257223563):
     """
     Returns surface distance between positions A and B on an ellipsoid.
 
     Parameters
     ----------
-    lat1, lon1: real scalars or vectors of length m.
+    lat_a, lon_a: real scalars or vectors of length m.
         latitude(s) and longitude(s) of position A.
-    lat2, lon2: real scalars or vectors of length n.
+    lat_b, lon_b: real scalars or vectors of length n.
         latitude(s) and longitude(s) of position B.
     a: real scalar, default WGS-84 ellipsoid.
         Semi-major axis of the Earth ellipsoid given in [m].
@@ -673,7 +675,8 @@ def geodesic_distance(lat1, lon1, lat2, lon2, a=6378137, f=1.0 / 298.257223563):
 
     """
     scalar_result = np.ndim(a) == 0
-    lat1, lon1, lat2, lon2, a, f = np.broadcast_arrays(*np.atleast_1d(lat1, lon1, lat2, lon2, a, f))
+    broadcast = np.broadcast_arrays
+    lat1, lon1, lat2, lon2, a, f = broadcast(*np.atleast_1d(lat_a, lon_a, lat_b, lon_b, a, f))
     blat1, blat2, true_lamda12, restore = _canonical(arctan((1 - f) * tan(lat1)),  # Eq 6
                                                      arctan((1 - f) * tan(lat2)),  # Eq 6
                                                      lon2 - lon1)
@@ -753,7 +756,7 @@ def geodesic_distance(lat1, lon1, lat2, lon2, a=6378137, f=1.0 / 298.257223563):
     nearly_antipodal = ~sphere & ~equatorial & (sigma12 >= np.pi*(1-3*np.abs(f)*cos_blat1**2))
 
     alpha1 = np.where(nearly_antipodal, _solve_astroid(), alpha1)
-    # alpha1 = np.deg2rad(161.914)
+
     short_distance = (s12 < a*1e-4)
     mask = ~(equatorial | meridional | short_distance | sphere) | nearly_antipodal
     mask *= finite_mask

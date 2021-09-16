@@ -1198,24 +1198,6 @@ def geodesic_distance(n_EA_E, n_EB_E, a=6378137, f=1.0 / 298.257223563, R_Ee=Non
     s12, az1, az2 = _geodesic_distance(lat1, lon1, lat2, lon2, a, f)
     return s12, az1, az2
 
-    # alpha11, alpha22 = _azimuth_sphere(n_EA_E, n_EB_E, R_Ee)
-    alpha1 = n_EA_E_and_n_EB_E2azimuth(n_EA_E, n_EB_E, a, f, R_Ee)
-    alpha2 = n_EA_E_and_n_EB_E2azimuth(n_EB_E, n_EA_E, a, f, R_Ee) + np.pi
-
-    z_EA = 0
-    z_EB = 0
-
-    p_EA_E = n_EB_E2p_EB_E(n_EA_E, z_EA, a, f, R_Ee)
-    p_EB_E = n_EB_E2p_EB_E(n_EB_E, z_EB, a, f, R_Ee)
-
-    radius = 0.5 * (norm(p_EA_E, axis=0) + norm(p_EB_E, axis=0)).ravel()
-
-    d_ab = norm(p_EB_E-p_EA_E, axis=0).ravel()
-    d_ab0 = euclidean_distance(n_EA_E, n_EB_E, radius)
-    s_ab0 = great_circle_distance(n_EA_E, n_EB_E, radius)
-    s_ab = d_ab * (s_ab0 / d_ab0)
-    return s_ab, alpha1, alpha2
-
 
 @use_docstring(_examples.get_examples_no_header([5], oo_solution=False))
 def euclidean_distance(n_EA_E, n_EB_E, radius=6371009.0):
