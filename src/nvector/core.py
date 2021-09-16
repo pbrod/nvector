@@ -767,7 +767,7 @@ def course_over_ground(nvectors, a=6378137, f=1.0 / 298.257223563, R_Ee=None, **
     >>> _ = ax.set_xlim(-500, 200)
     >>> _ = ax.set_aspect('equal', adjustable='box')
     >>> _ = ax.legend()
-    >>> plt.show()  # doctest + SKIP
+    >>> plt.show()  # doctest: +SKIP
     >>> plt.close()
 
     See also

@@ -592,7 +592,7 @@ class Nvector(_Common):
         """Normalizes self to unit vector(s)"""
         self.normal = unit(self.normal)
 
-    def course_over_ground(self, window_length=0, polyorder=2, mode='nearest', cval=0.0):
+    def course_over_ground(self, **options):
         """Returns course over ground in radians from nvector positions
 
         Parameters
@@ -600,10 +600,10 @@ class Nvector(_Common):
         window_length: positive odd integer
             The length of the Savitzky-Golay filter window (i.e., the number of coefficients).
             Default window_length=0, i.e. no smoothing.
-        polyorder: int
+        polyorder: int {2}
             The order of the polynomial used to fit the samples.
             polyorder must be less than window_length.
-        mode: 'mirror', 'constant', 'nearest', 'wrap' or 'interp'.
+        mode: 'mirror', 'constant', {'nearest'}, 'wrap' or 'interp'.
             Determines the type of extension to use for the padded signal to
             which the filter is applied.  When mode is 'constant', the padding
             value is given by cval. When the 'nearest' mode is selected (the default)
@@ -651,12 +651,11 @@ class Nvector(_Common):
         >>> _ = ax.set_xlim(-500, 200)
         >>> _ = ax.set_aspect('equal', adjustable='box')
         >>> _ = ax.legend()
-        >>> plt.show() # doctest + SKIP
+        >>> plt.show() # doctest: +SKIP
         >>> plt.close()
         """
         frame = self.frame
-        options = dict(a=frame.a, f=frame.f, R_Ee=frame.R_Ee)
-        return course_over_ground(self.normal, window_length, polyorder, mode, cval, **options)
+        return course_over_ground(self.normal, a=frame.a, f=frame.f, R_Ee=frame.R_Ee, **options)
 
     def mean(self):
         """
