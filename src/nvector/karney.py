@@ -125,9 +125,7 @@ def _astroid(x, y, f):
                        arctan2(-y, x * m_u / (1 + m_u)))
     shape = alpha1o.shape
     alpha11 = np.where((f < 0)*np.ones(shape), alpha1p, alpha1o)
-#     alpha11 = np.where(y == 0,
-#                       arctan2(-x, sqrt(np.maximum(1 - x**2, 0))),
-#                       arctan2(-x * m_u / (1 + m_u), y))  # Eq. 56 and 57
+
     return alpha11
 
 
@@ -341,10 +339,6 @@ def _get_jfun(epsi):
     a_1 = np.polyval(A1_COEFFICIENTS, epsi2) / epsim1  # Eq 17
     a_2 = np.polyval(A2_COEFFICIENTS, epsi2) * epsim1  # Eq 42
     a1m2 = a_1-a_2
-    # Avoid subtraction of nearly equal numbers
-#     a1m1 = np.polyval(A1_COEFFICIENTS[:-1], epsi2) * epsi2 / epsim1  # Eq 17
-#     a2m1 = np.polyval(A2_COEFFICIENTS[:-1], epsi2) * epsi2 * epsim1  # Eq 42
-#     a1m2 = epsi * (2.0 - epsi) / epsim1 + (a1m1 - a2m1)
 
     c1x = _eval_cij_coefs(C1_COEFFICIENTS, epsi, squared=True)  # Eq 18
     c2x = _eval_cij_coefs(C2_COEFFICIENTS, epsi, squared=True)  # Eq 43
@@ -398,7 +392,7 @@ def _solve_triangle_nea(blat1, alpha1):
     cos_blat1, sin_blat1 = cos(blat1)+TINY, sin(blat1)
     sin_alpha0 = sin_alpha1 * cos_blat1  # Eq. 5
     cos_alpha0 = np.abs(cos_alpha1 + 1j * sin_alpha1 * sin_blat1)
-    # alpha0 = arctan2(sin_alpha0, cos_alpha0)  # Eq 10
+    # alpha0 is arctan2(sin_alpha0, cos_alpha0)  # Eq 10
     sigma1 = arctan2(sin_blat1, cos_alpha1 * cos_blat1)  # Eq 11
     w_1 = arctan2(sin_alpha0 * sin(sigma1), cos(sigma1))  # Eq 12
     return sigma1, w_1, cos_alpha0, sin_alpha0
@@ -533,8 +527,8 @@ def geodesic_reckon(lat_a, lon_b, distance, azimuth, a=6378137, f=1.0 / 298.2572
 
     # Determine lamda12
     fun_i3 = _get_i3_fun(epsi, n)
-    # lamda1 = w_1 - f * sin_alpha0 * fun_i3(sigma1)  # Eq. 8
-    # lamda2 = w_2 - f * sin_alpha0 * fun_i3(sigma2)  # Eq. 8
+    # lamda1 is w_1 - f * sin_alpha0 * fun_i3(sigma1)  # Eq. 8
+    # lamda2 is w_2 - f * sin_alpha0 * fun_i3(sigma2)  # Eq. 8
 
     lamda12 = w_2-w_1 + f * sin_alpha0 * (fun_i3(sigma1) - fun_i3(sigma2))
 
@@ -585,7 +579,7 @@ def _solve_alpha1(alpha1, blat1, blat2, true_lamda12, a, f, tol=1e-15):
         m12 = b*(k_sin_s2*cos_sigma1*sin_sigma2
                  - k_sin_s1*cos_sigma2*sin_sigma1
                  - cos_sigma1*cos_sigma2*delta_j)  # Eq 38
-        # M12 = (cos_sigma1 * cos_sigma2
+        # M12 is (cos_sigma1 * cos_sigma2
         #        + k_sin_s2 / k_sin_s1 * sin_sigma1 * sin_sigma2
         #        - sin_sigma1 * cos_sigma2 * delta_j / k_sin_s1)  # Eq 39
         cos_alpha2 = cos(alpha2)
@@ -739,11 +733,11 @@ def geodesic_distance(lat_a, lon_a, lat_b, lon_b, a=6378137, f=1.0 / 298.2572235
     sin_lamda12 = sin(true_lamda12)
     sphere = (f == 0)
 
-    meridional = (np.abs(sin_lamda12) <= tol)  # alpha1 = 0 or pi #lamda12
+    meridional = (np.abs(sin_lamda12) <= tol)  # alpha1 is 0 or pi #lamda12
     delta_blat = blat2 - blat1
     equatorial = ((np.abs(delta_blat) <= tol)
                   & (np.abs(blat1) <= tol)
-                  & (true_lamda12 <= (1-f)*np.pi))  # alpha1 = pi/2
+                  & (true_lamda12 <= (1-f)*np.pi))  # alpha1 is pi/2
     oblate = (f >= 0)
     prolate = (f < 0)
     mask = equatorial & ~(meridional & oblate)
