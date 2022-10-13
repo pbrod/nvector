@@ -17,7 +17,7 @@ from nvector import rad, deg, lat_lon2n_E, unit, n_E2lat_lon
 
 def _init_earth_plotter(lat, lon):
     fig = plt.figure()
-    ax = fig.add_subplot(1,1,1, projection=ccrs.Orthographic(int(lon), int(lat)))
+    ax = fig.add_subplot(1, 1, 1, projection=ccrs.Orthographic(int(lon), int(lat)))
     ax.add_feature(cpf.OCEAN, zorder=0)
     ax.add_feature(cpf.LAND, zorder=0, edgecolor='black')
     ax.add_feature(cpf.COASTLINE)
@@ -67,6 +67,18 @@ def plot_mean_position():
 
     plt.title('Figure of mean position (red dot) compared to \npositions '
               'A, B, and C (black dots).')
+
+
+def main():
+    rotated_crs = ccrs.RotatedPole(pole_longitude=180.0, pole_latitude=90.0)
+
+    ax = plt.axes(projection=rotated_crs)
+    # ax.set_extent([-6, 3, 48, 58], crs=ccrs.PlateCarree())
+    ax.set_extent([9, 12, 58, 60], crs=ccrs.PlateCarree())
+    ax.coastlines(resolution='50m')
+    ax.gridlines(draw_labels=True, dms=True, x_inline=False, y_inline=False)
+
+    plt.show()
 
 
 if __name__ == '__main__':
