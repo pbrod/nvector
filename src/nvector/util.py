@@ -15,9 +15,11 @@ from nvector import license as _license
 __all__ = ['deg', 'rad', 'mdot', 'nthroot', 'get_ellipsoid', 'select_ellipsoid', 'unit',
            'allclose', 'eccentricity2', 'polar_radius', 'third_flattening']
 
+FINFO = np.finfo(float)
+_tiny_name = 'tiny' if np.__version__ < '1.22' else 'smallest_normal'
+_TINY = getattr(FINFO, _tiny_name)
+_EPS = FINFO.eps  # machine precision (machine epsilon)
 
-_EPS = np.finfo(float).eps  # machine precision (machine epsilon)
-_TINY = np.finfo(float).tiny
 Ellipsoid = namedtuple('Ellipsoid', 'a f name')
 
 
