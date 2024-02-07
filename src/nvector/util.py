@@ -13,7 +13,8 @@ from nvector._common import test_docstrings, _make_summary
 from nvector import license as _license
 
 __all__ = ['deg', 'rad', 'mdot', 'nthroot', 'get_ellipsoid', 'select_ellipsoid', 'unit',
-           'allclose', 'eccentricity2', 'polar_radius', 'third_flattening']
+           'allclose', 'eccentricity2', 'polar_radius', 'third_flattening',
+           'dm2degrees', 'degrees2dm']
 
 FINFO = np.finfo(float)
 _tiny_name = 'tiny' if np.__version__ < '1.22' else 'smallest_normal'
@@ -80,7 +81,6 @@ ELLIPSOID_IX = {'airy1858': 1,
                 'etrs89': 19,
                 'ngo1948': 20
                 }
-
 
 
 def eccentricity2(f):
@@ -381,6 +381,66 @@ def rad(*deg_angles):
     if len(deg_angles) == 1:
         return deg2rad(deg_angles[0])
     return tuple(deg2rad(angle) for angle in deg_angles)
+
+
+def dm2degrees(degrees, minutes):
+    """
+    Converts degrees, minutes to decimal degrees
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> np.allclose(dm2degrees(10, 49.3231), 10.822051)
+    True
+    >>> np.allclose(dm2degrees(10, 9.3231), 10.155385)
+    True
+    >>> np.allclose(dm2degrees(1, 9.3231), 1.155385)
+    True
+    >>> np.allclose(dm2degrees(-1, -9.3231), -1.155385)
+    True
+
+    >>> np.allclose(dm2degrees(0, -9.3234), -0.15539)
+    True
+
+    See also
+    --------
+    degrees2dm
+    """
+    degs, mins = np.broadcast_arrays(degrees, minutes)
+    return degs + mins / 60.0
+
+
+def degrees2dm(degrees):
+    """
+    Converts decimal degrees to degrees and minutes.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> np.allclose(degrees2dm(10.822051), (10,49.3231))
+    True
+    >>> np.allclose(degrees2dm(10.155385),(10, 9.3231))
+    True
+    >>> np.allclose(degrees2dm(1.155385), (1, 9.3231))
+    True
+    >>> np.allclose(degrees2dm(1.15539), (1, 9.3234))
+    True
+
+    >>> np.allclose(degrees2dm(-1.15539), (-1, -9.3234))
+    True
+
+    >>> np.allclose(degrees2dm(-0.15539), (0, -9.3234))
+    True
+
+
+    See also
+    --------
+    dm2degrees
+    """
+    degrees = np.broadcast_arrays(degrees)[0]
+    degs = np.int_(degrees)
+    mins = (degrees - degs) * 60
+    return degs, mins
 
 
 def mdot(a, b):
