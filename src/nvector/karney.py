@@ -1,5 +1,10 @@
-'''
-Created on 13. aug. 2021
+"""
+This module provides native Python implementations of a subset of the C++ library, GeographicLib.
+
+When given a combination of scalar and array inputs, the scalar inputs
+are automatically expanded to match the shape of the arrays.
+
+Full documentation is available at
 
 References
 ----------
@@ -11,15 +16,41 @@ Addenda: https://geographiclib.sourceforge.io/geod-addenda.html
 C. F. F. Karney, "Geodesics on an ellipsoid of revolution",
 
 
-@author: pab
-'''
+The MIT License (MIT).
+
+Copyright (c) 2008-2023, Charles Karney
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use, copy,
+modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+"""
 import warnings
 import numpy as np
 from numpy import arctan2, sin, cos, tan, arctan, sqrt
 # from scipy.special import ellipeinc, ellipkinc  # pylint: disable=no-name-in-module
-from nvector.util import nthroot, eccentricity2, third_flattening, polar_radius
+# from nvector.util import nthroot, eccentricity2, third_flattening, polar_radius
 
-TINY = 1e-150
+# _TINY = 1e-150
+FINFO = np.finfo(float)
+_tiny_name = 'tiny' if np.__version__ < '1.22' else 'smallest_normal'
+_TINY = getattr(FINFO, _tiny_name)
+_EPS = FINFO.eps  # machine precision (machine epsilon)
 
 # A1 coefficients defined in eq. 17 in Karney:
 A1_COEFFICIENTS = (1. / 256, 1. / 64., 1. / 4., 1.)
@@ -70,6 +101,132 @@ C3_COEFFICIENTS = (
     ((7, 512.), (-14, 7, 512.)),  # C_34
     ((21, 2560.),),  # C_35
 )
+
+
+def deg(*rad_angles):
+    """
+    Converts angle in radians to degrees.
+
+    Parameters
+    ----------
+    rad_angles:
+        angle in radians
+
+    Returns
+    -------
+    deg_angles:
+        angle in degrees
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> deg(np.pi/2)
+    90.0
+    >>> deg(np.pi/2, [0, np.pi])
+    (90.0, array([  0., 180.]))
+
+    See also
+    --------
+    rad
+    """
+    if len(rad_angles) == 1:
+        return np.rad2deg(rad_angles[0])
+    return tuple(np.rad2deg(angle) for angle in rad_angles)
+
+
+def rad(*deg_angles):
+    """
+    Converts angle in degrees to radians.
+
+    Parameters
+    ----------
+    deg_angles:
+        angle in degrees
+
+    Returns
+    -------
+    rad_angles:
+        angle in radians
+
+    Examples
+    --------
+    >>> deg(rad(90))
+    90.0
+    >>> deg(*rad(90, [0, 180]))
+    (90.0, array([  0., 180.]))
+
+    See also
+    --------
+    deg
+    """
+    if len(deg_angles) == 1:
+        return np.deg2rad(deg_angles[0])
+    return tuple(np.deg2rad(angle) for angle in deg_angles)
+
+
+def eccentricity2(f):
+    """Returns the first and second eccentricity squared given the flattening, f.
+
+    Notes
+    -----
+    The (first) eccentricity squared is defined as e2 = f*(2-f).
+    The second eccentricity squared is defined as e2m = e2 / (1 - e2).
+    """
+    e2 = (2.0 - f) * f  # = 1-b**2/a**
+    e2m = e2 / (1.0 - e2)
+    return e2, e2m
+
+
+def polar_radius(a, f):
+    """Returns the polar radius b given the equatorial radius a and flattening f of the ellipsoid.
+
+    Notes
+    -----
+    The semi minor half axis (polar radius) is defined as b = (1 - f) * a
+    where a is the semi major half axis (equatorial radius) and f is the flattening
+    of the ellipsoid.
+
+    """
+    b = a * (1.0 - f)
+    return b
+
+
+def third_flattening(f):
+    """Returns the third flattening, n, given the flattening, f.
+
+    Notes
+    -----
+    The third flattening is defined as n = f / (2 - f).
+    """
+
+    return f / (2.0 - f)
+
+
+def nthroot(x, n):
+    """
+    Returns the n'th root of x to machine precision
+
+    Parameters
+    ----------
+    x : real scalar or numpy array
+    n : scalar integer
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> np.allclose(nthroot(27.0, 3), 3.0)
+    True
+
+    """
+    shape = np.shape(x)
+    x = np.atleast_1d(x)
+    y = x**(1. / n)
+    mask = (x != 0) & (_EPS * np.abs(x) < 1)
+    ym = y[mask]
+    y[mask] -= (ym**n - x[mask]) / (n * ym**(n - 1))
+    if shape == ():
+        return y[()]
+    return y
 
 
 def __astroid(x, y):
@@ -389,7 +546,7 @@ def _solve_triangle_nea_direct(lat1, alpha1, f):
 
 def _solve_triangle_nea(blat1, alpha1):
     cos_alpha1, sin_alpha1 = cos(alpha1), sin(alpha1)
-    cos_blat1, sin_blat1 = cos(blat1)+TINY, sin(blat1)
+    cos_blat1, sin_blat1 = cos(blat1)+_TINY, sin(blat1)
     sin_alpha0 = sin_alpha1 * cos_blat1  # Eq. 5
     cos_alpha0 = np.abs(cos_alpha1 + 1j * sin_alpha1 * sin_blat1)
     # alpha0 is arctan2(sin_alpha0, cos_alpha0)  # Eq 10
@@ -472,15 +629,59 @@ def sphere_distance_rad(lat1, lon1, lat2, lon2):
     return distance_rad, azimuth_a, azimuth_b
 
 
-def geodesic_reckon(lat_a, lon_b, distance, azimuth, a=6378137, f=1.0 / 298.257223563,
-                    long_unroll=False):
+def geodesic_reckon(lat_a, lon_a, distance, azimuth, a=6378137, f=1.0 / 298.257223563,
+                    long_unroll=False, degrees=False):
     """
     Returns position B computed from position A, distance and azimuth.
 
     Parameters
     ----------
     lat_a, lon_b: real scalars or vectors of length k.
-        latitude(s) and longitude(s) of position A.
+        latitude(s) and longitude(s) of position A [rad or deg].
+    distance: real scalar or vector of length m.
+        ellipsoidal distance [m] between position A and B.
+    azimuth: real scalar or vector of length n.
+        azimuth [rad or deg] of line at position A.
+    a: real scalar, default WGS-84 ellipsoid.
+        Semi-major half axis of the Earth ellipsoid given in [m].
+    f: real scalar, default WGS-84 ellipsoid.
+        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+        Earth with radius a is used in stead of WGS-84.
+    long_unroll: bool
+        Controls the treatment of longitude. If it is False then the lon2
+        is reduced to the range [-180, 180) or [-pi, pi). If it is True, then (lon2 - lon1)
+        determines how many times and in what sense the geodesic has encircled
+        the ellipsoid.
+    degrees: bool
+        True if latitude, longitude and azimuth is given in degress.
+
+    Returns
+    -------
+    lat_b, lon_b:  arrays of length max(k,m,n).
+        latitude(s) and longitude(s) of position B [rad or deg].
+    azimuth_b: real scalars or vectors of length max(k,m,n).
+        azimuth [rad or deg] of line at position B.
+
+    Notes
+    -----
+    This function solves the direct geodesic problem of finding the final point B and
+    azimuth_b given the position of point A and the azimuth and distance from A to B.
+    """
+    if degrees:
+        params = rad(lat_a, lon_a) + (distance, rad(azimuth), a, f, long_unroll)
+        return deg(*_geodesic_reckon(*params))
+    return _geodesic_reckon(lat_a, lon_a, distance, azimuth, a, f, long_unroll)
+
+
+def _geodesic_reckon(lat_a, lon_a, distance, azimuth, a=6378137, f=1.0 / 298.257223563,
+                    long_unroll=False):
+    """
+    Returns position B computed from position A, distance and azimuth.
+
+    Parameters
+    ----------
+    lat_a, lon_a: real scalars or vectors of length k.
+        latitude(s) and longitude(s) of position A [rad].
     distance: real scalar or vector of length m.
         ellipsoidal distance [m] between position A and B.
     azimuth: real scalar or vector of length n.
@@ -492,23 +693,20 @@ def geodesic_reckon(lat_a, lon_b, distance, azimuth, a=6378137, f=1.0 / 298.2572
         Earth with radius a is used in stead of WGS-84.
     long_unroll: bool
         Controls the treatment of longitude. If it is False then the lon2
-        is reduced to the range [-180, 180). If it is True, then (lon2 - lon1)
+        is reduced to the range [-pi, pi). If it is True, then (lon2 - lon1)
         determines how many times and in what sense the geodesic has encircled
         the ellipsoid.
 
     Returns
     -------
-    lat2, lon2:  arrays of length max(k,m,n).
-        latitude(s) and longitude(s) of position B.
+    lat_b, lon_b:  arrays of length max(k,m,n).
+        latitude(s) and longitude(s) of position B [rad].
     azimuth_b: real scalars or vectors of length max(k,m,n).
         azimuth [rad] of line at position B.
 
-    Examples
-    --------
-    >>> import numpy as np
-    >>> import nvector as nv
     """
-    lat1, lon1, distance, az1, a = np.broadcast_arrays(lat_a, lon_b, distance, azimuth, a)
+
+    lat1, lon1, distance, az1, a = np.broadcast_arrays(lat_a, lon_a, distance, azimuth, a)
     alpha1 = truncate_small(az1)
     sigma1, w_1, cos_alpha0, sin_alpha0 = _solve_triangle_nea_direct(lat1, alpha1, f)
 
@@ -551,7 +749,7 @@ def _solve_alpha1(alpha1, blat1, blat2, true_lamda12, a, f, tol=1e-15):
     eta = third_flattening(f)
     e_2, e2m = eccentricity2(f)
 
-    sin_blat1, cos_blat1 = sin(blat1)-TINY, cos(blat1)
+    sin_blat1, cos_blat1 = sin(blat1)-_TINY, cos(blat1)
     sin_blat2, cos_blat2 = sin(blat2), cos(blat2)
 
     def _newton_step(alpha1):
@@ -634,16 +832,62 @@ def _canonical(blat1, blat2, lamda12):
     return blat11, blat22, true_lamda,  restore
 
 
-def geodesic_distance(lat_a, lon_a, lat_b, lon_b, a=6378137, f=1.0 / 298.257223563):
+def geodesic_distance(lat_a, lon_a, lat_b, lon_b, a=6378137, f=1.0 / 298.257223563, degrees=False):
     """
     Returns surface distance between positions A and B on an ellipsoid.
 
     Parameters
     ----------
     lat_a, lon_a: real scalars or vectors of length m.
-        latitude(s) and longitude(s) of position A.
+        latitude(s) and longitude(s) of position A [deg or rad].
     lat_b, lon_b: real scalars or vectors of length n.
-        latitude(s) and longitude(s) of position B.
+        latitude(s) and longitude(s) of position B [deg or rad].
+    a: real scalar, default WGS-84 ellipsoid.
+        Semi-major axis of the Earth ellipsoid given in [m].
+    f: real scalar, default WGS-84 ellipsoid.
+        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
+        Earth with radius a is used in stead of WGS-84.
+    degrees: bool
+        True if latitudes, longitudes and azimuths are given in degress
+
+    Returns
+    -------
+    distance:  real scalars or vectors of length max(m,n).
+        Surface distance [m] from A to B on the ellipsoid
+    azimuth_a, azimuth_b: real scalars or vectors of length max(m,n).
+        direction [rad or deg] of line at position a and b relative to
+        North, respectively.
+
+    Notes
+    -----
+    Solves the inverse geodesic problem of finding the length and azimuths of the
+    shortest geodesic between points specified by lat1, lon1, lat2, lon2 on an ellipsoid.
+
+    See also
+    --------
+    sphere_distance_rad
+
+    """
+
+    if degrees:
+        lat_a, lon_a, lat_b, lon_b = rad(lat_a, lon_a, lat_b, lon_b)
+
+    s_ab, azimuth_a, azimuth_b = _geodesic_distance(lat_a, lon_a, lat_b, lon_b, a, f)
+    if degrees:
+        azimuth_a, azimuth_b = deg(azimuth_a, azimuth_b)
+    return s_ab, azimuth_a, azimuth_b
+
+
+def _geodesic_distance(lat_a, lon_a, lat_b, lon_b, a=6378137, f=1.0 / 298.257223563):
+    """
+    Returns surface distance between positions A and B on an ellipsoid.
+
+    Parameters
+    ----------
+    lat_a, lon_a: real scalars or vectors of length m.
+        latitude(s) and longitude(s) of position A in radians.
+    lat_b, lon_b: real scalars or vectors of length n.
+        latitude(s) and longitude(s) of position B in radians.
     a: real scalar, default WGS-84 ellipsoid.
         Semi-major axis of the Earth ellipsoid given in [m].
     f: real scalar, default WGS-84 ellipsoid.
@@ -655,7 +899,7 @@ def geodesic_distance(lat_a, lon_a, lat_b, lon_b, a=6378137, f=1.0 / 298.2572235
     distance:  real scalars or vectors of length max(m,n).
         Surface distance [m] from A to B on the ellipsoid
     azimuth_a, azimuth_b: real scalars or vectors of length max(m,n).
-        direction [rad or deg] of line at position a and b relative to
+        direction [rad] of line at position a and b relative to
         North, respectively.
 
     Notes
@@ -680,8 +924,8 @@ def geodesic_distance(lat_a, lon_a, lat_b, lon_b, a=6378137, f=1.0 / 298.2572235
 
     # assume lat1<=0 and lat1 < lat2 < -lat1 and  0 <= true_lamda12 <= pi
 
-    cos_blat1 = cos(blat1) + TINY
-    sin_blat2, cos_blat2 = sin(blat2), cos(blat2)+TINY
+    cos_blat1 = cos(blat1) + _TINY
+    sin_blat2, cos_blat2 = sin(blat2), cos(blat2)+_TINY
 
     def vincenty():
         """See table 3 in Karney"""
