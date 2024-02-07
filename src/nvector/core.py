@@ -1018,6 +1018,7 @@ def _azimuth_sphere(n_EA_E, n_EB_E, R_Ee=None):
     return np.arctan2(sin_az1, cos_az1), np.arctan2(sin_az2, cos_az2)
 
 
+@use_docstring(_examples.get_examples_no_header([5], oo_solution=False))
 def great_circle_distance_rad(n_EA_E, n_EB_E, R_Ee=None):
     """
     Returns great circle distance in radians between positions A and B on a sphere
@@ -1039,6 +1040,10 @@ def great_circle_distance_rad(n_EA_E, n_EB_E, R_Ee=None):
     Formulae is given by equation (16) in Gade (2010) and is well
     conditioned for all angles.
     See also: https://en.wikipedia.org/wiki/Great-circle_distance.
+
+    Examples
+    --------
+    {super}
 
     See also
     --------
