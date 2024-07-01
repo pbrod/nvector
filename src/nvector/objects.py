@@ -13,7 +13,7 @@ from geographiclib.geodesic import Geodesic as _Geodesic
 from nvector import _examples, license as _license
 from nvector._common import test_docstrings, use_docstring_from, use_docstring, _make_summary
 from nvector.rotation import zyx2R, n_E_and_wa2R_EL, n_E2R_EN
-from nvector.util import unit, mdot, get_ellipsoid, rad, deg, isclose, allclose, array_to_list_dict
+from nvector.util import unit, mdot, get_ellipsoid, rad, deg, isclose, allclose, array_to_list_dict, deprecate
 from nvector.core import (lat_lon2n_E,
                           n_E2lat_lon,
                           n_EB_E2p_EB_E,
@@ -76,8 +76,7 @@ def delta_E(point_a, point_b):
     p_AB_E = p_EB_E - p_EA_E
     return p_AB_E
 
-
-diff_positions = np.deprecate(delta_E, old_name='diff_positions', new_name='delta_E')
+diff_positions = deprecate(delta_E, old_name='diff_positions', new_name='delta_E')
 
 
 def _base_angle(angle_rad):
@@ -664,9 +663,9 @@ class Nvector(_Common):
         average_nvector = unit(np.sum(self.normal, axis=1).reshape((3, 1)))
         return self.frame.Nvector(average_nvector, z=np.mean(self.z))
 
-    mean_horizontal_position = np.deprecate(mean,
-                                            old_name='mean_horizontal_position',
-                                            new_name='mean')
+    mean_horizontal_position = deprecate(mean,
+                                         old_name='mean_horizontal_position',
+                                         new_name='mean')
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
         options = dict(rtol=rtol, atol=atol)
@@ -1043,9 +1042,9 @@ class GeoPath(object):
         depth = (point_a1.z + point_a2.z + point_b1.z + point_b2.z) / 4.
         return frame.Nvector(normal_c, z=depth)
 
-    intersection = np.deprecate(intersect,
-                                old_name='intersection',
-                                new_name='intersect')
+    intersection = deprecate(intersect,
+                             old_name='intersection',
+                             new_name='intersect')
 
     def _on_ellipsoid_path(self, point, rtol=1e-6, atol=1e-8):
         point_a, point_b = self.geo_points()

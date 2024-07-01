@@ -4,16 +4,17 @@ Utility functions
 
 """
 from __future__ import division, print_function
+import functools
 import warnings
 from collections import namedtuple
 import numpy as np
-from numpy import rad2deg, deg2rad, deprecate
+from numpy import rad2deg, deg2rad
 from numpy.linalg import norm
 from nvector._common import test_docstrings, _make_summary
 from nvector import license as _license
 
 __all__ = ['deg', 'rad', 'mdot', 'nthroot', 'get_ellipsoid', 'select_ellipsoid', 'unit',
-           'allclose', 'eccentricity2', 'polar_radius', 'third_flattening']
+           'allclose', 'eccentricity2', 'polar_radius', 'third_flattening', 'deprecate']
 
 FINFO = np.finfo(float)
 _tiny_name = 'tiny' if np.__version__ < '1.22' else 'smallest_normal'
@@ -81,6 +82,45 @@ ELLIPSOID_IX = {'airy1858': 1,
                 'ngo1948': 20
                 }
 
+
+def deprecate(*args, **kwargs):
+    """Replacement for numpy.deprecate if missing"""
+    try:
+        return np.deprecate(*args, **kwargs)
+    except AttributeError:
+        pass
+
+    func = args[0]
+    args = args[1:]
+    old_name = kwargs.pop('old_name', None)
+    new_name = kwargs.pop('new_name', None)
+    message = kwargs.pop('message', None)
+
+    if old_name is None:
+        old_name = func.__name__
+    if new_name is None:
+        depdoc = "`%s` is deprecated!" % old_name
+    else:
+        depdoc = "`%s` is deprecated, use `%s` instead!" % \
+                 (old_name, new_name)
+
+    if message is not None:
+        depdoc += "\n" + message
+
+    @functools.wraps(func)
+    def newfunc(*args, **kwds):
+        warnings.warn(depdoc, DeprecationWarning, stacklevel=2)
+        return func(*args, **kwds)
+
+    newfunc.__name__ = old_name
+    doc = func.__doc__
+    if doc is None:
+        doc = depdoc
+    else:
+        doc = '\n\n'.join([depdoc, doc])
+    newfunc.__doc__ = doc
+
+    return newfunc
 
 
 def eccentricity2(f):
