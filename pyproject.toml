@@ -4,7 +4,6 @@ dynamic = ["version"]
 description = "The nvector library is a suite of tools written in Python to solve geographical position calculations forked from nvector."
 authors = [
     {name = "Kenneth Gade, FFI"},
-    {name = "Per A. Brodtkorb, FFI"},
     {name = "Kristian Svartveit, FFI"},
     {name = "Brita Hafskjold Gade, FFI"},
     {name = "Matt Hogan", email = "mhogan@nwra.com"}

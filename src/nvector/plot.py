@@ -63,7 +63,7 @@ def plot_mean_position():
     lat, lon = deg(lat), deg(lon)
     print('Ex7, Average lat={0:2.1f}, lon={1:2.1f}'.format(lat[0], lon[0]))
 
-    plotter = _init_plotter(lat, lon)
+    plotter = _init_plotter(lat[0], lon[0])
 
     plotter(lon, lat, linewidth=5, marker='o', color='r')
     plotter(lons, lats, linewidth=5, marker='o', color='k')
