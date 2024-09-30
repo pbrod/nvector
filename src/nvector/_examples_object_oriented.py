@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 from nvector._examples import GETTING_STARTED
 __doc__ = GETTING_STARTED  # @ReservedAssignment
 

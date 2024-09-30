@@ -3,12 +3,14 @@ Module related to rotation matrices and angles
 ==============================================
 
 """
-from __future__ import division, print_function
+from __future__ import annotations
+
 import numpy as np
-from numpy import arctan2, sin, cos, array, sqrt
+from numpy import arctan2, sin, cos, array, sqrt, ndarray, float64
+from nvector import _license
 from nvector._common import test_docstrings, _make_summary
 from nvector.util import mdot, unit, norm, _nvector_check_length
-from nvector import license as _license
+from nvector._typing import Optional, Union, ArrayLike, NpArrayLike, Array, format_docstring_types
 
 __all__ = ['E_rotation',
            'n_E_and_wa2R_EL',
@@ -27,18 +29,19 @@ E_ROTATION_MATRIX = dict(e=np.array([[0, 0, 1.0],
                                      [0, 1.0, 0],
                                      [-1.0, 0, 0]]),
                          E=np.eye(3))
+"""Rotation matrix defining the axes of the coordinate frame E."""
 
 # pylint: disable=invalid-name
 
 
-def E_rotation(axes='e'):
+def E_rotation(axes: str='e') -> ndarray:
     """
     Returns rotation matrix R_Ee defining the axes of the coordinate frame E.
 
     Parameters
     ----------
-    axes : 'e' or 'E'
-        defines orientation of the axes of the coordinate frame E.
+    axes : str
+        Either 'e' or 'E' defining the orientation of the axes of the coordinate frame E.
         If axes is 'e' then z-axis points to the North Pole along the Earth's
         rotation axis, x-axis points towards the point where latitude = longitude = 0.
         If axes is 'E' then x-axis points to the North Pole along the Earth's
@@ -46,9 +49,9 @@ def E_rotation(axes='e'):
 
     Returns
     -------
-    R_Ee : 3 x 3 array
-        rotation matrix defining the axes of the coordinate frame E as
-        described in Table 2 in Gade (2010).
+    R_Ee : ndarray
+        3 x 3 rotation matrix defining the axes of the coordinate frame E as
+        described in Table 2 in the article by Gade :cite:`Gade2010Nonsingular`.
 
     Notes
     -----
@@ -68,39 +71,34 @@ def E_rotation(axes='e'):
     --------
     >>> import numpy as np
     >>> import nvector as nv
-    >>> np.allclose(nv.E_rotation(axes='e'), [[ 0,  0,  1],
-    ...                                       [ 0,  1,  0],
-    ...                                       [-1,  0,  0]])
+    >>> bool(np.allclose(nv.E_rotation(axes='e'), [[ 0,  0,  1],
+    ...                                            [ 0,  1,  0],
+    ...                                            [-1,  0,  0]]))
     True
-    >>> np.allclose(nv.E_rotation(axes='E'), [[ 1.,  0.,  0.],
-    ...                                       [ 0.,  1.,  0.],
-    ...                                       [ 0.,  0.,  1.]])
+    >>> bool(np.allclose(nv.E_rotation(axes='E'), [[ 1.,  0.,  0.],
+    ...                                            [ 0.,  1.,  0.],
+    ...                                            [ 0.,  0.,  1.]]))
     True
 
-    References
-    ----------
-    Gade, K. (2010). `A Nonsingular Horizontal Position Representation,
-    The Journal of Navigation, Volume 63, Issue 03, pp 395-417, July 2010.
-    <www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf>`_
     """
     return E_ROTATION_MATRIX[axes]
 
-
-def R2xyz(R_AB):
+@format_docstring_types
+def R2xyz(R_AB: Array) -> tuple[NpArrayLike, NpArrayLike, NpArrayLike]:
     """
     Returns the Euler angles in the xyz-order from a rotation matrix.
 
     Parameters
     ----------
-    R_AB: 3 x 3 x n array
-        rotation matrix [no unit] (direction cosine matrix) such that the
+    R_AB : {array}
+        3 x 3 x n rotation array [no unit] (direction cosine matrix) such that the
         relation between a vector v decomposed in A and B is given by:
-        v_A = mdot(R_AB, v_B)
+        v_A = mdot(R_AB, v_B).
 
     Returns
     -------
-    x, y, z: real scalars or array of length n.
-        Angles [rad] of rotation about new axes.
+    x, y, z: {np_array_like}
+        Angles [rad] of rotation about new axes given as real scalars or vectors of length n.
 
     Notes
     -----
@@ -149,21 +147,22 @@ def R2xyz(R_AB):
     return x, y, z
 
 
-def R2zyx(R_AB):
+@format_docstring_types
+def R2zyx(R_AB: Array) -> tuple[NpArrayLike, NpArrayLike, NpArrayLike]:
     """
     Returns the Euler angles in the zxy-order from a rotation matrix.
 
     Parameters
     ----------
-    R_AB:  3x3 array
-        rotation matrix [no unit] (direction cosine matrix) such that the
+    R_AB : {array}
+        3 x 3 x n rotation matrix [no unit] (direction cosine matrix) such that the
         relation between a vector v decomposed in A and B is given by:
-        v_A = mdot(R_AB, v_B)
+        v_A = mdot(R_AB, v_B).
 
     Returns
     -------
-    z, y, x: real scalars
-        Angles [rad] of rotation about new axes.
+    z, y, x: {np_array_like}
+        Angles [rad] of rotation about new axes given as real scalars or vectors of length n.
 
     Notes
     -----
@@ -195,19 +194,20 @@ def R2zyx(R_AB):
     return -z, -y, -x
 
 
-def R_EL2n_E(R_EL):
+@format_docstring_types
+def R_EL2n_E(R_EL: Array) -> ndarray:
     """
     Returns n-vector from the rotation matrix R_EL.
 
     Parameters
     ----------
-    R_EL: 3 x 3 x n array
-        Rotation matrix (direction cosine matrix) [no unit]
+    R_EL: {array}
+        3 x 3 x n rotation matrix (direction cosine matrix) [no unit].
 
     Returns
     -------
-    n_E: 3 x n array
-        n-vector(s) [no unit] decomposed in E.
+    n_E: ndarray
+        3 x n array of n-vector(s) [no unit] decomposed in E.
 
     Notes
     -----
@@ -223,19 +223,20 @@ def R_EL2n_E(R_EL):
     return n_E.reshape(3, -1)
 
 
-def R_EN2n_E(R_EN):
+@format_docstring_types
+def R_EN2n_E(R_EN: Array) -> ndarray:
     """
     Returns n-vector from the rotation matrix R_EN.
 
     Parameters
     ----------
-    R_EN: 3 x 3 x n array
-        Rotation matrix (direction cosine matrix) [no unit]
+    R_EN: {array}
+        3 x 3 x n rotation matrix (direction cosine matrix) [no unit].
 
     Returns
     -------
-    n_E: 3 x n array
-        n-vector [no unit] decomposed in E.
+    n_E: ndarray
+        3 x n array of n-vector [no unit] decomposed in E.
 
     Notes
     -----
@@ -274,21 +275,22 @@ def _atleast_3d(x, y, z):
     return x[None, None, :], y[None, None, :], z[None, None, :]
 
 
-def xyz2R(x, y, z):
+@format_docstring_types
+def xyz2R(x: ArrayLike, y: ArrayLike, z: ArrayLike) -> ndarray:
     """
     Returns rotation matrix from Euler angles in the xyz-order.
 
     Parameters
     ----------
-    x, y, z: real scalars or array of lengths n
-        Angles [rad] of rotation about new axes.
+    x, y, z: {array_like}
+        Angles [rad] of rotation about new axes given as real scalars or array of lengths n.
 
     Returns
     -------
-    R_AB: 3 x 3 x n array
-        rotation matrix [no unit] (direction cosine matrix) such that the
+    R_AB: ndarray
+        3 x 3 x n rotation matrix [no unit] (direction cosine matrix) such that the
         relation between a vector v decomposed in A and B is given by:
-        v_A = mdot(R_AB, v_B)
+        v_A = mdot(R_AB, v_B).
 
     Notes
     -----
@@ -326,21 +328,22 @@ def xyz2R(x, y, z):
     return np.squeeze(R_AB)
 
 
-def zyx2R(z, y, x):
+@format_docstring_types
+def zyx2R(z: ArrayLike, y: ArrayLike, x: ArrayLike) -> ndarray:
     """
     Returns rotation matrix from Euler angles in the zyx-order.
 
     Parameters
     ----------
-    z, y, x: real scalars or arrays of lenths n
-        Angles [rad] of rotation about new axes.
+    z, y, x: {array_like}
+        Angles [rad] of rotation about new axes given as real scalars or arrays of lenths n.
 
     Returns
     -------
-    R_AB: 3 x 3 x n array
-        rotation matrix [no unit] (direction cosine matrix) such that the
+    R_AB: ndarray
+        3 x 3 x n rotation matrix [no unit] (direction cosine matrix) such that the
         relation between a vector v decomposed in A and B is given by:
-        v_A = mdot(R_AB, v_B)
+        v_A = mdot(R_AB, v_B).
 
     Notes
     -----
@@ -380,12 +383,12 @@ def zyx2R(z, y, x):
 
         >>> p1_b = np.atleast_2d((1, 0, 0)).T
         >>> p1_a = nv.mdot(R_AB, p1_b)
-        >>> nv.allclose(p1_a, [[0.7071067811865476], [0.7071067811865476], [0.0]])
+        >>> bool(nv.allclose(p1_a, [[0.7071067811865476], [0.7071067811865476], [0.0]]))
         True
 
         >>> p2_a = np.atleast_2d((0, 1, 0)).T
         >>> p2_b = nv.mdot(R_AB.T, p2_a)
-        >>> nv.allclose(p2_b, [[0.7071067811865476], [0.7071067811865476], [0.0]])
+        >>> bool(nv.allclose(p2_b, [[0.7071067811865476], [0.7071067811865476], [0.0]]))
         True
 
     See also
@@ -403,25 +406,27 @@ def zyx2R(z, y, x):
     return np.squeeze(R_AB)
 
 
-def n_E2lat_lon(n_E, R_Ee=None):
+@format_docstring_types
+def n_E2lat_lon(n_E: Array, R_Ee: Optional[Array]=None) -> tuple[ndarray, ndarray]:
     """
-    Converts n-vector to latitude and longitude.
+    Converts n-vector(s) to latitude(s) and longitude(s).
 
     Parameters
     ----------
-    n_E: 3 x n array
-        n-vector [no unit] decomposed in E.
-    R_Ee : 3 x 3 array
-        rotation matrix defining the axes of the coordinate frame E.
+    n_E: {array}
+        3 x n array of n-vector(s) [no unit] decomposed in E.
+    R_Ee : {array}
+        3 x 3  rotation matrix defining the axes of the coordinate frame E,
+        default E_rotation().
 
     Returns
     -------
-    latitude, longitude: real scalars or vectors of length n.
-        Geodetic latitude and longitude given in [rad]
+    latitude, longitude: ndarray
+        Geodetic latitude(s) and longitude(s) given in [rad]
 
     See also
     --------
-    lat_lon2n_E
+    lat_lon2n_E, nvector.rotation.E_rotation
     """
 
     n_e = change_axes_to_E(n_E, R_Ee)
@@ -443,20 +448,23 @@ def n_E2lat_lon(n_E, R_Ee=None):
     return latitude, longitude
 
 
-def change_axes_to_E(n_E, R_Ee=None):
+@format_docstring_types
+def change_axes_to_E(n_E: Array, R_Ee: Optional[Array]=None) -> ndarray:
     """
-    Change axes of the nvector from 'e' to 'E'.
+    Change axes of the nvector(s) from 'e' to 'E'.
 
     Parameters
     ----------
-    n_E: 3 x n array
-        n-vector [no unit] decomposed in E.
-    R_Ee : 3 x 3 array
-        rotation matrix defining the axes of the coordinate frame E.
+    n_E: {array}
+        3 x n array of n-vector(s) [no unit] decomposed in E.
+    R_Ee : {array}
+        3 x 3 rotation matrix defining the axes of the coordinate frame E,
+        default E_rotation().
+
     Returns
     -------
-    n_e: 3 x n array
-        n-vector [no unit] decomposed in e.
+    n_e: ndarray
+        3 x n array of n-vector(s) [no unit] decomposed in e.
 
     Notes
     -----
@@ -464,6 +472,10 @@ def change_axes_to_E(n_E, R_Ee=None):
     then x-axis points to the North Pole along the Earth's rotation axis,
     and yz-plane coincides with the equatorial plane, i.e.,
     y-axis points towards longitude +90deg (east) and latitude = 0.
+
+    See also
+    --------
+    E_rotation
     """
     if R_Ee is None:
         R_Ee = E_rotation()
@@ -475,25 +487,27 @@ def change_axes_to_E(n_E, R_Ee=None):
     return n_e
 
 
-def n_E2R_EN(n_E, R_Ee=None):
+@format_docstring_types
+def n_E2R_EN(n_E: Array, R_Ee: Optional[Array]=None) -> ndarray:
     """
     Returns the rotation matrix R_EN from n-vector.
 
     Parameters
     ----------
-    n_E: 3 x n array
-        n-vector [no unit] decomposed in E
-    R_Ee : 3 x 3 array
-        rotation matrix defining the axes of the coordinate frame E.
+    n_E: {array}
+        3 x n array of n-vector(s) [no unit] decomposed in E
+    R_Ee : {array}
+        3 x 3 rotation matrix defining the axes of the coordinate frame E,
+        default E_rotation().
 
     Returns
     -------
-    R_EN:  3 x 3 x n array
-        The resulting rotation matrix [no unit] (direction cosine matrix).
+    R_EN:  ndarray
+        The resulting 3 x 3 x n rotation matrix [no unit] (direction cosine matrix).
 
     See also
     --------
-    R_EN2n_E, n_E_and_wa2R_EL, R_EL2n_E
+    R_EN2n_E, n_E_and_wa2R_EL, R_EL2n_E, E_rotation
     """
     if R_Ee is None:
         R_Ee = E_rotation()
@@ -528,33 +542,42 @@ def n_E2R_EN(n_E, R_Ee=None):
     return np.squeeze(R_EN)
 
 
-def n_E_and_wa2R_EL(n_E, wander_azimuth, R_Ee=None):
+@format_docstring_types
+def n_E_and_wa2R_EL(n_E: Array,
+                    wander_azimuth: ArrayLike,
+                    R_Ee: Optional[Array]=None
+                    ) -> ndarray:
     """
     Returns rotation matrix R_EL from n-vector and wander azimuth angle.
 
     Parameters
     ----------
-    n_E: 3 x n array
-        n-vector [no unit] decomposed in E
-    wander_azimuth: real scalar or array of length n
-        Angle [rad] between L's x-axis and north, positive about L's z-axis.
-    R_Ee : 3 x 3 array
-        rotation matrix defining the axes of the coordinate frame E.
+    n_E : {array}
+        3 x n array of n-vector(s) [no unit] decomposed in E.
+    wander_azimuth: {array_like}
+        Angle(s) [rad] between L's x-axis and north, positive about L's z-axis given
+        as a real scalar or array of length n.
+    R_Ee : {array}
+        3 x 3 rotation matrix defining the axes of the coordinate frame E,
+        default E_rotation().
 
     Returns
     -------
-    R_EL: 3 x 3 x n array
-        The resulting rotation matrix.       [no unit]
+    R_EL: ndarray
+        The resulting 3 x 3 x n rotation matrix.  [no unit]
 
     Notes
     -----
-    Calculates the rotation matrix (direction cosine matrix) R_EL using
-    n-vector (n_E) and the wander azimuth angle. When wander_azimuth=0, we
-    have that N=L. (See Table 2 in Gade (2010) for details)
+    Calculates the rotation matrix (direction cosine matrix) `R_EL` using
+    n-vector (`n_E`) and the wander azimuth angle. When `wander_azimuth`=0, we
+    have that N=L. (See Table 2 in Gade :cite:`Gade2010Nonsingular` for details)
 
     See also
     --------
-    R_EL2n_E, R_EN2n_E, n_E2R_EN
+    R_EL2n_E,
+    R_EN2n_E,
+    n_E2R_EN,
+    nvector.rotation.E_rotation
     """
     if R_Ee is None:
         R_Ee = E_rotation()

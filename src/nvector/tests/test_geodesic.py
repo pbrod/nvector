@@ -148,11 +148,11 @@ PROLATE30_TESTCASES = [
 @pytest.mark.parametrize("testcase", WGS84_TESTCASES)
 def test_wgs84_inverse(testcase):
     """Test inverse method on the WGS84 ellipsoid"""
-    options = dict(frame=WGS84, degrees=True)
+
 
     (lat1, lon1, azi1, lat2, lon2, azi2, s12) = testcase[:7]
-    point1 = GeoPoint(lat1, lon1, **options)
-    point2 = GeoPoint(lat2, lon2, **options)
+    point1 = WGS84.GeoPointFromDegrees(lat1, lon1)
+    point2 = WGS84.GeoPointFromDegrees(lat2, lon2)
     s_ab, az_a, az_b = point1.distance_and_azimuth(point2,
                                                    degrees=True)
     assert s_ab == approx(s12, rel=1e-14)
@@ -163,10 +163,9 @@ def test_wgs84_inverse(testcase):
 @pytest.mark.parametrize("testcase", WGS84_TESTCASES)
 def test_wgs84_direct(testcase):
     """Test direct method on the WGS84 ellipsoid"""
-    options = dict(frame=WGS84, degrees=True)
 
     (lat1, lon1, azi1, lat2, lon2, azi2, s12) = testcase[:7]
-    point1 = GeoPoint(lat1, lon1, **options)
+    point1 = WGS84.GeoPointFromDegrees(lat1, lon1)
     point2, az_b = point1.displace(s12, azi1, long_unroll=True, degrees=True)
 
     lat_b, lon_b = point2.latitude_deg, point2.longitude_deg
@@ -179,10 +178,8 @@ def test_wgs84_direct(testcase):
 @pytest.mark.parametrize("testcase", PROLATE15_TESTCASES)
 def test_prolate15_direct(testcase):
     """Test direct method on the prolate15 ellipsoid"""
-    options = dict(frame=PROLATE15, degrees=True)
-
     (lat1, lon1, azi1, lat2, lon2, azi2, s12) = testcase[:7]
-    point1 = GeoPoint(lat1, lon1, **options)
+    point1 = PROLATE15.GeoPointFromDegrees(lat1, lon1)
     point2, az_b = point1.displace(s12, azi1, long_unroll=True, degrees=True)
 
     lat_b, lon_b = point2.latitude_deg, point2.longitude_deg
@@ -195,10 +192,8 @@ def test_prolate15_direct(testcase):
 @pytest.mark.parametrize("testcase", PROLATE30_TESTCASES)
 def test_prolate30_direct(testcase):
     """Test direct method on the prolate 30 ellipsoid"""
-    options = dict(frame=PROLATE30, degrees=True)
-
     (lat1, lon1, azi1, lat2, lon2, azi2, s12) = testcase[:7]
-    point1 = GeoPoint(lat1, lon1, **options)
+    point1 = PROLATE30.GeoPointFromDegrees(lat1, lon1)
     point2, az_b = point1.displace(s12, azi1, long_unroll=True, degrees=True)
 
     lat_b, lon_b = point2.latitude_deg, point2.longitude_deg

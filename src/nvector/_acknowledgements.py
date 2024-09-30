@@ -14,10 +14,9 @@ Most of the content is based on the article by K. Gade :cite:`Gade2010Nonsingula
 Thus this article should be cited in publications using this page or
 downloaded program code.
 
-However, if you use any of the FrameE.direct, FrameE.inverse,
-GeoPoint.distance_and_azimuth or GeoPoint.displace methods you should also cite
-the article by Karney :cite:`Karney2013Algorithms` because these methods call
-Karney's `geographiclib <https://pypi.python.org/pypi/geographiclib>`_ library
-to do the calculations.
+However, if you use any of the geodesic_distance,  geodesic_reckon, FrameE.direct,
+FrameE.inverse, GeoPoint.distance_and_azimuth or GeoPoint.displace methods you should also cite
+the article by Karney :cite:`Karney2013Algorithms` because these methods call the
+`karney library <https://pypi.python.org/pypi/karney>`_ to do the calculations.
 
 """

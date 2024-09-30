@@ -1,4 +1,5 @@
 import inspect
+from ._typing import TYPES_DICT
 try:
     import textwrap
     textwrap.indent  # pylint: disable=pointless-statement
@@ -17,7 +18,7 @@ def _get_h1line(object_):
     """Returns the H1 line of the documentation of an object."""
     doc = object_.__doc__
     if doc:
-        return doc.partition("Parameters\n")[0].strip()
+        return doc.partition("Parameters\n")[0].partition('Attributes\n')[0].strip()
     return ''
 
 
@@ -52,7 +53,7 @@ def use_docstring_from(cls):
     return use_docstring(cls.__doc__)
 
 
-def use_docstring(docstring):
+def use_docstring(docstring='', type_dict=None):
     """This decorator modifies the decorated function's docstring with supplied docstring.
 
     If the function's docstring is None it is replaced with the supplied docstring.
@@ -65,11 +66,17 @@ def use_docstring(docstring):
         if func_docstring is None:
             func.__doc__ = docstring
         else:
+            options = dict(super=docstring)
+            if type_dict:
+                options.update(type_dict)
+            else:
+                options.update(TYPES_DICT)
             try:
-                new_docstring = dedent(func_docstring).format(super=docstring)
+                new_docstring = dedent(func_docstring).format(**options)
                 func.__doc__ = new_docstring
-            except Exception:
-                pass  # python 2 crashes if the docstring alreasy exists!
+            except Exception as error:
+                warnings.warn(str(error), stacklevel=2)
+                # python 2 crashes if the docstring alreasy exists!
         return func
     return _doc
 

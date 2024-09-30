@@ -3,17 +3,26 @@ Utility functions
 =================
 
 """
-from __future__ import division, print_function
+from __future__ import annotations
 import warnings
-from collections import namedtuple
-import numpy as np
-from numpy import rad2deg, deg2rad, deprecate
-from numpy.linalg import norm
-from nvector._common import test_docstrings, _make_summary
-from nvector import license as _license
 
-__all__ = ['deg', 'rad', 'mdot', 'nthroot', 'get_ellipsoid', 'select_ellipsoid', 'unit',
-           'allclose', 'eccentricity2', 'polar_radius', 'third_flattening',
+import numpy as np
+from numpy import rad2deg, deg2rad, ndarray, float64
+from numpy.linalg import norm
+
+from nvector import _license
+from nvector._common import test_docstrings, _make_summary
+from nvector._typing import (Any,
+                             NamedTuple,
+                             format_docstring_types,
+                             ArrayLike,
+                             NpArrayLike,
+                             Array,
+                             Union)
+
+
+__all__ = ['deg', 'rad', 'mdot', 'nthroot', 'get_ellipsoid', 'unit', 'isclose',
+           'allclose', 'eccentricity2', 'polar_radius', 'third_flattening', 'array_to_list_dict',
            'dm2degrees', 'degrees2dm']
 
 FINFO = np.finfo(float)
@@ -21,7 +30,16 @@ _tiny_name = 'tiny' if np.__version__ < '1.22' else 'smallest_normal'
 _TINY = getattr(FINFO, _tiny_name)
 _EPS = FINFO.eps  # machine precision (machine epsilon)
 
-Ellipsoid = namedtuple('Ellipsoid', 'a f name')
+
+class Ellipsoid(NamedTuple):
+    """An ellipsoid with semi-major radius, flattening, and name"""
+
+    a: float
+    """Semi-major axis in meters"""
+    f: float
+    """Flattening value"""
+    name: str
+    """A name associated with the ellipsoid"""
 
 
 ELLIPSOID = {
@@ -47,6 +65,7 @@ ELLIPSOID = {
     19: Ellipsoid(a=6378137.0, f=298.257222101, name='ETRS89 / EUREF89'),
     20: Ellipsoid(a=6377492.0176, f=1/299.15281285, name='NGO1948')
 }
+"""Dictionary enumeration of supported ellipsoids. Synonyms are partitioned by '/' characters"""
 ELLIPSOID_IX = {'airy1858': 1,
                 'airymodified': 2,
                 'australiannational': 3,
@@ -81,10 +100,21 @@ ELLIPSOID_IX = {'airy1858': 1,
                 'etrs89': 19,
                 'ngo1948': 20
                 }
+"""Inverse mapping between a name string and ellipsoid ID"""
 
 
-def eccentricity2(f):
+def eccentricity2(f: Union[float, ndarray]) -> tuple[Union[float, ndarray], Union[float, ndarray]]:
     """Returns the first and second eccentricity squared given the flattening, f.
+
+    Parameters
+    ----------
+    f : float or ndarray
+        Flattening parameter.
+
+    Returns
+    -------
+    e2, e2m: float or ndarray
+        First and second eccentricities, respectively.
 
     Notes
     -----
@@ -96,13 +126,25 @@ def eccentricity2(f):
     return e2, e2m
 
 
-def polar_radius(a, f):
+def polar_radius(a: Union[float, ndarray], f: Union[float, ndarray]) -> Union[float, ndarray]:
     """Returns the polar radius b given the equatorial radius a and flattening f of the ellipsoid.
+
+    Parameters
+    ----------
+    a : float or ndarray
+        Equatorial radius.
+    f : float or ndarray
+        Flattening parameter.
+
+    Returns
+    -------
+    b : float or ndarray
+        Polar radius :math:`b`
 
     Notes
     -----
-    The semi minor half axis (polar radius) is defined as b = (1 - f) * a
-    where a is the semi major half axis (equatorial radius) and f is the flattening
+    The semi minor half axis (polar radius) is defined as :math:`b = (1 - f)a`
+    where :math:`a` is the semi major half axis (equatorial radius) and :math:`f` is the flattening
     of the ellipsoid.
 
     """
@@ -110,35 +152,62 @@ def polar_radius(a, f):
     return b
 
 
-def third_flattening(f):
+def third_flattening(f: Union[float, ndarray]) -> Union[float, ndarray]:
     """Returns the third flattening, n, given the flattening, f.
+
+    Parameters
+    ----------
+    f : float or ndarray
+        Flattening parameter.
+
+    Returns
+    -------
+    n : float or ndarray
+        Polar radius :math:`n`.
 
     Notes
     -----
-    The third flattening is defined as n = f / (2 - f).
+    The third flattening is defined as :math:`n = f / (2 - f)`.
     """
 
     return f / (2.0 - f)
 
 
-def array_to_list_dict(data):
-    """
-    Convert dict arrays to dict of lists.
+def array_to_list_dict(data: Union[Any, ndarray, list, tuple, dict]) -> Union[Any, dict, list]:
+    """Convert dict arrays to dict of lists.
 
     Parameters
     ----------
-    data : dict of arrays or an array
+    data : Any, ndarray, list, tuple or dict
+        A collection of data.
+
+    Returns
+    -------
+    dict or list
+
+    Notes
+    -----
+    If the input is not iterable, then the data is returned untouched.
 
     Examples
     --------
     >>> import numpy as np
-    >>> data = dict(a=np.zeros((3,)), b=(1,2,3), c=[], d=1, e='test',
-    ...          f=np.nan, g=[1], h=[np.nan], i=None)
-    >>> e = array_to_list_dict(data)
-    >>> e == {'a': [0.0, 0.0, 0.0],  'b': [1, 2, 3], 'c': [],'d': 1,
-    ...       'e': 'test', 'f': np.nan, 'g': [1], 'h': [np.nan], 'i': None}
+    >>> data1 = dict(a=np.zeros((3,)), b=(1,2,3), c=[], d=1, e='test',
+    ...              f=np.nan, g=[1], h=[np.nan], i=None)
+    >>> e1 = array_to_list_dict(data1)
+    >>> e1 == {'a': [0.0, 0.0, 0.0],  'b': [1, 2, 3], 'c': [],'d': 1,
+    ...        'e': 'test', 'f': np.nan, 'g': [1], 'h': [np.nan], 'i': None}
     True
-
+    >>> data2 = [1, 2., None]
+    >>> e2 = array_to_list_dict(data2)
+    >>> e2 == [1, 2., None]
+    True
+    >>> e3 = array_to_list_dict(np.array([-3., -2., -1.]))
+    >>> e3 == [-3., -2., -1.]
+    True
+    >>> e4 = array_to_list_dict(True)
+    >>> e4 is True
+    True
     """
     if isinstance(data, dict):
         for key in data:
@@ -153,14 +222,22 @@ def array_to_list_dict(data):
     return data
 
 
-def isclose(a, b, rtol=1e-9, atol=0.0, equal_nan=False):
+@format_docstring_types
+def isclose(a: ArrayLike,
+            b: ArrayLike,
+            rtol: float=1e-9,
+            atol: float=0.0,
+            equal_nan: bool=False
+            ) -> ndarray:
     """
     Returns True where the two arrays `a` and `b` are element-wise equal within a tolerance.
 
     Parameters
     ----------
-    a, b : array_like
-        Input arrays to compare.
+    a : {array_like}
+        First input array or number to compare.
+    b : {array_like}
+        Second input array or number to compare.
     rtol : float
         The relative tolerance parameter (see Notes).
     atol : float
@@ -171,7 +248,7 @@ def isclose(a, b, rtol=1e-9, atol=0.0, equal_nan=False):
 
     Returns
     -------
-    y : array_like
+    bool or ndarray
         Returns a boolean array of where `a` and `b` are equal within the
         given tolerance. If both `a` and `b` are scalars, returns a single
         boolean value.
@@ -182,8 +259,6 @@ def isclose(a, b, rtol=1e-9, atol=0.0, equal_nan=False):
 
     Notes
     -----
-    .. versionadded:: 0.7.5
-
     For finite values, isclose uses the following equation to test whether
     two floating point values are equivalent:
 
@@ -194,27 +269,31 @@ def isclose(a, b, rtol=1e-9, atol=0.0, equal_nan=False):
     the use case at hand. A zero value for `atol` will result in `False`
     if either `a` or `b` is zero.
 
+    For NumPy version 2, the representation of its boolean types are `np.True_` and `np.False_`
+    when returned whereas `True` and `False` when they are members of arrays, respectively.
+
     Examples
     --------
-    >>> import nvector.objects as no
-    >>> no.isclose([1e10,1e-7], [1.00001e10,1e-8])
-    array([False, False])
-    >>> no.isclose([1e10,1e-8], [1.00001e10,1e-9])
-    array([False, False])
-    >>> no.isclose([1e10,1e-8], [1.0001e10,1e-9])
-    array([False,  False])
-    >>> no.isclose([1.0, np.nan], [1.0, np.nan])
-    array([ True, False])
-    >>> no.isclose([1.0, np.nan], [1.0, np.nan], equal_nan=True)
-    array([ True, True])
-    >>> no.isclose([1e-8, 1e-7], [0.0, 0.0])
-    array([False, False])
-    >>> no.isclose([1e-100, 1e-7], [0.0, 0.0], atol=0.0)
-    array([False, False])
-    >>> no.isclose([1e-10, 1e-10], [1e-20, 0.0])
-    array([False,  False])
-    >>> no.isclose([1e-10, 1e-10], [1e-20, 0.999999e-10], atol=0.0)
-    array([False,  False])
+    >>> import numpy as np
+    >>> from nvector.util import isclose
+    >>> bool(np.all(isclose([1e10,1e-7], [1.00001e10,1e-8]) == [False, False]))
+    True
+    >>> bool(np.all(isclose([1e10,1e-8], [1.00001e10,1e-9]) == [False, False]))
+    True
+    >>> bool(np.all(isclose([1e10,1e-8], [1.0001e10,1e-9]) == [False, False]))
+    True
+    >>> bool(np.all(isclose([1.0, np.nan], [1.0, np.nan]) == [True, False]))
+    True
+    >>> bool(np.all(isclose([1.0, np.nan], [1.0, np.nan], equal_nan=True) == [True, True]))
+    True
+    >>> bool(np.all(isclose([1e-8, 1e-7], [0.0, 0.0]) == [False, False]))
+    True
+    >>> bool(np.all(isclose([1e-100, 1e-7], [0.0, 0.0], atol=0.0) == [False, False]))
+    True
+    >>> bool(np.all(isclose([1e-10, 1e-10], [1e-20, 0.0]) == [False, False]))
+    True
+    >>> bool(np.all(isclose([1e-10, 1e-10], [1e-20, 0.999999e-10], atol=0.0) == [False, False]))
+    True
     """
     a, b = np.broadcast_arrays(a, b)
 
@@ -228,14 +307,22 @@ def isclose(a, b, rtol=1e-9, atol=0.0, equal_nan=False):
     return out
 
 
-def allclose(a, b, rtol=1.e-7, atol=1.e-14, equal_nan=False):
+@format_docstring_types
+def allclose(a: ArrayLike,
+             b: ArrayLike,
+             rtol: float=1.e-7,
+             atol: float=1.e-14,
+             equal_nan: bool=False
+             ) -> np.bool_:
     """
     Returns True if two arrays are element-wise equal within a tolerance.
 
     Parameters
     ----------
-    a, b : array_like
-        Input arrays to compare.
+    a : {array_like}
+        First input array or number to compare.
+    b : {array_like}
+        Second input array or number to compare.
     rtol : float
         The relative tolerance parameter (see Notes).
     atol : float
@@ -244,13 +331,11 @@ def allclose(a, b, rtol=1.e-7, atol=1.e-14, equal_nan=False):
         Whether to compare NaN's as equal.  If True, NaN's in `a` will be
         considered equal to NaN's in `b` in the output array.
 
-        .. versionadded:: 1.10.0
-
     Returns
     -------
-    allclose : bool
-        Returns True if the two arrays are equal within the given
-        tolerance; False otherwise.
+    bool
+        Returns `np.True_` if the two arrays are equal within the given
+        tolerance; `np.False_` otherwise.
 
     See Also
     --------
@@ -271,25 +356,27 @@ def allclose(a, b, rtol=1.e-7, atol=1.e-14, equal_nan=False):
     means that `a` and `b` need not have the same shape in order for
     ``allclose(a, b)`` to evaluate to True.
 
+    For NumPy version 2, the representation of its boolean types are `np.True_` and `np.False_`
+    when returned whereas `True` and `False` when they are members of arrays, respectively.
+
     Examples
     --------
-    >>> import nvector.objects as no
-    >>> no.allclose([1e10, 1e-7], [1.00001e10, 1e-8])
+    >>> from nvector.util import allclose
+    >>> bool(allclose([1e10, 1e-7], [1.00001e10, 1e-8]))
     False
-    >>> no.allclose([1e10, 1e-8], [1.00001e10, 1e-9])
+    >>> bool(allclose([1e10, 1e-8], [1.00001e10, 1e-9]))
     False
-    >>> no.allclose([1e10, 1e-8], [1.0001e10, 1e-9])
+    >>> bool(allclose([1e10, 1e-8], [1.0001e10, 1e-9]))
     False
-    >>> no.allclose([1.0, np.nan], [1.0, np.nan])
+    >>> bool(allclose([1.0, np.nan], [1.0, np.nan]))
     False
-    >>> no.allclose([1.0, np.nan], [1.0, np.nan], equal_nan=True)
+    >>> bool(allclose([1.0, np.nan], [1.0, np.nan], equal_nan=True))
     True
-
     """
     return np.all(isclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan))
 
 
-def _nvector_check_length(n_E, atol=0.1):
+def _nvector_check_length(n_E: ndarray, atol: float=0.1) -> None:
     """
     Emits a warning if nvector deviates significantly from unit length.
 
@@ -316,90 +403,133 @@ def _nvector_check_length(n_E, atol=0.1):
     length_deviation = abs(norm(n_E[:, 0]) - 1)
     if length_deviation > atol:
         warnings.warn('n-vector should have unit length: '
-                      'norm(n_E)~=1 ! Error is: {}'.format(length_deviation))
+                      'norm(n_E)~=1 ! Error is: {}'.format(length_deviation), stacklevel=2)
 
 
-def deg(*rad_angles):
+@format_docstring_types
+def deg(*rad_angles: ArrayLike) -> Union[float64, ndarray, tuple[ndarray, ...]]:
     """
     Converts angle in radians to degrees.
 
     Parameters
     ----------
-    rad_angles:
-        angle in radians
+    rad_angles : {array_like}
+        Angle in radians.
 
     Returns
     -------
-    deg_angles:
-        angle in degrees
+    deg_angles : float64, ndarray or tuple[ndarray, ...]
+        Angle in degrees.
 
     Examples
     --------
     >>> import numpy as np
-    >>> import nvector as nv
-    >>> nv.deg(np.pi/2)
+    >>> from nvector.util import deg
+    >>> deg_number = deg(np.pi/2)
+    >>> deg_number.size == 1
+    True
+    >>> deg_number.item()
     90.0
-    >>> nv.deg(np.pi/2, [0, np.pi])
-    (90.0, array([  0., 180.]))
+    >>> degs_array = deg(np.linspace(0, np.pi, 3))
+    >>> isinstance(degs_array, ndarray)
+    True
+    >>> bool(allclose(degs_array, [0., 90., 180.]))
+    True
+    >>> degs_tuple = deg(np.pi/2, [0, np.pi])
+    >>> isinstance(degs_tuple, tuple)
+    True
+    >>> for value, expected in zip(degs_tuple, (90.0, [  0., 180.])):
+    ...     bool(np.allclose(value, expected))
+    True
+    True
 
     See also
     --------
     rad
+
+    Notes
+    -----
+    For NumPy version 2, the representation of its numeric types has changed.
+    The representation of float64 for `90` is `np.float64(90.0)`
     """
     if len(rad_angles) == 1:
         return rad2deg(rad_angles[0])
     return tuple(rad2deg(angle) for angle in rad_angles)
 
 
-def rad(*deg_angles):
+@format_docstring_types
+def rad(*deg_angles: ArrayLike) -> Union[float64, ndarray, tuple[ndarray, ...]]:
     """
     Converts angle in degrees to radians.
 
     Parameters
     ----------
-    deg_angles:
-        angle in degrees
+    deg_angles : {array_like}
+        Angle in degrees.
 
     Returns
     -------
-    rad_angles:
-        angle in radians
+    rad_angles : float64 | ndarray | tuple[ndarray, ...]
+        Angle in radians.
 
     Examples
     --------
     >>> import numpy as np
-    >>> import nvector as nv
-    >>> nv.deg(nv.rad(90))
-    90.0
-    >>> nv.deg(*nv.rad(90, [0, 180]))
-    (90.0, array([  0., 180.]))
+    >>> from nvector.util import deg, rad
+    >>> bool(np.isclose(deg(rad(90)), 90))
+    True
+    >>> degs_tuple = deg(*rad(90, [0, 180]))
+    >>> isinstance(degs_tuple, tuple)
+    True
+    >>> for value, expected in zip(degs_tuple, (90.0, [  0., 180.])):
+    ...     bool(np.allclose(value, expected))
+    True
+    True
 
     See also
     --------
     deg
+
+    Notes
+    -----
+    For NumPy version 2, the representation of its numeric types has changed.
+    The representation of float64 for `90` is `np.float64(90.0)`
     """
     if len(deg_angles) == 1:
         return deg2rad(deg_angles[0])
     return tuple(deg2rad(angle) for angle in deg_angles)
 
 
-def dm2degrees(degrees, minutes):
+@format_docstring_types
+def dm2degrees(degrees: ArrayLike, minutes: ArrayLike) -> NpArrayLike:
     """
     Converts degrees, minutes to decimal degrees
 
+    Parameters
+    ----------
+    degrees : {array_like}
+        Angles in integer degrees.
+    minutes: {array_like}
+        Angle in degree minutes.
+
+    Returns
+    -------
+    deg: {np_array_like}
+        Angles to converted to decimal degrees.
+
     Examples
     --------
-    >>> import numpy as np
-    >>> np.allclose(dm2degrees(10, 49.3231), 10.822051)
+    >>> from nvector.util import dm2degrees, allclose
+    >>> bool(allclose(dm2degrees(10, 49.3231), 10.822051))
     True
-    >>> np.allclose(dm2degrees(10, 9.3231), 10.155385)
+    >>> bool(allclose(dm2degrees(10, 9.3231), 10.155385))
     True
-    >>> np.allclose(dm2degrees(1, 9.3231), 1.155385)
+    >>> bool(allclose(dm2degrees(1, 9.3231), 1.155385))
     True
-    >>> np.allclose(dm2degrees(-1, -9.3231), -1.155385)
+    >>> bool(allclose(dm2degrees(-1, -9.3231), -1.155385))
     True
 
-    >>> np.allclose(dm2degrees(0, -9.3234), -0.15539)
+    >>> bool(allclose(dm2degrees(0, -9.3234), -0.15539))
     True
 
     See also
@@ -410,28 +540,38 @@ def dm2degrees(degrees, minutes):
     return degs + mins / 60.0
 
 
-def degrees2dm(degrees):
+@format_docstring_types
+def degrees2dm(degrees: ArrayLike) -> tuple[Union[int, ndarray], NpArrayLike]:
     """
     Converts decimal degrees to degrees and minutes.
 
+    Parameters
+    ----------
+    degrees: {array_like}
+        Angles to convert to degrees and minutes.
+
+    Returns
+    -------
+    degs : int or ndarray
+        Angles rounded to nearest lower integer.
+    minutes: {np_array_like}
+        Angle in degree minutes.
+
     Examples
     --------
-    >>> import numpy as np
-    >>> np.allclose(degrees2dm(10.822051), (10,49.3231))
+    >>> from nvector.util import degrees2dm, allclose
+    >>> bool(allclose(degrees2dm(10.822051), (10, 49.32306)))
     True
-    >>> np.allclose(degrees2dm(10.155385),(10, 9.3231))
+    >>> bool(allclose(degrees2dm(10.155385),(10, 9.3231)))
     True
-    >>> np.allclose(degrees2dm(1.155385), (1, 9.3231))
+    >>> bool(allclose(degrees2dm(1.155385), (1, 9.3231)))
     True
-    >>> np.allclose(degrees2dm(1.15539), (1, 9.3234))
+    >>> bool(allclose(degrees2dm(1.15539), (1, 9.3234)))
     True
-
-    >>> np.allclose(degrees2dm(-1.15539), (-1, -9.3234))
+    >>> bool(allclose(degrees2dm(-1.15539), (-1, -9.3234)))
     True
-
-    >>> np.allclose(degrees2dm(-0.15539), (0, -9.3234))
+    >>> bool(allclose(degrees2dm(-0.15539), (0, -9.3234)))
     True
-
 
     See also
     --------
@@ -443,17 +583,23 @@ def degrees2dm(degrees):
     return degs, mins
 
 
-def mdot(a, b):
+@format_docstring_types
+def mdot(a: Array, b: Array) -> ndarray:
     """
-    Returns multiple matrix multiplications of two arrays
+    Returns multiple matrix multiplications of two arrays.
     i.e. dot(a, b)[i,j,k] = sum(a[i,:,k] * b[:,j,k])
 
     Parameters
     ----------
-    a : array_like
+    a : {array}
         First argument.
-    b : array_like
+    b : {array}
         Second argument.
+
+    Returns
+    -------
+    ndarray
+        Matrix multiplication of `a` and `b`
 
     Notes
     -----
@@ -465,46 +611,47 @@ def mdot(a, b):
     --------
     3 x 3 x 2 times 3 x 3 x 2 array -> 3 x 3 x 2 array
         >>> import numpy as np
-        >>> import nvector as nv
+        >>> from nvector.util import mdot, allclose
         >>> a = 1.0 * np.arange(18).reshape(3,3,2)
         >>> b = - a
-        >>> t = np.concatenate([np.dot(a[...,i], b[...,i])[:, :, None]
-        ...                    for i in range(2)], axis=2)
-        >>> tm = nv.mdot(a, b)
+        >>> t = np.concatenate(
+        ...     [np.dot(a[...,i], b[...,i])[:, :, None] for i in range(2)],
+        ...     axis=2)
+        >>> tm = mdot(a, b)
         >>> tm.shape
         (3, 3, 2)
-        >>> nv.allclose(t, tm)
+        >>> bool(allclose(t, tm))
         True
 
     3 x 3 x 2 times 3 x 1 array -> 3 x 1 x 2 array
         >>> t1 = np.concatenate([np.dot(a[...,i], b[:,0,0][:,None])[:,:,None]
         ...                    for i in range(2)], axis=2)
 
-        >>> tm1 = nv.mdot(a, b[:,0,0].reshape(-1,1))
+        >>> tm1 = mdot(a, b[:,0,0].reshape(-1,1))
         >>> tm1.shape
         (3, 1, 2)
-        >>> nv.allclose(t1, tm1)
+        >>> bool(allclose(t1, tm1))
         True
 
     3 x 3  times 3 x 3 array -> 3 x 3 array
-        >>> tt0 = nv.mdot(a[...,0], b[...,0])
+        >>> tt0 = mdot(a[..., 0], b[..., 0])
         >>> tt0.shape
         (3, 3)
-        >>> nv.allclose(t[...,0], tt0)
+        >>> bool(allclose(t[..., 0], tt0))
         True
 
     3 x 3  times 3 x 1 array -> 3 x 1 array
-        >>> tt0 = nv.mdot(a[...,0], b[:,:1,0])
+        >>> tt0 = mdot(a[..., 0], b[:, :1, 0])
         >>> tt0.shape
         (3, 1)
-        >>> nv.allclose(t[:,:1,0], tt0)
+        >>> bool(allclose(t[:, :1, 0], tt0))
         True
 
     3 x 3  times 3 x 1 x 2 array -> 3 x 1 x 2 array
-        >>> tt0 = nv.mdot(a[..., 0], b[:, :2, 0][:, None])
+        >>> tt0 = mdot(a[..., 0], b[:, :2, 0][:, None])
         >>> tt0.shape
         (3, 1, 2)
-        >>> nv.allclose(t[:,:2,0][:,None], tt0)
+        >>> bool(allclose(t[:, :2, 0][:,None], tt0))
         True
 
     See also
@@ -514,19 +661,28 @@ def mdot(a, b):
     return np.einsum('ij...,jk...->ik...', a, b)
 
 
-def nthroot(x, n):
+@format_docstring_types
+def nthroot(x: ArrayLike, n: int) -> NpArrayLike:
     """
     Returns the n'th root of x to machine precision
 
     Parameters
     ----------
-    x : real scalar or numpy array
-    n : scalar integer
+    x : {array_like}
+        Value.
+    n : int
+        Integral root.
+
+    Returns
+    -------
+    {np_array_like}
 
     Examples
     --------
-    >>> import nvector as nv
-    >>> nv.allclose(nv.nthroot(27.0, 3), 3.0)
+    >>> from nvector.util import allclose, nthroot
+    >>> bool(allclose(nthroot(27.0, 3), 3.0))
+    True
+    >>> bool(allclose(nthroot([27.0, 64.0, 125.0], 3), [3, 4, 5]))
     True
 
     """
@@ -541,34 +697,40 @@ def nthroot(x, n):
     return y
 
 
-def get_ellipsoid(name):
+def get_ellipsoid(name: Union[int, str]) -> Ellipsoid:
     """
     Returns semi-major axis (a), flattening (f) and name of reference ellipsoid as a named tuple.
 
     Parameters
     ----------
-    name : string
-        name of ellipsoid. Valid options are:
-        1) Airy 1858
-        2) Airy Modified
-        3) Australian National
-        4) Bessel 1841
-        5) Clarke 1880
-        6) Everest 1830
-        7) Everest Modified
-        8) Fisher 1960
-        9) Fisher 1968
-        10) Hough 1956
-        11) Hayford / International ellipsoid 1924 / European Datum 1950 / ED50
-        12) Krassovsky 1938
-        13) NWL-9D / WGS 66
-        14) South American 1969
-        15) Soviet Geod. System 1985
-        16) WGS 72
-        17) Clarke 1866 / NAD27
-        18) GRS80 / WGS84 / NAD83
-        19) ETRS89 / EUREF89
-        20) NGO1948
+    name : int or str
+        Name (case insensitive) of ellipsoid or integral enumeration. Valid options are:
+
+            1) Airy 1858
+            2) Airy Modified
+            3) Australian National
+            4) Bessel 1841
+            5) Clarke 1880
+            6) Everest 1830
+            7) Everest Modified
+            8) Fisher 1960
+            9) Fisher 1968
+            10) Hough 1956
+            11) Hayford / International ellipsoid 1924 / European Datum 1950 / ED50
+            12) Krassovsky 1938
+            13) NWL-9D / WGS 66
+            14) South American 1969
+            15) Soviet Geod. System 1985
+            16) WGS 72
+            17) Clarke 1866 / NAD27
+            18) GRS80 / WGS84 / NAD83
+            19) ETRS89 / EUREF89
+            20) NGO1948
+
+    Returns
+    -------
+    Ellipsoid
+        An instance of an :py:class:`nvector.util.Ellipsoid` named tuple.
 
     Notes
     -----
@@ -579,17 +741,17 @@ def get_ellipsoid(name):
 
     Examples
     --------
-    >>> import nvector as nv
-    >>> nv.get_ellipsoid(name='wgs84')
+    >>> from nvector.util import get_ellipsoid
+    >>> get_ellipsoid(name='wgs84')
     Ellipsoid(a=6378137.0, f=0.0033528106647474805, name='GRS80 / WGS84 / NAD83')
-    >>> nv.get_ellipsoid(name='GRS80')
+    >>> get_ellipsoid(name='GRS80')
     Ellipsoid(a=6378137.0, f=0.0033528106647474805, name='GRS80 / WGS84 / NAD83')
-    >>> nv.get_ellipsoid(name='NAD83')
+    >>> get_ellipsoid(name='NAD83')
     Ellipsoid(a=6378137.0, f=0.0033528106647474805, name='GRS80 / WGS84 / NAD83')
-    >>> nv.get_ellipsoid(name=18)
+    >>> get_ellipsoid(name=18)
     Ellipsoid(a=6378137.0, f=0.0033528106647474805, name='GRS80 / WGS84 / NAD83')
 
-    >>> wgs72 = nv.get_ellipsoid(name="WGS 72")
+    >>> wgs72 = get_ellipsoid(name="WGS 72")
     >>> wgs72.a == 6378135.0
     True
     >>> wgs72.f == 0.003352779454167505
@@ -606,27 +768,28 @@ def get_ellipsoid(name):
     return ELLIPSOID[ellipsoid_id]
 
 
-select_ellipsoid = deprecate(get_ellipsoid, old_name='select_ellipsoid', new_name='get_ellipsoid')
-
-
-def unit(vector, norm_zero_vector=1, norm_zero_axis=0):
+@format_docstring_types
+def unit(vector: Array,
+         norm_zero_vector: Union[int, float]=1,
+         norm_zero_axis: int=0
+         ) -> ndarray:
     """
     Convert input vector to a vector of unit length.
 
     Parameters
     ----------
-    vector : 3 x m array
-        m column vectors
-    norm_zero_vector : one or NaN
-        Defines the fill value used for zero length vectors.
-    norm_zero_axis : 0, 1 or 2
+    vector : {array}
+        3 x m array (m column vectors).
+    norm_zero_vector : int | float
+        Defines the fill value used for zero length vectors. Either 1 or NaN.
+    norm_zero_axis : int
         Defines the direction that zero length vectors will point after
         the normalization is done.
 
     Returns
     -------
-    unitvector : 3 x m array
-        normalized unitvector(s) along axis==0.
+    ndarray
+        3 x m array, normalized unit-vector(s) along axis==0.
 
     Notes
     -----
@@ -636,12 +799,14 @@ def unit(vector, norm_zero_vector=1, norm_zero_axis=0):
 
     Examples
     --------
-    >>> import nvector as nv
-    >>> nv.allclose(nv.unit([[1, 0],[1, 0],[1, 0]]), [[ 0.57735027, 1],
-    ...                                               [ 0.57735027, 0],
-    ...                                               [ 0.57735027, 0]])
+    >>> from nvector.util import unit, allclose
+    >>> bool(allclose(unit([[1, 0],[1, 0],[1, 0]]), [[ 0.57735027, 1],
+    ...                                              [ 0.57735027, 0],
+    ...                                              [ 0.57735027, 0]]))
     True
     """
+    if not (norm_zero_vector == 1 or np.isnan(norm_zero_vector)):
+        warnings.warn("The `norm_zero_vector` parameter must be either 1 or NaN")
     # Scale to avoid overflow
     unit_vector = np.atleast_1d(vector) / (np.max(np.abs(vector), axis=0, keepdims=True) + _TINY)
 

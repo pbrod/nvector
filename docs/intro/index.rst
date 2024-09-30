@@ -23,7 +23,7 @@ Nvector has a lot of documentation. A high-level overview of how it's organized
 will help you know where to look for certain things:
 
 * :doc:`Tutorials </tutorials/index>` take you by the hand through a series of
-  typical usecases on how to use it. Start here if you're new to nvector.
+  typical use cases on how to use it. Start here if you're new to nvector.
 
 * :doc:`Topic guides </topics/index>` discuss key topics and concepts at a
   fairly high level and provide useful background information and explanation.

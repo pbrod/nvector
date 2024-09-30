@@ -5,12 +5,15 @@ Created on 9. des. 2015
 """
 from functools import partial
 try:
+    import matplotlib.pyplot as plt
+except (ImportError, OSError, ModuleNotFoundError):
+    plt = None
+try:
     import cartopy.feature as cpf
     import cartopy.crs as ccrs
-except OSError:
+except (ImportError, OSError, ModuleNotFoundError):
     cpf = ccrs = None
 
-import matplotlib.pyplot as plt
 import numpy as np
 from nvector import rad, deg, lat_lon2n_E, unit, n_E2lat_lon
 

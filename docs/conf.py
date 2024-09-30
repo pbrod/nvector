@@ -12,10 +12,10 @@
 import importlib
 import os
 import sys
-import inspect
 import re
 import glob
 from datetime import datetime
+from pathlib import Path
 CURRENT_YEAR = datetime.now().year
 START_YEAR = 2015
 
@@ -32,6 +32,7 @@ copyright = ', '.join((DEV_YEARS, organizations))
 __location__ = os.path.abspath(os.path.dirname(__file__))
 SOURCE_PATH = os.path.join(os.path.dirname(__location__), 'src')
 sys.path.insert(0, SOURCE_PATH)
+sys.path.insert(0, os.fspath(Path(__file__).parents[1] / "src"))  # OK
 
 # -- Run sphinx-apidoc ------------------------------------------------------
 # This hack is necessary since RTD does not issue `sphinx-apidoc` before running
@@ -69,13 +70,16 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.doctest',
               'sphinx.ext.intersphinx',
               'sphinx.ext.todo',
-              'sphinx.ext.autosummary',
+              #'sphinx.ext.autosummary',
               'sphinx.ext.viewcode',
               'sphinx.ext.coverage',
               'sphinx.ext.ifconfig',
               'sphinx.ext.imgmath',
-              'numpydoc',
-              'sphinxcontrib.bibtex'
+              #'numpydoc',
+              'sphinx.ext.napoleon',
+              'sphinxcontrib.bibtex',
+              # 'matplotlib.sphinxext.mathmpl',
+              'matplotlib.sphinxext.plot_directive', # See https://stackoverflow.com/questions/16047271/plot-directive-in-restructured-text
               ]
 
 bibtex_bibfiles = ['appendix/refs1.bib']
@@ -131,11 +135,11 @@ exclude_patterns = ['_build', 'tests', '_*.py']
 # default_role = None
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
-add_function_parentheses = False
+add_function_parentheses = True # pab False
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
-add_module_names = False
+add_module_names = True # pab False  
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
@@ -163,6 +167,11 @@ numpydoc_use_plots = True
 # they have a caption. The numref role is enabled. Obeyed so far only by
 # HTML and LaTeX builders. Default is False.
 numfig = True
+
+# matplotlib.sphinxext.plot_directive options
+plot_include_source = True
+plot_html_show_source_link = False
+
 # -----------------------------------------------------------------------------
 # Autosummary
 # -----------------------------------------------------------------------------
@@ -354,3 +363,20 @@ doctest_default_flags = (0
     | doctest.IGNORE_EXCEPTION_DETAIL
     | doctest.NORMALIZE_WHITESPACE
 )
+
+
+# -- Napoleon
+napoleon_google_docstring = False
+napoleon_numpy_docstring = True
+napoleon_include_init_with_doc = False
+napoleon_include_private_with_doc = False
+napoleon_include_special_with_doc = True
+napoleon_use_admonition_for_examples = False
+napoleon_use_admonition_for_notes = False
+napoleon_use_admonition_for_references = False
+napoleon_use_ivar = False
+napoleon_use_param = True
+napoleon_use_rtype = True
+napoleon_preprocess_types = False
+napoleon_type_aliases = None
+napoleon_attr_annotations = True

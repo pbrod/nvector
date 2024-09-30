@@ -45,8 +45,8 @@ EXAMPLE_1_OBJ_SOLUTION = """Solution:
     >>> import numpy as np
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
-    >>> pointA = wgs84.GeoPoint(latitude=1, longitude=2, z=3, degrees=True)
-    >>> pointB = wgs84.GeoPoint(latitude=4, longitude=5, z=6, degrees=True)
+    >>> pointA = wgs84.GeoPointFromDegrees(latitude=1, longitude=2, z=3)
+    >>> pointB = wgs84.GeoPointFromDegrees(latitude=4, longitude=5, z=6)
 
 Step1:  Find p_AB_N (delta decomposed in N).
     >>> p_AB_N = pointA.delta_to(pointB)
@@ -175,8 +175,7 @@ Step 4: Find R_EB, from R_EN and R_NB:
 Step 5: Decompose the delta BC vector in E:
     >>> p_BC_E = np.dot(R_EB, p_BC_B)
 
-Step 6: Find the position of C, using the functions that goes from one position and a delta,
-    to a new position:
+Step 6: Find the position of C, using the functions that goes from one position and a delta, to a new position:
     >>> n_EC_E, z_EC = nv.n_EA_E_and_p_AB_E2n_EB_E(n_EB_E, p_BC_E, z_EB, **wgs72)
 
 Step 7: Convert position C to latitude and longitude to make it more convenient to see for humans:
@@ -261,7 +260,7 @@ EXAMPLE_4_OBJ_SOLUTION = """
 Solution:
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
-    >>> pointB = wgs84.GeoPoint(latitude=1, longitude=2, z=-3, degrees=True)
+    >>> pointB = wgs84.GeoPointFromDegrees(latitude=1, longitude=2, z=-3)
     >>> p_EB_E = pointB.to_ecef_vector()
 
     >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel().tolist())
@@ -308,11 +307,11 @@ Solution for a sphere:
     >>> import numpy as np
     >>> import nvector as nv
     >>> frame_E = nv.FrameE(a=6371e3, f=0)
-    >>> positionA = frame_E.GeoPoint(latitude=88, longitude=0, degrees=True)
-    >>> positionB = frame_E.GeoPoint(latitude=89, longitude=-170, degrees=True)
+    >>> pointA = frame_E.GeoPointFromDegrees(latitude=88, longitude=0)
+    >>> pointB = frame_E.GeoPointFromDegrees(latitude=89, longitude=-170)
 
-    >>> s_AB, azia, azib = positionA.distance_and_azimuth(positionB)
-    >>> p_AB_E = positionB.to_ecef_vector() - positionA.to_ecef_vector()
+    >>> s_AB, azia, azib = pointA.distance_and_azimuth(pointB)
+    >>> p_AB_E = pointB.to_ecef_vector() - pointA.to_ecef_vector()
     >>> d_AB = p_AB_E.length
 
     >>> msg = 'Ex5: Great circle and Euclidean distance = {}'
@@ -321,7 +320,7 @@ Solution for a sphere:
     'Ex5: Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
 Alternative sphere solution:
-    >>> path = nv.GeoPath(positionA, positionB)
+    >>> path = nv.GeoPath(pointA, pointB)
     >>> s_AB2 = path.track_distance(method='greatcircle')
     >>> d_AB2 = path.track_distance(method='euclidean')
     >>> msg.format(s_AB2 / 1000, d_AB2 / 1000)
@@ -329,8 +328,8 @@ Alternative sphere solution:
 
 Exact solution for the WGS84 ellipsoid:
     >>> wgs84 = nv.FrameE(name='WGS84')
-    >>> point1 = wgs84.GeoPoint(latitude=88, longitude=0, degrees=True)
-    >>> point2 = wgs84.GeoPoint(latitude=89, longitude=-170, degrees=True)
+    >>> point1 = wgs84.GeoPointFromDegrees(latitude=88, longitude=0)
+    >>> point2 = wgs84.GeoPointFromDegrees(latitude=89, longitude=-170)
     >>> s_12, azi1, azi2 = point1.distance_and_azimuth(point2)
 
     >>> p_12_E = point2.to_ecef_vector() - point1.to_ecef_vector()
@@ -390,8 +389,8 @@ EXAMPLE_6_OBJ_SOLUTION = """
 Solution:
     >>> import nvector as nv
     >>> wgs84 = nv.FrameE(name='WGS84')
-    >>> n_EB_E_t0 = wgs84.GeoPoint(89, 0, degrees=True).to_nvector()
-    >>> n_EB_E_t1 = wgs84.GeoPoint(89, 180, degrees=True).to_nvector()
+    >>> n_EB_E_t0 = wgs84.GeoPointFromDegrees(89, 0).to_nvector()
+    >>> n_EB_E_t1 = wgs84.GeoPointFromDegrees(89, 180).to_nvector()
     >>> path = nv.GeoPath(n_EB_E_t0, n_EB_E_t1)
 
     >>> t0 = 10.
@@ -408,7 +407,7 @@ Solution:
 
 Vectorized solution:
     >>> t = np.array([10, 20])
-    >>> nvectors = wgs84.GeoPoint([89, 89], [0, 180], degrees=True).to_nvector()
+    >>> nvectors = wgs84.GeoPointFromDegrees([89, 89], [0, 180]).to_nvector()
     >>> nvectors_i = nvectors.interpolate(ti, t, kind='linear')
     >>> lati, loni, zi = nvectors_i.to_geo_point().latlon_deg
     >>> msg.format(lat_ti, lon_ti)
@@ -465,8 +464,7 @@ Note that the calculation is independent of the depths of the positions.
 EXAMPLE_7_OBJ_SOLUTION = """
 Solution:
     >>> import nvector as nv
-    >>> points = nv.GeoPoint(latitude=[90, 60, 50],
-    ...                      longitude=[0, 10, -20], degrees=True)
+    >>> points = nv.GeoPoint.from_degrees(latitude=[90, 60, 50], longitude=[0, 10, -20])
     >>> nvectors = points.to_nvector()
     >>> n_EM_E = nvectors.mean()
     >>> g_EM_E = n_EM_E.to_geo_point()
@@ -530,7 +528,7 @@ Exact solution:
     >>> import numpy as np
     >>> import nvector as nv
     >>> frame = nv.FrameE(a=6371e3, f=0)
-    >>> pointA = frame.GeoPoint(latitude=80, longitude=-90, degrees=True)
+    >>> pointA = frame.GeoPointFromDegrees(latitude=80, longitude=-90)
     >>> pointB, azimuthb = pointA.displace(distance=1000, azimuth=200, degrees=True)
     >>> lat, lon = pointB.latitude_deg, pointB.longitude_deg
 
@@ -538,7 +536,7 @@ Exact solution:
     >>> msg.format(lat, lon)
     'Ex8, Destination: lat, lon = 79.9915 deg, -90.0177 deg'
 
-    >>> np.allclose(azimuthb, -160.01742926820506)
+    >>> bool(np.allclose(azimuthb, -160.01742926820506))
     True
 
 Greatcircle solution:
@@ -550,7 +548,7 @@ Greatcircle solution:
     >>> msg.format(lat2, lon2)
     'Ex8, Destination: lat, lon = 79.9915 deg, -90.0177 deg'
 
-    >>> np.allclose(azimuthb, -160.0174292682187)
+    >>> bool(np.allclose(azimuthb, -160.0174292682187))
     True
 
 """
@@ -567,10 +565,19 @@ Solution:
     >>> s_AB = 1000.0  # [m]
     >>> r_earth = 6371e3  # [m], mean earth radius
 
+Greatcircle solution:
     >>> distance_rad = s_AB / r_earth
     >>> n_EB_E = nv.n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth)
     >>> lat_EB, lon_EB = nv.n_E2lat_lon(n_EB_E)
     >>> lat, lon = deg(lat_EB), deg(lon_EB)
+    >>> msg = 'Ex8, Destination: lat, lon = {:4.4f} deg, {:4.4f} deg'
+    >>> msg.format(lat[0], lon[0])
+    'Ex8, Destination: lat, lon = 79.9915 deg, -90.0177 deg'
+
+Exact solution:
+    >>> n_EB_E2, azimuthb = nv.geodesic_reckon(n_EA_E, s_AB, azimuth, a=r_earth, f=0)
+    >>> lat_EB2, lon_EB2 = nv.n_E2lat_lon(n_EB_E2)
+    >>> lat2, lon2 = deg(lat_EB2), deg(lon_EB2)
     >>> msg = 'Ex8, Destination: lat, lon = {:4.4f} deg, {:4.4f} deg'
     >>> msg.format(lat[0], lon[0])
     'Ex8, Destination: lat, lon = 79.9915 deg, -90.0177 deg'
@@ -599,10 +606,10 @@ Find the position C where the two great circles intersect.
 EXAMPLE_9_OBJ_SOLUTION = """
 Solution:
     >>> import nvector as nv
-    >>> pointA1 = nv.GeoPoint(10, 20, degrees=True)
-    >>> pointA2 = nv.GeoPoint(30, 40, degrees=True)
-    >>> pointB1 = nv.GeoPoint(50, 60, degrees=True)
-    >>> pointB2 = nv.GeoPoint(70, 80, degrees=True)
+    >>> pointA1 = nv.GeoPoint.from_degrees(10, 20)
+    >>> pointA2 = nv.GeoPoint.from_degrees(30, 40)
+    >>> pointB1 = nv.GeoPoint.from_degrees(50, 60)
+    >>> pointB2 = nv.GeoPoint.from_degrees(70, 80)
     >>> pathA = nv.GeoPath(pointA1, pointA2)
     >>> pathB = nv.GeoPath(pointB1, pointB2)
 
@@ -656,14 +663,14 @@ or alternatively
     'Ex9, Intersection: lat, lon = 40.3186, 55.9019 deg'
 
 Check that PointC is not between A1 and A2 or B1 and B2:
-    >>> np.allclose([nv.on_great_circle_path(path_a, n_EC_E),
-    ...              nv.on_great_circle_path(path_b, n_EC_E)], False)
+    >>> bool(np.allclose([nv.on_great_circle_path(path_a, n_EC_E),
+    ...                   nv.on_great_circle_path(path_b, n_EC_E)], False))
     True
 
 
 Check that PointC is on the great circle going through path A and path B:
-    >>> np.allclose([nv.on_great_circle(path_a, n_EC_E),
-    ...              nv.on_great_circle(path_b, n_EC_E)], True)
+    >>> bool(np.allclose([nv.on_great_circle(path_a, n_EC_E),
+    ...                   nv.on_great_circle(path_b, n_EC_E)], True))
     True
 
 """
@@ -698,9 +705,9 @@ Solution:
     >>> import numpy as np
     >>> import nvector as nv
     >>> frame = nv.FrameE(a=6371e3, f=0)
-    >>> pointA1 = frame.GeoPoint(0, 0, degrees=True)
-    >>> pointA2 = frame.GeoPoint(10, 0, degrees=True)
-    >>> pointB = frame.GeoPoint(1, 0.1, degrees=True)
+    >>> pointA1 = frame.GeoPoint(0, 0)
+    >>> pointA2 = frame.GeoPointFromDegrees(10, 0)
+    >>> pointB = frame.GeoPointFromDegrees(1, 0.1)
     >>> pathA = nv.GeoPath(pointA1, pointA2)
 
     >>> s_xt = pathA.cross_track_distance(pointB, method='greatcircle')
@@ -711,7 +718,7 @@ Solution:
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 
     >>> pointC = pathA.closest_point_on_great_circle(pointB)
-    >>> np.allclose(pathA.on_path(pointC), True)
+    >>> bool(np.allclose(pathA.on_path(pointC), True))
     True
 
 """
@@ -736,13 +743,13 @@ Solution:
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 
     >>> n_EC_E = nv.closest_point_on_great_circle(path, n_EB_E)
-    >>> np.allclose(nv.on_great_circle_path(path, n_EC_E, radius), True)
+    >>> bool(np.allclose(nv.on_great_circle_path(path, n_EC_E, radius), True))
     True
 
 Alternative solution 2:
     >>> s_xt2 = nv.great_circle_distance(n_EB_E, n_EC_E, radius)
     >>> d_xt2 = nv.euclidean_distance(n_EB_E, n_EC_E, radius)
-    >>> np.allclose(s_xt, s_xt2), np.allclose(d_xt, d_xt2)
+    >>> bool(np.allclose(s_xt, s_xt2)), bool(np.allclose(d_xt, d_xt2))
     (True, True)
 
 Alternative solution 3:
@@ -750,7 +757,7 @@ Alternative solution 3:
     >>> sin_theta = -np.dot(c_E.T, n_EB_E).ravel()
     >>> s_xt3 = np.arcsin(sin_theta) * radius
     >>> d_xt3 = sin_theta * radius
-    >>> np.allclose(s_xt, s_xt3), np.allclose(d_xt, d_xt3)
+    >>> bool(np.allclose(s_xt, s_xt3)), bool(np.allclose(d_xt, d_xt3))
     (True, True)
 
 """
@@ -821,4 +828,5 @@ class _DocTestFunctional(object):
 if __name__ == '__main__':
     from nvector._common import test_docstrings
     # print(GETTING_STARTED)
+    # print(GETTING_STARTED_FUNCTIONAL)
     test_docstrings(__file__)
