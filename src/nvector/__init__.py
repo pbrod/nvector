@@ -5,7 +5,7 @@ from .core import *
 from .objects import *
 from ._common import use_docstring
 
-__version__ = "0.7.7"
+__version__ = "1.0.0"
 
 _PACKAGE_NAME = __name__
 

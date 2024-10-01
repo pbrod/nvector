@@ -5,7 +5,7 @@
 groups = ["default", "all", "build", "plot", "sphinx", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:caf714e3e6ad9e384f2b7f5c1deff4957a3eaf3efa52d8e1630bb1a535110d47"
+content_hash = "sha256:44ce6be113cde6d5314bb13bc4959d11fcb6b5c6c73179192a66174b6014cd58"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -91,7 +91,7 @@ name = "cartopy"
 version = "0.23.0"
 requires_python = ">=3.9"
 summary = "A Python library for cartographic visualizations with Matplotlib"
-groups = ["all", "plot"]
+groups = ["all", "plot", "test"]
 dependencies = [
     "matplotlib>=3.5",
     "numpy>=1.21",
@@ -125,7 +125,7 @@ name = "certifi"
 version = "2024.8.30"
 requires_python = ">=3.6"
 summary = "Python package for providing Mozilla's CA Bundle."
-groups = ["all", "plot", "sphinx"]
+groups = ["all", "plot", "sphinx", "test"]
 files = [
     {file = "certifi-2024.8.30-py3-none-any.whl", hash = "sha256:922820b53db7a7257ffbda3f597266d435245903d80737e34f8a45ff3e3230d8"},
     {file = "certifi-2024.8.30.tar.gz", hash = "sha256:bec941d2aa8195e248a60b31ff9f0558284cf01a52591ceda73ea9afffd69fd9"},
@@ -330,7 +330,7 @@ name = "contourpy"
 version = "1.3.0"
 requires_python = ">=3.9"
 summary = "Python library for calculating contours of 2D quadrilateral grids"
-groups = ["all", "plot"]
+groups = ["all", "plot", "test"]
 dependencies = [
     "numpy>=1.23",
 ]
@@ -554,7 +554,7 @@ name = "cycler"
 version = "0.12.1"
 requires_python = ">=3.8"
 summary = "Composable style cycles"
-groups = ["all", "plot"]
+groups = ["all", "plot", "test"]
 files = [
     {file = "cycler-0.12.1-py3-none-any.whl", hash = "sha256:85cef7cff222d8644161529808465972e51340599459b8ac3ccbac5a854e0d30"},
     {file = "cycler-0.12.1.tar.gz", hash = "sha256:88bb128f02ba341da8ef447245a9e138fae777f6a23943da4540077d3601eb1c"},
@@ -669,7 +669,7 @@ name = "fonttools"
 version = "4.54.1"
 requires_python = ">=3.8"
 summary = "Tools to manipulate font files"
-groups = ["all", "plot"]
+groups = ["all", "plot", "test"]
 files = [
     {file = "fonttools-4.54.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:7ed7ee041ff7b34cc62f07545e55e1468808691dddfd315d51dd82a6b37ddef2"},
     {file = "fonttools-4.54.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:41bb0b250c8132b2fcac148e2e9198e62ff06f3cc472065dff839327945c5882"},
@@ -772,7 +772,7 @@ name = "importlib-resources"
 version = "6.4.5"
 requires_python = ">=3.8"
 summary = "Read resources from Python packages"
-groups = ["all", "plot"]
+groups = ["all", "plot", "test"]
 marker = "python_version < \"3.10\""
 dependencies = [
     "zipp>=3.1.0; python_version < \"3.10\"",
@@ -926,7 +926,7 @@ name = "kiwisolver"
 version = "1.4.7"
 requires_python = ">=3.8"
 summary = "A fast implementation of the Cassowary constraint solver"
-groups = ["all", "plot"]
+groups = ["all", "plot", "test"]
 files = [
     {file = "kiwisolver-1.4.7-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:8a9c83f75223d5e48b0bc9cb1bf2776cf01563e00ade8775ffe13b0b6e1af3a6"},
     {file = "kiwisolver-1.4.7-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:58370b1ffbd35407444d57057b57da5d6549d2d854fa30249771775c63b5fe17"},
@@ -1089,7 +1089,7 @@ name = "matplotlib"
 version = "3.9.2"
 requires_python = ">=3.9"
 summary = "Python plotting package"
-groups = ["all", "plot"]
+groups = ["all", "plot", "test"]
 dependencies = [
     "contourpy>=1.0.1",
     "cycler>=0.10",
@@ -1195,7 +1195,7 @@ name = "numpy"
 version = "2.0.2"
 requires_python = ">=3.9"
 summary = "Fundamental package for array computing in Python"
-groups = ["default", "all", "plot"]
+groups = ["default", "all", "plot", "test"]
 files = [
     {file = "numpy-2.0.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:51129a29dbe56f9ca83438b706e2e69a39892b5eda6cedcb6b0c9fdc9b0d3ece"},
     {file = "numpy-2.0.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:f15975dfec0cf2239224d80e32c3170b1d168335eaedee69da84fbe9f1f9cd04"},
@@ -1295,7 +1295,7 @@ name = "pillow"
 version = "10.4.0"
 requires_python = ">=3.8"
 summary = "Python Imaging Library (Fork)"
-groups = ["all", "plot"]
+groups = ["all", "plot", "test"]
 files = [
     {file = "pillow-10.4.0-cp310-cp310-macosx_10_10_x86_64.whl", hash = "sha256:4d9667937cfa347525b319ae34375c37b9ee6b525440f3ef48542fcf66f2731e"},
     {file = "pillow-10.4.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:543f3dc61c18dafb755773efc89aae60d06b6596a63914107f75459cf984164d"},
@@ -1515,7 +1515,7 @@ name = "pyparsing"
 version = "3.1.4"
 requires_python = ">=3.6.8"
 summary = "pyparsing module - Classes and methods to define and execute parsing grammars"
-groups = ["all", "plot"]
+groups = ["all", "plot", "test"]
 files = [
     {file = "pyparsing-3.1.4-py3-none-any.whl", hash = "sha256:a6a7ee4235a3f944aa1fa2249307708f893fe5717dc603503c6c7969c070fb7c"},
     {file = "pyparsing-3.1.4.tar.gz", hash = "sha256:f86ec8d1a83f11977c9a6ea7598e8c27fc5cddfa5b07ea2241edbbde1d7bc032"},
@@ -1526,7 +1526,7 @@ name = "pyproj"
 version = "3.6.1"
 requires_python = ">=3.9"
 summary = "Python interface to PROJ (cartographic projections and coordinate transformations library)"
-groups = ["all", "plot"]
+groups = ["all", "plot", "test"]
 dependencies = [
     "certifi",
 ]
@@ -1565,7 +1565,7 @@ name = "pyshp"
 version = "2.3.1"
 requires_python = ">=2.7"
 summary = "Pure Python read/write support for ESRI Shapefile format"
-groups = ["all", "plot"]
+groups = ["all", "plot", "test"]
 files = [
     {file = "pyshp-2.3.1-py2.py3-none-any.whl", hash = "sha256:67024c0ccdc352ba5db777c4e968483782dfa78f8e200672a90d2d30fd8b7b49"},
     {file = "pyshp-2.3.1.tar.gz", hash = "sha256:4caec82fd8dd096feba8217858068bacb2a3b5950f43c048c6dc32a3489d5af1"},
@@ -1633,11 +1633,26 @@ files = [
 ]
 
 [[package]]
+name = "pytest-ruff"
+version = "0.4.1"
+requires_python = "<4.0,>=3.8"
+summary = "pytest plugin to check ruff requirements."
+groups = ["all", "test"]
+dependencies = [
+    "pytest>=5",
+    "ruff>=0.0.242",
+]
+files = [
+    {file = "pytest_ruff-0.4.1-py3-none-any.whl", hash = "sha256:69acd5b2ba68d65998c730b5b4d656788193190e45f61a53aa66ef8b390634a4"},
+    {file = "pytest_ruff-0.4.1.tar.gz", hash = "sha256:2c9a30f15f384c229c881b52ec86cfaf1e79d39530dd7dd5f2d6aebe278f7eb7"},
+]
+
+[[package]]
 name = "python-dateutil"
 version = "2.9.0.post0"
 requires_python = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 summary = "Extensions to the standard Python datetime module"
-groups = ["all", "build", "plot"]
+groups = ["all", "build", "plot", "test"]
 dependencies = [
     "six>=1.5",
 ]
@@ -1841,6 +1856,33 @@ files = [
 ]
 
 [[package]]
+name = "ruff"
+version = "0.6.8"
+requires_python = ">=3.7"
+summary = "An extremely fast Python linter and code formatter, written in Rust."
+groups = ["all", "test"]
+files = [
+    {file = "ruff-0.6.8-py3-none-linux_armv6l.whl", hash = "sha256:77944bca110ff0a43b768f05a529fecd0706aac7bcce36d7f1eeb4cbfca5f0f2"},
+    {file = "ruff-0.6.8-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:27b87e1801e786cd6ede4ada3faa5e254ce774de835e6723fd94551464c56b8c"},
+    {file = "ruff-0.6.8-py3-none-macosx_11_0_arm64.whl", hash = "sha256:cd48f945da2a6334f1793d7f701725a76ba93bf3d73c36f6b21fb04d5338dcf5"},
+    {file = "ruff-0.6.8-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:677e03c00f37c66cea033274295a983c7c546edea5043d0c798833adf4cf4c6f"},
+    {file = "ruff-0.6.8-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:9f1476236b3eacfacfc0f66aa9e6cd39f2a624cb73ea99189556015f27c0bdeb"},
+    {file = "ruff-0.6.8-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:6f5a2f17c7d32991169195d52a04c95b256378bbf0de8cb98478351eb70d526f"},
+    {file = "ruff-0.6.8-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl", hash = "sha256:5fd0d4b7b1457c49e435ee1e437900ced9b35cb8dc5178921dfb7d98d65a08d0"},
+    {file = "ruff-0.6.8-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:f8034b19b993e9601f2ddf2c517451e17a6ab5cdb1c13fdff50c1442a7171d87"},
+    {file = "ruff-0.6.8-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:6cfb227b932ba8ef6e56c9f875d987973cd5e35bc5d05f5abf045af78ad8e098"},
+    {file = "ruff-0.6.8-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6ef0411eccfc3909269fed47c61ffebdcb84a04504bafa6b6df9b85c27e813b0"},
+    {file = "ruff-0.6.8-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:007dee844738c3d2e6c24ab5bc7d43c99ba3e1943bd2d95d598582e9c1b27750"},
+    {file = "ruff-0.6.8-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:ce60058d3cdd8490e5e5471ef086b3f1e90ab872b548814e35930e21d848c9ce"},
+    {file = "ruff-0.6.8-py3-none-musllinux_1_2_i686.whl", hash = "sha256:1085c455d1b3fdb8021ad534379c60353b81ba079712bce7a900e834859182fa"},
+    {file = "ruff-0.6.8-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:70edf6a93b19481affd287d696d9e311388d808671bc209fb8907b46a8c3af44"},
+    {file = "ruff-0.6.8-py3-none-win32.whl", hash = "sha256:792213f7be25316f9b46b854df80a77e0da87ec66691e8f012f887b4a671ab5a"},
+    {file = "ruff-0.6.8-py3-none-win_amd64.whl", hash = "sha256:ec0517dc0f37cad14a5319ba7bba6e7e339d03fbf967a6d69b0907d61be7a263"},
+    {file = "ruff-0.6.8-py3-none-win_arm64.whl", hash = "sha256:8d3bb2e3fbb9875172119021a13eed38849e762499e3cfde9588e4b4d70968dc"},
+    {file = "ruff-0.6.8.tar.gz", hash = "sha256:a5bf44b1aa0adaf6d9d20f86162b34f7c593bfedabc51239953e446aefc8ce18"},
+]
+
+[[package]]
 name = "scipy"
 version = "1.13.1"
 requires_python = ">=3.9"
@@ -1893,7 +1935,7 @@ name = "shapely"
 version = "2.0.6"
 requires_python = ">=3.7"
 summary = "Manipulation and analysis of geometric objects"
-groups = ["all", "plot"]
+groups = ["all", "plot", "test"]
 dependencies = [
     "numpy<3,>=1.14",
 ]
@@ -1936,7 +1978,7 @@ name = "six"
 version = "1.16.0"
 requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 summary = "Python 2 and 3 compatibility utilities"
-groups = ["all", "build", "plot", "sphinx"]
+groups = ["all", "build", "plot", "sphinx", "test"]
 files = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
@@ -2271,7 +2313,7 @@ name = "zipp"
 version = "3.20.2"
 requires_python = ">=3.8"
 summary = "Backport of pathlib-compatible object wrapper for zip files"
-groups = ["all", "build", "plot", "sphinx"]
+groups = ["all", "build", "plot", "sphinx", "test"]
 marker = "python_version < \"3.10\""
 files = [
     {file = "zipp-3.20.2-py3-none-any.whl", hash = "sha256:a817ac80d6cf4b23bf7f2828b7cabf326f15a001bea8b1f9b49631780ba28350"},
