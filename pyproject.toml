@@ -84,7 +84,7 @@ sphinx = [
     "sphinxcontrib-napoleon",
     "sphinxcontrib-bibtex"
 ]
-all = ["nvector[build,test,sphinx]"]
+all = ["nvector[build,plot,test,sphinx]"]
 
 [tool.pytest.ini_options]
 addopts = "-rsxXf --doctest-modules"
