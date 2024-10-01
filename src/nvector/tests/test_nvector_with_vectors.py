@@ -1,8 +1,8 @@
-'''
+"""
 Created on 10. jun. 2021
 
 @author: pab
-'''
+"""
 from functools import partial
 import numpy as np
 from numpy.testing import assert_allclose as _assert_allclose  # @UnresolvedImport
@@ -234,5 +234,5 @@ def test_course_over_ground():
     assert np.isnan(cog_c)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

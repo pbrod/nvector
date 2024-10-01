@@ -1,6 +1,6 @@
-'''
+"""
 Unittests for the rotation module
-'''
+"""
 from functools import partial
 import pytest
 import numpy as np

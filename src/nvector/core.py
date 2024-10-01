@@ -8,9 +8,10 @@ This file is part of NavLab and is available from www.navlab.net/nvector
 from __future__ import annotations
 
 import warnings
+from typing import Any, Union, Optional
 
 import numpy as np
-from numpy import arctan2, sin, cos, cross, dot, sqrt, ndarray, float64
+from numpy import arctan2, sin, cos, cross, dot, sqrt, ndarray
 from numpy.linalg import norm
 from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
@@ -20,34 +21,34 @@ from nvector import _examples, _license
 from nvector._common import test_docstrings, use_docstring, _make_summary
 from nvector.rotation import E_rotation, n_E2R_EN, n_E2lat_lon, change_axes_to_E
 from nvector.util import mdot, nthroot, unit, eccentricity2, polar_radius
-from nvector._typing import Any, Union, Optional, format_docstring_types, Array, ArrayLike, NpArrayLike
 
-__all__ = ['closest_point_on_great_circle',
-           'cross_track_distance',
-           'course_over_ground',
-           'euclidean_distance',
-           'geodesic_distance',
-           'geodesic_reckon',
-           'great_circle_distance',
-           'great_circle_distance_rad',
-           'great_circle_normal',
-           'interp_nvectors',
-           'interpolate',
-           'interp_nvectors',
-           'intersect',
-           'mean_horizontal_position',
-           'lat_lon2n_E',
-           'n_E2lat_lon',
-           'n_EA_E_and_n_EB_E2p_AB_E',
-           'n_EA_E_and_n_EB_E2p_AB_N',
-           'n_EA_E_and_p_AB_E2n_EB_E',
-           'n_EA_E_and_p_AB_N2n_EB_E',
-           'n_EB_E2p_EB_E',
-           'p_EB_E2n_EB_E',
-           'n_EA_E_distance_and_azimuth2n_EB_E',
-           'n_EA_E_and_n_EB_E2azimuth',
-           'on_great_circle',
-           'on_great_circle_path',
+from nvector._typing import format_docstring_types, Array, ArrayLike, NpArrayLike
+
+__all__ = ["closest_point_on_great_circle",
+           "cross_track_distance",
+           "course_over_ground",
+           "euclidean_distance",
+           "geodesic_distance",
+           "geodesic_reckon",
+           "great_circle_distance",
+           "great_circle_distance_rad",
+           "great_circle_normal",
+           "interp_nvectors",
+           "interpolate",
+           "intersect",
+           "mean_horizontal_position",
+           "lat_lon2n_E",
+           "n_E2lat_lon",
+           "n_EA_E_and_n_EB_E2p_AB_E",
+           "n_EA_E_and_n_EB_E2p_AB_N",
+           "n_EA_E_and_p_AB_E2n_EB_E",
+           "n_EA_E_and_p_AB_N2n_EB_E",
+           "n_EB_E2p_EB_E",
+           "p_EB_E2n_EB_E",
+           "n_EA_E_distance_and_azimuth2n_EB_E",
+           "n_EA_E_and_n_EB_E2azimuth",
+           "on_great_circle",
+           "on_great_circle_path",
            ]
 
 
@@ -103,12 +104,12 @@ def lat_lon2n_E(latitude: ArrayLike,
     """
     if R_Ee is None:
         R_Ee = E_rotation()
-    # Equation (3) from Gade (2010):  n-vector decomposed in E with axes='e'
+    # Equation (3) from Gade (2010):  n-vector decomposed in E with axes="e"
     n_e = np.vstack((sin(latitude) * np.ones_like(longitude),
                      cos(latitude) * sin(longitude),
                      -cos(latitude) * cos(longitude)))
     # n_E = dot(R_Ee.T, n_e)
-    n_E = np.matmul(R_Ee.T, n_e)  # n-vector decomposed in E with axes 'E'
+    n_E = np.matmul(R_Ee.T, n_e)  # n-vector decomposed in E with axes "E"
     return n_E
 
 
@@ -127,11 +128,13 @@ def n_EB_E2p_EB_E(n_EB_E: ArrayLike,
     n_EB_E: {array}
         3 x m array of n-vector(s) [no unit] of position B, decomposed in E.
     depth : {array_like}
-        Real scalar or 1 x n array of depth(s) [m] of system B, relative to the ellipsoid (depth = -height).
+        Scalar or 1 x n array of depth(s) [m] of system B, relative to the ellipsoid
+        (depth = -height).
     a : float
         Semi-major axis of the Earth ellipsoid given in [m], default WGS-84 ellipsoid.
     f : float.
-        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical Earth with radius a is used instead
+        Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical Earth with
+        radius a is used instead
     R_Ee : {array} (default E_rotation())
         Optional 3 x 3 rotation matrix defining the axes of the coordinate frame E.
 
@@ -218,7 +221,6 @@ def _equation23(a: float, f: float, p_EB_E: ndarray) -> tuple[ndarray, ndarray, 
     return x_scale, yz_scale, -height
 
 
-
 @use_docstring(_examples.get_examples_no_header([3], oo_solution=False))
 def p_EB_E2n_EB_E(p_EB_E: Array,
                   a: float=6378137.,
@@ -294,7 +296,6 @@ def p_EB_E2n_EB_E(p_EB_E: Array,
     return n_EB_E, depth
 
 
-
 @use_docstring(_examples.get_examples_no_header([1], False))
 def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E: Array,
                              n_EB_E: Array,
@@ -325,7 +326,8 @@ def n_EA_E_and_n_EB_E2p_AB_E(n_EA_E: Array,
         Flattening [no unit] of the Earth ellipsoid. If f==0 then spherical
         Earth with radius `a` is used instead of WGS-84, default WGS-84 ellipsoid.
     R_Ee : {array}
-        Optional 3 x 3 rotation matrix defining the axes of the coordinate frame E, default E_rotation().
+        Optional 3 x 3 rotation matrix defining the axes of the coordinate frame E,
+        default E_rotation().
 
     Returns
     -------
@@ -609,8 +611,8 @@ def _interp_vectors(t_i: ArrayLike,
         3 x n array of n-vectors [no unit] decomposed in E.
     kind: str or int
         Specifies the kind of interpolation as a string
-        ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic'
-        where 'zero', 'slinear', 'quadratic' and 'cubic' refer to a spline
+        ("linear", "nearest", "zero", "slinear", "quadratic", "cubic"
+        where "zero", "slinear", "quadratic" and "cubic" refer to a spline
         interpolation of zeroth, first, second or third order) or as an
         integer specifying the order of the spline interpolator to use.
     window_length : int
@@ -620,16 +622,16 @@ def _interp_vectors(t_i: ArrayLike,
         The order of the polynomial used to fit the samples.
         polyorder must be less than window_length.
     mode: str
-        Accepted values are 'mirror', 'constant', 'nearest', 'wrap' or 'interp'.
+        Accepted values are "mirror", "constant", "nearest", "wrap" or "interp".
         Determines the type of extension to use for the padded signal to
-        which the filter is applied.  When mode is 'constant', the padding
+        which the filter is applied.  When mode is "constant", the padding
         value is given by cval.
-        When the 'interp' mode is selected (the default), no extension
+        When the "interp" mode is selected (the default), no extension
         is used.  Instead, a degree polyorder polynomial is fit to the
         last window_length values of the edges, and this polynomial is
         used to evaluate the last window_length // 2 output values.
     cval: int or float
-        Value to fill past the edges of the input if mode is 'constant'.
+        Value to fill past the edges of the input if mode is "constant".
 
     Returns
     -------
@@ -651,10 +653,10 @@ def _interp_vectors(t_i: ArrayLike,
 def interp_nvectors(t_i: ArrayLike,
                     t: Array,
                     nvectors: Array,
-                    kind: Union[int, str]='linear',
+                    kind: Union[int, str]="linear",
                     window_length: int=0,
                     polyorder: int=2,
-                    mode: str='interp',
+                    mode: str="interp",
                     cval: Union[int, float] = 0.0
                     ) -> ndarray:
     """
@@ -670,11 +672,11 @@ def interp_nvectors(t_i: ArrayLike,
         3 x n array of n-vectors [no unit] decomposed in E.
     kind: str or int
         Specifies the kind of interpolation as a string
-        ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic'
-        where 'zero', 'slinear', 'quadratic' and 'cubic' refer to a spline
+        ("linear", "nearest", "zero", "slinear", "quadratic", "cubic"
+        where "zero", "slinear", "quadratic" and "cubic" refer to a spline
         interpolation of zeroth, first, second or third order) or as an
         integer specifying the order of the spline interpolator to use.
-        Default is 'linear'.
+        Default is "linear".
     window_length : int
         The length of the Savitzky-Golay filter window (i.e., the number of coefficients).
         Default window_length=0, i.e. no smoothing. Must be positive odd integer or zero.
@@ -682,17 +684,17 @@ def interp_nvectors(t_i: ArrayLike,
         The order of the polynomial used to fit the samples.
         polyorder must be less than window_length. Default 2.
     mode: str
-        Accepted values are 'mirror', 'constant', 'nearest', 'wrap' or 'interp'.
+        Accepted values are "mirror", "constant", "nearest", "wrap" or "interp".
         Determines the type of extension to use for the padded signal to
-        which the filter is applied.  When mode is 'constant', the padding
+        which the filter is applied.  When mode is "constant", the padding
         value is given by cval.
-        When the 'interp' mode is selected (the default), no extension
+        When the "interp" mode is selected (the default), no extension
         is used.  Instead, a degree polyorder polynomial is fit to the
         last window_length values of the edges, and this polynomial is
         used to evaluate the last window_length // 2 output values.
-        Default 'interp'.
+        Default "interp".
     cval: int or float
-        Value to fill past the edges of the input if mode is 'constant'.
+        Value to fill past the edges of the input if mode is "constant".
         Default is 0.0.
 
     Returns
@@ -713,9 +715,9 @@ def interp_nvectors(t_i: ArrayLike,
     >>> t = np.arange(len(lat))
     >>> t_i = np.linspace(0, t[-1], 100)
     >>> nvectors = nv.lat_lon2n_E(lat, lon)
-    >>> nvectors_i = nv.interp_nvectors(t_i, t, nvectors, kind='cubic')
+    >>> nvectors_i = nv.interp_nvectors(t_i, t, nvectors, kind="cubic")
     >>> lati, loni = nv.deg(*nv.n_E2lat_lon(nvectors_i))
-    >>> h = plt.plot(nv.deg(lon), nv.deg(lat), 'o', loni, lati, '-')
+    >>> h = plt.plot(nv.deg(lon), nv.deg(lat), "o", loni, lati, "-")
     >>> plt.show()  # doctest: +SKIP
     >>> plt.close()
 
@@ -727,9 +729,9 @@ def interp_nvectors(t_i: ArrayLike,
     >>> t = np.arange(len(lat))
     >>> t_i = np.linspace(0, t[-1], 100)
     >>> nvectors = nv.lat_lon2n_E(lat, lon)
-    >>> nvectors_i = nv.interp_nvectors(t_i, t, nvectors, 'cubic', 31)
+    >>> nvectors_i = nv.interp_nvectors(t_i, t, nvectors, "cubic", 31)
     >>> [lati, loni] = nv.n_E2lat_lon(nvectors_i)
-    >>> h = plt.plot(nv.deg(lon), nv.deg(lat), 'o', nv.deg(loni), nv.deg(lati), '-')
+    >>> h = plt.plot(nv.deg(lon), nv.deg(lat), "o", nv.deg(loni), nv.deg(lati), "-")
     >>> plt.show()  # doctest: +SKIP
     >>> plt.close()
 
@@ -814,8 +816,8 @@ def intersect(path_a: tuple[Array, Array],
     # product between n_EC_E_tmp and n_EA1_E:
     n_EC_E = np.sign(dot(n_EC_E_tmp.T, n_EA1_E)) * n_EC_E_tmp
     if np.any(np.isnan(n_EC_E)):
-        warnings.warn('Paths are Equal. Intersection point undefined. '
-                      'NaN returned.', stacklevel=2)
+        warnings.warn("Paths are Equal. Intersection point undefined. "
+                      "NaN returned.", stacklevel=2)
     return n_EC_E
 
 
@@ -825,8 +827,9 @@ def _check_window_length(window_length: int, data: ndarray) -> int:
     window_length = window_length + (window_length + 1) % 2  # make sure it is an odd integer
     if window_length >= n:
         new_length = max(n - 1 - n % 2, 1)
-        warnings.warn('Window length must be smaller than {}, but got {}!'
-                      ' Truncating to {}!'.format(n, window_length, new_length))
+        warnings.warn("Window length must be smaller than {}, but got {}!"
+                      " Truncating to {}!".format(n, window_length, new_length),
+                      stacklevel=2)
         window_length = new_length
     return window_length
 
@@ -848,8 +851,8 @@ def course_over_ground(nvectors: Array,
     a : float
         Semi-major axis of the Earth ellipsoid given in [m], default WGS-84 ellipsoid.
     f : float
-        Flattening [no unit] of the Earth ellipsoid, default WGS-84 ellipsoid. If f==0 then spherical
-        Earth with radius `a` is used instead of WGS-84.
+        Flattening [no unit] of the Earth ellipsoid, default WGS-84 ellipsoid.
+        If f==0 then spherical earth with radius `a` is used instead of WGS-84.
     R_Ee : {array}
         Optional 3 x 3 rotation matrix defining the axes of the coordinate frame E,
         default E_rotation().
@@ -865,20 +868,20 @@ def course_over_ground(nvectors: Array,
                 The order of the polynomial used to fit the samples.
                 The value must be less than window_length. Default is 2.
             mode: str
-                Valid options are: 'mirror', 'constant', 'nearest', 'wrap' or 'interp'.
+                Valid options are: "mirror", "constant", "nearest", "wrap" or "interp".
                 Determines the type of extension to use for the padded signal to
-                which the filter is applied. Accepted values are 'mirror', 'constant',
-                'nearest', 'wrap', or 'interp' (default = 'nearest').
-                When mode is 'constant', the padding value is given by cval.
-                When the 'nearest' mode is selected (the default)
+                which the filter is applied. Accepted values are "mirror", "constant",
+                "nearest", "wrap", or "interp" (default = "nearest").
+                When mode is "constant", the padding value is given by cval.
+                When the "nearest" mode is selected (the default)
                 the extension contains the nearest input value.
-                When the 'interp' mode is selected, no extension
+                When the "interp" mode is selected, no extension
                 is used.  Instead, a degree polyorder polynomial is fit to the
                 last window_length values of the edges, and this polynomial is
                 used to evaluate the last window_length // 2 output values.
-                Default 'nearest'.
+                Default "nearest".
             cval: int or float
-                Value to fill past the edges of the input if mode is 'constant'
+                Value to fill past the edges of the input if mode is "constant"
                 (default is 0.0).
 
     Returns
@@ -907,17 +910,17 @@ def course_over_ground(nvectors: Array,
     >>> nvec = nv.lat_lon2n_E(lats, lons)
     >>> COG_rad = nv.course_over_ground(nvec)
     >>> dx, dy = np.sin(COG_rad[0]), np.cos(COG_rad[0])
-    >>> COG = nv.deg(COG_rad)
+    >>> COG = nv.deg(COG_rad[0])
     >>> p_AB_N = nv.n_EA_E_and_n_EB_E2p_AB_N(nvec[:, :1], nvec[:, 1:]).ravel()
     >>> ax = plt.figure().gca()
-    >>> _ = ax.plot(0, 0, 'bo', label='A')
-    >>> _ = ax.arrow(0,0, dx*300, dy*300, head_width=20, label='COG')
-    >>> _ = ax.plot(p_AB_N[1], p_AB_N[0], 'go', label='B')
-    >>> _ = ax.set_title('COG=%2.1f degrees' % COG)
-    >>> _ = ax.set_xlabel('East [m]')
-    >>> _ = ax.set_ylabel('North [m]')
+    >>> _ = ax.plot(0, 0, "bo", label="A")
+    >>> _ = ax.arrow(0,0, dx*300, dy*300, head_width=20, label="COG")
+    >>> _ = ax.plot(p_AB_N[1], p_AB_N[0], "go", label="B")
+    >>> _ = ax.set_title("COG=%2.1f degrees" % COG)
+    >>> _ = ax.set_xlabel("East [m]")
+    >>> _ = ax.set_ylabel("North [m]")
     >>> _ = ax.set_xlim(-500, 200)
-    >>> _ = ax.set_aspect('equal', adjustable='box')
+    >>> _ = ax.set_aspect("equal", adjustable="box")
     >>> _ = ax.legend()
     >>> plt.show()  # doctest: +SKIP
     >>> plt.close()
@@ -929,15 +932,15 @@ def course_over_ground(nvectors: Array,
     nvectors = np.atleast_2d(nvectors)
     if nvectors.shape[1] < 2:
         return np.nan
-    window_length = options.pop('window_length', 0)
+    window_length = options.pop("window_length", 0)
     if window_length > 0:
         window_length = _check_window_length(window_length, nvectors[0])
-        polyorder = options.pop('polyorder', 2)
-        mode = options.pop('mode', 'nearest')
-        if mode not in {'nearest', 'interp'}:
-            warnings.warn('Using {} is not a recommended mode for filtering headings data!'
-                          ' Use "interp" or "nearest" mode instead!'.format(mode), stacklevel=2)
-        cval = options.pop('cval', 0.0)
+        polyorder = options.pop("polyorder", 2)
+        mode = options.pop("mode", "nearest")
+        if mode not in {"nearest", "interp"}:
+            warnings.warn("Using {} is not a recommended mode for filtering headings data!"
+                          " Use 'interp' or 'nearest' mode instead!".format(mode), stacklevel=2)
+        cval = options.pop("cval", 0.0)
         normal = savgol_filter(nvectors, window_length, polyorder, axis=1, mode=mode, cval=cval)
     else:
         normal = nvectors
@@ -988,7 +991,7 @@ def _great_circle_cross_track_distance(sin_theta: NpArrayLike,
 @use_docstring(_examples.get_examples_no_header([10], oo_solution=False))
 def cross_track_distance(path: tuple[Array, Array],
                          n_EB_E: Array,
-                         method: str='greatcircle',
+                         method: str="greatcircle",
                          radius: ArrayLike=6371009.0
                          ) -> ndarray:
     """
@@ -997,11 +1000,12 @@ def cross_track_distance(path: tuple[Array, Array],
     Parameters
     ----------
     path : tuple[{array}, {array}]
-        2-tuple of n-vectors of shape 3 x k and 3 x m, respectively, defining path A, decomposed in E.
+        2-tuple of n-vectors of shape 3 x k and 3 x m, respectively, defining path A,
+        decomposed in E.
     n_EB_E : {array}
         3 x n array n-vector(s) of position B to measure the cross track distance to.
     method : str
-        Defining distance calculated. Options are: 'greatcircle' or 'euclidean'
+        Defining distance calculated. Options are: "greatcircle" or "euclidean"
     radius: {array_like}
         Radius of sphere [m], default 6371009.0. (len(radius)=o)
 
@@ -1026,7 +1030,7 @@ def cross_track_distance(path: tuple[Array, Array],
     """
     c_E = great_circle_normal(path[0], path[1])
     sin_theta = -np.sum(c_E * np.asarray(n_EB_E), axis=0)
-    if method[0].lower() == 'e':
+    if method[0].lower() == "e":
         return _euclidean_cross_track_distance(sin_theta, radius)
     return _great_circle_cross_track_distance(sin_theta, radius)
 
@@ -1043,7 +1047,8 @@ def on_great_circle(path: tuple[Array, Array],
     Parameters
     ----------
     path : tuple[{array}, {array}]
-        2-tuple of n-vectors of shapes 3 x k and 3 x m, respectively, defining path A, decomposed in E.
+        2-tuple of n-vectors of shapes 3 x k and 3 x m, respectively, defining path A,
+        decomposed in E.
     n_EB_E : {array}
         3 x n array n-vector(s) of position B to check to.
     radius: {array_like}
@@ -1054,7 +1059,8 @@ def on_great_circle(path: tuple[Array, Array],
     Returns
     -------
     ndarray
-        max(k, m, n, o) bool array. An element is True if position B is on great circle through path A.
+        max(k, m, n, o) bool array. An element is True if position B is on great circle
+        through path A.
 
     Notes
     -----
@@ -1091,7 +1097,8 @@ def on_great_circle_path(path: tuple[Array, Array],
     Parameters
     ----------
     path : tuple[{array}, {array}]
-        2-tuple of n-vectors of shapes 3 x k and 3 x m, respectively, defining path A, decomposed in E.
+        2-tuple of n-vectors of shapes 3 x k and 3 x m, respectively, defining path A,
+        decomposed in E.
     n_EB_E : {array}
         3 x n array n-vector(s) of position B to measure the cross track distance to.
     radius : {array_like}
@@ -1102,7 +1109,8 @@ def on_great_circle_path(path: tuple[Array, Array],
     Returns
     -------
     ndarray
-        max(k, m, n) bool array. True if position B is on great circle and between endpoints of path A.
+        max(k, m, n) bool array. True if position B is on great circle and between
+        endpoints of path A.
 
     Notes
     -----
@@ -1140,7 +1148,8 @@ def closest_point_on_great_circle(path: tuple[Array, Array],
     Parameters
     ----------
     path : tuple[{array}, {array}]
-        2-tuple of n-vectors of shapes 3 x k and 3 x m, respectively, defining path A, decomposed in E.
+        2-tuple of n-vectors of shapes 3 x k and 3 x m, respectively, defining path A,
+        decomposed in E.
     n_EB_E : {array}
         3 x n array n-vector(s) of position B to find the closest point to.
     Returns
@@ -1315,8 +1324,8 @@ def geodesic_reckon(n_EA_E: Array,
     a : float
         Semi-major axis of the Earth ellipsoid given in [m], default WGS-84 ellipsoid.
     f : float
-        Flattening [no unit] of the Earth ellipsoid, default WGS-84 ellipsoid. If f==0 then spherical
-        Earth with radius `a` is used instead of WGS-84.
+        Flattening [no unit] of the Earth ellipsoid, default WGS-84 ellipsoid.
+        If f==0 then spherical earth with radius `a` is used instead of WGS-84.
     R_Ee : {array}
         Optional 3 x 3 rotation matrix defining the axes of the coordinate frame E,
         default E_rotation().
@@ -1330,8 +1339,9 @@ def geodesic_reckon(n_EA_E: Array,
 
     Notes
     -----
-    This function is a thin wrapper around the `karney.geodesic.reckon <https://pypi.python.org/pypi/karney>`_
-    function which is an implementation of the method described in :cite:`Karney2013Algorithms`.
+    The `karney.geodesic.reckon <https://pypi.python.org/pypi/karney>`_
+    function is used here, which is an implementation of the method described in
+    :cite:`Karney2013Algorithms`.
 
     Examples
     --------
@@ -1371,8 +1381,8 @@ def geodesic_distance(n_EA_E: Array,
     a : float
         Semi-major axis of the Earth ellipsoid given in [m], default WGS-84 ellipsoid.
     f : float
-        Flattening [no unit] of the Earth ellipsoid, default WGS-84 ellipsoid. If f==0 then spherical
-        Earth with radius `a` is used instead of WGS-84.
+        Flattening [no unit] of the Earth ellipsoid, default WGS-84 ellipsoid.
+        If f==0 then spherical earth with radius `a` is used instead of WGS-84.
     R_Ee : {array}
         Optional 3 x 3 rotation matrix defining the axes of the coordinate frame E,
         default E_rotation().
@@ -1380,15 +1390,17 @@ def geodesic_distance(n_EA_E: Array,
     Returns
     -------
     distance:  {np_array_like}
-        Scalar or vector of length max(m,n) of surface distance(s) [m] from A to B on the ellipsoid.
+        Scalar or vector of length max(m,n) of surface distance(s) [m] from A to B
+        on the ellipsoid.
     azimuth_a, azimuth_b: {np_array_like}
         Scalar or vector of length max(m,n) of direction(s) [rad or deg] of line(s) at
         position A and B relative to North, respectively.
 
     Notes
     -----
-    This function is a thin wrapper around the `karney.geodesic.distance <https://pypi.python.org/pypi/karney>`_
-    function which is an implementation of the method described in :cite:`Karney2013Algorithms`.
+    The `karney.geodesic.distance <https://pypi.python.org/pypi/karney>`_
+    function is used here, which is an implementation of the method described in
+    :cite:`Karney2013Algorithms`.
 
     Examples
     --------
@@ -1594,7 +1606,7 @@ def mean_horizontal_position(n_EB_E: Array) -> ndarray:
 _odict = globals()
 __doc__ = (__doc__  # @ReservedAssignment
            + _make_summary(dict((n, _odict[n]) for n in __all__))
-           + 'License\n-------\n'
+           + "License\n-------\n"
            + _license.__doc__)
 
 

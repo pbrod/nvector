@@ -5,23 +5,25 @@ Module related to rotation matrices and angles
 """
 from __future__ import annotations
 
+from typing import Optional
+
 import numpy as np
-from numpy import arctan2, sin, cos, array, sqrt, ndarray, float64
+from numpy import arctan2, sin, cos, array, sqrt, ndarray
 from nvector import _license
 from nvector._common import test_docstrings, _make_summary
 from nvector.util import mdot, unit, norm, _nvector_check_length
-from nvector._typing import Optional, Union, ArrayLike, NpArrayLike, Array, format_docstring_types
+from nvector._typing import ArrayLike, NpArrayLike, Array, format_docstring_types
 
-__all__ = ['E_rotation',
-           'n_E_and_wa2R_EL',
-           'n_E2R_EN',
-           'R_EL2n_E',
-           'R_EN2n_E',
-           'R2xyz',
-           'R2zyx',
-           'xyz2R',
-           'zyx2R',
-           'change_axes_to_E'
+__all__ = ["E_rotation",
+           "n_E_and_wa2R_EL",
+           "n_E2R_EN",
+           "R_EL2n_E",
+           "R_EN2n_E",
+           "R2xyz",
+           "R2zyx",
+           "xyz2R",
+           "zyx2R",
+           "change_axes_to_E"
            ]
 
 _EPS = np.finfo(float).eps
@@ -34,17 +36,17 @@ E_ROTATION_MATRIX = dict(e=np.array([[0, 0, 1.0],
 # pylint: disable=invalid-name
 
 
-def E_rotation(axes: str='e') -> ndarray:
+def E_rotation(axes: str="e") -> ndarray:
     """
     Returns rotation matrix R_Ee defining the axes of the coordinate frame E.
 
     Parameters
     ----------
     axes : str
-        Either 'e' or 'E' defining the orientation of the axes of the coordinate frame E.
-        If axes is 'e' then z-axis points to the North Pole along the Earth's
+        Either "e" or "E" defining the orientation of the axes of the coordinate frame E.
+        If axes is "e" then z-axis points to the North Pole along the Earth's
         rotation axis, x-axis points towards the point where latitude = longitude = 0.
-        If axes is 'E' then x-axis points to the North Pole along the Earth's
+        If axes is "E" then x-axis points to the North Pole along the Earth's
         rotation axis, y-axis points towards where longitude +90deg (east) and latitude = 0.
 
     Returns
@@ -57,10 +59,10 @@ def E_rotation(axes: str='e') -> ndarray:
     -----
     R_Ee controls the axes of the coordinate frame E (Earth-Centred,
     Earth-Fixed, ECEF) used by the other functions in this library.
-    It is very common in many fields to choose axes equal to 'e', which
+    It is very common in many fields to choose axes equal to "e", which
     is also the default in this library. Previously the old matlab toolbox
-    the default value was equal to 'E'.
-    If you choose axes equal to 'E' the yz-plane coincides with the equatorial
+    the default value was equal to "E".
+    If you choose axes equal to "E" the yz-plane coincides with the equatorial
     plane. This choice of axis ensures that at zero latitude and longitude,
     frame N (North-East-Down) has the same orientation as frame E. If
     roll/pitch/yaw are zero, also frame B (forward-starboard-down) has this
@@ -71,11 +73,11 @@ def E_rotation(axes: str='e') -> ndarray:
     --------
     >>> import numpy as np
     >>> import nvector as nv
-    >>> bool(np.allclose(nv.E_rotation(axes='e'), [[ 0,  0,  1],
+    >>> bool(np.allclose(nv.E_rotation(axes="e"), [[ 0,  0,  1],
     ...                                            [ 0,  1,  0],
     ...                                            [-1,  0,  0]]))
     True
-    >>> bool(np.allclose(nv.E_rotation(axes='E'), [[ 1.,  0.,  0.],
+    >>> bool(np.allclose(nv.E_rotation(axes="E"), [[ 1.,  0.,  0.],
     ...                                            [ 0.,  1.,  0.],
     ...                                            [ 0.,  0.,  1.]]))
     True
@@ -451,7 +453,7 @@ def n_E2lat_lon(n_E: Array, R_Ee: Optional[Array]=None) -> tuple[ndarray, ndarra
 @format_docstring_types
 def change_axes_to_E(n_E: Array, R_Ee: Optional[Array]=None) -> ndarray:
     """
-    Change axes of the nvector(s) from 'e' to 'E'.
+    Change axes of the nvector(s) from "e" to "E".
 
     Parameters
     ----------
@@ -468,7 +470,7 @@ def change_axes_to_E(n_E: Array, R_Ee: Optional[Array]=None) -> ndarray:
 
     Notes
     -----
-    The function make sure to rotate the coordinates so that axes is 'E':
+    The function make sure to rotate the coordinates so that axes is "E":
     then x-axis points to the North Pole along the Earth's rotation axis,
     and yz-plane coincides with the equatorial plane, i.e.,
     y-axis points towards longitude +90deg (east) and latitude = 0.
@@ -593,7 +595,7 @@ def n_E_and_wa2R_EL(n_E: Array,
 _odict = globals()
 __doc__ = (__doc__  # @ReservedAssignment
            + _make_summary(dict((n, _odict[n]) for n in __all__))
-           + 'License\n-------\n'
+           + "License\n-------\n"
            + _license.__doc__)
 
 

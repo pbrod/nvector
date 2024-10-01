@@ -4,17 +4,17 @@ Created on 26. sep. 2024
 @author: pab
 """
 import warnings
-from typing import Any, NamedTuple, Optional, Union
+from typing import Union
 from numpy import ndarray, float64
 
 ArrayLike = Union[int, float, list, tuple, ndarray]
-ArrayLikeTxt = 'int, float, list, tuple or ndarray'
+ArrayLikeTxt = "int, float, list, tuple or ndarray"
 
 NpArrayLike = Union[float64, ndarray]
-NpArrayLikeTxt = 'float64 or ndarray'
+NpArrayLikeTxt = "float64 or ndarray"
 
 Array = Union[list, tuple, ndarray]
-ArrayTxt = 'list, tuple or ndarray'
+ArrayTxt = "list, tuple or ndarray"
 
 TYPES_DICT = dict(array=ArrayTxt,
                   array_like=ArrayLikeTxt,

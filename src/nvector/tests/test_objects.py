@@ -18,12 +18,12 @@ assert_allclose = partial(_assert_allclose, atol=1e-15)
 EARTH_RADIUS_M = 6371009.0
 
 
-@pytest.mark.parametrize("lat_a,lat_b,method", [(81, 80, 'ellipsoid'),
-                                                (79, 80, 'ellipsoid'),
-                                                (81, 80, 'greatcircle'),
-                                                (79, 80, 'greatcircle')])
+@pytest.mark.parametrize("lat_a,lat_b,method", [(81, 80, "ellipsoid"),
+                                                (79, 80, "ellipsoid"),
+                                                (81, 80, "greatcircle"),
+                                                (79, 80, "greatcircle")])
 def test_geo_path_on_path(lat_a, lat_b, method):
-    wgs84 = FrameE(name='WGS84')
+    wgs84 = FrameE(name="WGS84")
     point_a = wgs84.GeoPointFromDegrees(latitude=lat_a, longitude=0)
     point_b = wgs84.GeoPointFromDegrees(latitude=lat_b, longitude=0)
     point_c = wgs84.GeoPointFromDegrees(latitude=0.5*(lat_a+lat_b), longitude=0)
@@ -45,10 +45,21 @@ def test_geo_path_on_path(lat_a, lat_b, method):
         assert not path.on_path(point, method=method)
 
 
+def test_geo_path_repr():
+    wgs84 = FrameE(name="WGS84")
+    point_a = wgs84.GeoPointFromDegrees(latitude=81, longitude=0)
+    point_b = wgs84.GeoPointFromDegrees(latitude=79, longitude=0)
+
+    path = nv.GeoPath(point_a, point_b)
+    r = repr(path)
+    print(r)
+    assert r == "GeoPath(point_a=GeoPoint(latitude=1.413716694115407, longitude=0.0, z=0, frame=FrameE(a=6378137.0, f=0.0033528106647474805, name='WGS84', axes='e')), point_b=GeoPoint(latitude=1.3788101090755203, longitude=0.0, z=0, frame=FrameE(a=6378137.0, f=0.0033528106647474805, name='WGS84', axes='e')))"  # noqa
+
+
 class TestGeoPoint:
 
     def test_scalar_geopoint_to_nvector_to_geopoint(self):
-        wgs84 = FrameE(name='WGS84')
+        wgs84 = FrameE(name="WGS84")
         gp1 = wgs84.GeoPointFromDegrees(10, 5)
         np1 = gp1.to_nvector()
         gp2 = np1.to_geo_point()
@@ -59,7 +70,7 @@ class TestGeoPoint:
         assert np.ndim(gp2.longitude) == 0
 
     def test_scalar_geopoint_to_nvector_to_ecef_to_geopoint(self):
-        wgs84 = FrameE(name='WGS84')
+        wgs84 = FrameE(name="WGS84")
         gp1 = wgs84.GeoPointFromDegrees(10, 5)
         np1 = gp1.to_nvector()
         ep1 = np1.to_ecef_vector()
@@ -75,7 +86,7 @@ class TestGeoPoint:
         assert np.ndim(ep1.elevation) == 0
 
     def test_vector_geopoint_to_nvector_to_geopoint(self):
-        wgs84 = FrameE(name='WGS84')
+        wgs84 = FrameE(name="WGS84")
         gp1 = wgs84.GeoPointFromDegrees(10, [5, 7])
         np1 = gp1.to_nvector()
         gp2 = np1.to_geo_point()
@@ -86,7 +97,7 @@ class TestGeoPoint:
         assert np.ndim(gp2.longitude) == 1
 
     def test_vector_geopoint_to_nvector_to_ecef_to_geopoint(self):
-        wgs84 = FrameE(name='WGS84')
+        wgs84 = FrameE(name="WGS84")
         gp1 = wgs84.GeoPointFromDegrees([10, 15], 5)
         np1 = gp1.to_nvector()
         ep1 = np1.to_ecef_vector()
@@ -102,7 +113,7 @@ class TestGeoPoint:
         assert np.ndim(ep1.elevation) == 1
 
     def test_distance_and_azimuth(self):
-        wgs84 = FrameE(name='WGS84')
+        wgs84 = FrameE(name="WGS84")
         point1 = wgs84.GeoPointFromDegrees(latitude=-30, longitude=0)
         point2 = wgs84.GeoPointFromDegrees(latitude=29.9, longitude=179.8)
         s_12, _azi1, _azi2 = point1.distance_and_azimuth(point2)
@@ -149,20 +160,20 @@ class TestGeoPoint:
         assert_allclose(p4.latlon_deg, truth, atol=1e-12)  # pylint: disable=redundant-keyword-arg
 
         # ------ greatcircle --------
-        s_12, azi1, azi2 = point1.distance_and_azimuth(point2, method='greatcircle')
+        s_12, azi1, azi2 = point1.distance_and_azimuth(point2, method="greatcircle")
         assert_allclose(s_12, 331713.817039)
         assert_allclose(nv.deg(azi1, azi2), (-3.330916, -173.327885))
 
-        p3, azib = point1.displace(s_12, azi1, method='greatcircle')
+        p3, azib = point1.displace(s_12, azi1, method="greatcircle")
         assert_allclose(nv.deg(azib), -173.32784)
         assert_allclose(p3.latlon_deg, (89.000005, -169.999949, 0))
 
-        p4, azia = point2.displace(s_12, azi2 + np.pi, method='greatcircle')
+        p4, azia = point2.displace(s_12, azi2 + np.pi, method="greatcircle")
         _assert_allclose(p4.latlon_deg, truth, atol=1e-4)  # Less than 0.4 meters
         assert_allclose(nv.deg(azia), -3.3309161604062467 + 180)
 
     def test_displace(self):
-        wgs84 = FrameE(name='WGS84')
+        wgs84 = FrameE(name="WGS84")
         # Test example in Karney table 2:
         s_ab = 10000000
         azi_a = np.deg2rad(30)
@@ -182,35 +193,35 @@ class TestGeoPoint:
         n_eb_e, azi22 = nv.geodesic_reckon(n_a.normal, s_ab, azi_a, wgs84.a, wgs84.f)
         assert_allclose(azi22, azi2)
         assert_allclose(azi222, azi2)
-        da = azi22 - azi2
-        dn = n_eb_e - n_b.normal
-        dn2 = n_eb_e - nbb.normal
+        # da = azi22 - azi2
+        # dn = n_eb_e - n_b.normal
+        # dn2 = n_eb_e - nbb.normal
         assert_allclose(n_eb_e, n_b.normal)
         assert_allclose(n_eb_e, nbb.normal)
 
     def test_geopoint_repr(self):
 
-        wgs84 = FrameE(name='WGS84')
+        wgs84 = FrameE(name="WGS84")
         point_a = wgs84.GeoPointFromDegrees(latitude=1, longitude=2, z=3)
-        r0 = str(point_a)
-        assert r0 == "GeoPoint(latitude=0.017453292519943295, longitude=0.03490658503988659, z=3, frame=FrameE(a=6378137.0, f=0.0033528106647474805, name='WGS84', axes='e'))"
+        r0 = repr(point_a)
+        assert r0 == "GeoPoint(latitude=0.017453292519943295, longitude=0.03490658503988659, z=3, frame=FrameE(a=6378137.0, f=0.0033528106647474805, name='WGS84', axes='e'))"  # noqa
         point_b = wgs84.GeoPointFromDegrees(latitude=4, longitude=5, z=6)
         p_AB_N = point_a.delta_to(point_b)
-        r = str(p_AB_N)
-        assert r.startswith("Pvector(pvector=[[331730.2")
+        r = repr(p_AB_N)
+        assert r == "Pvector(pvector=[[331730.2347808943], [332997.8749892696], [17404.271361936342]], frame=FrameN(nvector=Nvector(normal=[[0.9992386149554826], [0.03489418134011367], [0.01745240643728351]], z=[0], frame=FrameE(a=6378137.0, f=0.0033528106647474805, name='WGS84', axes='e'))), scalar=True)"  # noqa
 
 
 class TestFrames:
     def test_compare_E_frames(self):
-        E = FrameE(name='WGS84')
+        E = FrameE(name="WGS84")
         E2 = FrameE(a=E.a, f=E.f)
         assert E == E2
         E3 = FrameE(a=E.a, f=0)
         assert E != E3
 
     def test_compare_B_frames(self):
-        E = FrameE(name='WGS84')
-        E2 = FrameE(name='WGS72')
+        E = FrameE(name="WGS84")
+        E2 = FrameE(name="WGS72")
 
         n_EB_E = E.Nvector(unit([[1], [2], [3]]), z=-400)
         B = FrameB(n_EB_E, yaw=10, pitch=20, roll=30, degrees=True)
@@ -232,8 +243,8 @@ class TestFrames:
         assert B != B5
 
     def test_compare_N_frames(self):
-        wgs84 = FrameE(name='WGS84')
-        wgs72 = FrameE(name='WGS72')
+        wgs84 = FrameE(name="WGS84")
+        wgs72 = FrameE(name="WGS72")
         pointA = wgs84.GeoPointFromDegrees(latitude=1, longitude=2, z=3)
         pointB = wgs72.GeoPointFromDegrees(latitude=1, longitude=2, z=6)
 
@@ -251,8 +262,8 @@ class TestFrames:
         assert frame_L1 != frame_L3
 
     def test_compare_L_frames(self):
-        wgs84 = FrameE(name='WGS84')
-        wgs72 = FrameE(name='WGS72')
+        wgs84 = FrameE(name="WGS84")
+        wgs72 = FrameE(name="WGS72")
         pointA = wgs84.GeoPointFromDegrees(latitude=1, longitude=2, z=3)
         pointB = wgs72.GeoPointFromDegrees(latitude=1, longitude=2, z=6)
 
@@ -266,7 +277,7 @@ class TestFrames:
 
     @staticmethod
     def test_compute_delta_L_in_moving_frame_east():
-        wgs84 = FrameE(name='WGS84')
+        wgs84 = FrameE(name="WGS84")
         point_a = wgs84.GeoPointFromDegrees(latitude=1, longitude=2, z=0)
         point_b = wgs84.GeoPointFromDegrees(latitude=1, longitude=2.005, z=0)
         sensor_position = wgs84.GeoPointFromDegrees(latitude=1.000090437, longitude=2.0025, z=0)
@@ -295,7 +306,7 @@ class TestFrames:
 
     @staticmethod
     def test_compute_delta_N_in_moving_frame_east():
-        wgs84 = FrameE(name='WGS84')
+        wgs84 = FrameE(name="WGS84")
         point_a = wgs84.GeoPointFromDegrees(latitude=1, longitude=2, z=0)
         point_b = wgs84.GeoPointFromDegrees(latitude=1, longitude=2.005, z=0)
         sensor_position = wgs84.GeoPointFromDegrees(latitude=1.0, longitude=2.0025, z=0)
@@ -326,7 +337,7 @@ class TestFrames:
 
     @staticmethod
     def test_compute_delta_L_in_moving_frame_north():
-        wgs84 = FrameE(name='WGS84')
+        wgs84 = FrameE(name="WGS84")
         point_a = wgs84.GeoPointFromDegrees(latitude=1, longitude=2, z=0)
         point_b = wgs84.GeoPointFromDegrees(latitude=1.005, longitude=2.0, z=0)
         sensor_position = wgs84.GeoPointFromDegrees(latitude=1.0025, longitude=2.0, z=0)
@@ -362,7 +373,7 @@ class TestExamples:
 
     @staticmethod
     def test_Ex1_A_and_B_to_delta_in_frame_N():
-        wgs84 = FrameE(name='WGS84')
+        wgs84 = FrameE(name="WGS84")
         point_a = wgs84.GeoPointFromDegrees(latitude=1, longitude=2, z=3)
         point_b = wgs84.GeoPointFromDegrees(latitude=4, longitude=5, z=6)
 
@@ -386,7 +397,7 @@ class TestExamples:
         # delta vector from B to C, decomposed in B is given:
 
         # A custom reference ellipsoid is given (replacing WGS-84):
-        wgs72 = FrameE(name='WGS72')
+        wgs72 = FrameE(name="WGS72")
 
         # Position and orientation of B is given 400m above E:
         n_EB_E = wgs72.Nvector(unit([[1], [2], [3]]), z=-400)
@@ -410,7 +421,7 @@ class TestExamples:
     @staticmethod
     def test_Ex3_ECEF_vector_to_geodetic_latitude():
 
-        wgs84 = FrameE(name='WGS84')
+        wgs84 = FrameE(name="WGS84")
         # Position B is given as p_EB_E ("ECEF-vector")
         position_B = 6371e3 * np.vstack((0.9, -1, 1.1))  # m
         p_EB_E = wgs84.ECEFvector(position_B)
@@ -425,7 +436,7 @@ class TestExamples:
 
     @staticmethod
     def test_Ex4_geodetic_latitude_to_ECEF_vector():
-        wgs84 = FrameE(name='WGS84')
+        wgs84 = FrameE(name="WGS84")
         pointB = wgs84.GeoPointFromDegrees(latitude=1, longitude=2, z=-3)
 
         p_EB_E = pointB.to_ecef_vector()
@@ -454,9 +465,9 @@ class TestExamples:
         point_b = frame_E.GeoPointFromDegrees(latitude=89, longitude=-170)
         path = GeoPath(point_a, point_b)
 
-        s_AB = path.track_distance(method='greatcircle')
-        d_AB = path.track_distance(method='euclidean')
-        s1_AB = path.track_distance(method='exact')
+        s_AB = path.track_distance(method="greatcircle")
+        d_AB = path.track_distance(method="euclidean")
+        s1_AB = path.track_distance(method="exact")
 
         assert_allclose(s_AB / 1000, 332.45644411)
         assert_allclose(s1_AB / 1000, 332.45644411)
@@ -464,7 +475,7 @@ class TestExamples:
 
     @staticmethod
     def test_exact_ellipsoidal_distance():
-        wgs84 = FrameE(name='WGS84')
+        wgs84 = FrameE(name="WGS84")
         pointA = wgs84.GeoPointFromDegrees(latitude=88, longitude=0)
         pointB = wgs84.GeoPointFromDegrees(latitude=89, longitude=-170)
         s_AB, _azia, _azib = pointA.distance_and_azimuth(pointB)
@@ -481,7 +492,7 @@ class TestExamples:
 
         # Position B at time t0 and t2 is given as n_EB_E_t0 and n_EB_E_t1:
         # Enter elements as lat/long in deg:
-        wgs84 = FrameE(name='WGS84')
+        wgs84 = FrameE(name="WGS84")
         n_EB_E_t0 = wgs84.GeoPointFromDegrees(89, 0).to_nvector()
         n_EB_E_t1 = wgs84.GeoPointFromDegrees(89, 180).to_nvector()
 
@@ -538,7 +549,7 @@ class TestExamples:
         point_a = frame.GeoPointFromDegrees(latitude=80, longitude=-90)
         point_b, _azimuthb = point_a.displace(distance=1000, azimuth=200, degrees=True)
         pointB2, _azimuthb = point_a.displace(distance=1000,
-                                             azimuth=np.deg2rad(200))
+                                              azimuth=np.deg2rad(200))
         assert_allclose(point_b.latlon, pointB2.latlon)
 
         lat_B, lon_B = point_b.latitude_deg, point_b.longitude_deg
@@ -596,8 +607,8 @@ class TestExamples:
         path_a = GeoPath(point_a1, point_a2)
 
         # Find the cross track distance from path A to position B.
-        s_xt = path_a.cross_track_distance(point_b, method='greatcircle')
-        d_xt = path_a.cross_track_distance(point_b, method='euclidean')
+        s_xt = path_a.cross_track_distance(point_b, method="greatcircle")
+        d_xt = path_a.cross_track_distance(point_b, method="euclidean")
 
         point_c = path_a.closest_point_on_great_circle(point_b)
         point_c2 = path_a.closest_point_on_great_circle(point_b2)
@@ -609,9 +620,9 @@ class TestExamples:
         assert_allclose(d_xt, 11117.79346741)
 
         assert path_a.on_path(point_c)
-        assert path_a.on_path(point_c, method='exact')
+        assert path_a.on_path(point_c, method="exact")
 
         assert not path_a.on_path(point_c2)
-        assert not path_a.on_path(point_c2, method='exact')
+        assert not path_a.on_path(point_c2, method="exact")
         assert point_c3 == point_a2
         assert point_c4 == point_a1

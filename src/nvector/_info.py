@@ -1,4 +1,4 @@
-from nvector import (_intro,  # pylint: disable=no-name-in-module
+from nvector import (_intro,
                      _documentation,
                      _installation,
                      _examples_object_oriented,
@@ -18,6 +18,6 @@ __doc__ = (  # @ReservedAssignment
     + _images.__doc__)  # @UndefinedVariable
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from nvector._common import test_docstrings
     test_docstrings(__file__)

@@ -76,10 +76,10 @@ def test_Ex1_A_and_B_to_delta_in_frame_N():
     azimuth = np.arctan2(p_AB_N[1], p_AB_N[0])
     # positive angle about down-axis
 
-    print('Ex1, delta north, east, down = {0}, {1}, {2}'.format(p_AB_N[0],
+    print("Ex1, delta north, east, down = {0}, {1}, {2}".format(p_AB_N[0],
                                                                 p_AB_N[1],
                                                                 p_AB_N[2]))
-    print('Ex1, azimuth = {0} deg'.format(deg(azimuth)))
+    print("Ex1, azimuth = {0} deg".format(deg(azimuth)))
 
     assert_allclose(p_AB_N[0], 331730.23478089)
     assert_allclose(p_AB_N[1], 332997.87498927)
@@ -120,7 +120,7 @@ def test_Ex2_B_and_delta_in_frame_B_to_C_in_frame_E():
     # convenient to see lat, long:
     lat_EC, long_EC = n_E2lat_lon(n_EC_E)
     # Here we also assume that the user wants output height (= - depth):
-    msg = 'Ex2, Pos C: lat, long = {},{} deg,  height = {} m'
+    msg = "Ex2, Pos C: lat, long = {},{} deg,  height = {} m"
     print(msg.format(deg(lat_EC), deg(long_EC), -z_EC))
 
     assert_allclose(deg(lat_EC), 53.32637826)
@@ -143,7 +143,7 @@ def test_Ex3_ECEF_vector_to_geodetic_latitude():
     # Convert to lat, long and height:
     lat_EB, long_EB = n_E2lat_lon(n_EB_E)
     h_EB = -z_EB
-    msg = 'Ex3, Pos B: lat, long = {} {} deg, height = {} m'
+    msg = "Ex3, Pos B: lat, long = {} {} deg, height = {} m"
     print(msg.format(deg(lat_EB), deg(long_EB), h_EB))
 
     assert_allclose(deg(lat_EB), 39.37874867)
@@ -167,7 +167,7 @@ def test_Ex4_geodetic_latitude_to_ECEF_vector():
     # Step2: Find the ECEF-vector p_EB_E:
     p_EB_E = n_EB_E2p_EB_E(n_EB_E, -h_EB)
 
-    print('Ex4: p_EB_E = {0} m'.format(p_EB_E.ravel()))
+    print("Ex4: p_EB_E = {0} m".format(p_EB_E.ravel()))
 
     assert_allclose(p_EB_E.ravel(), [6373290.27721828, 222560.20067474, 110568.82718179])
 
@@ -185,7 +185,7 @@ def test_Ex5_great_circle_distance():
     s_AB = great_circle_distance(n_EA_E, n_EB_E, radius=r_Earth)
     d_AB = euclidean_distance(n_EA_E, n_EB_E, radius=r_Earth)
 
-    msg = 'Ex5, Great circle distance = {} km, Euclidean distance = {} km'
+    msg = "Ex5, Great circle distance = {} km, Euclidean distance = {} km"
     print(msg.format(s_AB / 1000, d_AB / 1000))
 
     assert_allclose(s_AB / 1000, 332.45644411)
@@ -213,7 +213,7 @@ def test_Ex6_interpolated_position():
     # When displaying the resulting position for humans, it is more
     # convenient to see lat, long:
     lat_EB_ti, long_EB_ti = n_E2lat_lon(n_EB_E_ti)
-    msg = 'Ex6, Interpolated position: lat, long = {} {} deg'
+    msg = "Ex6, Interpolated position: lat, long = {} {} deg"
     print(msg.format(deg(lat_EB_ti), deg(long_EB_ti)))
 
     assert_allclose(deg(lat_EB_ti), 89.7999805)
@@ -234,7 +234,7 @@ def test_Ex7_mean_position():
     truth = [0.3841171702926, -0.046602405485689447, 0.9221074857571395]
     # The result is best viewed with a figure that shows the n-vectors
     # relative to an Earth-model:
-    # print('Ex7, See figure')
+    # print("Ex7, See figure")
     # plot_earth_figure(n_EA_E,n_EB_E,n_EC_E,n_EM_E)
     # print(n_EM_E.ravel().tolist())
     assert_allclose(n_EM_E.ravel(), truth)
@@ -270,7 +270,7 @@ def test_Ex8_position_A_and_azimuth_and_distance_to_B():
     # When displaying the resulting position for humans, it is more
     # convenient to see lat, long:
     lat_EB, long_EB = n_E2lat_lon(n_EB_E)
-    print('Ex8, Destination: lat, long = {0} {1} deg'.format(deg(lat_EB),
+    print("Ex8, Destination: lat, long = {0} {1} deg".format(deg(lat_EB),
                                                              deg(long_EB)))
 
     assert_allclose(deg(lat_EB), 79.99154867)
@@ -300,7 +300,7 @@ def test_Ex9_intersect():
     # When displaying the resulting position for humans, it is more
     # convenient to see lat, long:
     lat_EC, long_EC = n_E2lat_lon(n_EC_E)
-    msg = 'Ex9, Intersection: lat, long = {} {} deg'
+    msg = "Ex9, Intersection: lat, long = {} {} deg"
     print(msg.format(deg(lat_EC), deg(long_EC)))
     assert_allclose(deg(lat_EC), 40.31864307)
     assert_allclose(deg(long_EC), 55.90186788)
@@ -329,7 +329,7 @@ def test_Ex10_cross_track_distance():
 
     # Find the Euclidean cross track distance:
     d_xt = sin_theta * radius
-    msg = 'Ex10, Cross track distance = {} m, Euclidean = {} m'
+    msg = "Ex10, Cross track distance = {} m, Euclidean = {} m"
     print(msg.format(s_xt, d_xt))
 
     assert_allclose(s_xt, 11117.79911015)
@@ -353,7 +353,7 @@ def test_small_and_large_cross_track_distance():
         s_xt = great_circle_distance(n_EB1_E, n_EB_E, radius)
         c_E = unit(np.cross(n_EA1_E, n_EA2_E, axis=0))
         s_xt2 = (np.arccos(np.dot(c_E.T, n_EB_E)) - np.pi / 2) * radius
-        s_xt3 = cross_track_distance(path, n_EB_E, method='greatcircle', radius=radius)
+        s_xt3 = cross_track_distance(path, n_EB_E, method="greatcircle", radius=radius)
 
         # pylint: disable=invalid-unary-operand-type
         s_xt4 = np.arctan2(-np.dot(c_E.T, n_EB_E),

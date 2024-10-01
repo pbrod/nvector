@@ -44,22 +44,22 @@ directions to be defined.)
 EXAMPLE_1_OBJ_SOLUTION = """Solution:
     >>> import numpy as np
     >>> import nvector as nv
-    >>> wgs84 = nv.FrameE(name='WGS84')
+    >>> wgs84 = nv.FrameE(name="WGS84")
     >>> pointA = wgs84.GeoPointFromDegrees(latitude=1, longitude=2, z=3)
     >>> pointB = wgs84.GeoPointFromDegrees(latitude=4, longitude=5, z=6)
 
 Step1:  Find p_AB_N (delta decomposed in N).
     >>> p_AB_N = pointA.delta_to(pointB)
     >>> x, y, z = p_AB_N.pvector.ravel()
-    >>> 'Ex1: delta north, east, down = {0:8.2f}, {1:8.2f}, {2:8.2f}'.format(x, y, z)
+    >>> "Ex1: delta north, east, down = {0:8.2f}, {1:8.2f}, {2:8.2f}".format(x, y, z)
     'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
 
 Step2: Find the direction (azimuth) to B, relative to north, as well as elevation and distance:
-    >>> 'azimuth = {0:4.2f} deg'.format(p_AB_N.azimuth_deg)
+    >>> "azimuth = {0:4.2f} deg".format(p_AB_N.azimuth_deg)
     'azimuth = 45.11 deg'
-    >>> 'elevation = {0:4.2f} deg'.format(p_AB_N.elevation_deg)
+    >>> "elevation = {0:4.2f} deg".format(p_AB_N.elevation_deg)
     'elevation = 2.12 deg'
-    >>> 'distance = {0:4.2f} m'.format(p_AB_N.length)
+    >>> "distance = {0:4.2f} m".format(p_AB_N.length)
     'distance = 470356.72 m'
 
 """
@@ -79,20 +79,20 @@ Step1: Convert to n-vectors:
 Step2: Find p_AB_N (delta decomposed in N). WGS-84 ellipsoid is default:
     >>> p_AB_N = nv.n_EA_E_and_n_EB_E2p_AB_N(n_EA_E, n_EB_E, z_EA, z_EB)
     >>> x, y, z = p_AB_N.ravel()
-    >>> 'Ex1: delta north, east, down = {0:8.2f}, {1:8.2f}, {2:8.2f}'.format(x, y, z)
+    >>> "Ex1: delta north, east, down = {0:8.2f}, {1:8.2f}, {2:8.2f}".format(x, y, z)
     'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
 
 Step3: Find the direction (azimuth) to B, relative to north as well as elevation and distance:
     >>> azimuth = np.arctan2(y, x)
-    >>> 'azimuth = {0:4.2f} deg'.format(deg(azimuth))
+    >>> "azimuth = {0:4.2f} deg".format(deg(azimuth))
     'azimuth = 45.11 deg'
 
     >>> distance = np.linalg.norm(p_AB_N)
     >>> elevation = np.arcsin(z / distance)
-    >>> 'elevation = {0:4.2f} deg'.format(deg(elevation))
+    >>> "elevation = {0:4.2f} deg".format(deg(elevation))
     'elevation = 2.12 deg'
 
-    >>> 'distance = {0:4.2f} m'.format(distance)
+    >>> "distance = {0:4.2f} m".format(distance)
     'distance = 470356.72 m'
 
 """
@@ -123,7 +123,7 @@ EXAMPLE_2_OBJ_SOLUTION = """
 Solution:
     >>> import numpy as np
     >>> import nvector as nv
-    >>> wgs72 = nv.FrameE(name='WGS72')
+    >>> wgs72 = nv.FrameE(name="WGS72")
     >>> wgs72 = nv.FrameE(a=6378135, f=1.0/298.26)
 
 Step 1: Position and orientation of B is given 400m above E:
@@ -142,7 +142,7 @@ Step 4: Find point C by adding delta BC to EB
     >>> pointC = p_EC_E.to_geo_point()
 
     >>> lat, lon, z = pointC.latlon_deg
-    >>> msg = 'Ex2: PosC: lat, lon = {:4.4f}, {:4.4f} deg,  height = {:4.2f} m'
+    >>> msg = "Ex2: PosC: lat, lon = {:4.4f}, {:4.4f} deg,  height = {:4.2f} m"
     >>> msg.format(lat, lon, -z)
     'Ex2: PosC: lat, lon = 53.3264, 63.4681 deg,  height = 406.01 m'
 
@@ -175,13 +175,13 @@ Step 4: Find R_EB, from R_EN and R_NB:
 Step 5: Decompose the delta BC vector in E:
     >>> p_BC_E = np.dot(R_EB, p_BC_B)
 
-Step 6: Find the position of C, using the functions that goes from one position and a delta, to a new position:
+Step 6: Find the position of C, using position n_EB_E and delta vector p_BC_E:
     >>> n_EC_E, z_EC = nv.n_EA_E_and_p_AB_E2n_EB_E(n_EB_E, p_BC_E, z_EB, **wgs72)
 
 Step 7: Convert position C to latitude and longitude to make it more convenient to see for humans:
     >>> lat_EC, lon_EC = nv.n_E2lat_lon(n_EC_E)
     >>> lat, lon, z = deg(lat_EC), deg(lon_EC), z_EC
-    >>> msg = 'Ex2: PosC: lat, lon = {:4.4f}, {:4.4f} deg,  height = {:4.2f} m'
+    >>> msg = "Ex2: PosC: lat, lon = {:4.4f}, {:4.4f} deg,  height = {:4.2f} m"
     >>> msg.format(lat[0], lon[0], -z[0])
     'Ex2: PosC: lat, lon = 53.3264, 63.4681 deg,  height = 406.01 m'
 
@@ -207,7 +207,7 @@ EXAMPLE_3_OBJ_SOLUTION = """
 Solution:
     >>> import numpy as np
     >>> import nvector as nv
-    >>> wgs84 = nv.FrameE(name='WGS84')
+    >>> wgs84 = nv.FrameE(name="WGS84")
     >>> position_B = 6371e3 * np.vstack((0.9, -1, 1.1))  # m
     >>> p_EB_E = wgs84.ECEFvector(position_B)
 
@@ -215,7 +215,7 @@ Step 1: Find geodetic latitude and depth from the p-vector:
     >>> pointB = p_EB_E.to_geo_point()
 
     >>> lat, lon, z = pointB.latlon_deg
-    >>> 'Ex3: Pos B: lat, lon = {:4.4f}, {:4.4f} deg, height = {:9.3f} m'.format(lat, lon, -z)
+    >>> "Ex3: Pos B: lat, lon = {:4.4f}, {:4.4f} deg, height = {:9.3f} m".format(lat, lon, -z)
     'Ex3: Pos B: lat, lon = 39.3787, -48.0128 deg, height = 4702059.834 m'
 
 """
@@ -236,7 +236,7 @@ Step 2: Convert to latitude, longitude and height:
     >>> h = -z_EB
     >>> lat, lon = deg(lat_EB), deg(lon_EB)
 
-    >>> msg = 'Ex3: Pos B: lat, lon = {:4.4f}, {:4.4f} deg, height = {:9.3f} m'
+    >>> msg = "Ex3: Pos B: lat, lon = {:4.4f}, {:4.4f} deg, height = {:9.3f} m"
     >>> msg.format(lat[0], lon[0], h[0])
     'Ex3: Pos B: lat, lon = 39.3787, -48.0128 deg, height = 4702059.834 m'
 
@@ -259,11 +259,11 @@ lonEB and hEB, find the ECEF-vector for this position, p_EB_E.
 EXAMPLE_4_OBJ_SOLUTION = """
 Solution:
     >>> import nvector as nv
-    >>> wgs84 = nv.FrameE(name='WGS84')
+    >>> wgs84 = nv.FrameE(name="WGS84")
     >>> pointB = wgs84.GeoPointFromDegrees(latitude=1, longitude=2, z=-3)
     >>> p_EB_E = pointB.to_ecef_vector()
 
-    >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel().tolist())
+    >>> "Ex4: p_EB_E = {} m".format(p_EB_E.pvector.ravel().tolist())
     'Ex4: p_EB_E = [6373290.277218279, 222560.20067473652, 110568.82718178593] m'
 
 """
@@ -279,7 +279,7 @@ Solution:
     >>> n_EB_E = nv.lat_lon2n_E(lat_EB, lon_EB)
     >>> p_EB_E = nv.n_EB_E2p_EB_E(n_EB_E, -h_EB, **wgs84)
 
-    >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.ravel().tolist())
+    >>> "Ex4: p_EB_E = {} m".format(p_EB_E.ravel().tolist())
     'Ex4: p_EB_E = [6373290.277218279, 222560.20067473652, 110568.82718178593] m'
 
 """
@@ -314,27 +314,27 @@ Solution for a sphere:
     >>> p_AB_E = pointB.to_ecef_vector() - pointA.to_ecef_vector()
     >>> d_AB = p_AB_E.length
 
-    >>> msg = 'Ex5: Great circle and Euclidean distance = {}'
-    >>> msg = msg.format('{:5.2f} km, {:5.2f} km')
+    >>> msg = "Ex5: Great circle and Euclidean distance = {}"
+    >>> msg = msg.format("{:5.2f} km, {:5.2f} km")
     >>> msg.format(s_AB / 1000, d_AB / 1000)
     'Ex5: Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
 Alternative sphere solution:
     >>> path = nv.GeoPath(pointA, pointB)
-    >>> s_AB2 = path.track_distance(method='greatcircle')
-    >>> d_AB2 = path.track_distance(method='euclidean')
+    >>> s_AB2 = path.track_distance(method="greatcircle")
+    >>> d_AB2 = path.track_distance(method="euclidean")
     >>> msg.format(s_AB2 / 1000, d_AB2 / 1000)
     'Ex5: Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
 Exact solution for the WGS84 ellipsoid:
-    >>> wgs84 = nv.FrameE(name='WGS84')
+    >>> wgs84 = nv.FrameE(name="WGS84")
     >>> point1 = wgs84.GeoPointFromDegrees(latitude=88, longitude=0)
     >>> point2 = wgs84.GeoPointFromDegrees(latitude=89, longitude=-170)
     >>> s_12, azi1, azi2 = point1.distance_and_azimuth(point2)
 
     >>> p_12_E = point2.to_ecef_vector() - point1.to_ecef_vector()
     >>> d_12 = p_12_E.length
-    >>> msg = 'Ellipsoidal and Euclidean distance = {:5.2f} km, {:5.2f} km'
+    >>> msg = "Ellipsoidal and Euclidean distance = {:5.2f} km, {:5.2f} km"
     >>> msg.format(s_12 / 1000, d_12 / 1000)
     'Ellipsoidal and Euclidean distance = 333.95 km, 333.91 km'
 
@@ -353,8 +353,8 @@ Solution for a sphere:
     >>> s_AB = nv.great_circle_distance(n_EA_E, n_EB_E, radius=r_Earth)[0]
     >>> d_AB = nv.euclidean_distance(n_EA_E, n_EB_E, radius=r_Earth)[0]
 
-    >>> msg = 'Ex5: Great circle and Euclidean distance = {}'
-    >>> msg = msg.format('{:5.2f} km, {:5.2f} km')
+    >>> msg = "Ex5: Great circle and Euclidean distance = {}"
+    >>> msg = msg.format("{:5.2f} km, {:5.2f} km")
     >>> msg.format(s_AB / 1000, d_AB / 1000)
     'Ex5: Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
@@ -363,7 +363,7 @@ Exact solution for the WGS84 ellipsoid:
     >>> p_EB_E = nv.n_EB_E2p_EB_E(n_EB_E, 0)
     >>> d_12 = np.linalg.norm(p_EA_E-p_EB_E)
     >>> s_12, azi1, azi2 = nv.geodesic_distance(n_EA_E, n_EB_E)
-    >>> msg = 'Ellipsoidal and Euclidean distance = {:5.2f} km, {:5.2f} km'
+    >>> msg = "Ellipsoidal and Euclidean distance = {:5.2f} km, {:5.2f} km"
     >>> msg.format(s_12 / 1000, d_12 / 1000)
     'Ellipsoidal and Euclidean distance = 333.95 km, 333.91 km'
 
@@ -388,7 +388,7 @@ as n-vectors.
 EXAMPLE_6_OBJ_SOLUTION = """
 Solution:
     >>> import nvector as nv
-    >>> wgs84 = nv.FrameE(name='WGS84')
+    >>> wgs84 = nv.FrameE(name="WGS84")
     >>> n_EB_E_t0 = wgs84.GeoPointFromDegrees(89, 0).to_nvector()
     >>> n_EB_E_t1 = wgs84.GeoPointFromDegrees(89, 180).to_nvector()
     >>> path = nv.GeoPath(n_EB_E_t0, n_EB_E_t1)
@@ -401,14 +401,14 @@ Solution:
     >>> g_EB_E_ti = path.interpolate(ti_n).to_geo_point()
 
     >>> lat_ti, lon_ti, z_ti = g_EB_E_ti.latlon_deg
-    >>> msg = 'Ex6, Interpolated position: lat, lon = {:2.1f} deg, {:2.1f} deg'
+    >>> msg = "Ex6, Interpolated position: lat, lon = {:2.1f} deg, {:2.1f} deg"
     >>> msg.format(lat_ti, lon_ti)
     'Ex6, Interpolated position: lat, lon = 89.8 deg, 180.0 deg'
 
 Vectorized solution:
     >>> t = np.array([10, 20])
     >>> nvectors = wgs84.GeoPointFromDegrees([89, 89], [0, 180]).to_nvector()
-    >>> nvectors_i = nvectors.interpolate(ti, t, kind='linear')
+    >>> nvectors_i = nvectors.interpolate(ti, t, kind="linear")
     >>> lati, loni, zi = nvectors_i.to_geo_point().latlon_deg
     >>> msg.format(lat_ti, lon_ti)
     'Ex6, Interpolated position: lat, lon = 89.8 deg, 180.0 deg'
@@ -432,14 +432,14 @@ Solution:
     >>> lat_EB_ti, lon_EB_ti = nv.n_E2lat_lon(n_EB_E_ti)
 
     >>> lat_ti, lon_ti = deg(lat_EB_ti), deg(lon_EB_ti)
-    >>> msg = 'Ex6, Interpolated position: lat, lon = {:2.1f} deg, {:2.1f} deg'
+    >>> msg = "Ex6, Interpolated position: lat, lon = {:2.1f} deg, {:2.1f} deg"
     >>> msg.format(lat_ti[0], lon_ti[0])
     'Ex6, Interpolated position: lat, lon = 89.8 deg, 180.0 deg'
 
 Vectorized solution:
     >>> nvectors = nv.lat_lon2n_E(rad([89, 89]), rad([0, 180]))
     >>> t = np.array([10, 20])
-    >>> nvectors_i = nv.interp_nvectors(ti, t, nvectors, kind='linear')
+    >>> nvectors_i = nv.interp_nvectors(ti, t, nvectors, kind="linear")
     >>> lati, loni = nv.deg(*nv.n_E2lat_lon(nvectors_i))
     >>> msg.format(lat_ti[0], lon_ti[0])
     'Ex6, Interpolated position: lat, lon = 89.8 deg, 180.0 deg'
@@ -469,7 +469,7 @@ Solution:
     >>> n_EM_E = nvectors.mean()
     >>> g_EM_E = n_EM_E.to_geo_point()
     >>> lat, lon = g_EM_E.latitude_deg, g_EM_E.longitude_deg
-    >>> msg = 'Ex7: Pos M: lat, lon = {:4.4f}, {:4.4f} deg'
+    >>> msg = "Ex7: Pos M: lat, lon = {:4.4f}, {:4.4f} deg"
     >>> msg.format(lat, lon)
     'Ex7: Pos M: lat, lon = 67.2362, -6.9175 deg'
 
@@ -493,7 +493,7 @@ or
 
     >>> lat, lon = nv.n_E2lat_lon(n_EM_E)
     >>> lat, lon = deg(lat), deg(lon)
-    >>> msg = 'Ex7: Pos M: lat, lon = {:4.4f}, {:4.4f} deg'
+    >>> msg = "Ex7: Pos M: lat, lon = {:4.4f}, {:4.4f} deg"
     >>> msg.format(lat[0], lon[0])
     'Ex7: Pos M: lat, lon = 67.2362, -6.9175 deg'
 
@@ -532,7 +532,7 @@ Exact solution:
     >>> pointB, azimuthb = pointA.displace(distance=1000, azimuth=200, degrees=True)
     >>> lat, lon = pointB.latitude_deg, pointB.longitude_deg
 
-    >>> msg = 'Ex8, Destination: lat, lon = {:4.4f} deg, {:4.4f} deg'
+    >>> msg = "Ex8, Destination: lat, lon = {:4.4f} deg, {:4.4f} deg"
     >>> msg.format(lat, lon)
     'Ex8, Destination: lat, lon = 79.9915 deg, -90.0177 deg'
 
@@ -543,7 +543,7 @@ Greatcircle solution:
     >>> pointB2, azimuthb = pointA.displace(distance=1000,
     ...                                     azimuth=200,
     ...                                     degrees=True,
-    ...                                     method='greatcircle')
+    ...                                     method="greatcircle")
     >>> lat2, lon2 = pointB2.latitude_deg, pointB.longitude_deg
     >>> msg.format(lat2, lon2)
     'Ex8, Destination: lat, lon = 79.9915 deg, -90.0177 deg'
@@ -570,7 +570,7 @@ Greatcircle solution:
     >>> n_EB_E = nv.n_EA_E_distance_and_azimuth2n_EB_E(n_EA_E, distance_rad, azimuth)
     >>> lat_EB, lon_EB = nv.n_E2lat_lon(n_EB_E)
     >>> lat, lon = deg(lat_EB), deg(lon_EB)
-    >>> msg = 'Ex8, Destination: lat, lon = {:4.4f} deg, {:4.4f} deg'
+    >>> msg = "Ex8, Destination: lat, lon = {:4.4f} deg, {:4.4f} deg"
     >>> msg.format(lat[0], lon[0])
     'Ex8, Destination: lat, lon = 79.9915 deg, -90.0177 deg'
 
@@ -578,7 +578,7 @@ Exact solution:
     >>> n_EB_E2, azimuthb = nv.geodesic_reckon(n_EA_E, s_AB, azimuth, a=r_earth, f=0)
     >>> lat_EB2, lon_EB2 = nv.n_E2lat_lon(n_EB_E2)
     >>> lat2, lon2 = deg(lat_EB2), deg(lon_EB2)
-    >>> msg = 'Ex8, Destination: lat, lon = {:4.4f} deg, {:4.4f} deg'
+    >>> msg = "Ex8, Destination: lat, lon = {:4.4f} deg, {:4.4f} deg"
     >>> msg.format(lat[0], lon[0])
     'Ex8, Destination: lat, lon = 79.9915 deg, -90.0177 deg'
 
@@ -616,20 +616,20 @@ Solution:
     >>> pointC = pathA.intersect(pathB)
     >>> pointC = pointC.to_geo_point()
     >>> lat, lon = pointC.latitude_deg, pointC.longitude_deg
-    >>> msg = 'Ex9, Intersection: lat, lon = {:4.4f}, {:4.4f} deg'
+    >>> msg = "Ex9, Intersection: lat, lon = {:4.4f}, {:4.4f} deg"
     >>> msg.format(lat, lon)
     'Ex9, Intersection: lat, lon = 40.3186, 55.9019 deg'
 
 Check that PointC is not between A1 and A2 or B1 and B2:
-    >>> pathA.on_path(pointC)
+    >>> bool(pathA.on_path(pointC))
     False
-    >>> pathB.on_path(pointC)
+    >>> bool(pathB.on_path(pointC))
     False
 
 Check that PointC is on the great circle going through path A and path B:
-    >>> pathA.on_great_circle(pointC)
+    >>> bool(pathA.on_great_circle(pointC))
     True
-    >>> pathB.on_great_circle(pointC)
+    >>> bool(pathB.on_great_circle(pointC))
     True
 
 """
@@ -658,7 +658,7 @@ or alternatively
     >>> lat_EC, lon_EC = nv.n_E2lat_lon(n_EC_E)
 
     >>> lat, lon = deg(lat_EC), deg(lon_EC)
-    >>> msg = 'Ex9, Intersection: lat, lon = {:4.4f}, {:4.4f} deg'
+    >>> msg = "Ex9, Intersection: lat, lon = {:4.4f}, {:4.4f} deg"
     >>> msg.format(lat[0], lon[0])
     'Ex9, Intersection: lat, lon = 40.3186, 55.9019 deg'
 
@@ -710,11 +710,11 @@ Solution:
     >>> pointB = frame.GeoPointFromDegrees(1, 0.1)
     >>> pathA = nv.GeoPath(pointA1, pointA2)
 
-    >>> s_xt = pathA.cross_track_distance(pointB, method='greatcircle')
-    >>> d_xt = pathA.cross_track_distance(pointB, method='euclidean')
+    >>> s_xt = pathA.cross_track_distance(pointB, method="greatcircle")
+    >>> d_xt = pathA.cross_track_distance(pointB, method="euclidean")
 
-    >>> val_txt = '{:4.2f} km, {:4.2f} km'.format(s_xt/1000, d_xt/1000)
-    >>> 'Ex10: Cross track distance: s_xt, d_xt = {}'.format(val_txt)
+    >>> val_txt = "{:4.2f} km, {:4.2f} km".format(s_xt/1000, d_xt/1000)
+    >>> "Ex10: Cross track distance: s_xt, d_xt = {}".format(val_txt)
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 
     >>> pointC = pathA.closest_point_on_great_circle(pointB)
@@ -735,11 +735,11 @@ Solution:
     >>> path = (n_EA1_E, n_EA2_E)
     >>> radius = 6371e3  # mean earth radius [m]
     >>> s_xt = nv.cross_track_distance(path, n_EB_E, radius=radius)
-    >>> d_xt = nv.cross_track_distance(path, n_EB_E, method='euclidean',
+    >>> d_xt = nv.cross_track_distance(path, n_EB_E, method="euclidean",
     ...                                radius=radius)
 
-    >>> val_txt = '{:4.2f} km, {:4.2f} km'.format(s_xt[0]/1000, d_xt[0]/1000)
-    >>> 'Ex10: Cross track distance: s_xt, d_xt = {0}'.format(val_txt)
+    >>> val_txt = "{:4.2f} km, {:4.2f} km".format(s_xt[0]/1000, d_xt[0]/1000)
+    >>> "Ex10: Cross track distance: s_xt, d_xt = {0}".format(val_txt)
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 
     >>> n_EC_E = nv.closest_point_on_great_circle(path, n_EB_E)
@@ -766,21 +766,21 @@ Alternative solution 3:
 def get_examples(indices, oo_solution=True):
     """Returns examples with header"""
     dic = dict(globals())
-    hdr = 'EXAMPLE_{}_HEADER'
-    txt = 'EXAMPLE_{}_TXT'
-    sol = 'EXAMPLE_{}_OBJ_SOLUTION' if oo_solution else 'EXAMPLE_{}_FUN_SOLUTION'
-    return ''.join((dic[hdr.format(i)] + dic[txt.format(i)] + dic[sol.format(i)] + see_also(i)
+    hdr = "EXAMPLE_{}_HEADER"
+    txt = "EXAMPLE_{}_TXT"
+    sol = "EXAMPLE_{}_OBJ_SOLUTION" if oo_solution else "EXAMPLE_{}_FUN_SOLUTION"
+    return "".join((dic[hdr.format(i)] + dic[txt.format(i)] + dic[sol.format(i)] + see_also(i)
                     for i in indices))
 
 
 def get_examples_no_header(indices, oo_solution=True):
     """Returns examples with no header"""
     dic = dict(globals())
-    hdr = 'EXAMPLE_{}_HEADER'
-    txt = 'EXAMPLE_{}_TXT'
-    sol = 'EXAMPLE_{}_OBJ_SOLUTION' if oo_solution else 'EXAMPLE_{}_FUN_SOLUTION'
-    return ''.join((''.join(
-        dic[hdr.format(i)].rpartition('\n')[:1]) + dic[txt.format(i)] + dic[sol.format(i)]
+    hdr = "EXAMPLE_{}_HEADER"
+    txt = "EXAMPLE_{}_TXT"
+    sol = "EXAMPLE_{}_OBJ_SOLUTION" if oo_solution else "EXAMPLE_{}_FUN_SOLUTION"
+    return "".join(("".join(
+        dic[hdr.format(i)].rpartition("\n")[:1]) + dic[txt.format(i)] + dic[sol.format(i)]
         for i in indices))
 
 
@@ -797,7 +797,7 @@ of the tutorial.
 {0}{1}{2}{3}{4}{5}{6}
 
 """.format(EXAMPLE_1_HEADER, EXAMPLE_1_TXT, EXAMPLE_1_OBJ_SOLUTION,
-           'Functional ', EXAMPLE_1_FUN_SOLUTION, see_also(1),
+           "Functional ", EXAMPLE_1_FUN_SOLUTION, see_also(1),
            get_examples(range(2, 11), oo_solution=True))
 
 
@@ -813,7 +813,7 @@ the :doc:`getting started </tutorials/getting_started>` section of the tutorial.
 {0}{1}{2}{3}{4}{5}{6}
 
 """.format(EXAMPLE_1_HEADER, EXAMPLE_1_TXT, EXAMPLE_1_FUN_SOLUTION,
-           'OO-', EXAMPLE_1_OBJ_SOLUTION, see_also(1),
+           "OO-", EXAMPLE_1_OBJ_SOLUTION, see_also(1),
            get_examples(range(2, 11), oo_solution=False))
 
 
@@ -825,7 +825,7 @@ class _DocTestFunctional(object):
     __doc__ = GETTING_STARTED_FUNCTIONAL
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from nvector._common import test_docstrings
     # print(GETTING_STARTED)
     # print(GETTING_STARTED_FUNCTIONAL)

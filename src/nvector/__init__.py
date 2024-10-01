@@ -1,8 +1,8 @@
-from ._info import __doc__  # @UnresolvedImport
-from .util import *
-from .rotation import *
-from .core import *
-from .objects import *
+from ._info import __doc__ as __doc__  # @UnresolvedImport
+from .util import *  # noqa
+from .rotation import *  # noqa
+from .core import *  # noqa
+from .objects import *  # noqa
 from ._common import use_docstring
 
 __version__ = "1.0.0"
@@ -44,4 +44,4 @@ def test(*options, plugins=None):
 
     """
     import pytest
-    return pytest.main(['--pyargs', _PACKAGE_NAME] + list(options), plugins=plugins)
+    return pytest.main(["--pyargs", _PACKAGE_NAME] + list(options), plugins=plugins)

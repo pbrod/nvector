@@ -5,12 +5,12 @@ import pytest
 from pytest import approx
 
 import numpy as np
-from nvector import GeoPoint, FrameE
+from nvector import FrameE
 
-WGS84 = FrameE(name='WGS84')
-SPHERE = FrameE(6.4e6, 0, name='sphere')
-PROLATE15 = FrameE(6.4e6, -1 / 150.0, name='prolate spheroid')
-PROLATE30 = FrameE(6.4e6, -1 / 300.0, name='prolate spheroid')
+WGS84 = FrameE(name="WGS84")
+SPHERE = FrameE(6.4e6, 0, name="sphere")
+PROLATE15 = FrameE(6.4e6, -1 / 150.0, name="prolate spheroid")
+PROLATE30 = FrameE(6.4e6, -1 / 300.0, name="prolate spheroid")
 
 
 WGS84_TESTCASES = [
