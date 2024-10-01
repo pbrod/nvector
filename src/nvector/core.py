@@ -1601,9 +1601,9 @@ _odict = globals()
 __doc__ = (  # @ReservedAssignment
     __doc__
     + _make_summary(dict((n, _odict[n]) for n in __all__))
-    + '.. only:: draft\n\n'
+    + ".. only:: draft\n\n"
     + "    License\n    -------\n    "
-    + _license.__doc__.replace('\n', '\n    ')
+    + _license.__doc__.replace("\n", "\n    ")
 )
 
 
