@@ -176,7 +176,7 @@ def third_flattening(f: Union[float, ndarray]) -> Union[float, ndarray]:
     Returns
     -------
     n : float or ndarray
-        Polar radius :math:`n`.
+        Third flattening :math:`n`.
 
     Notes
     -----
@@ -830,8 +830,9 @@ _odict = globals()
 __doc__ = (  # @ReservedAssignment
     __doc__
     + _make_summary(dict((n, _odict[n]) for n in __all__))
-    + "License\n-------\n"
-    + _license.__doc__
+    + '.. only:: draft\n\n'
+    + "    License\n    -------\n    "
+    + _license.__doc__.replace('\n', '\n    ')
 )
 
 

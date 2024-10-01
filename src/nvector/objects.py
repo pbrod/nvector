@@ -2055,8 +2055,9 @@ _ODICT = globals()
 __doc__ = (
     __doc__  # @ReservedAssignment
     + _make_summary(dict((n, _ODICT[n]) for n in __all__))
-    + "License\n-------\n"
-    + _license.__doc__
+    + '.. only:: draft\n\n'
+    + "    License\n    -------\n    "
+    + _license.__doc__.replace('\n', '\n    ')
 )
 
 
