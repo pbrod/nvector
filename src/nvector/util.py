@@ -3,6 +3,7 @@ Utility functions
 =================
 
 """
+
 from __future__ import annotations
 import warnings
 from typing import Any, NamedTuple
@@ -13,28 +14,25 @@ from numpy.linalg import norm
 
 from nvector import _license
 from nvector._common import test_docstrings, _make_summary
-from nvector._typing import (format_docstring_types,
-                             ArrayLike,
-                             NpArrayLike,
-                             Array,
-                             Union)
+from nvector._typing import format_docstring_types, ArrayLike, NpArrayLike, Array, Union
 
 
-__all__ = ["deg",
-           "rad",
-           "mdot",
-           "nthroot",
-           "get_ellipsoid",
-           "unit",
-           "isclose",
-           "allclose",
-           "eccentricity2",
-           "polar_radius",
-           "third_flattening",
-           "array_to_list_dict",
-           "dm2degrees",
-           "degrees2dm"
-           ]
+__all__ = [
+    "deg",
+    "rad",
+    "mdot",
+    "nthroot",
+    "get_ellipsoid",
+    "unit",
+    "isclose",
+    "allclose",
+    "eccentricity2",
+    "polar_radius",
+    "third_flattening",
+    "array_to_list_dict",
+    "dm2degrees",
+    "degrees2dm",
+]
 
 FINFO = np.finfo(float)
 _tiny_name = "tiny" if np.__version__ < "1.22" else "smallest_normal"
@@ -64,8 +62,11 @@ ELLIPSOID = {
     8: Ellipsoid(a=6378166.0, f=1.0 / 298.3, name="Fisher 1960"),
     9: Ellipsoid(a=6378150.0, f=1.0 / 298.3, name="Fisher 1968"),
     10: Ellipsoid(a=6378270.0, f=1.0 / 297, name="Hough 1956"),
-    11: Ellipsoid(a=6378388.0, f=1.0 / 297,
-                  name="Hayford/International ellipsoid 1924/European Datum 1950/ED50"),
+    11: Ellipsoid(
+        a=6378388.0,
+        f=1.0 / 297,
+        name="Hayford/International ellipsoid 1924/European Datum 1950/ED50",
+    ),
     12: Ellipsoid(a=6378245.0, f=1.0 / 298.3, name="Krassovsky 1938"),
     13: Ellipsoid(a=6378145.0, f=1.0 / 298.25, name="NWL-9D / WGS 66"),
     14: Ellipsoid(a=6378160.0, f=1.0 / 298.25, name="South American 1969 / SAD69"),
@@ -74,43 +75,44 @@ ELLIPSOID = {
     17: Ellipsoid(a=6378206.4, f=1.0 / 294.9786982138, name="Clarke 1866 / NAD27"),
     18: Ellipsoid(a=6378137.0, f=1.0 / 298.257223563, name="GRS80 / WGS84 / NAD83"),
     19: Ellipsoid(a=6378137.0, f=298.257222101, name="ETRS89 / EUREF89"),
-    20: Ellipsoid(a=6377492.0176, f=1/299.15281285, name="NGO1948")
+    20: Ellipsoid(a=6377492.0176, f=1 / 299.15281285, name="NGO1948"),
 }
 """Dictionary enumeration of supported ellipsoids. Synonyms are partitioned by "/" characters"""
-ELLIPSOID_IX = {"airy1858": 1,
-                "airymodified": 2,
-                "australiannational": 3,
-                "bessel": 4,
-                "bessel1841": 4,
-                "clarke1880": 5,
-                "everest1830": 6,
-                "everestmodified": 7,
-                "fisher1960": 8,
-                "fisher1968": 9,
-                "hough1956": 10,
-                "hough": 10,
-                "hayford": 11,
-                "international": 11,
-                "internationalellipsoid1924": 11,
-                "europeandatum1950": 11,
-                "ed50": 11,
-                "krassovsky": 12,
-                "krassovsky1938": 12,
-                "nwl-9d": 13,
-                "wgs66": 13,
-                "southamerican1969": 14,
-                "sad69": 14,
-                "sovietgeod.system1985": 15,
-                "wgs72": 16,
-                "clarke1866": 17,
-                "nad27": 17,
-                "grs80": 18,
-                "wgs84": 18,
-                "nad83": 18,
-                "euref89": 19,
-                "etrs89": 19,
-                "ngo1948": 20
-                }
+ELLIPSOID_IX = {
+    "airy1858": 1,
+    "airymodified": 2,
+    "australiannational": 3,
+    "bessel": 4,
+    "bessel1841": 4,
+    "clarke1880": 5,
+    "everest1830": 6,
+    "everestmodified": 7,
+    "fisher1960": 8,
+    "fisher1968": 9,
+    "hough1956": 10,
+    "hough": 10,
+    "hayford": 11,
+    "international": 11,
+    "internationalellipsoid1924": 11,
+    "europeandatum1950": 11,
+    "ed50": 11,
+    "krassovsky": 12,
+    "krassovsky1938": 12,
+    "nwl-9d": 13,
+    "wgs66": 13,
+    "southamerican1969": 14,
+    "sad69": 14,
+    "sovietgeod.system1985": 15,
+    "wgs72": 16,
+    "clarke1866": 17,
+    "nad27": 17,
+    "grs80": 18,
+    "wgs84": 18,
+    "nad83": 18,
+    "euref89": 19,
+    "etrs89": 19,
+    "ngo1948": 20,
+}
 """Inverse mapping between a name string and ellipsoid ID"""
 
 
@@ -234,12 +236,9 @@ def array_to_list_dict(data: Union[Any, ndarray, list, tuple, dict]) -> Union[An
 
 
 @format_docstring_types
-def isclose(a: ArrayLike,
-            b: ArrayLike,
-            rtol: float=1e-9,
-            atol: float=0.0,
-            equal_nan: bool=False
-            ) -> ndarray:
+def isclose(
+    a: ArrayLike, b: ArrayLike, rtol: float = 1e-9, atol: float = 0.0, equal_nan: bool = False
+) -> ndarray:
     """
     Returns True where the two arrays `a` and `b` are element-wise equal within a tolerance.
 
@@ -311,7 +310,7 @@ def isclose(a: ArrayLike,
     mask = np.isfinite(a) & np.isfinite(b)
 
     out = np.full(b.shape, False)
-    abs_tol = np.maximum(atol, rtol*np.maximum(np.abs(a[mask]), np.abs(b[mask])))
+    abs_tol = np.maximum(atol, rtol * np.maximum(np.abs(a[mask]), np.abs(b[mask])))
     out[mask] = np.isclose(a[mask], b[mask], rtol=0, atol=abs_tol, equal_nan=equal_nan)
     mask = ~mask
     out[mask] = np.isclose(a[mask], b[mask], equal_nan=equal_nan)
@@ -319,12 +318,9 @@ def isclose(a: ArrayLike,
 
 
 @format_docstring_types
-def allclose(a: ArrayLike,
-             b: ArrayLike,
-             rtol: float=1.e-7,
-             atol: float=1.e-14,
-             equal_nan: bool=False
-             ) -> np.bool_:
+def allclose(
+    a: ArrayLike, b: ArrayLike, rtol: float = 1.0e-7, atol: float = 1.0e-14, equal_nan: bool = False
+) -> np.bool_:
     """
     Returns True if two arrays are element-wise equal within a tolerance.
 
@@ -387,7 +383,7 @@ def allclose(a: ArrayLike,
     return np.all(isclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan))
 
 
-def _nvector_check_length(n_E: ndarray, atol: float=0.1) -> None:
+def _nvector_check_length(n_E: ndarray, atol: float = 0.1) -> None:
     """
     Emits a warning if nvector deviates significantly from unit length.
 
@@ -413,8 +409,8 @@ def _nvector_check_length(n_E: ndarray, atol: float=0.1) -> None:
     """
     length_deviation = abs(norm(n_E[:, 0]) - 1)
     if length_deviation > atol:
-        warnings.warn("n-vector should have unit length: "
-                      "norm(n_E)~=1 ! Error is: {}".format(length_deviation), stacklevel=2)
+        msg = "n-vector should have unit length: norm(n_E)~=1 ! Error is: {}"
+        warnings.warn(msg.format(length_deviation), stacklevel=2)
 
 
 @format_docstring_types
@@ -699,10 +695,10 @@ def nthroot(x: ArrayLike, n: int) -> NpArrayLike:
     """
     shape = np.shape(x)
     x = np.atleast_1d(x)
-    y = x**(1. / n)
+    y = x ** (1.0 / n)
     mask = (x != 0) & (_EPS * np.abs(x) < 1)
     ym = y[mask]
-    y[mask] -= (ym**n - x[mask]) / (n * ym**(n - 1))
+    y[mask] -= (ym**n - x[mask]) / (n * ym ** (n - 1))
     if shape == ():
         return y[()]
     return y
@@ -780,10 +776,9 @@ def get_ellipsoid(name: Union[int, str]) -> Ellipsoid:
 
 
 @format_docstring_types
-def unit(vector: Array,
-         norm_zero_vector: Union[int, float]=1,
-         norm_zero_axis: int=0
-         ) -> ndarray:
+def unit(
+    vector: Array, norm_zero_vector: Union[int, float] = 1, norm_zero_axis: int = 0
+) -> ndarray:
     """
     Convert input vector to a vector of unit length.
 
@@ -817,13 +812,12 @@ def unit(vector: Array,
     True
     """
     if not (norm_zero_vector == 1 or np.isnan(norm_zero_vector)):
-        warnings.warn("The `norm_zero_vector` parameter must be either 1 or NaN",
-                      stacklevel=2)
+        warnings.warn("The `norm_zero_vector` parameter must be either 1 or NaN", stacklevel=2)
     # Scale to avoid overflow
     unit_vector = np.atleast_1d(vector) / (np.max(np.abs(vector), axis=0, keepdims=True) + _TINY)
 
     current_norm = norm(unit_vector, axis=0, keepdims=True)
-    unit_vector /= (current_norm + _TINY)
+    unit_vector /= current_norm + _TINY
 
     idx = np.flatnonzero(current_norm == 0)
     unit_vector[:, idx] = 0 * norm_zero_vector
@@ -833,10 +827,12 @@ def unit(vector: Array,
 
 
 _odict = globals()
-__doc__ = (__doc__  # @ReservedAssignment
-           + _make_summary(dict((n, _odict[n]) for n in __all__))
-           + "License\n-------\n"
-           + _license.__doc__)
+__doc__ = (  # @ReservedAssignment
+    __doc__
+    + _make_summary(dict((n, _odict[n]) for n in __all__))
+    + "License\n-------\n"
+    + _license.__doc__
+)
 
 
 if __name__ == "__main__":

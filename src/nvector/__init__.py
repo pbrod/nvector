@@ -10,10 +10,12 @@ __version__ = "1.0.0"
 _PACKAGE_NAME = __name__
 
 
-@use_docstring("""
+@use_docstring(
+    """
 import {0} as {1}
 {1}.test('-q', '--doctest-modules', '--cov={0}', '--disable-warnings')
-""".format(_PACKAGE_NAME, _PACKAGE_NAME[:2]))
+""".format(_PACKAGE_NAME, _PACKAGE_NAME[:2])
+)
 def test(*options, plugins=None):
     """
     Run tests for module using pytest.
@@ -44,4 +46,5 @@ def test(*options, plugins=None):
 
     """
     import pytest
+
     return pytest.main(["--pyargs", _PACKAGE_NAME] + list(options), plugins=plugins)

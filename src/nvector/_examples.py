@@ -769,8 +769,12 @@ def get_examples(indices, oo_solution=True):
     hdr = "EXAMPLE_{}_HEADER"
     txt = "EXAMPLE_{}_TXT"
     sol = "EXAMPLE_{}_OBJ_SOLUTION" if oo_solution else "EXAMPLE_{}_FUN_SOLUTION"
-    return "".join((dic[hdr.format(i)] + dic[txt.format(i)] + dic[sol.format(i)] + see_also(i)
-                    for i in indices))
+    return "".join(
+        (
+            dic[hdr.format(i)] + dic[txt.format(i)] + dic[sol.format(i)] + see_also(i)
+            for i in indices
+        )
+    )
 
 
 def get_examples_no_header(indices, oo_solution=True):
@@ -779,9 +783,14 @@ def get_examples_no_header(indices, oo_solution=True):
     hdr = "EXAMPLE_{}_HEADER"
     txt = "EXAMPLE_{}_TXT"
     sol = "EXAMPLE_{}_OBJ_SOLUTION" if oo_solution else "EXAMPLE_{}_FUN_SOLUTION"
-    return "".join(("".join(
-        dic[hdr.format(i)].rpartition("\n")[:1]) + dic[txt.format(i)] + dic[sol.format(i)]
-        for i in indices))
+    return "".join(
+        (
+            "".join(dic[hdr.format(i)].rpartition("\n")[:1])
+            + dic[txt.format(i)]
+            + dic[sol.format(i)]
+            for i in indices
+        )
+    )
 
 
 GETTING_STARTED = """
@@ -796,9 +805,15 @@ of the tutorial.
 
 {0}{1}{2}{3}{4}{5}{6}
 
-""".format(EXAMPLE_1_HEADER, EXAMPLE_1_TXT, EXAMPLE_1_OBJ_SOLUTION,
-           "Functional ", EXAMPLE_1_FUN_SOLUTION, see_also(1),
-           get_examples(range(2, 11), oo_solution=True))
+""".format(
+    EXAMPLE_1_HEADER,
+    EXAMPLE_1_TXT,
+    EXAMPLE_1_OBJ_SOLUTION,
+    "Functional ",
+    EXAMPLE_1_FUN_SOLUTION,
+    see_also(1),
+    get_examples(range(2, 11), oo_solution=True),
+)
 
 
 GETTING_STARTED_FUNCTIONAL = """
@@ -812,9 +827,15 @@ the :doc:`getting started </tutorials/getting_started>` section of the tutorial.
 
 {0}{1}{2}{3}{4}{5}{6}
 
-""".format(EXAMPLE_1_HEADER, EXAMPLE_1_TXT, EXAMPLE_1_FUN_SOLUTION,
-           "OO-", EXAMPLE_1_OBJ_SOLUTION, see_also(1),
-           get_examples(range(2, 11), oo_solution=False))
+""".format(
+    EXAMPLE_1_HEADER,
+    EXAMPLE_1_TXT,
+    EXAMPLE_1_FUN_SOLUTION,
+    "OO-",
+    EXAMPLE_1_OBJ_SOLUTION,
+    see_also(1),
+    get_examples(range(2, 11), oo_solution=False),
+)
 
 
 class _DocTestOO(object):
@@ -827,6 +848,7 @@ class _DocTestFunctional(object):
 
 if __name__ == "__main__":
     from nvector._common import test_docstrings
+
     # print(GETTING_STARTED)
     # print(GETTING_STARTED_FUNCTIONAL)
     test_docstrings(__file__)

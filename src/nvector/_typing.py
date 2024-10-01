@@ -3,6 +3,7 @@ Created on 26. sep. 2024
 
 @author: pab
 """
+
 import warnings
 from typing import Union
 from numpy import ndarray, float64
@@ -16,9 +17,7 @@ NpArrayLikeTxt = "float64 or ndarray"
 Array = Union[list, tuple, ndarray]
 ArrayTxt = "list, tuple or ndarray"
 
-TYPES_DICT = dict(array=ArrayTxt,
-                  array_like=ArrayLikeTxt,
-                  np_array_like=NpArrayLikeTxt)
+TYPES_DICT = dict(array=ArrayTxt, array_like=ArrayLikeTxt, np_array_like=NpArrayLikeTxt)
 
 
 def format_docstring_types(func):
@@ -41,4 +40,3 @@ def format_docstring_types(func):
             warnings.warn(str(error), stacklevel=2)
             # python 2 crashes if the docstring already exists!
     return func
-

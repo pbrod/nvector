@@ -16,21 +16,26 @@ import re
 import glob
 from datetime import datetime
 from pathlib import Path
+
 CURRENT_YEAR = datetime.now().year
 START_YEAR = 2015
 
-DEV_YEARS = '{}'.format(START_YEAR) if START_YEAR == CURRENT_YEAR else '{}-{}'.format(START_YEAR, CURRENT_YEAR)
+DEV_YEARS = (
+    "{}".format(START_YEAR)
+    if START_YEAR == CURRENT_YEAR
+    else "{}-{}".format(START_YEAR, CURRENT_YEAR)
+)
 # General information about the project.
 
 
-project = u'Nvector'
+project = "Nvector"
 PACKAGE_NAME = project.lower()
-author = 'Kenneth Gade and Per A. Brodtkorb'
-organizations = 'Norwegian Defence Research Establishment (FFI)'
-copyright = ', '.join((DEV_YEARS, organizations))
+author = "Kenneth Gade and Per A. Brodtkorb"
+organizations = "Norwegian Defence Research Establishment (FFI)"
+copyright = ", ".join((DEV_YEARS, organizations))
 
 __location__ = os.path.abspath(os.path.dirname(__file__))
-SOURCE_PATH = os.path.join(os.path.dirname(__location__), 'src')
+SOURCE_PATH = os.path.join(os.path.dirname(__location__), "src")
 sys.path.insert(0, SOURCE_PATH)
 sys.path.insert(0, os.fspath(Path(__file__).parents[1] / "src"))  # OK
 
@@ -43,18 +48,17 @@ sys.path.insert(0, os.fspath(Path(__file__).parents[1] / "src"))  # OK
 # Additionally it helps us to avoid running apidoc manually
 
 #
-#from sphinx import apidoc
+# from sphinx import apidoc
 #
-#output_dir = os.path.join(__location__, "api")
-#module_dir = os.path.join(__location__, "../src", PACKAGE_NAME)
-#try:
+# output_dir = os.path.join(__location__, "api")
+# module_dir = os.path.join(__location__, "../src", PACKAGE_NAME)
+# try:
 #    shutil.rmtree(output_dir)
-#except Exception:
+# except Exception:
 #    pass
-#cmd_line_template = "sphinx-apidoc -f -o {outputdir} {moduledir}"
-#cmd_line = cmd_line_template.format(outputdir=output_dir, moduledir=module_dir)
-#apidoc.main(cmd_line.split(" "))
-
+# cmd_line_template = "sphinx-apidoc -f -o {outputdir} {moduledir}"
+# cmd_line = cmd_line_template.format(outputdir=output_dir, moduledir=module_dir)
+# apidoc.main(cmd_line.split(" "))
 
 
 # -- General configuration ------------------------------------------------
@@ -66,51 +70,52 @@ sys.path.insert(0, os.fspath(Path(__file__).parents[1] / "src"))  # OK
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc',
-              'sphinx.ext.doctest',
-              'sphinx.ext.intersphinx',
-              'sphinx.ext.todo',
-              #'sphinx.ext.autosummary',
-              'sphinx.ext.viewcode',
-              'sphinx.ext.coverage',
-              'sphinx.ext.ifconfig',
-              'sphinx.ext.imgmath',
-              #'numpydoc',
-              'sphinx.ext.napoleon',
-              'sphinxcontrib.bibtex',
-              # 'matplotlib.sphinxext.mathmpl',
-              'matplotlib.sphinxext.plot_directive', # See https://stackoverflow.com/questions/16047271/plot-directive-in-restructured-text
-              ]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.doctest",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.todo",
+    #'sphinx.ext.autosummary',
+    "sphinx.ext.viewcode",
+    "sphinx.ext.coverage",
+    "sphinx.ext.ifconfig",
+    "sphinx.ext.imgmath",
+    #'numpydoc',
+    "sphinx.ext.napoleon",
+    "sphinxcontrib.bibtex",
+    # 'matplotlib.sphinxext.mathmpl',
+    "matplotlib.sphinxext.plot_directive",  # See https://stackoverflow.com/questions/16047271/plot-directive-in-restructured-text
+]
 
-bibtex_bibfiles = ['appendix/refs1.bib']
+bibtex_bibfiles = ["appendix/refs1.bib"]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ".rst"
 
 # The encoding of source files.
-source_encoding = 'utf-8'
+source_encoding = "utf-8"
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-PACKAGE = importlib.import_module(PACKAGE_NAME, './src')
+PACKAGE = importlib.import_module(PACKAGE_NAME, "./src")
 
 # The full version, including alpha/beta/rc tags.
 release = PACKAGE.__version__
 
 #
 # The short X.Y version
-version = re.sub(r'(\d+\.\d+)\.\d+(.*)', r'\1\2', release)
-version = re.sub(r'(\.dev\d+).*?$', r'\1', version)
+version = re.sub(r"(\d+\.\d+)\.\d+(.*)", r"\1\2", release)
+version = re.sub(r"(\.dev\d+).*?$", r"\1", version)
 print("{0!s} {1!s}".format(version, release))
 
 
@@ -119,7 +124,7 @@ print("{0!s} {1!s}".format(version, release))
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = 'en'
+language = "en"
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -129,24 +134,24 @@ language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build', 'tests', '_*.py']
+exclude_patterns = ["_build", "tests", "_*.py"]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 # default_role = None
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
-add_function_parentheses = True # pab False
+add_function_parentheses = True  # pab False
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
-add_module_names = True # pab False  
+add_module_names = True  # pab False
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
 # show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
@@ -182,7 +187,7 @@ autosummary_generate = glob.glob("reference/*.rst")
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinx_rtd_theme' # 'alabaster'
+html_theme = "sphinx_rtd_theme"  # 'alabaster'
 # If true, the index is generated twice: once as a single page with all the entries, and once as one page per starting letter. Default is False.
 html_split_index = True
 
@@ -199,7 +204,7 @@ html_show_copyright = True
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 
 # Custom sidebar templates, must be a dictionary that maps document names
@@ -218,20 +223,21 @@ html_static_path = ['_static']
 # }
 
 
-
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = PACKAGE_NAME + 'doc'
+htmlhelp_basename = PACKAGE_NAME + "doc"
 
 
 # -- Options for LaTeX output
 # Documents to append as an appendix to all manuals.
-latex_appendices = ['appendix/changelog',
-                    'appendix/authors',
-                    'appendix/license',
-                    'appendix/acknowledgement',
-                    'appendix/zreferences']
+latex_appendices = [
+    "appendix/changelog",
+    "appendix/authors",
+    "appendix/license",
+    "appendix/acknowledgement",
+    "appendix/zreferences",
+]
 # Ensure that the bibliography directive is processed after all cites.
 # Sphinx appears to process files in an alphabetical manner. For instance, in case you have
 # only one file containing a bibliography directive, simply name that file zreferences.rst.
@@ -242,39 +248,41 @@ latex_appendices = ['appendix/changelog',
 latex_domain_indices = False
 
 # latex_engine = 'xelatex'
-latex_engine = 'pdflatex'
+latex_engine = "pdflatex"
 
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc,  '{}-{}.tex'.format(PACKAGE_NAME, release), project + ' Documentation for Python',
-     author, 'manual'),
+    (
+        master_doc,
+        "{}-{}.tex".format(PACKAGE_NAME, release),
+        project + " Documentation for Python",
+        author,
+        "manual",
+    ),
 ]
 
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
-    'papersize': 'a4paper',
-
+    "papersize": "a4paper",
     # The font size ('10pt', '11pt' or '12pt').
     # 'pointsize': '10pt',
-
     # Additional stuff for the LaTeX preamble.
-    'preamble': r'''
+    "preamble": r"""
 %%%add number to subsubsection 2=subsection, 3=subsubsection
 %%% below subsubsection is not good idea.
 \setcounter{secnumdepth}{3}
 %
 %%%% Table of content upto 2=subsection, 3=subsubsection
 \setcounter{tocdepth}{2}
-''',
-
+""",
     # Latex figure (float) alignment
-    'figure_align': 'htbp',
-#    'fncychap': '\\usepackage{fncychap}',
-#    'fontpkg': '\\usepackage{amsmath,amsfonts,amssymb,amsthm}',
-#    'printindex': r'\footnotesize\raggedright\printindex',
+    "figure_align": "htbp",
+    #    'fncychap': '\\usepackage{fncychap}',
+    #    'fontpkg': '\\usepackage{amsmath,amsfonts,amssymb,amsthm}',
+    #    'printindex': r'\footnotesize\raggedright\printindex',
 }
 
 
@@ -285,7 +293,7 @@ latex_logo = "_static/logo.jpg"
 # If true, show page references after internal links.
 latex_show_pagerefs = False
 # If true, show URL addresses after external links.
-latex_show_urls = 'footnote'  # 'no', 'inline'
+latex_show_urls = "footnote"  # 'no', 'inline'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
@@ -298,15 +306,11 @@ latex_use_parts = True
 # latex_show_urls = False
 
 
-
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, PACKAGE_NAME, project + ' Documentation',
-     [author], 1)
-]
+man_pages = [(master_doc, PACKAGE_NAME, project + " Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
@@ -315,9 +319,15 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, PACKAGE_NAME, project + ' Documentation',
-     author, PACKAGE_NAME, 'One line description of project.',
-     'Miscellaneous'),
+    (
+        master_doc,
+        PACKAGE_NAME,
+        project + " Documentation",
+        author,
+        PACKAGE_NAME,
+        "One line description of project.",
+        "Miscellaneous",
+    ),
 ]
 
 
@@ -339,25 +349,26 @@ epub_copyright = copyright
 # epub_uid = ''
 
 # A list of files that should not be packed into the epub file.
-epub_exclude_files = ['search.html']
+epub_exclude_files = ["search.html"]
 
 # -- External mapping ------------------------------------------------------------
-python_version = '.'.join(map(str, sys.version_info[0:2]))
+python_version = ".".join(map(str, sys.version_info[0:2]))
 intersphinx_mapping = {
-    'sphinx': ('http://www.sphinx-doc.org/en/stable', None),
-    'python': ('https://docs.python.org/' + python_version, None),
-    'matplotlib': ('https://matplotlib.org', None),
-    'numpy': ('https://docs.scipy.org/doc/numpy', None),
-    'sklearn': ('http://scikit-learn.org/stable', None),
-    'pandas': ('http://pandas.pydata.org/pandas-docs/stable', None),
-    'scipy': ('https://docs.scipy.org/doc/scipy/reference', None),
+    "sphinx": ("http://www.sphinx-doc.org/en/stable", None),
+    "python": ("https://docs.python.org/" + python_version, None),
+    "matplotlib": ("https://matplotlib.org", None),
+    "numpy": ("https://docs.scipy.org/doc/numpy", None),
+    "sklearn": ("http://scikit-learn.org/stable", None),
+    "pandas": ("http://pandas.pydata.org/pandas-docs/stable", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
 }
 
 # -- Doctest configuration ----------------------------------------
 
 import doctest
 
-doctest_default_flags = (0
+doctest_default_flags = (
+    0
     | doctest.DONT_ACCEPT_TRUE_FOR_1
     | doctest.ELLIPSIS
     | doctest.IGNORE_EXCEPTION_DETAIL

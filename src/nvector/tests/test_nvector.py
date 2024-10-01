@@ -19,30 +19,33 @@ in degrees, the variable name has the following ending: _deg
 
 - The dot product (inner product) of vectors x and y is written dot(x,y).
 """
+
 from functools import partial
 import numpy as np
 
 from nvector.util import unit, deg, rad
 from nvector.rotation import zyx2R, n_E2R_EN
-from nvector.core import (lat_lon2n_E, n_E2lat_lon,
-                          n_EA_E_and_n_EB_E2p_AB_E,
-                          n_EA_E_and_p_AB_E2n_EB_E,
-                          p_EB_E2n_EB_E,
-                          n_EB_E2p_EB_E,
-                          mean_horizontal_position,
-                          great_circle_distance,
-                          euclidean_distance,
-                          cross_track_distance,
-                          closest_point_on_great_circle,
-                          n_EA_E_distance_and_azimuth2n_EB_E,
-                          n_EA_E_and_n_EB_E2azimuth)
+from nvector.core import (
+    lat_lon2n_E,
+    n_E2lat_lon,
+    n_EA_E_and_n_EB_E2p_AB_E,
+    n_EA_E_and_p_AB_E2n_EB_E,
+    p_EB_E2n_EB_E,
+    n_EB_E2p_EB_E,
+    mean_horizontal_position,
+    great_circle_distance,
+    euclidean_distance,
+    cross_track_distance,
+    closest_point_on_great_circle,
+    n_EA_E_distance_and_azimuth2n_EB_E,
+    n_EA_E_and_n_EB_E2azimuth,
+)
 from numpy.testing import assert_allclose as _assert_allclose  # @UnresolvedImport
 
 assert_allclose = partial(_assert_allclose, atol=1e-15)
 
 
 def test_Ex1_A_and_B_to_delta_in_frame_N():
-
     # Positions A and B are given in (decimal) degrees and depths:
     lat_EA, lon_EA, z_EA = rad(1), rad(2), 3
     lat_EB, lon_EB, z_EB = rad(4), rad(5), 6
@@ -76,9 +79,7 @@ def test_Ex1_A_and_B_to_delta_in_frame_N():
     azimuth = np.arctan2(p_AB_N[1], p_AB_N[0])
     # positive angle about down-axis
 
-    print("Ex1, delta north, east, down = {0}, {1}, {2}".format(p_AB_N[0],
-                                                                p_AB_N[1],
-                                                                p_AB_N[2]))
+    print("Ex1, delta north, east, down = {0}, {1}, {2}".format(p_AB_N[0], p_AB_N[1], p_AB_N[2]))
     print("Ex1, azimuth = {0} deg".format(deg(azimuth)))
 
     assert_allclose(p_AB_N[0], 331730.23478089)
@@ -129,7 +130,6 @@ def test_Ex2_B_and_delta_in_frame_B_to_C_in_frame_E():
 
 
 def test_Ex3_ECEF_vector_to_geodetic_latitude():
-
     # Position B is given as p_EB_E ("ECEF-vector")
 
     p_EB_E = 6371e3 * np.vstack((0.9, -1, 1.1))  # m
@@ -152,7 +152,6 @@ def test_Ex3_ECEF_vector_to_geodetic_latitude():
 
 
 def test_Ex4_geodetic_latitude_to_ECEF_vector():
-
     # Position B is given with lat, long and height:
     lat_EB_deg = 1
     long_EB_deg = 2
@@ -173,7 +172,6 @@ def test_Ex4_geodetic_latitude_to_ECEF_vector():
 
 
 def test_Ex5_great_circle_distance():
-
     # Position A and B are given as n_EA_E and n_EB_E:
     # Enter elements as lat/long in deg:
     n_EA_E = lat_lon2n_E(rad(88), rad(0))
@@ -193,7 +191,6 @@ def test_Ex5_great_circle_distance():
 
 
 def test_Ex6_interpolated_position():
-
     # Position B at time t0 and t2 is given as n_EB_E_t0 and n_EB_E_t1:
     # Enter elements as lat/long in deg:
     n_EB_E_t0 = lat_lon2n_E(rad(89), rad(0))
@@ -217,11 +214,10 @@ def test_Ex6_interpolated_position():
     print(msg.format(deg(lat_EB_ti), deg(long_EB_ti)))
 
     assert_allclose(deg(lat_EB_ti), 89.7999805)
-    assert_allclose(deg(long_EB_ti), 180.)
+    assert_allclose(deg(long_EB_ti), 180.0)
 
 
 def test_Ex7_mean_position():
-
     # Three positions A, B and C are given:
     # Enter elements as lat/long in deg:
     n_EA_E = lat_lon2n_E(rad(90), rad(0))
@@ -245,7 +241,6 @@ def test_Ex7_mean_position():
 
 
 def test_Ex8_position_A_and_azimuth_and_distance_to_B():
-
     # Position A is given as n_EA_E:
     # Enter elements as lat/long in deg:
     lat, lon = rad(80), rad(-90)
@@ -270,8 +265,7 @@ def test_Ex8_position_A_and_azimuth_and_distance_to_B():
     # When displaying the resulting position for humans, it is more
     # convenient to see lat, long:
     lat_EB, long_EB = n_E2lat_lon(n_EB_E)
-    print("Ex8, Destination: lat, long = {0} {1} deg".format(deg(lat_EB),
-                                                             deg(long_EB)))
+    print("Ex8, Destination: lat, long = {0} {1} deg".format(deg(lat_EB), deg(long_EB)))
 
     assert_allclose(deg(lat_EB), 79.99154867)
     assert_allclose(deg(long_EB), -90.01769837)
@@ -280,7 +274,6 @@ def test_Ex8_position_A_and_azimuth_and_distance_to_B():
 
 
 def test_Ex9_intersect():
-
     # Two paths A and B are given by two pairs of positions:
     # Enter elements as lat/long in deg:
     n_EA1_E = lat_lon2n_E(rad(10), rad(20))
@@ -289,8 +282,9 @@ def test_Ex9_intersect():
     n_EB2_E = lat_lon2n_E(rad(70), rad(80))
 
     # Find the intersection between the two paths, n_EC_E:
-    n_EC_E_tmp = unit(np.cross(np.cross(n_EA1_E, n_EA2_E, axis=0),
-                               np.cross(n_EB1_E, n_EB2_E, axis=0), axis=0))
+    n_EC_E_tmp = unit(
+        np.cross(np.cross(n_EA1_E, n_EA2_E, axis=0), np.cross(n_EB1_E, n_EB2_E, axis=0), axis=0)
+    )
 
     # n_EC_E_tmp is one of two solutions, the other is -n_EC_E_tmp. Select
     # the one that is closet to n_EA1_E, by selecting sign from the dot
@@ -307,7 +301,6 @@ def test_Ex9_intersect():
 
 
 def test_Ex10_cross_track_distance():
-
     # Position A1 and A2 and B are given as n_EA1_E, n_EA2_E, and n_EB_E:
     # Enter elements as lat/long in deg:
     n_EA1_E = lat_lon2n_E(rad(0), rad(0))
@@ -345,7 +338,7 @@ def test_small_and_large_cross_track_distance():
     path = (n_EA1_E, n_EA2_E)
     n_EB1_E = closest_point_on_great_circle(path, n_EB0_E)
 
-    for s_xt0 in [np.pi * radius, np.pi / 3 * radius, 10., 0.1, 1e-3, 1e-4, 1e-5, 1e-8]:
+    for s_xt0 in [np.pi * radius, np.pi / 3 * radius, 10.0, 0.1, 1e-3, 1e-4, 1e-5, 1e-8]:
         distance_rad = s_xt0 / radius
         n_EB_E = n_EA_E_distance_and_azimuth2n_EB_E(n_EB1_E, distance_rad, np.pi / 2)
 
@@ -356,9 +349,13 @@ def test_small_and_large_cross_track_distance():
         s_xt3 = cross_track_distance(path, n_EB_E, method="greatcircle", radius=radius)
 
         # pylint: disable=invalid-unary-operand-type
-        s_xt4 = np.arctan2(-np.dot(c_E.T, n_EB_E),
-                           np.linalg.norm(np.cross(c_E, n_EB_E, axis=0), axis=0)) * radius
-        rtol = 10**(-min(9 + np.log10(s_xt0), 15))
+        s_xt4 = (
+            np.arctan2(
+                -np.dot(c_E.T, n_EB_E), np.linalg.norm(np.cross(c_E, n_EB_E, axis=0), axis=0)
+            )
+            * radius
+        )
+        rtol = 10 ** (-min(9 + np.log10(s_xt0), 15))
         if s_xt0 <= np.pi / 3 * radius:
             assert_allclose(n_EB2_E, n_EB1_E)
             assert_allclose(s_xt2, s_xt0, rtol=rtol)

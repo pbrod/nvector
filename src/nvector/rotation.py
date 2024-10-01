@@ -3,6 +3,7 @@ Module related to rotation matrices and angles
 ==============================================
 
 """
+
 from __future__ import annotations
 
 from typing import Optional
@@ -14,29 +15,27 @@ from nvector._common import test_docstrings, _make_summary
 from nvector.util import mdot, unit, norm, _nvector_check_length
 from nvector._typing import ArrayLike, NpArrayLike, Array, format_docstring_types
 
-__all__ = ["E_rotation",
-           "n_E_and_wa2R_EL",
-           "n_E2R_EN",
-           "R_EL2n_E",
-           "R_EN2n_E",
-           "R2xyz",
-           "R2zyx",
-           "xyz2R",
-           "zyx2R",
-           "change_axes_to_E"
-           ]
+__all__ = [
+    "E_rotation",
+    "n_E_and_wa2R_EL",
+    "n_E2R_EN",
+    "R_EL2n_E",
+    "R_EN2n_E",
+    "R2xyz",
+    "R2zyx",
+    "xyz2R",
+    "zyx2R",
+    "change_axes_to_E",
+]
 
 _EPS = np.finfo(float).eps
-E_ROTATION_MATRIX = dict(e=np.array([[0, 0, 1.0],
-                                     [0, 1.0, 0],
-                                     [-1.0, 0, 0]]),
-                         E=np.eye(3))
+E_ROTATION_MATRIX = dict(e=np.array([[0, 0, 1.0], [0, 1.0, 0], [-1.0, 0, 0]]), E=np.eye(3))
 """Rotation matrix defining the axes of the coordinate frame E."""
 
 # pylint: disable=invalid-name
 
 
-def E_rotation(axes: str="e") -> ndarray:
+def E_rotation(axes: str = "e") -> ndarray:
     """
     Returns rotation matrix R_Ee defining the axes of the coordinate frame E.
 
@@ -85,6 +84,7 @@ def E_rotation(axes: str="e") -> ndarray:
     """
     return E_ROTATION_MATRIX[axes]
 
+
 @format_docstring_types
 def R2xyz(R_AB: Array) -> tuple[NpArrayLike, NpArrayLike, NpArrayLike]:
     """
@@ -130,22 +130,26 @@ def R2xyz(R_AB: Array) -> tuple[NpArrayLike, NpArrayLike, NpArrayLike]:
     # cos_y is based on as many elements as possible, to average out
     # numerical errors. It is selected as the positive square root since
     # y: [-pi/2 pi/2]
-    cos_y = sqrt((R_AB[0, 0, ...]**2 + R_AB[0, 1, ...]**2
-                  + R_AB[1, 2, ...]**2 + R_AB[2, 2, ...]**2) / 2)
+    cos_y = sqrt(
+        (R_AB[0, 0, ...] ** 2 + R_AB[0, 1, ...] ** 2 + R_AB[1, 2, ...] ** 2 + R_AB[2, 2, ...] ** 2)
+        / 2
+    )
     sin_y = R_AB[0, 2, ...]
 
     non_singular = cos_y > 10 * _EPS  # atan2: [-pi pi]
-    x = np.where(non_singular,
-                 arctan2(-R_AB[1, 2, ...], R_AB[2, 2, ...]),
-                 0)  # Only the sum/difference of x and z is now given, choosing x = 0
-    y = np.where(non_singular,
-                 arctan2(sin_y, cos_y),
-                 np.sign(sin_y) * np.pi/2)  # Selecting y = +-pi/2, with correct sign
-    z = np.where(non_singular,
-                 arctan2(-R_AB[0, 1, ...], R_AB[0, 0, ...]),
-                 # Lower left 2x2 elements of R_AB now only consists of sin_z and cos_z.
-                 # Using the two whose signs are the same for both singularities:
-                 arctan2(R_AB[1, 0, ...], R_AB[1, 1, ...]))
+    x = np.where(
+        non_singular, arctan2(-R_AB[1, 2, ...], R_AB[2, 2, ...]), 0
+    )  # Only the sum/difference of x and z is now given, choosing x = 0
+    y = np.where(
+        non_singular, arctan2(sin_y, cos_y), np.sign(sin_y) * np.pi / 2
+    )  # Selecting y = +-pi/2, with correct sign
+    z = np.where(
+        non_singular,
+        arctan2(-R_AB[0, 1, ...], R_AB[0, 0, ...]),
+        # Lower left 2x2 elements of R_AB now only consists of sin_z and cos_z.
+        # Using the two whose signs are the same for both singularities:
+        arctan2(R_AB[1, 0, ...], R_AB[1, 1, ...]),
+    )
     return x, y, z
 
 
@@ -323,9 +327,13 @@ def xyz2R(x: ArrayLike, y: ArrayLike, z: ArrayLike) -> ndarray:
     sx, sy, sz = sin(x), sin(y), sin(z)
     cx, cy, cz = cos(x), cos(y), cos(z)
 
-    R_AB = array([[cy * cz, -cy * sz, sy],
-                  [sy * sx * cz + cx * sz, -sy * sx * sz + cx * cz, -cy * sx],
-                  [-sy * cx * cz + sx * sz, sy * cx * sz + sx * cz, cy * cx]])
+    R_AB = array(
+        [
+            [cy * cz, -cy * sz, sy],
+            [sy * sx * cz + cx * sz, -sy * sx * sz + cx * cz, -cy * sx],
+            [-sy * cx * cz + sx * sz, sy * cx * sz + sx * cz, cy * cx],
+        ]
+    )
 
     return np.squeeze(R_AB)
 
@@ -401,15 +409,19 @@ def zyx2R(z: ArrayLike, y: ArrayLike, x: ArrayLike) -> ndarray:
     sx, sy, sz = sin(x), sin(y), sin(z)
     cx, cy, cz = cos(x), cos(y), cos(z)
 
-    R_AB = array([[cz * cy, -sz * cx + cz * sy * sx, sz * sx + cz * sy * cx],
-                  [sz * cy, cz * cx + sz * sy * sx, - cz * sx + sz * sy * cx],
-                  [-sy, cy * sx, cy * cx]])
+    R_AB = array(
+        [
+            [cz * cy, -sz * cx + cz * sy * sx, sz * sx + cz * sy * cx],
+            [sz * cy, cz * cx + sz * sy * sx, -cz * sx + sz * sy * cx],
+            [-sy, cy * sx, cy * cx],
+        ]
+    )
 
     return np.squeeze(R_AB)
 
 
 @format_docstring_types
-def n_E2lat_lon(n_E: Array, R_Ee: Optional[Array]=None) -> tuple[ndarray, ndarray]:
+def n_E2lat_lon(n_E: Array, R_Ee: Optional[Array] = None) -> tuple[ndarray, ndarray]:
     """
     Converts n-vector(s) to latitude(s) and longitude(s).
 
@@ -434,7 +446,7 @@ def n_E2lat_lon(n_E: Array, R_Ee: Optional[Array]=None) -> tuple[ndarray, ndarra
     n_e = change_axes_to_E(n_E, R_Ee)
 
     sin_latitude = n_e[0, ...]
-    cos_latitude = sqrt(n_e[1, ...]**2 + n_e[2, ...]**2)
+    cos_latitude = sqrt(n_e[1, ...] ** 2 + n_e[2, ...] ** 2)
     sin_longitude_cos_latitude = n_e[1, ...]
     cos_longitude_cos_latitude = -n_e[2, ...]
 
@@ -451,7 +463,7 @@ def n_E2lat_lon(n_E: Array, R_Ee: Optional[Array]=None) -> tuple[ndarray, ndarra
 
 
 @format_docstring_types
-def change_axes_to_E(n_E: Array, R_Ee: Optional[Array]=None) -> ndarray:
+def change_axes_to_E(n_E: Array, R_Ee: Optional[Array] = None) -> ndarray:
     """
     Change axes of the nvector(s) from "e" to "E".
 
@@ -490,7 +502,7 @@ def change_axes_to_E(n_E: Array, R_Ee: Optional[Array]=None) -> ndarray:
 
 
 @format_docstring_types
-def n_E2R_EN(n_E: Array, R_Ee: Optional[Array]=None) -> ndarray:
+def n_E2R_EN(n_E: Array, R_Ee: Optional[Array] = None) -> ndarray:
     """
     Returns the rotation matrix R_EN from n-vector.
 
@@ -536,19 +548,14 @@ def n_E2R_EN(n_E: Array, R_Ee: Optional[Array]=None) -> ndarray:
 
     # Form R_EN from the unit vectors:
     # R_EN = dot(R_Ee.T, np.hstack((Nx_e, Ny_e, Nz_e)))
-    Nxyz_e = np.hstack((Nx_e[:, None, ...],
-                        Ny_e[:, None, ...],
-                        Nz_e[:, None, ...]))
+    Nxyz_e = np.hstack((Nx_e[:, None, ...], Ny_e[:, None, ...], Nz_e[:, None, ...]))
     R_EN = mdot(np.swapaxes(R_Ee, 1, 0), Nxyz_e)
 
     return np.squeeze(R_EN)
 
 
 @format_docstring_types
-def n_E_and_wa2R_EL(n_E: Array,
-                    wander_azimuth: ArrayLike,
-                    R_Ee: Optional[Array]=None
-                    ) -> ndarray:
+def n_E_and_wa2R_EL(n_E: Array, wander_azimuth: ArrayLike, R_Ee: Optional[Array] = None) -> ndarray:
     """
     Returns rotation matrix R_EL from n-vector and wander azimuth angle.
 
@@ -593,10 +600,12 @@ def n_E_and_wa2R_EL(n_E: Array,
 
 
 _odict = globals()
-__doc__ = (__doc__  # @ReservedAssignment
-           + _make_summary(dict((n, _odict[n]) for n in __all__))
-           + "License\n-------\n"
-           + _license.__doc__)
+__doc__ = (
+    __doc__  # @ReservedAssignment
+    + _make_summary(dict((n, _odict[n]) for n in __all__))
+    + "License\n-------\n"
+    + _license.__doc__
+)
 
 
 if __name__ == "__main__":

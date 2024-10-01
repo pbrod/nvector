@@ -3,7 +3,9 @@ Created on 9. des. 2015
 
 @author: pab
 """
+
 from functools import partial
+
 try:
     import matplotlib.pyplot as plt
 except (ImportError, OSError, ModuleNotFoundError):
@@ -50,10 +52,13 @@ def plot_mean_position():
     >>> plt.show()  # doctest: +SKIP
     >>> plt.close()
     """
-    positions = np.array([(90, 0),
-                          (60, 10),
-                          (50, -20),
-                          ])
+    positions = np.array(
+        [
+            (90, 0),
+            (60, 10),
+            (50, -20),
+        ]
+    )
     lats, lons = np.transpose(positions)
     nvecs = lat_lon2n_E(rad(lats), rad(lons))
 
@@ -68,8 +73,9 @@ def plot_mean_position():
     plotter(lon, lat, linewidth=5, marker="o", color="r")
     plotter(lons, lats, linewidth=5, marker="o", color="k")
 
-    plt.title("Figure of mean position (red dot) compared to \npositions "
-              "A, B, and C (black dots).")
+    plt.title(
+        "Figure of mean position (red dot) compared to \npositions " "A, B, and C (black dots)."
+    )
 
 
 def main():
@@ -85,6 +91,6 @@ def main():
 
 
 if __name__ == "__main__":
-
     from nvector._common import test_docstrings
+
     test_docstrings(__file__)

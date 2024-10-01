@@ -3,6 +3,7 @@ Object-oriented interface to geodesic functions
 ===============================================
 
 """
+
 # pylint: disable=invalid-name
 from __future__ import annotations
 from typing import Union, Any, Optional
@@ -13,38 +14,48 @@ from numpy.linalg import norm
 from karney import geodesic  # @UnresolvedImport
 from nvector import _examples, _license
 from nvector._common import test_docstrings, use_docstring, _make_summary
-from nvector.core import (lat_lon2n_E,
-                          n_E2lat_lon,
-                          n_EB_E2p_EB_E,
-                          p_EB_E2n_EB_E,
-                          closest_point_on_great_circle,
-                          course_over_ground,
-                          great_circle_distance,
-                          euclidean_distance,
-                          cross_track_distance,
-                          intersect,
-                          n_EA_E_distance_and_azimuth2n_EB_E,
-                          E_rotation,
-                          on_great_circle_path,
-                          _interp_vectors)
+from nvector.core import (
+    lat_lon2n_E,
+    n_E2lat_lon,
+    n_EB_E2p_EB_E,
+    p_EB_E2n_EB_E,
+    closest_point_on_great_circle,
+    course_over_ground,
+    great_circle_distance,
+    euclidean_distance,
+    cross_track_distance,
+    intersect,
+    n_EA_E_distance_and_azimuth2n_EB_E,
+    E_rotation,
+    on_great_circle_path,
+    _interp_vectors,
+)
 from nvector.rotation import zyx2R, n_E_and_wa2R_EL, n_E2R_EN
 from nvector.util import unit, mdot, get_ellipsoid, rad, deg, isclose, allclose, array_to_list_dict
 from nvector._typing import Array, ArrayLike, NpArrayLike, format_docstring_types
 
 
-__all__ = ["delta_E", "delta_L", "delta_N",
-           "FrameB", "FrameE", "FrameN", "FrameL",
-           "GeoPath",
-           "GeoPoint",
-           "ECEFvector",
-           "Nvector",
-           "Pvector"]
+__all__ = [
+    "delta_E",
+    "delta_L",
+    "delta_N",
+    "FrameB",
+    "FrameE",
+    "FrameN",
+    "FrameL",
+    "GeoPath",
+    "GeoPoint",
+    "ECEFvector",
+    "Nvector",
+    "Pvector",
+]
 
 
 @use_docstring(_examples.get_examples_no_header([1]))
-def delta_E(point_a: Union["Nvector", "GeoPoint", "ECEFvector"],
-            point_b:  Union["Nvector", "GeoPoint", "ECEFvector"]
-            ) -> "ECEFvector":
+def delta_E(
+    point_a: Union["Nvector", "GeoPoint", "ECEFvector"],
+    point_b: Union["Nvector", "GeoPoint", "ECEFvector"],
+) -> "ECEFvector":
     """
     Returns cartesian delta vector from positions A to B decomposed in E.
 
@@ -88,9 +99,10 @@ def _base_angle(angle_rad: Union[int, float, float64, ndarray]) -> Union[float64
     return np.mod(angle_rad + np.pi, 2 * np.pi) - np.pi
 
 
-def delta_N(point_a: Union["Nvector", "GeoPoint", "ECEFvector"],
-            point_b: Union["Nvector", "GeoPoint", "ECEFvector"]
-            ) -> "Pvector":
+def delta_N(
+    point_a: Union["Nvector", "GeoPoint", "ECEFvector"],
+    point_b: Union["Nvector", "GeoPoint", "ECEFvector"],
+) -> "Pvector":
     """Returns cartesian delta vector from positions A to B decomposed in N.
 
     Parameters
@@ -131,10 +143,11 @@ def _delta(self, other: Union["Nvector", "GeoPoint", "ECEFvector"]) -> "Pvector"
     return delta_N(self, other)
 
 
-def delta_L(point_a: Union["Nvector", "GeoPoint", "ECEFvector"],
-            point_b: Union["Nvector", "GeoPoint", "ECEFvector"],
-            wander_azimuth: Union[int, float]=0
-            )->"Pvector":
+def delta_L(
+    point_a: Union["Nvector", "GeoPoint", "ECEFvector"],
+    point_b: Union["Nvector", "GeoPoint", "ECEFvector"],
+    wander_azimuth: Union[int, float] = 0,
+) -> "Pvector":
     """Returns cartesian delta vector from positions A to B decomposed in L.
 
     Parameters
@@ -162,8 +175,7 @@ def delta_L(point_a: Union["Nvector", "GeoPoint", "ECEFvector"],
 
 
 class _Common:
-    """Base class that defines the common methods for geodetic vector-like and frame-like classes
-    """
+    """Base class that defines the common methods for geodetic vector-like and frame-like classes"""
 
     _NAMES: tuple[str, ...] = tuple()
     """Sequence of attribute names for the repr"""
@@ -173,8 +185,13 @@ class _Common:
         fmt = ", "
         names = self._NAMES if self._NAMES else list(self.__dict__)
         dict_params = array_to_list_dict(self.__dict__.copy())
-        params = fmt.join(["{}={!r}".format(name, dict_params[name])
-                           for name in names if not name.startswith("_")])
+        params = fmt.join(
+            [
+                "{}={!r}".format(name, dict_params[name])
+                for name in names
+                if not name.startswith("_")
+            ]
+        )
         return "{}({})".format(cname, params)
 
     def __str__(self):
@@ -184,6 +201,7 @@ class _Common:
 
     def _mystr(self, pretty=True):
         """display a nice short string representation of object."""
+
         def strfun(cls):
             if isinstance(cls, _Common):
                 return cls._mystr(pretty)
@@ -219,7 +237,6 @@ class _Common:
                 val = getattr(self, name)
                 val_txt = get_arg(name, val)
                 if val_txt is not None:
-
                     n += len(val_txt) + 2
                     args.append(val_txt)
         if pretty and n > 80:
@@ -296,15 +313,17 @@ class GeoPoint(_Common):
     'lat2 = 32.64, lon2 = 49.01, az2 = 140.37'
 
     """
+
     _NAMES = ("latitude", "longitude", "z", "frame")
 
-    def __init__(self,
-                 latitude: ArrayLike,
-                 longitude: ArrayLike,
-                 z: ArrayLike=0,
-                 frame: Optional["FrameE"]=None,
-                 degrees: bool=False
-                 ) -> None:
+    def __init__(
+        self,
+        latitude: ArrayLike,
+        longitude: ArrayLike,
+        z: ArrayLike = 0,
+        frame: Optional["FrameE"] = None,
+        degrees: bool = False,
+    ) -> None:
         """
         Initialize geographical position given as latitude, longitude, depth in frame E.
 
@@ -330,11 +349,13 @@ class GeoPoint(_Common):
 
     @classmethod
     @format_docstring_types
-    def from_degrees(cls,
-                     latitude: Union[int, float, list, tuple, ndarray],
-                     longitude: Union[int, float, list, tuple, ndarray],
-                     z: Union[int, float, list, tuple, ndarray]=0,
-                     frame: Optional["FrameE"]=None) -> "GeoPoint":
+    def from_degrees(
+        cls,
+        latitude: Union[int, float, list, tuple, ndarray],
+        longitude: Union[int, float, list, tuple, ndarray],
+        z: Union[int, float, list, tuple, ndarray] = 0,
+        frame: Optional["FrameE"] = None,
+    ) -> "GeoPoint":
         """
         Returns GeoPoint from latitude [deg], longitude [deg], depth in frame E.
 
@@ -362,10 +383,12 @@ class GeoPoint(_Common):
         options = dict(rtol=rtol, atol=atol)
         delta_lat = diff(self.latitude, other.latitude)
         delta_lon = diff(self.longitude, other.longitude)
-        return (allclose(delta_lat, 0, **options)
-                and allclose(delta_lon, 0, **options)
-                and allclose(self.z, other.z, **options)
-                and self.frame == other.frame)
+        return (
+            allclose(delta_lat, 0, **options)
+            and allclose(delta_lon, 0, **options)
+            and allclose(self.z, other.z, **options)
+            and self.frame == other.frame
+        )
 
     @property
     def latlon_deg(self) -> tuple[ndarray, ndarray, ndarray]:
@@ -390,15 +413,13 @@ class GeoPoint(_Common):
     @property
     def scalar(self) -> bool:
         """True if the position is a scalar point"""
-        return (np.ndim(self.z) == 0
-                and np.size(self.latitude) == 1
-                and np.size(self.longitude) == 1)
+        return np.ndim(self.z) == 0 and np.size(self.latitude) == 1 and np.size(self.longitude) == 1
 
     def to_ecef_vector(self) -> "ECEFvector":
-        """Returns position(s) as ECEFvector object. """
+        """Returns position(s) as ECEFvector object."""
         return self.to_nvector().to_ecef_vector()
 
-    def to_geo_point(self)-> "GeoPoint":
+    def to_geo_point(self) -> "GeoPoint":
         """Returns position(s) as GeoPoint object, in this case, itself."""
         return self
 
@@ -410,11 +431,12 @@ class GeoPoint(_Common):
 
     delta_to = _delta
 
-    def _displace_great_circle(self,
-                               distance: Union[int, float, list, tuple, ndarray],
-                               azimuth: Union[int, float, list, tuple, ndarray],
-                               degrees: bool
-                               ):
+    def _displace_great_circle(
+        self,
+        distance: Union[int, float, list, tuple, ndarray],
+        azimuth: Union[int, float, list, tuple, ndarray],
+        degrees: bool,
+    ):
         """Returns the great circle solution using the nvector method."""
         n_a = self.to_nvector()
         e_a = n_a.to_ecef_vector()
@@ -429,13 +451,14 @@ class GeoPoint(_Common):
         return point_b, azimuth_b
 
     @format_docstring_types
-    def displace(self,
-                 distance: ArrayLike,
-                 azimuth: ArrayLike,
-                 long_unroll: bool=False,
-                 degrees: bool=False,
-                 method: str="ellipsoid"
-                 ):
+    def displace(
+        self,
+        distance: ArrayLike,
+        azimuth: ArrayLike,
+        long_unroll: bool = False,
+        degrees: bool = False,
+        method: str = "ellipsoid",
+    ):
         """
         Returns position b computed from current position, distance and azimuth.
 
@@ -471,12 +494,13 @@ class GeoPoint(_Common):
             return self._displace_ellipsoid(distance, azimuth, long_unroll, degrees)
         return self._displace_great_circle(distance, azimuth, degrees)
 
-    def _displace_ellipsoid(self,
-                            distance: ArrayLike,
-                            azimuth: ArrayLike,
-                            long_unroll: bool=False,
-                            degrees: bool=False
-                            ):
+    def _displace_ellipsoid(
+        self,
+        distance: ArrayLike,
+        azimuth: ArrayLike,
+        long_unroll: bool = False,
+        degrees: bool = False,
+    ):
         """Returns the exact ellipsoidal solution using the method of Karney.
 
         Parameters
@@ -504,20 +528,21 @@ class GeoPoint(_Common):
         if not degrees:
             azimuth = deg(azimuth)
         lat_a, lon_a = self.latitude_deg, self.longitude_deg
-        lat_b, lon_b, azimuth_b = frame.direct(lat_a, lon_a, azimuth, distance,
-                                               z=z, long_unroll=long_unroll,
-                                               degrees=True)
+        lat_b, lon_b, azimuth_b = frame.direct(
+            lat_a, lon_a, azimuth, distance, z=z, long_unroll=long_unroll, degrees=True
+        )
 
         point_b = frame.GeoPointFromDegrees(latitude=lat_b, longitude=lon_b, z=z)
         if not degrees:
             return point_b, rad(azimuth_b)
         return point_b, azimuth_b
 
-    def distance_and_azimuth(self,
-                             point: Union["GeoPoint", "Nvector", "ECEFvector", "Pvector"],
-                             degrees: bool=False,
-                             method: str="ellipsoid"
-                             ) -> tuple[NpArrayLike, NpArrayLike, NpArrayLike]:
+    def distance_and_azimuth(
+        self,
+        point: Union["GeoPoint", "Nvector", "ECEFvector", "Pvector"],
+        degrees: bool = False,
+        method: str = "ellipsoid",
+    ) -> tuple[NpArrayLike, NpArrayLike, NpArrayLike]:
         """
         Returns ellipsoidal distance between positions as well as the direction.
 
@@ -560,11 +585,9 @@ class GeoPoint(_Common):
             return self._distance_and_azimuth_ellipsoid(point, degrees)
         return self._distance_and_azimuth_greatcircle(point, degrees)
 
-    def _distance_and_azimuth_greatcircle(self,
-                                          point: Union["GeoPoint", "Nvector",
-                                                       "ECEFvector", "Pvector"],
-                                          degrees: bool
-                                          ) -> tuple[NpArrayLike, NpArrayLike, NpArrayLike]:
+    def _distance_and_azimuth_greatcircle(
+        self, point: Union["GeoPoint", "Nvector", "ECEFvector", "Pvector"], degrees: bool
+    ) -> tuple[NpArrayLike, NpArrayLike, NpArrayLike]:
         """
         Returns great circle distance between positions as well as the direction.
 
@@ -595,11 +618,9 @@ class GeoPoint(_Common):
             return distance[0], azimuth_a, azimuth_b  # scalar track distance
         return distance, azimuth_a, azimuth_b
 
-    def _distance_and_azimuth_ellipsoid(self,
-                                        point: Union["GeoPoint", "Nvector",
-                                                     "ECEFvector", "Pvector"],
-                                        degrees: bool
-                                        ) -> tuple[NpArrayLike, NpArrayLike, NpArrayLike]:
+    def _distance_and_azimuth_ellipsoid(
+        self, point: Union["GeoPoint", "Nvector", "ECEFvector", "Pvector"], degrees: bool
+    ) -> tuple[NpArrayLike, NpArrayLike, NpArrayLike]:
         """
         Returns ellipsoidal distance between positions as well as the direction.
 
@@ -666,13 +687,10 @@ class Nvector(_Common):
     --------
     GeoPoint, ECEFvector, Pvector
     """
+
     _NAMES = ("normal", "z", "frame")
 
-    def __init__(self,
-                 normal: Array,
-                 z: ArrayLike=0,
-                 frame: Optional["FrameE"]=None
-                 ) -> None:
+    def __init__(self, normal: Array, z: ArrayLike = 0, frame: Optional["FrameE"] = None) -> None:
         """
         Initialize geographical position(s) given as n-vector(s) and depth(s) in frame E
 
@@ -693,15 +711,16 @@ class Nvector(_Common):
         self.frame = _default_frame(frame)
 
     @format_docstring_types
-    def interpolate(self,
-                    t_i: ArrayLike,
-                    t: Array,
-                    kind: Union[int, str]="linear",
-                    window_length: int=0,
-                    polyorder: int=2,
-                    mode: str="interp",
-                    cval: Union[int, float]=0.0
-                    ):
+    def interpolate(
+        self,
+        t_i: ArrayLike,
+        t: Array,
+        kind: Union[int, str] = "linear",
+        window_length: int = 0,
+        polyorder: int = 2,
+        mode: str = "interp",
+        cval: Union[int, float] = 0.0,
+    ):
         """
         Returns interpolated values from nvector data.
 
@@ -885,9 +904,11 @@ class Nvector(_Common):
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
         options = dict(rtol=rtol, atol=atol)
-        return (allclose(self.normal, other.normal, **options)
-                and allclose(self.z, other.z, **options)
-                and self.frame == other.frame)
+        return (
+            allclose(self.normal, other.normal, **options)
+            and allclose(self.z, other.z, **options)
+            and self.frame == other.frame
+        )
 
     def __add__(self, other):
         _check_frames(self, other)
@@ -931,13 +952,15 @@ class Pvector(_Common):
     scalar : bool
         True if p-vector represents a scalar position, i.e. n = 1.
     """
+
     _NAMES = ("pvector", "frame", "scalar")
 
-    def __init__(self,
-                 pvector: Array,
-                 frame: Union["FrameN", "FrameB", "FrameL"],
-                 scalar: Optional[bool]=None
-                 ) -> None:
+    def __init__(
+        self,
+        pvector: Array,
+        frame: Union["FrameN", "FrameB", "FrameL"],
+        scalar: Optional[bool] = None,
+    ) -> None:
         """
         Initialize geographical position(s) given as cartesian position vector(s) in a frame.
 
@@ -961,8 +984,7 @@ class Pvector(_Common):
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
         options = dict(rtol=rtol, atol=atol)
-        return (allclose(self.pvector, other.pvector, **options)
-                and self.frame == other.frame)
+        return allclose(self.pvector, other.pvector, **options) and self.frame == other.frame
 
     def to_ecef_vector(self) -> "ECEFvector":
         """Returns position(s) as ECEFvector object."""
@@ -1045,11 +1067,9 @@ class ECEFvector(Pvector):
     GeoPoint, ECEFvector, Pvector
     """
 
-    def __init__(self,
-                 pvector: Array,
-                 frame: Optional["FrameE"]=None,
-                 scalar: Optional[bool]=None
-                 ):
+    def __init__(
+        self, pvector: Array, frame: Optional["FrameE"] = None, scalar: Optional[bool] = None
+    ):
         """
         Initialize geographical position(s) given as cartesian position vector(s) in a frame.
 
@@ -1143,12 +1163,14 @@ class GeoPath(_Common):
     --------
     {super}
     """
+
     _NAMES = ("point_a", "point_b")
 
-    def __init__(self,
-                 point_a: Union[Nvector, GeoPoint, ECEFvector],
-                 point_b: Union[Nvector, GeoPoint, ECEFvector],
-                 ) -> None:
+    def __init__(
+        self,
+        point_a: Union[Nvector, GeoPoint, ECEFvector],
+        point_b: Union[Nvector, GeoPoint, ECEFvector],
+    ) -> None:
         """
         Initialize geographical path between two positions in Frame E
 
@@ -1167,15 +1189,15 @@ class GeoPath(_Common):
         return self.point_a == other.point_a and self.point_b == other.point_b
 
     def nvectors(self) -> tuple[Nvector, Nvector]:
-        """ Returns point A and point B as n-vectors"""
+        """Returns point A and point B as n-vectors"""
         return self.point_a.to_nvector(), self.point_b.to_nvector()
 
     def geo_points(self) -> tuple[GeoPoint, GeoPoint]:
-        """ Returns point A and point B as geo-points"""
+        """Returns point A and point B as geo-points"""
         return self.point_a.to_geo_point(), self.point_b.to_geo_point()
 
     def ecef_vectors(self) -> tuple[ECEFvector, ECEFvector]:
-        """ Returns point A and point B as  ECEF-vectors"""
+        """Returns point A and point B as  ECEF-vectors"""
         return self.point_a.to_ecef_vector(), self.point_b.to_ecef_vector()
 
     def nvector_normals(self) -> tuple[ndarray, ndarray]:
@@ -1188,11 +1210,12 @@ class GeoPath(_Common):
         radius = (p_E1_E.length + p_E2_E.length) / 2
         return radius
 
-    def cross_track_distance(self,
-                             point: Union[Nvector, GeoPoint, ECEFvector],
-                             method: str="greatcircle",
-                             radius: Union[float, None]=None
-                             ) -> Union[float64, ndarray]:
+    def cross_track_distance(
+        self,
+        point: Union[Nvector, GeoPoint, ECEFvector],
+        method: str = "greatcircle",
+        radius: Union[float, None] = None,
+    ) -> Union[float64, ndarray]:
         """
         Returns cross track distance from path to point.
 
@@ -1224,10 +1247,9 @@ class GeoPath(_Common):
             return distance[0]  # scalar cross track distance
         return distance
 
-    def track_distance(self,
-                       method: str="greatcircle",
-                       radius: Union[float, None]=None
-                       ) -> NpArrayLike:
+    def track_distance(
+        self, method: str = "greatcircle", radius: Union[float, None] = None
+    ) -> NpArrayLike:
         """
         Returns the path distance computed at the average height in [m].
 
@@ -1276,23 +1298,23 @@ class GeoPath(_Common):
         path_a = (point_a1.normal, point_a2.normal)  # self.nvector_normals()
         path_b = (point_b1.normal, point_b2.normal)  # path.nvector_normals()
         normal_c = intersect(path_a, path_b)  # nvector
-        depth = (point_a1.z + point_a2.z + point_b1.z + point_b2.z) / 4.
+        depth = (point_a1.z + point_a2.z + point_b1.z + point_b2.z) / 4.0
         return frame.Nvector(normal_c, z=depth)
 
-    def _on_ellipsoid_path(self, point: Union[Nvector, GeoPoint, ECEFvector],
-                           rtol: float=1e-6,
-                           atol: float=1e-8) -> Union[bool_, ndarray]:
+    def _on_ellipsoid_path(
+        self, point: Union[Nvector, GeoPoint, ECEFvector], rtol: float = 1e-6, atol: float = 1e-8
+    ) -> Union[bool_, ndarray]:
         point_a, point_b = self.geo_points()
         point_c = point.to_geo_point()
         z = (point_a.z + point_b.z) * 0.5
         distance_ab, azimuth_ab, _azi_ba = point_a.distance_and_azimuth(point_b)
         distance_ac, azimuth_ac, _azi_ca = point_a.distance_and_azimuth(point_c)
-        return (isclose(z, point_c.z, rtol=rtol, atol=atol)
-                & (isclose(distance_ac, 0, atol=atol)
-                   | ((distance_ab >= distance_ac)
-                      & isclose(azimuth_ac, azimuth_ab, rtol=rtol, atol=atol))))
+        return isclose(z, point_c.z, rtol=rtol, atol=atol) & (
+            isclose(distance_ac, 0, atol=atol)
+            | ((distance_ab >= distance_ac) & isclose(azimuth_ac, azimuth_ab, rtol=rtol, atol=atol))
+        )
 
-    def on_great_circle(self, point, atol: float=1e-8) -> Union[bool_, ndarray]:
+    def on_great_circle(self, point, atol: float = 1e-8) -> Union[bool_, ndarray]:
         """Returns True if point is on the great circle within a tolerance."""
         distance = np.abs(self.cross_track_distance(point))
         result = isclose(distance, 0, atol=atol)
@@ -1300,12 +1322,9 @@ class GeoPath(_Common):
             return result[()]
         return result
 
-    def _on_great_circle_path(self,
-                              point,
-                              radius=None,
-                              rtol: float=1e-9,
-                              atol: float=1e-8
-                              ) -> Union[bool_, ndarray]:
+    def _on_great_circle_path(
+        self, point, radius=None, rtol: float = 1e-9, atol: float = 1e-8
+    ) -> Union[bool_, ndarray]:
         if radius is None:
             radius = self._get_average_radius()
         n_a, n_b = self.nvectors()
@@ -1317,12 +1336,13 @@ class GeoPath(_Common):
             return result[0]  # scalar outout
         return result
 
-    def on_path(self,
-                point: Union[Nvector, GeoPoint, ECEFvector],
-                method: str="greatcircle",
-                rtol: float=1e-6,
-                atol: float=1e-8
-                ) -> Union[bool_, ndarray]:
+    def on_path(
+        self,
+        point: Union[Nvector, GeoPoint, ECEFvector],
+        method: str = "greatcircle",
+        rtol: float = 1e-6,
+        atol: float = 1e-8,
+    ) -> Union[bool_, ndarray]:
         """
         Returns True if point is on the path between A and B witin a tolerance.
 
@@ -1376,7 +1396,9 @@ class GeoPath(_Common):
             return self._on_ellipsoid_path(point, rtol=rtol, atol=atol)
         return self._on_great_circle_path(point, rtol=rtol, atol=atol)
 
-    def _closest_point_on_great_circle(self, point: Union[Nvector, GeoPoint, ECEFvector])->Nvector:
+    def _closest_point_on_great_circle(
+        self, point: Union[Nvector, GeoPoint, ECEFvector]
+    ) -> Nvector:
         point_c = point.to_nvector()
         point_a, point_b = self.nvectors()
         path = (point_a.normal, point_b.normal)
@@ -1384,7 +1406,9 @@ class GeoPath(_Common):
         normal_d = closest_point_on_great_circle(path, point_c.normal)
         return point_c.frame.Nvector(normal_d, z)
 
-    def closest_point_on_great_circle(self, point: Union[Nvector, GeoPoint, ECEFvector])->GeoPoint:
+    def closest_point_on_great_circle(
+        self, point: Union[Nvector, GeoPoint, ECEFvector]
+    ) -> GeoPoint:
         """
         Returns closest point on great circle path to the point.
 
@@ -1528,14 +1552,16 @@ class FrameE(_Common):
     --------
     FrameN, FrameL, FrameB, nvector.util.get_ellipsoid
     """
+
     _NAMES = ("a", "f", "name", "axes")
 
-    def __init__(self,
-                 a: Optional[float]=None,
-                 f: Optional[float]=None,
-                 name: Optional[str]="WGS84",
-                 axes: Optional[str]="e"
-                 ) -> None:
+    def __init__(
+        self,
+        a: Optional[float] = None,
+        f: Optional[float] = None,
+        name: Optional[str] = "WGS84",
+        axes: Optional[str] = "e",
+    ) -> None:
         if a is None or f is None:
             a, f, _full_name = get_ellipsoid(name)
         self.a = a
@@ -1549,19 +1575,22 @@ class FrameE(_Common):
         return E_rotation(self.axes)
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
-        return (allclose(self.a, other.a, rtol=rtol, atol=atol)
-                and allclose(self.f, other.f, rtol=rtol, atol=atol)
-                and allclose(self.R_Ee, other.R_Ee, rtol=rtol, atol=atol))
+        return (
+            allclose(self.a, other.a, rtol=rtol, atol=atol)
+            and allclose(self.f, other.f, rtol=rtol, atol=atol)
+            and allclose(self.R_Ee, other.R_Ee, rtol=rtol, atol=atol)
+        )
 
     @format_docstring_types
-    def inverse(self,
-                lat_a: ArrayLike,
-                lon_a: ArrayLike,
-                lat_b: ArrayLike,
-                lon_b: ArrayLike,
-                z: ArrayLike=0,
-                degrees: bool=False
-                ) -> tuple[NpArrayLike, NpArrayLike, NpArrayLike]:
+    def inverse(
+        self,
+        lat_a: ArrayLike,
+        lon_a: ArrayLike,
+        lat_b: ArrayLike,
+        lon_b: ArrayLike,
+        z: ArrayLike = 0,
+        degrees: bool = False,
+    ) -> tuple[NpArrayLike, NpArrayLike, NpArrayLike]:
         """
         Returns ellipsoidal distance between positions as well as the direction.
 
@@ -1604,15 +1633,16 @@ class FrameE(_Common):
         return geodesic.distance(lat_a, lon_a, lat_b, lon_b, a1, f, degrees=degrees)
 
     @format_docstring_types
-    def direct(self,
-               lat_a: ArrayLike,
-               lon_a: ArrayLike,
-               azimuth: ArrayLike,
-               distance: ArrayLike,
-               z: ArrayLike=0,
-               long_unroll: bool=False,
-               degrees: bool=False
-               ) -> tuple[NpArrayLike, NpArrayLike, NpArrayLike]:
+    def direct(
+        self,
+        lat_a: ArrayLike,
+        lon_a: ArrayLike,
+        azimuth: ArrayLike,
+        distance: ArrayLike,
+        z: ArrayLike = 0,
+        long_unroll: bool = False,
+        degrees: bool = False,
+    ) -> tuple[NpArrayLike, NpArrayLike, NpArrayLike]:
         """
         Returns position B computed from position A, distance and azimuth.
 
@@ -1655,17 +1685,14 @@ class FrameE(_Common):
           * The flattening f should be between -1/50 and 1/50 inn order to retain full accuracy.
 
         """
-        a1, f = self.a-z, self.f
+        a1, f = self.a - z, self.f
         lat1, lon1, az1, distance, a1 = np.broadcast_arrays(lat_a, lon_a, azimuth, distance, a1)
         return geodesic.reckon(lat1, lon1, distance, az1, a1, f, long_unroll, degrees=degrees)
 
     @format_docstring_types
-    def GeoPoint(self,
-                 latitude: ArrayLike,
-                 longitude: ArrayLike,
-                 z: ArrayLike=0,
-                 degrees: bool=False
-                 ) -> GeoPoint:
+    def GeoPoint(
+        self, latitude: ArrayLike, longitude: ArrayLike, z: ArrayLike = 0, degrees: bool = False
+    ) -> GeoPoint:
         """
         Returns GeoPoint from latitude, longitude, depth in current frame.
 
@@ -1683,11 +1710,9 @@ class FrameE(_Common):
         return GeoPoint(latitude, longitude, z, frame=self, degrees=degrees)
 
     @format_docstring_types
-    def GeoPointFromDegrees(self,
-                            latitude: ArrayLike,
-                            longitude: ArrayLike,
-                            z: ArrayLike=0
-                            ) -> GeoPoint:
+    def GeoPointFromDegrees(
+        self, latitude: ArrayLike, longitude: ArrayLike, z: ArrayLike = 0
+    ) -> GeoPoint:
         """
         Returns GeoPoint from latitude [deg], longitude [deg], depth in current frame
 
@@ -1703,7 +1728,7 @@ class FrameE(_Common):
         return GeoPoint.from_degrees(latitude, longitude, z, frame=self)
 
     @format_docstring_types
-    def Nvector(self,  normal: Array, z: ArrayLike=0) -> Nvector:
+    def Nvector(self, normal: Array, z: ArrayLike = 0) -> Nvector:
         """
         Returns Nvector from n-vector(s) and depth(s) in current frame.
 
@@ -1717,10 +1742,7 @@ class FrameE(_Common):
         return Nvector(normal, z, frame=self)
 
     @format_docstring_types
-    def ECEFvector(self,
-                   pvector: Array,
-                   scalar: Optional[bool]=None
-                   )-> ECEFvector:
+    def ECEFvector(self, pvector: Array, scalar: Optional[bool] = None) -> ECEFvector:
         """
         Returns ECEFvector from cartesian position vector(s) in current frame.
 
@@ -1825,8 +1847,9 @@ class FrameN(_LocalFrame):
         return n_E2R_EN(nvector.normal, nvector.frame.R_Ee)
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
-        return (allclose(self.R_EN, other.R_EN, rtol=rtol, atol=atol)
-                and self.nvector == other.nvector)
+        return (
+            allclose(self.R_EN, other.R_EN, rtol=rtol, atol=atol) and self.nvector == other.nvector
+        )
 
 
 class FrameL(FrameN):
@@ -1864,11 +1887,10 @@ class FrameL(FrameN):
     --------
     FrameE, FrameN, FrameB
     """
+
     _NAMES = ("nvector", "wander_azimuth")
 
-    def __init__(self,
-                 nvector: Nvector,
-                 wander_azimuth: ArrayLike=0) -> None:
+    def __init__(self, nvector: Nvector, wander_azimuth: ArrayLike = 0) -> None:
         """
         Initialize Local level, Wander azimuth frame from nvector
 
@@ -1887,9 +1909,9 @@ class FrameL(FrameN):
 
     @classmethod
     @format_docstring_types
-    def from_point(cls,
-                   point: Union[ECEFvector, GeoPoint, Nvector],
-                   wander_azimuth: ArrayLike=0) -> "FrameL":
+    def from_point(
+        cls, point: Union[ECEFvector, GeoPoint, Nvector], wander_azimuth: ArrayLike = 0
+    ) -> "FrameL":
         """
         Returns FrameL with its origin projected from the point to the surface of ellipsoid model
 
@@ -1943,12 +1965,14 @@ class FrameB(_LocalFrame):
 
     _NAMES = ("nvector", "yaw", "pitch", "roll")
 
-    def __init__(self,
-                 nvector: Nvector,
-                 yaw: Optional[ArrayLike]=0,
-                 pitch: Optional[ArrayLike]=0,
-                 roll: Optional[ArrayLike]=0,
-                 degrees: Optional[bool]=False) -> None:
+    def __init__(
+        self,
+        nvector: Nvector,
+        yaw: Optional[ArrayLike] = 0,
+        pitch: Optional[ArrayLike] = 0,
+        roll: Optional[ArrayLike] = 0,
+        degrees: Optional[bool] = False,
+    ) -> None:
         """
         Initialize Body frame
 
@@ -1970,12 +1994,14 @@ class FrameB(_LocalFrame):
 
     @classmethod
     @format_docstring_types
-    def from_point(cls,
-                   point: Union[ECEFvector, GeoPoint, Nvector],
-                   yaw: Optional[ArrayLike]=0,
-                   pitch: Optional[ArrayLike]=0,
-                   roll: Optional[ArrayLike]=0,
-                   degrees: Optional[bool]=False) -> "FrameB":
+    def from_point(
+        cls,
+        point: Union[ECEFvector, GeoPoint, Nvector],
+        yaw: Optional[ArrayLike] = 0,
+        pitch: Optional[ArrayLike] = 0,
+        roll: Optional[ArrayLike] = 0,
+        degrees: Optional[bool] = False,
+    ) -> "FrameB":
         """
         Returns FrameB where its origin coincides with the vehicle's reference point.
 
@@ -2000,32 +2026,38 @@ class FrameB(_LocalFrame):
         return mdot(R_EN, R_NB)  # rotation matrix
 
     def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
-        return (allclose(self.yaw, other.yaw, rtol=rtol, atol=atol)
-                and allclose(self.pitch, other.pitch, rtol=rtol, atol=atol)
-                and allclose(self.roll, other.roll, rtol=rtol, atol=atol)
-                and allclose(self.R_EN, other.R_EN, rtol=rtol, atol=atol)
-                and self.nvector == other.nvector)
+        return (
+            allclose(self.yaw, other.yaw, rtol=rtol, atol=atol)
+            and allclose(self.pitch, other.pitch, rtol=rtol, atol=atol)
+            and allclose(self.roll, other.roll, rtol=rtol, atol=atol)
+            and allclose(self.R_EN, other.R_EN, rtol=rtol, atol=atol)
+            and self.nvector == other.nvector
+        )
 
 
-def _check_frames(self: Union[GeoPoint, Nvector, Pvector, ECEFvector],
-                  other: Union[GeoPoint, Nvector, Pvector, ECEFvector],
-                  ) -> None:
+def _check_frames(
+    self: Union[GeoPoint, Nvector, Pvector, ECEFvector],
+    other: Union[GeoPoint, Nvector, Pvector, ECEFvector],
+) -> None:
     if not self.frame == other.frame:
         raise ValueError("Frames are unequal")
 
 
-def _default_frame(frame: Union[FrameB, FrameE, FrameL, FrameN, None],
-                   ) -> Union[FrameB, FrameE, FrameL, FrameN]:
+def _default_frame(
+    frame: Union[FrameB, FrameE, FrameL, FrameN, None],
+) -> Union[FrameB, FrameE, FrameL, FrameN]:
     if frame is None:
         return FrameE()
     return frame
 
 
 _ODICT = globals()
-__doc__ = (__doc__  # @ReservedAssignment
-           + _make_summary(dict((n, _ODICT[n]) for n in __all__))
-           + "License\n-------\n"
-           + _license.__doc__)
+__doc__ = (
+    __doc__  # @ReservedAssignment
+    + _make_summary(dict((n, _ODICT[n]) for n in __all__))
+    + "License\n-------\n"
+    + _license.__doc__
+)
 
 
 if __name__ == "__main__":

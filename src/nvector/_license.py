@@ -36,6 +36,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 from datetime import datetime
+
 CURRENT_YEAR = datetime.now().year
 
 if __doc__:
