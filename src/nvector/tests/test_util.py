@@ -4,6 +4,7 @@ Created on 23. jun. 2021
 @author: pab
 """
 
+import warnings
 from functools import partial
 import pytest
 import numpy as np
@@ -99,11 +100,14 @@ def test_nthroot(value, n):
 
 @given(st.floats(), st.floats(), st.floats())
 def test_unit(x, y, z):
-    vec = unit([[x], [y], [z]])
-    if np.all(np.abs([x, y, z]) < np.inf):
-        assert_allclose(np.sqrt(np.sum(vec**2)), 1.0)
-    else:
-        assert np.all(np.isnan(vec))
+    with warnings.catch_warnings(record=True):
+        # Silence warnings
+        vec = unit([[x], [y], [z]])
+        if np.all(np.isfinite([x, y, z])):
+            assert_allclose(np.sqrt(np.sum(vec**2)), 1.0)
+        else:
+            assert np.all(np.isnan(vec))
+            assert np.any(np.isnan([x, y, z])) or np.any(np.isinf([x, y, z]))
 
 
 def test_mdot():
