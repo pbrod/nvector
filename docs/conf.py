@@ -84,6 +84,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinxcontrib.bibtex",
     # 'matplotlib.sphinxext.mathmpl',
+    'myst_parser', #  Allow markdown. See https://www.sphinx-doc.org/en/master/usage/markdown.html
     "matplotlib.sphinxext.plot_directive",  # See https://stackoverflow.com/questions/16047271/plot-directive-in-restructured-text
 ]
 
@@ -96,7 +97,11 @@ templates_path = ["_templates"]
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = ".rst"
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.txt': 'markdown',
+    '.md': 'markdown',
+}
 
 # The encoding of source files.
 source_encoding = "utf-8"

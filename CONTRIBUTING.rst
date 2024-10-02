@@ -7,14 +7,14 @@ Short version
 -------------
 
 * Submit bug reports and feature requests at 
-  [GitHub](https://github.com/pbrod/nvector/issues)
+  `GitHub <https://github.com/pbrod/nvector/issues>`_
 
 * Make pull requests to the ``develop`` branch.
 
 Bug reports
 -----------
 
-When [reporting a bug](https://github.com/pbrod/nvector/issues) please
+When `reporting a bug <https://github.com/pbrod/nvector/issues>`_ please
 include:
 
 * Your operating system name and version
@@ -28,7 +28,7 @@ Feature requests and feedback
 -----------------------------
 
 The best way to send feedback is to file an issue at
-[GitHub](https://github.com/pbrod/nvector/issues).
+`GitHub. <https://github.com/pbrod/nvector/issues>`_
 
 If you are proposing a feature:
 
@@ -50,27 +50,28 @@ The following are optional, but recommended.
 
 * The CPython interpreter version 3.12
    * You can install it using official binaries, pyenv, or any Anaconda-like distribution 
-* The [PDM](https://pdm-project.org/latest/) application for locking, building, and testing.
-* Dedicated IDE like PyCharm, Spyder, or [VSCodium](https://vscodium.com/) to name a few. These allow more flexible git
+* The `PDM <https://pdm-project.org/latest/>`_ application for locking, building, and testing.
+* Dedicated IDE like PyCharm, Spyder, or `VSCodium <https://vscodium.com/>`_ to name a few. These allow more flexible git
   control.
 
 
 Development Steps
 -----------------
 
-1. [Fork nvector on GitHub](https://github.com/pbrod/nvector)
+1. `Fork nvector on GitHub <https://github.com/pbrod/nvector>`_
 
 2. Clone your fork locally. Using the command line would be:
 
    ```shell
    git clone git@github.com/<USER>/nvector.git
    ```
-   
+
 3. Create a branch for local development. Using the command line would be:
 
    ```shell
    git checkout -b name-of-your-bugfix-or-feature
    ```
+
    Now you can make changes and commit them.
   
 4. When you're done making changes, run all the checks to ensure that nothing
@@ -95,7 +96,7 @@ Development Steps
    pdm run nox
    ```
    
-5. For linting the source code you can use `ruff <https://pypi.org/project/ruff/#description>`_
+5. For linting the source code you can use `ruff <https://pypi.org/project/ruff/#description>`_:
 
     ```shell
     ruff format ./src
@@ -109,11 +110,11 @@ Development Steps
 
    ```shell
    git add <FILE1> <FILE2> ... <FILEN>
-   git commit -m "TAG: Brief description. Longer description later."
+   git commit -m "<type>(<scope>): <subject> <BLANK LINE> <body> <BLANK LINE> <footer>"
    ```
-   
-   The `nvector` package does not follow any development workflows at this time, but one should be adopted like NumPy
-   workflow with tags.
+
+   See :ref:`commit-message-guidelines`.
+
 
 9. Once you are happy with the local changes, push to GitHub:
 
@@ -128,6 +129,64 @@ Development Steps
     made to the ``develop`` branch (subject to change).  Note that automated tests will be run on
     GitHub actions, but these must be initialized by a member of the team.
 
+.. _commit-message-guidelines:
+
+Commit message guidelines
+-------------------------
+The `nvector` project  uses python-semantic-release for automating the releases.
+By analyzing the commit messages it takes care of incrementing the version number
+and update the changelog as well as publish the package.
+
+Therefore the commit messages must follow the 
+`angular commit message style <https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits>`_
+This leads to more readable messages that are easy to follow when looking through the 
+project history.
+Each commit message consists of a ``header``, a ``body`` and a ``footer``. 
+The header has a special format that includes a ``type``, a ``scope`` and a ``subject``::
+
+    <type>(<scope>): <subject>
+    <BLANK LINE>
+    <body>
+    <BLANK LINE>
+    <footer>
+
+The ``header`` is mandatory and the ``scope`` of the ``header`` is optional.
+
+Any line of the commit message cannot be longer than 100 characters! 
+This allows the message to be easier to read on GitHub as well as in various git tools.
+The ``body`` or ``footer`` can begin with BREAKING CHANGE: 
+followed by a short description to create a major release.
+
+The ``type`` must be one of the following:
+
+   * feat: A new feature
+   * fix: A bug fix
+   * docs: Documentation only changes
+   * style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+   * refactor: A code change that neither fixes a bug nor adds a feature
+   * perf: A code change that improves performance
+   * test: Adding missing or correcting existing tests
+   * chore: Changes to the build process or auxiliary tools and libraries such as documentation generation
+
+The ``scope`` could be anything specifying place of the commit change. 
+For example $core, $objects, $rotation, etc...
+
+The ``subject`` contains succinct description of the change:
+
+  * use the imperative, present tense: "change" not "changed" nor "changes"
+  * don't capitalize first letter
+  * no dot (.) at the end
+
+The ``body`` should include the motivation for the change and contrast this 
+with previous behavior. Use the imperative, present tense: 
+"change" not "changed" nor "changes". 
+
+The ``footer`` should contain any information about Breaking Changes and is 
+also the place to reference GitHub issues that this commit closes.
+
+Breaking Changes should start with the word BREAKING CHANGE: with a space or two newlines. 
+The rest of the commit message is then used for this.
+
 
 Pull Request Guidelines
 -----------------------
@@ -138,9 +197,8 @@ make a pull request. Pull requests should be made to the ``develop`` branch (sub
 For merging, you should:
 
 1. Include an example for use
-2. Add a note to `CHANGELOG.rst` about the changes
-3. Update the author list in `AUTHORS.rst` if applicable
-4. Ensure that all checks passed (current checks include GitHub Actions)
+2. Update the author list in `AUTHORS.rst` if applicable
+3. Ensure that all checks passed (current checks include GitHub Actions)
 
 If you don't have all the necessary Python versions available locally or have
 trouble building all the testing environments, you can rely on GitHub Actions
@@ -152,7 +210,8 @@ Project Style Guidelines
 ------------------------
 
 The `nvector` project follows the 
-[Napoleon NumPy style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/#google-vs-numpy) with type-hinting. 
+`Napoleon NumPy style <https://sphinxcontrib-napoleon.readthedocs.io/en/latest/#google-vs-numpy>`_ 
+with type-hinting. 
 A good example is the following:
 
 .. code-block:: python
