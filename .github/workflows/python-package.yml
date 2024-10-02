@@ -1,18 +1,24 @@
-# This workflow will install Python dependencies and run tests with a variety of Python versions
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+# This workflow will do Continous Integration (CI) and Continous Deployment (CD).
+# It will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: 
+# https://py-pkgs.org/08-ci-cd
+# https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-name: nvector-test
+name: ci-cd
 
+# Controls when the workflow will run
 on: [push, pull_request]
 
+# A workflow run is made up of one or more jobs that can run 
+# sequentially or in parallel
 jobs:
-  test:
-
+  ci:
+    # Set up operating system
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        python-version: ["3.12"] #,  "3.11", "3.10", "3.9"]
+        os: [ubuntu-latest] #, macOS-latest, windows-latest]
       fail-fast: false
 
     steps:
@@ -27,3 +33,105 @@ jobs:
     - name: Run Tests
       run: |
         pdm run pytest
+
+  release1:
+    concurrency: release1
+    permissions:
+      contents: write
+    # Only run this job if the "ci" job passes
+    needs: ci
+
+    # Only run this job if new work is pushed to the "master" branch
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+    # Set up operating system
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      released: ${{ steps.release.outputs.released }}
+
+    # Define job steps
+    steps:
+    - name: Set up Python 3.12
+      uses: actions/setup-python@main
+      with:
+        python-version: 3.12
+    - name: Check-out repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        ref: master
+        submodules: recursive
+
+    - name: Use Python Semantic Release to prepare release
+      id: release
+      uses: python-semantic-release/python-semantic-release@v9.9.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Publish package distributions to GitHub Releases
+      uses: python-semantic-release/publish-action@main
+      if: steps.release.outputs.released == 'true'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Store the distribution packages
+      uses: actions/upload-artifact@v4
+      if: steps.release.outputs.released == 'true'
+      with:
+        name: python-package-distributions
+        path: dist/
+
+#  testpypi-publish:
+#    needs: release1
+#    if: needs.release1.outputs.released == 'true'
+#    runs-on: ubuntu-latest
+#    permissions:
+#      # IMPORTANT: this permission is mandatory for trusted publishing
+#      id-token: write
+#    # Dedicated environments with protections for publishing are strongly recommended.
+#    environment:
+#      name: pypi
+#      # OPTIONAL: uncomment and update to include your PyPI project URL in the deployment status:
+#      url: https://test.pypi.org/p/nvector
+#
+#    steps:
+#      - name: Retrieve release distributions
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: python-package-distributions
+#          path: dist/
+#
+#      - name: Publish release distributions to PyPI
+#        uses: pypa/gh-action-pypi-publish@release/v1
+#      - name: Test install from TestPyPI
+#        run: |
+#          pip install \
+#          --index-url https://test.pypi.org/simple/ \
+#          --extra-index-url https://pypi.org/simple/ \
+#            nvector
+
+  pypi-publish:
+    runs-on: ubuntu-latest
+    needs: release1
+    if: needs.release1.outputs.released == 'true'
+#    needs: testpypi-publish
+
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+
+    # Dedicated environments with protections for publishing are strongly recommended.
+    environment:
+      name: pypi
+      # OPTIONAL: uncomment and update to include your PyPI project URL in the deployment status:
+      url: https://pypi.org/p/nvector
+
+    steps:
+      - name: Retrieve release distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish release distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
