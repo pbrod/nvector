@@ -95,9 +95,12 @@ Development Steps
    pdm run nox
    ```
    
-5. Run any linting or style compliance program. Currently `nvector` does not have any, but a suggestion would be 
-appreciated.
+5. For linting the source code you can use `ruff <https://pypi.org/project/ruff/#description>`_
 
+    ```shell
+    ruff format ./src
+    ```
+    
 6. Update/add documentation (in ``docs``), if relevant.
    
 7. Add your name to the ``AUTHORS.rst`` file as an author.
@@ -152,32 +155,33 @@ The `nvector` project follows the
 [Napoleon NumPy style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/#google-vs-numpy) with type-hinting. 
 A good example is the following:
 
-```python
-def add_function(x1: int, x2: float) -> float:
-    """Adds two numbers
+.. code-block:: python
 
-    Parameters
-    ----------
-    x1 : int
-        An integer value
-    x2 : float
-        A floating-point value
-    
-    Returns
-    -------
-    float
-        The sum of the inputs.
+    def add_function(x1: int, x2: float) -> float:
+        """Adds two numbers
+
+        Parameters
+        ----------
+        x1 : int
+            An integer value
+        x2 : float
+            A floating-point value
         
-    Examples
-    --------
-    >>> add_function(
-    ...     1,
-    ...     2.
-    ... )
-    3.
-    """
-    return x1 + x2 
-```
+        Returns
+        -------
+        float
+            The sum of the inputs.
+            
+        Examples
+        --------
+        >>> add_function(
+        ...     1,
+        ...     2.
+        ... )
+        3.
+        """
+        return x1 + x2 
+
 In the case you cannot type-hint, try to be as descriptive in the docstrings as possible. Try to add docstring
 examples using the `>>>` and `...` notation. 
 

@@ -2,6 +2,72 @@
 Changelog
 =========
 
+Version 1.0.0, October 2, 2024
+==============================
+Per A Brodtkorb (63):
+      
+      * Added pytest-ruff and ruff as test dependencies to pyproject.toml
+      * added sphinx_build_latex script to pyproject.toml
+      * Replaced all single quotes (') with double quotes (").  
+      * Added pretty print __str__ method to _Common in objects.py
+      * Removed conversion of an array with ndim > 0 to a scalar in plot.py since it is deprecated, and will error in future.
+      * Replaced dependency on geographiclib with karney.py, which now is a separate package.
+      * Made matplotlib and cartopy optional dependency
+      * Added dm2degrees and degrees2dm in util.py
+      * Adopted many of the changes Matt Hogan did to the nvector fork called "envector":  
+      
+         * Updated docstrings to adopt the Napoleon docstring standard.  
+         * Removed numpydoc from the documentation requirements as it is not used.  
+         * Added type-hints to most functions and methods  
+         * Reduced matrix of supported Python versions as to reduce burden of testing  
+         * Added local testing support using nox.
+         * Replaced testing on travis and appveyor with github.workflows/python-package
+         * Added CODE_OF_CONDUCT.md, CONTRIBUTING.rst and workflows/python-package.yml.
+         * Removed THANKS.rst
+
+      * Added example to great_circle_distance_rad
+      * Replaced numpy.finfo(float).tiny with numpy.finfo(float).smallest_normal if version > 1.22 in util.py
+      * Added main function to plot.py
+      * Made _init_earth_plotter more robust in nvector.plot.py.
+      * Made test_prolate15_direct more forgiving...
+      * Removed unused rsum from util.py
+      * Fixed doctest so they don't crash on travis: Replaced "# doctest + SKIP" with "# doctest: +SKIP" in docstrings.
+      * Added hypothesis to tests_require in setup.py
+      * Updated badges in README.rst and _images.py
+      * Simplified duplicated test-values in test_R2zyx_zyx2R_roundtrip and test_R2xyz_xyz2R_roundtrip.
+      * Updated example 5 in _examples.py so it works again. 
+      * Fixed a bug in geodesic_distance
+      * Moved test_geo_solve6, test_geo_solve9,  test_geo_solve10 and test_geo_solve11 into test_inverse_cornercases
+      * Fixed a bug in test_nan_propagation
+      * Moved test_geo_solve29, test_geo_solve0 and test_geo_solve1 into WGS84_TESTCASES
+      * Removed obsolete long_unroll argument from GeoPoint.distance_and_azimuth and FrameE.inverse
+      * Fixed karney.py so that all the tests work.
+      * Added geodesic_reckon and improved geodesic_distance in core.py 
+      * Added karney.py
+      * Fixed doctests in lat_lon2n_E in core.py 
+      * Added geodesic_distance function to core.py 
+      * Added doctest example to GeoPoint.distance_and_azimuth method in objects.py
+      * Added allclose to __all__ in nvector.util.py and replaced all examples using np.allclose with nv.allclose 
+      * Added doctest example to lat_lon2n_E function. 
+      * Made lat_lon2n_E more general by allowing to broadcast the input. 
+      * Added test_util.py module. 
+      * Made nthroot function more robust against zero-division. 
+      * Made unit function more robust against overflow. 
+      * Made get_ellipsoid more forgiving on name argument
+      * Added NGO1948 and EUREF89 options to get_ellipsoid.
+      * Added course_over_ground, n_EA_E_and_n_EB_E2p_AB_N and n_EA_E_and_p_AB_N2n_EB_E to core.py 
+      * Added course_over_ground method to Nvector class in objects.py
+      * Added  n_EA_E_and_n_EB_E2p_AB_N and n_EA_E_and_p_AB_N2n_EB_E functions to core.py 
+      * Added content to topics/nvector.rst
+      * Fixes issue #15: KeyError: 'point' in __repr__ of Pvector
+      * Added test_nvector_with_vectors.py in order to check vectorized code work correctly. 
+      * Refactored great_circle_distance_rad function from great_circle_distance function
+      * Removed unused code from _info.py, _info_functional.py, core.py, plot.py
+      * Added tests to check if ``zyx2R(*R2zyx(r_matrix)) == r_matrix`` and ``xyz2R(*R2xyz(r_matrix)) == r_matrix`` 
+      * Corrected docstring of mdot in nvector.util.py
+
+
+
 Version 0.7.7, June 3, 2021
 ================================
 Per A Brodtkorb (27):
