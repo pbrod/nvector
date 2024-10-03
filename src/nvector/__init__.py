@@ -1,4 +1,5 @@
 from typing import Any, Optional
+
 from ._common import use_docstring
 from ._info import __doc__ as __doc__  # @UnresolvedImport
 from .core import *  # noqa
@@ -6,7 +7,7 @@ from .objects import *  # noqa
 from .rotation import *  # noqa
 from .util import *  # noqa
 
-__version__ = "1.0.2"
+__version__ = "1.0.1"
 
 _PACKAGE_NAME = __name__
 
@@ -17,7 +18,7 @@ import {_PACKAGE_NAME} as {_PACKAGE_NAME[:2]}
 {_PACKAGE_NAME[:2]}.test('-q', '--doctest-modules', '--cov={_PACKAGE_NAME}', '--disable-warnings')
 """
 )
-def test(*options: str, plugins: Optional[Any]=None) -> int:
+def test(*options: str, plugins: Optional[Any] = None) -> int:
     """
     Run tests for module using pytest.
 

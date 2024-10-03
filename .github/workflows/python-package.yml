@@ -34,104 +34,30 @@ jobs:
       run: |
         pdm run pytest
 
-  release1:
-    concurrency: release1
-    permissions:
-      contents: write
-    # Only run this job if the "ci" job passes
-    needs: ci
-
-    # Only run this job if new work is pushed to the "master" branch
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-
-    # Set up operating system
-    runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.release.outputs.tag }}
-      released: ${{ steps.release.outputs.released }}
-
-    # Define job steps
-    steps:
-    - name: Set up Python 3.12
-      uses: actions/setup-python@main
-      with:
-        python-version: 3.12
-    - name: Check-out repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        ref: master
-        submodules: recursive
-
-    - name: Use Python Semantic Release to prepare release
-      id: release
-      uses: python-semantic-release/python-semantic-release@v9.9.0
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Publish package distributions to GitHub Releases
-      uses: python-semantic-release/publish-action@main
-      if: steps.release.outputs.released == 'true'
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Store the distribution packages
-      uses: actions/upload-artifact@v4
-      if: steps.release.outputs.released == 'true'
-      with:
-        name: python-package-distributions
-        path: dist/
-
-#  testpypi-publish:
-#    needs: release1
-#    if: needs.release1.outputs.released == 'true'
-#    runs-on: ubuntu-latest
-#    permissions:
-#      # IMPORTANT: this permission is mandatory for trusted publishing
-#      id-token: write
-#    # Dedicated environments with protections for publishing are strongly recommended.
-#    environment:
-#      name: pypi
-#      # OPTIONAL: uncomment and update to include your PyPI project URL in the deployment status:
-#      url: https://test.pypi.org/p/nvector
-#
-#    steps:
-#      - name: Retrieve release distributions
-#        uses: actions/download-artifact@v4
-#        with:
-#          name: python-package-distributions
-#          path: dist/
-#
-#      - name: Publish release distributions to PyPI
-#        uses: pypa/gh-action-pypi-publish@release/v1
-#      - name: Test install from TestPyPI
-#        run: |
-#          pip install \
-#          --index-url https://test.pypi.org/simple/ \
-#          --extra-index-url https://pypi.org/simple/ \
-#            nvector
-
   pypi-publish:
+    needs: ci
+    # Only run this job if new work is pushed to the "master" branch
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master1'
+    
+    name: upload release to PyPI
     runs-on: ubuntu-latest
-    needs: release1
-    if: needs.release1.outputs.released == 'true'
-#    needs: testpypi-publish
-
     permissions:
+      # This permission is needed for private repositories.
+      contents: read
       # IMPORTANT: this permission is mandatory for trusted publishing
       id-token: write
-
+      
     # Dedicated environments with protections for publishing are strongly recommended.
     environment:
       name: pypi
       # OPTIONAL: uncomment and update to include your PyPI project URL in the deployment status:
       url: https://pypi.org/p/nvector
-
+      
     steps:
-      - name: Retrieve release distributions
-        uses: actions/download-artifact@v4
-        with:
-          name: python-package-distributions
-          path: dist/
+      - uses: actions/checkout@v4
 
+      - uses: pdm-project/setup-pdm@v4
+      
       - name: Publish release distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        run: pdm publish
+

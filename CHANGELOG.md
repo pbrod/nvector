@@ -1,5 +1,20 @@
 # Changelog
 
+
+## [1.0.1] - 2024-10-03
+
+### 📚 Documentation
+
+- Prepare changelog for automatic updates using semantic versioning
+
+### ⚙️ Miscellaneous Tasks
+
+- *(pyproject.toml)* Replace use of python-semantic-release with pdm-bump and git-cliff.
+
+### ◀️ Revert
+
+- Remove release1, pypi-publish and test-pypi-publish jobs from workflows/python-package.yml
+
 ## [1.0.0]  2024-10-02
 
   - Added pytest-ruff and ruff as test dependencies to pyproject.toml
