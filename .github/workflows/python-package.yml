@@ -42,6 +42,8 @@ jobs:
         python-version: ["3.12"]
     steps:
     - uses: actions/checkout@v4
+      with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of Sonar analysis
     - name: Set up PDM
       uses: pdm-project/setup-pdm@v4
       with:
@@ -66,8 +68,8 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: ./coverage.xml   # coverage report
     
-    - name: SonarCloud scanner
-      uses: sonarsource/sonarcloud-github-action@master
+    - name: SonarCloud scan
+      uses: SonarSource/sonarcloud-github-action@master
       env:
-        GITHUB_TOKEN: ${?{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${?{ secrets.SONAR_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
