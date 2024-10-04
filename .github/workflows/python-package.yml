@@ -34,6 +34,8 @@ jobs:
          pdm run pytest	
   coverage:
     needs: ci
+    # Only run this job if new work is pushed to the "master" branch
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     strategy:
       matrix:
