@@ -16,8 +16,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.12"] #,  "3.11", "3.10", "3.9"]
-        os: [ubuntu-latest] #, macOS-latest, windows-latest]
+        python-version: ["3.12",  "3.11", "3.10", "3.9"]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
       fail-fast: false
 
     steps:
@@ -29,6 +29,43 @@ jobs:
     - name: Install dependencies
       run: |
         pdm install -dG test
-    - name: Run Tests
+    - name: Run Tests		
       run: |
-        pdm run pytest
+         pdm run pytest	
+  coverage:
+    needs: ci
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up PDM
+      uses: pdm-project/setup-pdm@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        pdm install -dG test
+     # See: https://remarkablemark.org/blog/2023/10/14/setup-codeclimate-with-github-actions/
+    - uses: remarkablemark/setup-codeclimate@v2
+    - name: Run Tests and report to CodeClimate  
+      run: |
+          cc-test-reporter before-build
+          pdm run pytest	
+          cc-test-reporter after-build --exit-code $?
+      env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+
+    # See: https://martinheinz.dev/blog/69 "Ultimate CI Pipeline for All of Your Python Projects"
+    - name: Use Codecov to track coverage
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage.xml   # coverage report
+    
+    - name: SonarCloud scanner
+      uses: sonarsource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${?{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${?{ secrets.SONAR_TOKEN }}
