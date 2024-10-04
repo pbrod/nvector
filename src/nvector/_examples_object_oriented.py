@@ -4,7 +4,6 @@ __doc__ = GETTING_STARTED  # @ReservedAssignment
 
 
 if __name__ == "__main__":
-    from nvector._common import write_readme, test_docstrings
+    from nvector._common import test_docstrings
 
     test_docstrings(__file__)
-    write_readme(__doc__)

@@ -24,6 +24,7 @@ __doc__ = (  # @ReservedAssignment
 
 
 if __name__ == "__main__":
-    from nvector._common import test_docstrings
+    from nvector._common import write_readme, test_docstrings
 
+    write_readme(__doc__)
     test_docstrings(__file__)

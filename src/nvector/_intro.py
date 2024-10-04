@@ -1,8 +1,9 @@
+# ruff: noqa: E501
 r"""
 
 .. only:: html
 
-    |pkg_img| |tests_img| |docs_img| |health_img| |coverage_img| |versions_img| |downloads_img|
+    |pkg_img| |tests_img| |quality_img| |docs_img| |health_img| |coverage_img| |versions_img| |downloads_img|
 
 
 The nvector library is a suite of tools written in Python to solve geographical position
