@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.2] - 2024-10-04
+
+### 📚 Documentation
+
+- Updated test badge and quality badge in README.rst
+
+### ⚙️ Miscellaneous Tasks
+
+- Add pdm.lock and cliff.toml
+- Update release.yml and python-package.yml
+- Send coverage report to codeclimate and codecov
+- Only send code coverage reports for changes made to the master branch
+- Add sonar-project.properties and update link to test badge
+- Update SonarCloud analysis in python-package.yml
+- Update .readthedocs.yml
 
 ## [1.0.1] - 2024-10-03
 

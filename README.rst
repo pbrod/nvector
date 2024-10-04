@@ -5,7 +5,7 @@ nvector
 
 
 
-    |pkg_img| |tests_img| |docs_img| |health_img| |coverage_img| |versions_img| |downloads_img|
+    |pkg_img| |tests_img| |quality_img| |docs_img| |health_img| |coverage_img| |versions_img| |downloads_img|
 
 
 The nvector library is a suite of tools written in Python to solve geographical position
@@ -24,7 +24,7 @@ calculations. Currently the following operations are implemented:
 * Find the cross track distance between a path and a position.
 
 
-Using n-vector, the calculations become simple and non-singular. 
+Using n-vector, the calculations become simple and non-singular.
 Full accuracy is achieved for any global position (and for any distance).
 
 
@@ -42,8 +42,8 @@ position calculations can be solved with simple vector algebra
 Converting between n-vector and latitude/longitude is unambiguous and easy
 using the provided functions.
 
-n_E is n-vector in the program code, while in documents we use nE. E denotes
-an Earth-fixed coordinate frame, and it indicates that the three components of
+n_E is n-vector in the program code, while in documents we use :math:`\mathbf{n}^{E}`.
+E denotes an Earth-fixed coordinate frame, and it indicates that the three components of
 n-vector are along the three axes of E. More details about the notation and
 reference frames can be found in the `documentation. 
 <https://www.navlab.net/nvector/#vector_symbols>`_
@@ -97,7 +97,7 @@ Then at the Python prompt, try to import nvector:
 
     >>> import nvector as nv
     >>> print(nv.__version__)
-    0.7.7dev0
+    1.0.2
 
 
 To test if the toolbox is working correctly paste the following in an interactive
@@ -132,8 +132,9 @@ of the tutorial.
 Given two positions, A and B as latitudes, longitudes and depths relative to
 Earth, E.
 
-Find the exact vector between the two positions, given in meters north, east,
-and down, and find the direction (azimuth) to B, relative to north.
+Find the exact vector between the two positions, given in meters north, east, and down, and
+find the direction (azimuth) to B, relative to north, as well as elevation and distance.
+
 Assume WGS-84 ellipsoid. The given depths are from the ellipsoid surface.
 Use position A to define north, east, and down directions.
 (Due to the curvature of Earth and different directions to the North Pole,
@@ -144,22 +145,22 @@ directions to be defined.)
 Solution:
     >>> import numpy as np
     >>> import nvector as nv
-    >>> wgs84 = nv.FrameE(name='WGS84')
-    >>> pointA = wgs84.GeoPoint(latitude=1, longitude=2, z=3, degrees=True)
-    >>> pointB = wgs84.GeoPoint(latitude=4, longitude=5, z=6, degrees=True)
+    >>> wgs84 = nv.FrameE(name="WGS84")
+    >>> pointA = wgs84.GeoPointFromDegrees(latitude=1, longitude=2, z=3)
+    >>> pointB = wgs84.GeoPointFromDegrees(latitude=4, longitude=5, z=6)
 
 Step1:  Find p_AB_N (delta decomposed in N).
     >>> p_AB_N = pointA.delta_to(pointB)
     >>> x, y, z = p_AB_N.pvector.ravel()
-    >>> 'Ex1: delta north, east, down = {0:8.2f}, {1:8.2f}, {2:8.2f}'.format(x, y, z)
+    >>> "Ex1: delta north, east, down = {0:8.2f}, {1:8.2f}, {2:8.2f}".format(x, y, z)
     'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
 
-Step2: Also find the direction (azimuth) to B, relative to north:
-    >>> 'azimuth = {0:4.2f} deg'.format(p_AB_N.azimuth_deg)
+Step2: Find the direction (azimuth) to B, relative to north, as well as elevation and distance:
+    >>> "azimuth = {0:4.2f} deg".format(p_AB_N.azimuth_deg)
     'azimuth = 45.11 deg'
-    >>> 'elevation = {0:4.2f} deg'.format(p_AB_N.elevation_deg)
+    >>> "elevation = {0:4.2f} deg".format(p_AB_N.elevation_deg)
     'elevation = 2.12 deg'
-    >>> 'distance = {0:4.2f} m'.format(p_AB_N.length)
+    >>> "distance = {0:4.2f} m".format(p_AB_N.length)
     'distance = 470356.72 m'
 
 Functional Solution:
@@ -174,29 +175,23 @@ Step1: Convert to n-vectors:
     >>> n_EA_E = nv.lat_lon2n_E(lat_EA, lon_EA)
     >>> n_EB_E = nv.lat_lon2n_E(lat_EB, lon_EB)
 
-Step2: Find p_AB_E (delta decomposed in E).WGS-84 ellipsoid is default:
-    >>> p_AB_E = nv.n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA, z_EB)
-
-Step3: Find R_EN for position A:
-    >>> R_EN = nv.n_E2R_EN(n_EA_E)
-
-Step4: Find p_AB_N (delta decomposed in N).
-    >>> p_AB_N = np.dot(R_EN.T, p_AB_E).ravel()
-    >>> x, y, z = p_AB_N
-    >>> 'Ex1: delta north, east, down = {0:8.2f}, {1:8.2f}, {2:8.2f}'.format(x, y, z)
+Step2: Find p_AB_N (delta decomposed in N). WGS-84 ellipsoid is default:
+    >>> p_AB_N = nv.n_EA_E_and_n_EB_E2p_AB_N(n_EA_E, n_EB_E, z_EA, z_EB)
+    >>> x, y, z = p_AB_N.ravel()
+    >>> "Ex1: delta north, east, down = {0:8.2f}, {1:8.2f}, {2:8.2f}".format(x, y, z)
     'Ex1: delta north, east, down = 331730.23, 332997.87, 17404.27'
 
-Step5: Also find the direction (azimuth) to B, relative to north:
+Step3: Find the direction (azimuth) to B, relative to north as well as elevation and distance:
     >>> azimuth = np.arctan2(y, x)
-    >>> 'azimuth = {0:4.2f} deg'.format(deg(azimuth))
+    >>> "azimuth = {0:4.2f} deg".format(deg(azimuth))
     'azimuth = 45.11 deg'
 
     >>> distance = np.linalg.norm(p_AB_N)
     >>> elevation = np.arcsin(z / distance)
-    >>> 'elevation = {0:4.2f} deg'.format(deg(elevation))
+    >>> "elevation = {0:4.2f} deg".format(deg(elevation))
     'elevation = 2.12 deg'
 
-    >>> 'distance = {0:4.2f} m'.format(distance)
+    >>> "distance = {0:4.2f} m".format(distance)
     'distance = 470356.72 m'
 
 See also
@@ -223,7 +218,7 @@ use a = 6 378 135 m and f = 1/298.26.
 Solution:
     >>> import numpy as np
     >>> import nvector as nv
-    >>> wgs72 = nv.FrameE(name='WGS72')
+    >>> wgs72 = nv.FrameE(name="WGS72")
     >>> wgs72 = nv.FrameE(a=6378135, f=1.0/298.26)
 
 Step 1: Position and orientation of B is given 400m above E:
@@ -242,7 +237,7 @@ Step 4: Find point C by adding delta BC to EB
     >>> pointC = p_EC_E.to_geo_point()
 
     >>> lat, lon, z = pointC.latlon_deg
-    >>> msg = 'Ex2: PosC: lat, lon = {:4.4f}, {:4.4f} deg,  height = {:4.2f} m'
+    >>> msg = "Ex2: PosC: lat, lon = {:4.4f}, {:4.4f} deg,  height = {:4.2f} m"
     >>> msg.format(lat, lon, -z)
     'Ex2: PosC: lat, lon = 53.3264, 63.4681 deg,  height = 406.01 m'
 
@@ -265,13 +260,15 @@ assuming WGS-84 ellipsoid.
 Solution:
     >>> import numpy as np
     >>> import nvector as nv
-    >>> wgs84 = nv.FrameE(name='WGS84')
+    >>> wgs84 = nv.FrameE(name="WGS84")
     >>> position_B = 6371e3 * np.vstack((0.9, -1, 1.1))  # m
     >>> p_EB_E = wgs84.ECEFvector(position_B)
+
+Step 1: Find geodetic latitude and depth from the p-vector:
     >>> pointB = p_EB_E.to_geo_point()
 
     >>> lat, lon, z = pointB.latlon_deg
-    >>> 'Ex3: Pos B: lat, lon = {:4.4f}, {:4.4f} deg, height = {:9.3f} m'.format(lat, lon, -z)
+    >>> "Ex3: Pos B: lat, lon = {:4.4f}, {:4.4f} deg, height = {:9.3f} m".format(lat, lon, -z)
     'Ex3: Pos B: lat, lon = 39.3787, -48.0128 deg, height = 4702059.834 m'
 
 See also
@@ -290,11 +287,11 @@ lonEB and hEB, find the ECEF-vector for this position, p_EB_E.
 
 Solution:
     >>> import nvector as nv
-    >>> wgs84 = nv.FrameE(name='WGS84')
-    >>> pointB = wgs84.GeoPoint(latitude=1, longitude=2, z=-3, degrees=True)
+    >>> wgs84 = nv.FrameE(name="WGS84")
+    >>> pointB = wgs84.GeoPointFromDegrees(latitude=1, longitude=2, z=-3)
     >>> p_EB_E = pointB.to_ecef_vector()
 
-    >>> 'Ex4: p_EB_E = {} m'.format(p_EB_E.pvector.ravel().tolist())
+    >>> "Ex4: p_EB_E = {} m".format(p_EB_E.pvector.ravel().tolist())
     'Ex4: p_EB_E = [6373290.277218279, 222560.20067473652, 110568.82718178593] m'
 
 See also
@@ -319,34 +316,34 @@ Solution for a sphere:
     >>> import numpy as np
     >>> import nvector as nv
     >>> frame_E = nv.FrameE(a=6371e3, f=0)
-    >>> positionA = frame_E.GeoPoint(latitude=88, longitude=0, degrees=True)
-    >>> positionB = frame_E.GeoPoint(latitude=89, longitude=-170, degrees=True)
+    >>> pointA = frame_E.GeoPointFromDegrees(latitude=88, longitude=0)
+    >>> pointB = frame_E.GeoPointFromDegrees(latitude=89, longitude=-170)
 
-    >>> s_AB, azia, azib = positionA.distance_and_azimuth(positionB)
-    >>> p_AB_E = positionB.to_ecef_vector() - positionA.to_ecef_vector()
+    >>> s_AB, azia, azib = pointA.distance_and_azimuth(pointB)
+    >>> p_AB_E = pointB.to_ecef_vector() - pointA.to_ecef_vector()
     >>> d_AB = p_AB_E.length
 
-    >>> msg = 'Ex5: Great circle and Euclidean distance = {}'
-    >>> msg = msg.format('{:5.2f} km, {:5.2f} km')
+    >>> msg = "Ex5: Great circle and Euclidean distance = {}"
+    >>> msg = msg.format("{:5.2f} km, {:5.2f} km")
     >>> msg.format(s_AB / 1000, d_AB / 1000)
     'Ex5: Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
 Alternative sphere solution:
-    >>> path = nv.GeoPath(positionA, positionB)
-    >>> s_AB2 = path.track_distance(method='greatcircle')
-    >>> d_AB2 = path.track_distance(method='euclidean')
+    >>> path = nv.GeoPath(pointA, pointB)
+    >>> s_AB2 = path.track_distance(method="greatcircle")
+    >>> d_AB2 = path.track_distance(method="euclidean")
     >>> msg.format(s_AB2 / 1000, d_AB2 / 1000)
     'Ex5: Great circle and Euclidean distance = 332.46 km, 332.42 km'
 
 Exact solution for the WGS84 ellipsoid:
-    >>> wgs84 = nv.FrameE(name='WGS84')
-    >>> point1 = wgs84.GeoPoint(latitude=88, longitude=0, degrees=True)
-    >>> point2 = wgs84.GeoPoint(latitude=89, longitude=-170, degrees=True)
+    >>> wgs84 = nv.FrameE(name="WGS84")
+    >>> point1 = wgs84.GeoPointFromDegrees(latitude=88, longitude=0)
+    >>> point2 = wgs84.GeoPointFromDegrees(latitude=89, longitude=-170)
     >>> s_12, azi1, azi2 = point1.distance_and_azimuth(point2)
 
     >>> p_12_E = point2.to_ecef_vector() - point1.to_ecef_vector()
     >>> d_12 = p_12_E.length
-    >>> msg = 'Ellipsoidal and Euclidean distance = {:5.2f} km, {:5.2f} km'
+    >>> msg = "Ellipsoidal and Euclidean distance = {:5.2f} km, {:5.2f} km"
     >>> msg.format(s_12 / 1000, d_12 / 1000)
     'Ellipsoidal and Euclidean distance = 333.95 km, 333.91 km'
 
@@ -368,9 +365,9 @@ as n-vectors.
 
 Solution:
     >>> import nvector as nv
-    >>> wgs84 = nv.FrameE(name='WGS84')
-    >>> n_EB_E_t0 = wgs84.GeoPoint(89, 0, degrees=True).to_nvector()
-    >>> n_EB_E_t1 = wgs84.GeoPoint(89, 180, degrees=True).to_nvector()
+    >>> wgs84 = nv.FrameE(name="WGS84")
+    >>> n_EB_E_t0 = wgs84.GeoPointFromDegrees(89, 0).to_nvector()
+    >>> n_EB_E_t1 = wgs84.GeoPointFromDegrees(89, 180).to_nvector()
     >>> path = nv.GeoPath(n_EB_E_t0, n_EB_E_t1)
 
     >>> t0 = 10.
@@ -381,14 +378,14 @@ Solution:
     >>> g_EB_E_ti = path.interpolate(ti_n).to_geo_point()
 
     >>> lat_ti, lon_ti, z_ti = g_EB_E_ti.latlon_deg
-    >>> msg = 'Ex6, Interpolated position: lat, lon = {:2.1f} deg, {:2.1f} deg'
+    >>> msg = "Ex6, Interpolated position: lat, lon = {:2.1f} deg, {:2.1f} deg"
     >>> msg.format(lat_ti, lon_ti)
     'Ex6, Interpolated position: lat, lon = 89.8 deg, 180.0 deg'
 
 Vectorized solution:
     >>> t = np.array([10, 20])
-    >>> nvectors = wgs84.GeoPoint([89, 89], [0, 180], degrees=True).to_nvector()
-    >>> nvectors_i = nvectors.interpolate(ti, t, kind='linear')
+    >>> nvectors = wgs84.GeoPointFromDegrees([89, 89], [0, 180]).to_nvector()
+    >>> nvectors_i = nvectors.interpolate(ti, t, kind="linear")
     >>> lati, loni, zi = nvectors_i.to_geo_point().latlon_deg
     >>> msg.format(lat_ti, lon_ti)
     'Ex6, Interpolated position: lat, lon = 89.8 deg, 180.0 deg'
@@ -410,13 +407,12 @@ Note that the calculation is independent of the depths of the positions.
 
 Solution:
     >>> import nvector as nv
-    >>> points = nv.GeoPoint(latitude=[90, 60, 50],
-    ...                      longitude=[0, 10, -20], degrees=True)
+    >>> points = nv.GeoPoint.from_degrees(latitude=[90, 60, 50], longitude=[0, 10, -20])
     >>> nvectors = points.to_nvector()
     >>> n_EM_E = nvectors.mean()
     >>> g_EM_E = n_EM_E.to_geo_point()
     >>> lat, lon = g_EM_E.latitude_deg, g_EM_E.longitude_deg
-    >>> msg = 'Ex7: Pos M: lat, lon = {:4.4f}, {:4.4f} deg'
+    >>> msg = "Ex7: Pos M: lat, lon = {:4.4f}, {:4.4f} deg"
     >>> msg.format(lat, lon)
     'Ex7: Pos M: lat, lon = 67.2362, -6.9175 deg'
 
@@ -448,27 +444,27 @@ Exact solution:
     >>> import numpy as np
     >>> import nvector as nv
     >>> frame = nv.FrameE(a=6371e3, f=0)
-    >>> pointA = frame.GeoPoint(latitude=80, longitude=-90, degrees=True)
+    >>> pointA = frame.GeoPointFromDegrees(latitude=80, longitude=-90)
     >>> pointB, azimuthb = pointA.displace(distance=1000, azimuth=200, degrees=True)
     >>> lat, lon = pointB.latitude_deg, pointB.longitude_deg
 
-    >>> msg = 'Ex8, Destination: lat, lon = {:4.4f} deg, {:4.4f} deg'
+    >>> msg = "Ex8, Destination: lat, lon = {:4.4f} deg, {:4.4f} deg"
     >>> msg.format(lat, lon)
     'Ex8, Destination: lat, lon = 79.9915 deg, -90.0177 deg'
 
-    >>> np.allclose(azimuthb, -160.01742926820506)
+    >>> bool(np.allclose(azimuthb, -160.01742926820506))
     True
 
 Greatcircle solution:
     >>> pointB2, azimuthb = pointA.displace(distance=1000,
     ...                                     azimuth=200,
     ...                                     degrees=True,
-    ...                                     method='greatcircle')
+    ...                                     method="greatcircle")
     >>> lat2, lon2 = pointB2.latitude_deg, pointB.longitude_deg
     >>> msg.format(lat2, lon2)
     'Ex8, Destination: lat, lon = 79.9915 deg, -90.0177 deg'
 
-    >>> np.allclose(azimuthb, -160.0174292682187)
+    >>> bool(np.allclose(azimuthb, -160.0174292682187))
     True
 
 See also
@@ -491,30 +487,30 @@ Find the position C where the two great circles intersect.
 
 Solution:
     >>> import nvector as nv
-    >>> pointA1 = nv.GeoPoint(10, 20, degrees=True)
-    >>> pointA2 = nv.GeoPoint(30, 40, degrees=True)
-    >>> pointB1 = nv.GeoPoint(50, 60, degrees=True)
-    >>> pointB2 = nv.GeoPoint(70, 80, degrees=True)
+    >>> pointA1 = nv.GeoPoint.from_degrees(10, 20)
+    >>> pointA2 = nv.GeoPoint.from_degrees(30, 40)
+    >>> pointB1 = nv.GeoPoint.from_degrees(50, 60)
+    >>> pointB2 = nv.GeoPoint.from_degrees(70, 80)
     >>> pathA = nv.GeoPath(pointA1, pointA2)
     >>> pathB = nv.GeoPath(pointB1, pointB2)
 
     >>> pointC = pathA.intersect(pathB)
     >>> pointC = pointC.to_geo_point()
     >>> lat, lon = pointC.latitude_deg, pointC.longitude_deg
-    >>> msg = 'Ex9, Intersection: lat, lon = {:4.4f}, {:4.4f} deg'
+    >>> msg = "Ex9, Intersection: lat, lon = {:4.4f}, {:4.4f} deg"
     >>> msg.format(lat, lon)
     'Ex9, Intersection: lat, lon = 40.3186, 55.9019 deg'
 
 Check that PointC is not between A1 and A2 or B1 and B2:
-    >>> pathA.on_path(pointC)
+    >>> bool(pathA.on_path(pointC))
     False
-    >>> pathB.on_path(pointC)
+    >>> bool(pathB.on_path(pointC))
     False
 
 Check that PointC is on the great circle going through path A and path B:
-    >>> pathA.on_great_circle(pointC)
+    >>> bool(pathA.on_great_circle(pointC))
     True
-    >>> pathB.on_great_circle(pointC)
+    >>> bool(pathB.on_great_circle(pointC))
     True
 
 See also
@@ -545,20 +541,20 @@ Solution:
     >>> import numpy as np
     >>> import nvector as nv
     >>> frame = nv.FrameE(a=6371e3, f=0)
-    >>> pointA1 = frame.GeoPoint(0, 0, degrees=True)
-    >>> pointA2 = frame.GeoPoint(10, 0, degrees=True)
-    >>> pointB = frame.GeoPoint(1, 0.1, degrees=True)
+    >>> pointA1 = frame.GeoPoint(0, 0)
+    >>> pointA2 = frame.GeoPointFromDegrees(10, 0)
+    >>> pointB = frame.GeoPointFromDegrees(1, 0.1)
     >>> pathA = nv.GeoPath(pointA1, pointA2)
 
-    >>> s_xt = pathA.cross_track_distance(pointB, method='greatcircle')
-    >>> d_xt = pathA.cross_track_distance(pointB, method='euclidean')
+    >>> s_xt = pathA.cross_track_distance(pointB, method="greatcircle")
+    >>> d_xt = pathA.cross_track_distance(pointB, method="euclidean")
 
-    >>> val_txt = '{:4.2f} km, {:4.2f} km'.format(s_xt/1000, d_xt/1000)
-    >>> 'Ex10: Cross track distance: s_xt, d_xt = {}'.format(val_txt)
+    >>> val_txt = "{:4.2f} km, {:4.2f} km".format(s_xt/1000, d_xt/1000)
+    >>> "Ex10: Cross track distance: s_xt, d_xt = {}".format(val_txt)
     'Ex10: Cross track distance: s_xt, d_xt = 11.12 km, 11.12 km'
 
     >>> pointC = pathA.closest_point_on_great_circle(pointB)
-    >>> np.allclose(pathA.on_path(pointC), True)
+    >>> bool(np.allclose(pathA.on_path(pointC), True))
     True
 
 See also
@@ -584,11 +580,10 @@ Most of the content is based on the article by K. Gade [Gad10]_.
 Thus this article should be cited in publications using this page or
 downloaded program code.
 
-However, if you use any of the FrameE.direct, FrameE.inverse,
-GeoPoint.distance_and_azimuth or GeoPoint.displace methods you should also cite
-the article by Karney [Kar13]_ because these methods call
-Karney's `geographiclib <https://pypi.python.org/pypi/geographiclib>`_ library
-to do the calculations.
+However, if you use any of the geodesic_distance,  geodesic_reckon, FrameE.direct,
+FrameE.inverse, GeoPoint.distance_and_azimuth or GeoPoint.displace methods you should also cite
+the article by Karney [Kar13]_ because these methods call the
+`karney library <https://pypi.python.org/pypi/karney>`_ to do the calculations.
 
 
 
@@ -596,6 +591,8 @@ to do the calculations.
    :target: https://pypi.python.org/pypi/nvector/
 .. |tests_img| image:: https://github.com/pbrod/nvector/actions/workflows/python-package.yml/badge.svg
    :target: https://github.com/pbrod/nvector/actions/
+.. |quality_img| image:: https://sonarcloud.io/api/project_badges/measure?project=pbrod_nvector&metric=alert_status
+   :target: https://sonarcloud.io/project/overview?id=pbrod_nvector
 .. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable
    :target: http://Nvector.readthedocs.org/en/stable/
 .. |health_img| image:: https://api.codeclimate.com/v1/badges/c04214bef610b25906fe/maintainability

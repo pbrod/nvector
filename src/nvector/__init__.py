@@ -5,7 +5,7 @@ from .core import *  # noqa
 from .objects import *  # noqa
 from ._common import use_docstring
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 _PACKAGE_NAME = __name__
 

@@ -7,6 +7,9 @@
     .. |tests_img| image:: https://github.com/pbrod/nvector/actions/workflows/python-package.yml/badge.svg
         :target: https://github.com/pbrod/nvector/actions/
 
+    .. |quality_img| image:: https://sonarcloud.io/api/project_badges/measure?project=pbrod_nvector&metric=alert_status
+        :target: https://sonarcloud.io/project/overview?id=pbrod_nvector
+
     .. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable
        :target: http://Nvector.readthedocs.org/en/stable/
 
