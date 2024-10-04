@@ -594,8 +594,8 @@ to do the calculations.
 
 .. |pkg_img| image:: https://badge.fury.io/py/nvector.png
    :target: https://pypi.python.org/pypi/nvector/
-.. |tests_img| image:: https://app.travis-ci.com/pbrod/Nvector.svg?branch=master
-   :target: https://app.travis-ci.com/pbrod/Nvector
+.. |tests_img| image:: https://github.com/pbrod/nvector/actions/workflows/python-package.yml/badge.svg
+   :target: https://github.com/pbrod/nvector/actions/
 .. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable
    :target: http://Nvector.readthedocs.org/en/stable/
 .. |health_img| image:: https://api.codeclimate.com/v1/badges/c04214bef610b25906fe/maintainability
