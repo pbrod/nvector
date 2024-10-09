@@ -17,7 +17,7 @@ dependencies = [
     "karney>=1.0",
 ]
 
-requires-python = ">=3.9"
+requires-python = ">=3.9, !=3.13.*"
 readme = "README.rst"
 license = {text = "Simplified BSD"}
 license_file = "LICENSE.txt"
