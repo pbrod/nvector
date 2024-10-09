@@ -1,7 +1,7 @@
 [project]
 name = "nvector"
 dynamic = ["version"]
-description = "The nvector library is a suite of tools written in Python to solve geographical position calculations forked from nvector."
+description = "The nvector library is a suite of tools written in Python to solve geographical position calculations."
 authors = [
     {name = "Kenneth Gade, FFI"},
     {name = "Kristian Svartveit, FFI"},
