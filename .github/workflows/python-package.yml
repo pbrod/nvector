@@ -27,9 +27,16 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
+      if: matrix.os == 'ubuntu-latest'
       run: |
-        pdm install -dG test
-    - name: Run Tests		
+        pdm install -dG test -L pdm_linux.lock
+      if: matrix.os == 'windows-latest'
+      run: |
+        pdm install -dG test -L pdm_windows.lock
+      if: matrix.os == 'macOS-latest'
+      run: |
+        pdm install -dG test -L pdm_macos.lock
+    - name: Run Tests
       run: |
          pdm run pytest	
   coverage:
@@ -49,8 +56,15 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
+      if: matrix.os == 'ubuntu-latest'
       run: |
-        pdm install -dG test
+        pdm install -dG test -L pdm_linux.lock
+      if: matrix.os == 'windows-latest'
+      run: |
+        pdm install -dG test -L pdm_windows.lock
+      if: matrix.os == 'macOS-latest'
+      run: |
+        pdm install -dG test -L pdm_macos.lock
      # See: https://remarkablemark.org/blog/2023/10/14/setup-codeclimate-with-github-actions/
     - uses: remarkablemark/setup-codeclimate@v2
     - name: Run Tests and report to CodeClimate  
