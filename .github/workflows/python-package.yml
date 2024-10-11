@@ -26,14 +26,16 @@ jobs:
       uses: pdm-project/setup-pdm@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      if: matrix.os == 'ubuntu-latest'
+    - if: matrix.os == 'ubuntu-latest'
+      name: Install dependencies on Linux
       run: |
         pdm install -dG test -L pdm_linux.lock
-      if: matrix.os == 'windows-latest'
+    - if: matrix.os == 'windows-latest'
+      name: Install dependencies on Windows
       run: |
         pdm install -dG test -L pdm_windows.lock
-      if: matrix.os == 'macOS-latest'
+    - if: matrix.os == 'macOS-latest'
+      name: Install dependencies on macOS
       run: |
         pdm install -dG test -L pdm_macos.lock
     - name: Run Tests
@@ -55,14 +57,16 @@ jobs:
       uses: pdm-project/setup-pdm@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      if: matrix.os == 'ubuntu-latest'
+    - if: matrix.os == 'ubuntu-latest'
+      name: Install dependencies on Linux
       run: |
         pdm install -dG test -L pdm_linux.lock
-      if: matrix.os == 'windows-latest'
+    - if: matrix.os == 'windows-latest'
+      name: Install dependencies on Windows
       run: |
         pdm install -dG test -L pdm_windows.lock
-      if: matrix.os == 'macOS-latest'
+    - if: matrix.os == 'macOS-latest'
+      name: Install dependencies on macOS
       run: |
         pdm install -dG test -L pdm_macos.lock
      # See: https://remarkablemark.org/blog/2023/10/14/setup-codeclimate-with-github-actions/
