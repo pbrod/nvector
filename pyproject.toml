@@ -67,6 +67,7 @@ build-docs-latex = "sphinx-build -b latex docs docs/_build/latex -d docs/_build/
 build-docs-pdf = "sphinx-build -b latexpdf docs docs/_build/latex -d docs/_build/doctrees"
 lock_win64 = "pdm lock -L pdm_windows.lock --python 3.12 --strategy no_direct_minimal_versions --platform windows -dG all"
 lock_linux = "pdm lock -L pdm_linux.lock --python 3.12 --strategy no_direct_minimal_versions --platform linux -dG all"
+lock_macos = "pdm lock -L pdm_macos.lock --python 3.12 --strategy no_direct_minimal_versions --platform macos -dG all"
 
 format = "ruff format ./src/"  # format code
 check-style = "ruff check ./src/"  # check code style
