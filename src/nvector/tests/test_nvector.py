@@ -369,7 +369,7 @@ def test_n_EA_E_and_n_EB_E2azimuth():
     n2_E = np.array([[0], [1], [0]])
     n3_E = np.array([[0, 0], [0, 0], [1, 1]])
     n4_E = np.array([[0, 0], [1, 1], [0, 0]])
-    for n1, n2 in zip((n1_E, n3_E, n3_E), (n2_E, n2_E, n4_E)):
+    for n1, n2 in zip((n1_E, n3_E, n3_E), (n2_E, n2_E, n4_E), strict=False):
         azimuth = n_EA_E_and_n_EB_E2azimuth(n1, n2)
         assert_allclose(azimuth, np.pi / 2)
         azimuth = n_EA_E_and_n_EB_E2azimuth(n2, n1)
