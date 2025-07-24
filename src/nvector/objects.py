@@ -6,34 +6,34 @@ Object-oriented interface to geodesic functions
 
 # pylint: disable=invalid-name
 from __future__ import annotations
-from typing import Union, Any, Optional
+
+from typing import Any, Callable, Optional, Union
 
 import numpy as np
-from numpy import ndarray, float64, bool_
-from numpy.linalg import norm
 from karney import geodesic  # @UnresolvedImport
+from numpy import bool_, ndarray
+from numpy.linalg import norm
+
 from nvector import _examples, _license
-from nvector._common import test_docstrings, use_docstring, _make_summary
+from nvector._common import _make_summary, test_docstrings, use_docstring
+from nvector._typing import Array, ArrayLike, NpArrayLike, format_docstring_types
 from nvector.core import (
-    lat_lon2n_E,
-    n_E2lat_lon,
-    n_EB_E2p_EB_E,
-    p_EB_E2n_EB_E,
+    _interp_vectors,
     closest_point_on_great_circle,
     course_over_ground,
-    great_circle_distance,
-    euclidean_distance,
     cross_track_distance,
+    euclidean_distance,
+    great_circle_distance,
     intersect,
+    lat_lon2n_E,
+    n_E2lat_lon,
     n_EA_E_distance_and_azimuth2n_EB_E,
-    E_rotation,
+    n_EB_E2p_EB_E,
     on_great_circle_path,
-    _interp_vectors,
+    p_EB_E2n_EB_E,
 )
-from nvector.rotation import zyx2R, n_E_and_wa2R_EL, n_E2R_EN
-from nvector.util import unit, mdot, get_ellipsoid, rad, deg, isclose, allclose, array_to_list_dict
-from nvector._typing import Array, ArrayLike, NpArrayLike, format_docstring_types
-
+from nvector.rotation import E_rotation, n_E2R_EN, n_E_and_wa2R_EL, zyx2R
+from nvector.util import allclose, array_to_list_dict, deg, get_ellipsoid, isclose, mdot, rad, unit
 
 __all__ = [
     "delta_E",
@@ -94,7 +94,7 @@ def delta_E(
     return p_AB_E
 
 
-def _base_angle(angle_rad: Union[int, float, float64, ndarray]) -> Union[float64, ndarray]:
+def _base_angle(angle_rad: ArrayLike) -> NpArrayLike:
     r"""Returns angle so it is between $-\pi$ and $\pi$"""
     return np.mod(angle_rad + np.pi, 2 * np.pi) - np.pi
 
@@ -177,32 +177,28 @@ def delta_L(
 class _Common:
     """Base class that defines the common methods for geodetic vector-like and frame-like classes"""
 
-    _NAMES: tuple[str, ...] = tuple()
+    _NAMES: tuple[str, ...] = ()
     """Sequence of attribute names for the repr"""
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         cname = self.__class__.__name__
         fmt = ", "
         names = self._NAMES if self._NAMES else list(self.__dict__)
         dict_params = array_to_list_dict(self.__dict__.copy())
         params = fmt.join(
-            [
-                "{}={!r}".format(name, dict_params[name])
-                for name in names
-                if not name.startswith("_")
-            ]
+            [f"{name}={dict_params[name]!r}" for name in names if not name.startswith("_")]
         )
-        return "{}({})".format(cname, params)
+        return f"{cname}({params})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """display a nice short string representation of object."""
 
         return self._mystr(pretty=True)
 
-    def _mystr(self, pretty=True):
+    def _mystr(self, pretty: bool=True) -> str:
         """display a nice short string representation of object."""
 
-        def strfun(cls):
+        def strfun(cls) -> str:
             if isinstance(cls, _Common):
                 return cls._mystr(pretty)
             return str(cls)
@@ -224,7 +220,7 @@ class _Common:
 
         return self._get_str(_get_short_arg, pretty)
 
-    def _get_str(self, get_arg, pretty=False):
+    def _get_str(self, get_arg: Callable, pretty: bool=False) -> str:
         class_name = self.__class__.__name__
         args = []
 
@@ -244,13 +240,13 @@ class _Common:
             return "{}(\n    {})".format(class_name, ",\n    ".join(args))
         return "{}({})".format(class_name, ", ".join(args))
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         try:
             return self is other or self._is_equal_to(other, rtol=1e-12, atol=1e-14)
         except (AttributeError, NotImplementedError):
             return False
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
     def _is_equal_to(self, other: Any, rtol: float, atol: float) -> bool:
@@ -315,6 +311,15 @@ class GeoPoint(_Common):
     """
 
     _NAMES = ("latitude", "longitude", "z", "frame")
+    """Sequence of attribute names for the repr"""
+    latitude: ndarray
+    """Geodetic latitude [rad]"""
+    longitude: ndarray
+    """Geodetic longitude [rad]"""
+    z: ndarray
+    """Depth(s) [m] relative to the ellipsoid (depth = -height)"""
+    frame: "FrameE"
+    """Frame ellipsoid"""
 
     def __init__(
         self,
@@ -351,9 +356,9 @@ class GeoPoint(_Common):
     @format_docstring_types
     def from_degrees(
         cls,
-        latitude: Union[int, float, list, tuple, ndarray],
-        longitude: Union[int, float, list, tuple, ndarray],
-        z: Union[int, float, list, tuple, ndarray] = 0,
+        latitude: ArrayLike,
+        longitude: ArrayLike,
+        z: ArrayLike = 0,
         frame: Optional["FrameE"] = None,
     ) -> "GeoPoint":
         """
@@ -374,13 +379,13 @@ class GeoPoint(_Common):
         latitude, longitude = rad(latitude, longitude)
         return cls(latitude, longitude, z, frame)
 
-    def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
+    def _is_equal_to(self, other: Any, rtol:float=1e-12, atol:float=1e-14) -> bool:
         def diff(angle1, angle2):
             pi2 = 2 * np.pi
             delta = (angle1 - angle2) % pi2
             return np.where(delta > np.pi, pi2 - delta, delta)
 
-        options = dict(rtol=rtol, atol=atol)
+        options = {"rtol": rtol, "atol": atol}
         delta_lat = diff(self.latitude, other.latitude)
         delta_lon = diff(self.longitude, other.longitude)
         return (
@@ -433,10 +438,10 @@ class GeoPoint(_Common):
 
     def _displace_great_circle(
         self,
-        distance: Union[int, float, list, tuple, ndarray],
-        azimuth: Union[int, float, list, tuple, ndarray],
+        distance: ArrayLike,
+        azimuth: ArrayLike,
         degrees: bool,
-    ):
+    ) -> tuple["GeoPoint", NpArrayLike]:
         """Returns the great circle solution using the nvector method."""
         n_a = self.to_nvector()
         e_a = n_a.to_ecef_vector()
@@ -448,7 +453,7 @@ class GeoPoint(_Common):
         azimuth_b = _base_angle(delta_N(point_b, e_a).azimuth - np.pi)
         if degrees:
             return point_b, deg(azimuth_b)
-        return point_b, azimuth_b
+        return point_b.to_geo_point(), azimuth_b
 
     @format_docstring_types
     def displace(
@@ -458,7 +463,7 @@ class GeoPoint(_Common):
         long_unroll: bool = False,
         degrees: bool = False,
         method: str = "ellipsoid",
-    ):
+    ) -> tuple["GeoPoint", NpArrayLike]:
         """
         Returns position b computed from current position, distance and azimuth.
 
@@ -500,7 +505,7 @@ class GeoPoint(_Common):
         azimuth: ArrayLike,
         long_unroll: bool = False,
         degrees: bool = False,
-    ):
+    ) -> tuple["GeoPoint", NpArrayLike]:
         """Returns the exact ellipsoidal solution using the method of Karney.
 
         Parameters
@@ -689,6 +694,13 @@ class Nvector(_Common):
     """
 
     _NAMES = ("normal", "z", "frame")
+    """Sequence of attribute names for the repr"""
+    normal: ndarray
+    """Normal vector(s)"""
+    z: ndarray
+    """Depth(s) [m]"""
+    frame: "FrameE"
+    """Reference ellipsoid"""
 
     def __init__(self, normal: Array, z: ArrayLike = 0, frame: Optional["FrameE"] = None) -> None:
         """
@@ -720,7 +732,7 @@ class Nvector(_Common):
         polyorder: int = 2,
         mode: str = "interp",
         cval: Union[int, float] = 0.0,
-    ):
+    ) -> "Nvector":
         """
         Returns interpolated values from nvector data.
 
@@ -902,35 +914,35 @@ class Nvector(_Common):
         average_nvector = unit(np.sum(self.normal, axis=1).reshape((3, 1)))
         return self.frame.Nvector(average_nvector, z=np.mean(self.z))
 
-    def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
-        options = dict(rtol=rtol, atol=atol)
+    def _is_equal_to(self, other: Any, rtol: float=1e-12, atol: float=1e-14):
+        options = {"rtol": rtol, "atol": atol}
         return (
             allclose(self.normal, other.normal, **options)
             and allclose(self.z, other.z, **options)
             and self.frame == other.frame
         )
 
-    def __add__(self, other):
+    def __add__(self, other: "Nvector") -> "Nvector":
         _check_frames(self, other)
         return self.frame.Nvector(self.normal + other.normal, self.z + other.z)
 
-    def __sub__(self, other):
+    def __sub__(self, other: "Nvector") -> "Nvector":
         _check_frames(self, other)
         return self.frame.Nvector(self.normal - other.normal, self.z - other.z)
 
-    def __neg__(self):
+    def __neg__(self) -> "Nvector":
         return self.frame.Nvector(-self.normal, -self.z)
 
-    def __mul__(self, scalar):
+    def __mul__(self, scalar) -> "Nvector":
         """Elementwise multiplication"""
 
         if not isinstance(scalar, Nvector):
             return self.frame.Nvector(self.normal * scalar, self.z * scalar)
         return NotImplemented  # "Only scalar multiplication is implemented"
 
-    def __div__(self, scalar):
+    def __div__(self, scalar) -> "Nvector":
         """Elementwise division"""
-        if not isinstance(scalar, Nvector):
+        if not isinstance(scalar, "Nvector"):
             return self.frame.Nvector(self.normal / scalar, self.z / scalar)
         return NotImplemented  # "Only scalar division is implemented"
 
@@ -954,6 +966,12 @@ class Pvector(_Common):
     """
 
     _NAMES = ("pvector", "frame", "scalar")
+    """Sequence of attribute names for the repr"""
+    pvector: ndarray
+    """Position array-like, must be shape (3, n, m, ...) with n>0"""
+    frame: Union["FrameN", "FrameB", "FrameL"]
+    """Reference ellipsoid"""
+    scalar: bool
 
     def __init__(
         self,
@@ -982,8 +1000,8 @@ class Pvector(_Common):
 
     delta_to = _delta
 
-    def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
-        options = dict(rtol=rtol, atol=atol)
+    def _is_equal_to(self, other: Any, rtol: float=1e-12, atol: float=1e-14) -> bool:
+        options = {"rtol": rtol, "atol": atol}
         return allclose(self.pvector, other.pvector, **options) and self.frame == other.frame
 
     def to_ecef_vector(self) -> "ECEFvector":
@@ -1003,7 +1021,7 @@ class Pvector(_Common):
         return self.to_ecef_vector().to_geo_point()
 
     @property
-    def length(self) -> Union[float64, ndarray]:
+    def length(self) -> NpArrayLike:
         """Length of the pvector."""
         lengths = norm(self.pvector, axis=0)
         if self.scalar:
@@ -1011,12 +1029,12 @@ class Pvector(_Common):
         return lengths
 
     @property
-    def azimuth_deg(self) -> Union[float64, ndarray]:
+    def azimuth_deg(self) -> NpArrayLike:
         """Azimuth in degree clockwise relative to the x-axis."""
         return deg(self.azimuth)
 
     @property
-    def azimuth(self) -> Union[float64, ndarray]:
+    def azimuth(self) -> NpArrayLike:
         """Azimuth in radian clockwise relative to the x-axis."""
         p_AB_N = self.pvector
         if self.scalar:
@@ -1024,12 +1042,12 @@ class Pvector(_Common):
         return np.arctan2(p_AB_N[1], p_AB_N[0])
 
     @property
-    def elevation_deg(self) -> Union[float64, ndarray]:
+    def elevation_deg(self) -> NpArrayLike:
         """Elevation in degree relative to the xy-plane. (Positive downwards in a NED frame)"""
         return deg(self.elevation)
 
     @property
-    def elevation(self) -> Union[float64, ndarray]:
+    def elevation(self) -> NpArrayLike:
         """Elevation in radian relative to the xy-plane. (Positive downwards in a NED frame)"""
         z = self.pvector[2]
         if self.scalar:
@@ -1038,7 +1056,7 @@ class Pvector(_Common):
 
 
 @use_docstring(_examples.get_examples_no_header([3, 4]))
-class ECEFvector(Pvector):
+class ECEFvector(Pvector):  #_Common):
     """
     Geographical position(s) given as cartesian position vector(s) in frame E
 
@@ -1066,6 +1084,14 @@ class ECEFvector(Pvector):
     --------
     GeoPoint, ECEFvector, Pvector
     """
+    _NAMES = ("pvector", "frame", "scalar")
+    """Sequence of attribute names for the repr"""
+    pvector: ndarray
+    """Position array-like, must be shape (3, n, m, ...) with n>0"""
+    frame: "FrameE"
+    """Reference ellipsoid"""
+    scalar: bool
+
 
     def __init__(
         self, pvector: Array, frame: Optional["FrameE"] = None, scalar: Optional[bool] = None
@@ -1077,14 +1103,18 @@ class ECEFvector(Pvector):
         ----------
         pvector : list, tuple or ndarray
             3 x n array cartesian position vector(s) [m] from E to B, decomposed in E.
-        frame : FrameN, FrameB or FrameL
+        frame : FrameE
             Local frame
         scalar : bool
             True if p-vector represents a scalar position, i.e. n = 1.
         """
-        super(ECEFvector, self).__init__(pvector, _default_frame(frame), scalar)
+        if scalar is None:
+            scalar = np.shape(pvector)[1] == 1
+        self.pvector = np.asarray(pvector)
+        self.frame = frame
+        self.scalar = scalar
 
-    def change_frame(self, frame: Union("FrameB", "FrameL", "FrameN")) -> Pvector:
+    def change_frame(self, frame: Union["FrameB", "FrameL", "FrameN"]) -> Pvector:
         """
         Converts to Cartesian position vector in another frame
 
@@ -1128,17 +1158,17 @@ class ECEFvector(Pvector):
 
     delta_to = _delta
 
-    def __add__(self, other):
+    def __add__(self, other: 'ECEFvector') -> "ECEFvector":
         _check_frames(self, other)
         scalar = self.scalar and other.scalar
         return ECEFvector(self.pvector + other.pvector, self.frame, scalar)
 
-    def __sub__(self, other):
+    def __sub__(self, other: "ECEFvector") -> "ECEFvector":
         _check_frames(self, other)
         scalar = self.scalar and other.scalar
         return ECEFvector(self.pvector - other.pvector, self.frame, scalar)
 
-    def __neg__(self):
+    def __neg__(self) -> "ECEFvector":
         return ECEFvector(-self.pvector, self.frame, self.scalar)
 
 
@@ -1205,7 +1235,7 @@ class GeoPath(_Common):
         nvector_a, nvector_b = self.nvectors()
         return nvector_a.normal, nvector_b.normal
 
-    def _get_average_radius(self) -> Union[float, float64, ndarray]:
+    def _get_average_radius(self) -> NpArrayLike:
         p_E1_E, p_E2_E = self.ecef_vectors()
         radius = (p_E1_E.length + p_E2_E.length) / 2
         return radius
@@ -1215,7 +1245,7 @@ class GeoPath(_Common):
         point: Union[Nvector, GeoPoint, ECEFvector],
         method: str = "greatcircle",
         radius: Union[float, None] = None,
-    ) -> Union[float64, ndarray]:
+    ) -> NpArrayLike:
         """
         Returns cross track distance from path to point.
 
@@ -1553,13 +1583,22 @@ class FrameE(_Common):
     FrameN, FrameL, FrameB, nvector.util.get_ellipsoid
     """
 
-    _NAMES = ("a", "f", "name", "axes")
+    _NAMES = ('a', 'f', 'name', 'axes')
+    """Sequence of attribute names for the repr"""
+    a: float
+    """Semi-major axis of the Earth ellipsoid given in [m]."""
+    f: float
+    """Flattening [no unit] of the Earth ellipsoid."""
+    name: str
+    """Defining the default ellipsoid."""
+    axes: str
+    """Define axes orientation of E frame."""
 
     def __init__(
         self,
         a: Optional[float] = None,
         f: Optional[float] = None,
-        name: Optional[str] = "WGS84",
+        name: str = "WGS84",
         axes: Optional[str] = "e",
     ) -> None:
         if a is None or f is None:
@@ -1574,7 +1613,7 @@ class FrameE(_Common):
         """Rotation matrix R_Ee defining the axes of the coordinate frame E"""
         return E_rotation(self.axes)
 
-    def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
+    def _is_equal_to(self, other: Any, rtol:float=1e-12, atol: float=1e-14) -> bool:
         return (
             allclose(self.a, other.a, rtol=rtol, atol=atol)
             and allclose(self.f, other.f, rtol=rtol, atol=atol)
@@ -1756,12 +1795,17 @@ class FrameE(_Common):
         return ECEFvector(pvector, frame=self, scalar=scalar)
 
 
-class _LocalFrame(_Common):
+
+class _LocalFrameBase(_Common):
+
+    nvector: Nvector
+    """n-vector"""
+
     @property
     def R_EN(self) -> ndarray:
         raise NotImplementedError
 
-    def Pvector(self, pvector: Array) -> Pvector:
+    def Pvector(self, pvector: Array) -> "Pvector":
         """Returns Pvector relative to the local frame.
 
         Parameters
@@ -1779,7 +1823,7 @@ class _LocalFrame(_Common):
 
 
 @use_docstring(_examples.get_examples_no_header([1]))
-class FrameN(_LocalFrame):
+class FrameN(_LocalFrameBase):
     """
     North-East-Down frame
 
@@ -1846,7 +1890,7 @@ class FrameN(_LocalFrame):
         nvector = self.nvector
         return n_E2R_EN(nvector.normal, nvector.frame.R_Ee)
 
-    def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
+    def _is_equal_to(self, other: Any, rtol: float=1e-12, atol: float=1e-14) -> bool:
         return (
             allclose(self.R_EN, other.R_EN, rtol=rtol, atol=atol) and self.nvector == other.nvector
         )
@@ -1935,7 +1979,7 @@ class FrameL(FrameN):
 
 
 @use_docstring(_examples.get_examples_no_header([2]))
-class FrameB(_LocalFrame):
+class FrameB(_LocalFrameBase):
     """
     Body frame
 
@@ -1964,6 +2008,10 @@ class FrameB(_LocalFrame):
     """
 
     _NAMES = ("nvector", "yaw", "pitch", "roll")
+
+    yaw: ndarray
+    pitch: ndarray
+    roll: ndarray
 
     def __init__(
         self,
@@ -2025,7 +2073,7 @@ class FrameB(_LocalFrame):
         R_EN = n_E2R_EN(n_EB_E, self.nvector.frame.R_Ee)
         return mdot(R_EN, R_NB)  # rotation matrix
 
-    def _is_equal_to(self, other, rtol=1e-12, atol=1e-14):
+    def _is_equal_to(self, other: Any, rtol: float=1e-12, atol: float=1e-14) -> bool:
         return (
             allclose(self.yaw, other.yaw, rtol=rtol, atol=atol)
             and allclose(self.pitch, other.pitch, rtol=rtol, atol=atol)
@@ -2054,7 +2102,7 @@ def _default_frame(
 _ODICT = globals()
 __doc__ = (
     __doc__  # @ReservedAssignment
-    + _make_summary(dict((n, _ODICT[n]) for n in __all__))
+    + _make_summary({n: _ODICT[n] for n in __all__})
     + ".. only:: draft\n\n"
     + "    License\n    -------\n    "
     + _license.__doc__.replace("\n", "\n    ")

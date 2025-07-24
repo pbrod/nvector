@@ -2,10 +2,10 @@
 Module that checks that the geodesic direct and inverse methods is working correctly.
 """
 
+import numpy as np
 import pytest
 from pytest import approx
 
-import numpy as np
 from nvector import FrameE
 
 WGS84 = FrameE(name="WGS84")

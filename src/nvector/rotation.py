@@ -9,11 +9,13 @@ from __future__ import annotations
 from typing import Optional
 
 import numpy as np
-from numpy import arctan2, sin, cos, array, sqrt, ndarray
+from numpy import arctan2, array, cos, ndarray, sin, sqrt
+from numpy.linalg import norm
+
 from nvector import _license
-from nvector._common import test_docstrings, _make_summary
-from nvector.util import mdot, unit, norm, _nvector_check_length
-from nvector._typing import ArrayLike, NpArrayLike, Array, format_docstring_types
+from nvector._common import _make_summary, test_docstrings
+from nvector._typing import Array, ArrayLike, NpArrayLike, format_docstring_types
+from nvector.util import _nvector_check_length, mdot, unit
 
 __all__ = [
     "E_rotation",
@@ -29,7 +31,7 @@ __all__ = [
 ]
 
 _EPS = np.finfo(float).eps
-E_ROTATION_MATRIX = dict(e=np.array([[0, 0, 1.0], [0, 1.0, 0], [-1.0, 0, 0]]), E=np.eye(3))
+E_ROTATION_MATRIX = {"e": np.array([[0, 0, 1.0], [0, 1.0, 0], [-1.0, 0, 0]]), "E": np.eye(3)}
 """Rotation matrix defining the axes of the coordinate frame E."""
 
 # pylint: disable=invalid-name
@@ -257,7 +259,7 @@ def R_EN2n_E(R_EN: Array) -> ndarray:
     return R_EL2n_E(R_EN)
 
 
-def _atleast_3d(x, y, z):
+def _atleast_3d(x: ArrayLike, y: ArrayLike, z: ArrayLike) -> tuple[ndarray, ndarray, ndarray]:
     """
     Examples
     --------
@@ -602,7 +604,7 @@ def n_E_and_wa2R_EL(n_E: Array, wander_azimuth: ArrayLike, R_Ee: Optional[Array]
 _odict = globals()
 __doc__ = (
     __doc__  # @ReservedAssignment
-    + _make_summary(dict((n, _odict[n]) for n in __all__))
+    + _make_summary({n: _odict[n] for n in __all__})
     + ".. only:: draft\n\n"
     + "    License\n    -------\n    "
     + _license.__doc__.replace("\n", "\n    ")

@@ -5,17 +5,17 @@ Utility functions
 """
 
 from __future__ import annotations
+
 import warnings
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Union
 
 import numpy as np
-from numpy import rad2deg, deg2rad, ndarray, float64
+from numpy import deg2rad, float64, ndarray, rad2deg
 from numpy.linalg import norm
 
 from nvector import _license
-from nvector._common import test_docstrings, _make_summary
-from nvector._typing import format_docstring_types, ArrayLike, NpArrayLike, Array, Union
-
+from nvector._common import _make_summary, test_docstrings
+from nvector._typing import Array, ArrayLike, NpArrayLike, format_docstring_types
 
 __all__ = [
     "deg",
@@ -770,7 +770,9 @@ def get_ellipsoid(name: Union[int, str]) -> Ellipsoid:
     """
     if isinstance(name, str):
         name = name.lower().replace(" ", "").partition("/")[0]
-    ellipsoid_id = ELLIPSOID_IX.get(name, name)
+        ellipsoid_id = ELLIPSOID_IX[name]
+    else:
+        ellipsoid_id = int(name)
 
     return ELLIPSOID[ellipsoid_id]
 
@@ -829,7 +831,7 @@ def unit(
 _odict = globals()
 __doc__ = (  # @ReservedAssignment
     __doc__
-    + _make_summary(dict((n, _odict[n]) for n in __all__))
+    + _make_summary({n: _odict[n] for n in __all__})
     + ".. only:: draft\n\n"
     + "    License\n    -------\n    "
     + _license.__doc__.replace("\n", "\n    ")

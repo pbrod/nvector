@@ -5,22 +5,28 @@ Created on 26. sep. 2024
 """
 
 import warnings
-from typing import Union
-from numpy import ndarray, float64
+from typing import Any, Callable, TypeVar, Union
 
-ArrayLike = Union[int, float, list, tuple, ndarray]
+import numpy as np
+import numpy.typing as npt
+
+#ArrayLike = npt.ArrayLike  #
+ArrayLike = Union[int, float, list, tuple, np.ndarray]
 ArrayLikeTxt = "int, float, list, tuple or ndarray"
 
-NpArrayLike = Union[float64, ndarray]
+NpArrayLike = Union[np.float64, np.ndarray]
 NpArrayLikeTxt = "float64 or ndarray"
 
-Array = Union[list, tuple, ndarray]
+#Array = npt.ArrayLike  #
+Array = Union[list, tuple, np.ndarray]
 ArrayTxt = "list, tuple or ndarray"
 
-TYPES_DICT = dict(array=ArrayTxt, array_like=ArrayLikeTxt, np_array_like=NpArrayLikeTxt)
+TYPES_DICT = {"array": ArrayTxt, "array_like": ArrayLikeTxt, "np_array_like": NpArrayLikeTxt}
+
+F = TypeVar("F", bound=Callable[..., Any])
 
 
-def format_docstring_types(func):
+def format_docstring_types(func: F) -> F:
     """This decorator modifies the decorated function's docstring with supplied types.
 
     It replaces:

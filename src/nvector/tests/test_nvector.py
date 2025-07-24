@@ -21,26 +21,27 @@ in degrees, the variable name has the following ending: _deg
 """
 
 from functools import partial
-import numpy as np
 
-from nvector.util import unit, deg, rad
-from nvector.rotation import zyx2R, n_E2R_EN
+import numpy as np
+from numpy.testing import assert_allclose as _assert_allclose  # @UnresolvedImport
+
 from nvector.core import (
+    closest_point_on_great_circle,
+    cross_track_distance,
+    euclidean_distance,
+    great_circle_distance,
     lat_lon2n_E,
+    mean_horizontal_position,
     n_E2lat_lon,
+    n_EA_E_and_n_EB_E2azimuth,
     n_EA_E_and_n_EB_E2p_AB_E,
     n_EA_E_and_p_AB_E2n_EB_E,
-    p_EB_E2n_EB_E,
-    n_EB_E2p_EB_E,
-    mean_horizontal_position,
-    great_circle_distance,
-    euclidean_distance,
-    cross_track_distance,
-    closest_point_on_great_circle,
     n_EA_E_distance_and_azimuth2n_EB_E,
-    n_EA_E_and_n_EB_E2azimuth,
+    n_EB_E2p_EB_E,
+    p_EB_E2n_EB_E,
 )
-from numpy.testing import assert_allclose as _assert_allclose  # @UnresolvedImport
+from nvector.rotation import n_E2R_EN, zyx2R
+from nvector.util import deg, rad, unit
 
 assert_allclose = partial(_assert_allclose, atol=1e-15)
 
@@ -79,8 +80,8 @@ def test_Ex1_A_and_B_to_delta_in_frame_N():
     azimuth = np.arctan2(p_AB_N[1], p_AB_N[0])
     # positive angle about down-axis
 
-    print("Ex1, delta north, east, down = {0}, {1}, {2}".format(p_AB_N[0], p_AB_N[1], p_AB_N[2]))
-    print("Ex1, azimuth = {0} deg".format(deg(azimuth)))
+    print(f"Ex1, delta north, east, down = {p_AB_N[0]}, {p_AB_N[1]}, {p_AB_N[2]}")
+    print(f"Ex1, azimuth = {deg(azimuth)} deg")
 
     assert_allclose(p_AB_N[0], 331730.23478089)
     assert_allclose(p_AB_N[1], 332997.87498927)
@@ -166,7 +167,7 @@ def test_Ex4_geodetic_latitude_to_ECEF_vector():
     # Step2: Find the ECEF-vector p_EB_E:
     p_EB_E = n_EB_E2p_EB_E(n_EB_E, -h_EB)
 
-    print("Ex4: p_EB_E = {0} m".format(p_EB_E.ravel()))
+    print(f"Ex4: p_EB_E = {p_EB_E.ravel()} m")
 
     assert_allclose(p_EB_E.ravel(), [6373290.27721828, 222560.20067474, 110568.82718179])
 
@@ -265,7 +266,7 @@ def test_Ex8_position_A_and_azimuth_and_distance_to_B():
     # When displaying the resulting position for humans, it is more
     # convenient to see lat, long:
     lat_EB, long_EB = n_E2lat_lon(n_EB_E)
-    print("Ex8, Destination: lat, long = {0} {1} deg".format(deg(lat_EB), deg(long_EB)))
+    print(f"Ex8, Destination: lat, long = {deg(lat_EB)} {deg(long_EB)} deg")
 
     assert_allclose(deg(lat_EB), 79.99154867)
     assert_allclose(deg(long_EB), -90.01769837)

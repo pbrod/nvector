@@ -3,22 +3,22 @@ Unittests for the rotation module
 """
 
 from functools import partial
-import pytest
+
 import numpy as np
-from nvector.util import rad
-from nvector.rotation import (
-    xyz2R,
-    R2xyz,
-    zyx2R,
-    R2zyx,
-    n_E_and_wa2R_EL,
-    n_E2R_EN,
-    R_EN2n_E,
-    R_EL2n_E,
-)
-
-
+import pytest
 from numpy.testing import assert_allclose as _assert_allclose  # @UnresolvedImport
+
+from nvector.rotation import (
+    R2xyz,
+    R2zyx,
+    R_EL2n_E,
+    R_EN2n_E,
+    n_E2R_EN,
+    n_E_and_wa2R_EL,
+    xyz2R,
+    zyx2R,
+)
+from nvector.util import rad
 
 assert_allclose = partial(_assert_allclose, atol=1e-15)
 
