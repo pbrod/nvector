@@ -8,12 +8,13 @@ import sys
 import warnings
 from functools import partial
 
-import pytest
 import numpy as np
+import pytest
 from numpy.testing import assert_allclose as _assert_allclose  # @UnresolvedImport
+
 import nvector as nv
+from nvector.objects import FrameB, FrameE, FrameL, FrameN, GeoPath, GeoPoint, delta_L
 from nvector.util import unit
-from nvector.objects import FrameB, FrameE, FrameN, FrameL, GeoPoint, GeoPath, delta_L
 
 assert_allclose = partial(_assert_allclose, atol=1e-15)
 

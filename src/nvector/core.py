@@ -9,21 +9,20 @@ This file is part of NavLab and is available from www.navlab.net/nvector
 from __future__ import annotations
 
 import warnings
-from typing import Any, Union, Optional
+from typing import Any, Optional, Union
 
 import numpy as np
-from numpy import arctan2, sin, cos, cross, dot, sqrt, ndarray
+from karney import geodesic  # @UnresolvedImport
+from numpy import arctan2, cos, cross, dot, ndarray, sin, sqrt
 from numpy.linalg import norm
 from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
 
-from karney import geodesic  # @UnresolvedImport
 from nvector import _examples, _license
-from nvector._common import test_docstrings, use_docstring, _make_summary
-from nvector.rotation import E_rotation, n_E2R_EN, n_E2lat_lon, change_axes_to_E
-from nvector.util import mdot, nthroot, unit, eccentricity2, polar_radius
-
-from nvector._typing import format_docstring_types, Array, ArrayLike, NpArrayLike
+from nvector._common import _make_summary, test_docstrings, use_docstring
+from nvector._typing import Array, ArrayLike, NpArrayLike, format_docstring_types
+from nvector.rotation import E_rotation, change_axes_to_E, n_E2lat_lon, n_E2R_EN
+from nvector.util import eccentricity2, mdot, nthroot, polar_radius, unit
 
 __all__ = [
     "closest_point_on_great_circle",
@@ -648,7 +647,7 @@ def _interp_vectors(
     """
     if window_length > 0:
         window_length = window_length + (window_length + 1) % 2  # make sure it is an odd integer
-        options = dict(axis=1, mode=mode, cval=cval)
+        options = {"axis": 1, "mode": mode, "cval": cval}
         normals = savgol_filter(nvectors, window_length, polyorder, **options)
     else:
         normals = nvectors
@@ -943,8 +942,8 @@ def course_over_ground(
         mode = options.pop("mode", "nearest")
         if mode not in {"nearest", "interp"}:
             warnings.warn(
-                "Using {} is not a recommended mode for filtering headings data!"
-                " Use 'interp' or 'nearest' mode instead!".format(mode),
+                f"Using {mode} is not a recommended mode for filtering headings data!"
+                " Use 'interp' or 'nearest' mode instead!",
                 stacklevel=2,
             )
         cval = options.pop("cval", 0.0)
@@ -1600,7 +1599,7 @@ def mean_horizontal_position(n_EB_E: Array) -> ndarray:
 _odict = globals()
 __doc__ = (  # @ReservedAssignment
     __doc__
-    + _make_summary(dict((n, _odict[n]) for n in __all__))
+    + _make_summary({n: _odict[n] for n in __all__})
     + ".. only:: draft\n\n"
     + "    License\n    -------\n    "
     + _license.__doc__.replace("\n", "\n    ")

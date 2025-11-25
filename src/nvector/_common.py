@@ -1,17 +1,19 @@
-import warnings
+from __future__ import annotations
 import inspect
-from ._typing import TYPES_DICT
 import textwrap
+import warnings
+from typing import Any, Callable, Optional, cast
 
+from ._typing import TYPES_DICT, F
 
 dedent = textwrap.dedent
 
 
-def indent(text, amount=4, ch=" "):
+def indent(text: str, amount: int=4, ch: str=" ") -> str:
     return textwrap.indent(text, amount * ch)
 
 
-def _get_h1line(object_):
+def _get_h1line(object_: object) -> str:
     """Returns the H1 line of the documentation of an object."""
     doc = object_.__doc__
     if doc:
@@ -19,7 +21,7 @@ def _get_h1line(object_):
     return ""
 
 
-def _make_summary(odict):
+def _make_summary(odict: dict[str, Any]) -> str:
     """Return summary of all functions and classes in odict"""
 
     class_summary = "\n".join(
@@ -46,7 +48,7 @@ def _make_summary(odict):
     return summary
 
 
-def use_docstring_from(cls):
+def use_docstring_from(cls: object) -> Callable[..., Any]:
     """This decorator modifies the decorated function's docstring by
     with the docstring from the class `cls`.
 
@@ -60,7 +62,8 @@ def use_docstring_from(cls):
     return use_docstring(cls.__doc__)
 
 
-def use_docstring(docstring="", type_dict=None):
+def use_docstring(docstring: Optional[str]="", type_dict: Optional[dict[str, str]] = None
+                  ) -> Callable[..., Any]:
     """This decorator modifies the decorated function's docstring with supplied docstring.
 
     If the function's docstring is None it is replaced with the supplied docstring.
@@ -69,12 +72,12 @@ def use_docstring(docstring="", type_dict=None):
     This is useful when you want modify the docstring of a function at runtime.
     """
 
-    def _doc(func):
+    def _doc(func: F) -> F:
         func_docstring = func.__doc__
         if func_docstring is None:
             func.__doc__ = docstring
         else:
-            options = dict(super=docstring)
+            options = {"super": docstring}
             if type_dict:
                 options.update(type_dict)
             else:
@@ -90,14 +93,14 @@ def use_docstring(docstring="", type_dict=None):
     return _doc
 
 
-def test_docstrings(filename):
+def test_docstrings(filename: str) -> None:
     import doctest
 
-    print("Testing docstrings in {0!s}".format(filename))
+    print(f"Testing docstrings in {filename!s}")
     doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS)
     print("Docstrings tested")
 
 
-def write_readme(doc):
+def write_readme(doc: str) -> None:
     with open("readme.txt", "w") as fid:
         fid.write(doc)
