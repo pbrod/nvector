@@ -1,15 +1,16 @@
 from __future__ import annotations
+
 import inspect
 import textwrap
 import warnings
-from typing import Any, Callable, Optional, cast
+from typing import Any, Callable, Optional
 
 from ._typing import TYPES_DICT, F
 
 dedent = textwrap.dedent
 
 
-def indent(text: str, amount: int=4, ch: str=" ") -> str:
+def indent(text: str, amount: int = 4, ch: str = " ") -> str:
     return textwrap.indent(text, amount * ch)
 
 
@@ -62,8 +63,9 @@ def use_docstring_from(cls: object) -> Callable[..., Any]:
     return use_docstring(cls.__doc__)
 
 
-def use_docstring(docstring: Optional[str]="", type_dict: Optional[dict[str, str]] = None
-                  ) -> Callable[..., Any]:
+def use_docstring(
+    docstring: Optional[str] = "", type_dict: Optional[dict[str, str]] = None
+) -> Callable[..., Any]:
     """This decorator modifies the decorated function's docstring with supplied docstring.
 
     If the function's docstring is None it is replaced with the supplied docstring.

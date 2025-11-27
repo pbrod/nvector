@@ -1,4 +1,4 @@
-from .__init__ import __version__  # type: ignore
+from .__init__ import __version__
 
 __doc__ = f"""
 Install nvector

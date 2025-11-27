@@ -3,6 +3,7 @@ Created on 18. jan. 2016
 
 @author: pab
 """
+
 from typing import Iterable
 
 
@@ -764,7 +765,7 @@ Alternative solution 3:
 """
 
 
-def get_examples(indices: Iterable[int], oo_solution: bool=True) -> str:
+def get_examples(indices: Iterable[int], oo_solution: bool = True) -> str:
     """Returns examples with header"""
     dic = dict(globals())
     hdr = "EXAMPLE_{}_HEADER"
@@ -775,7 +776,7 @@ def get_examples(indices: Iterable[int], oo_solution: bool=True) -> str:
     )
 
 
-def get_examples_no_header(indices: Iterable[int], oo_solution: bool=True) -> str:
+def get_examples_no_header(indices: Iterable[int], oo_solution: bool = True) -> str:
     """Returns examples with no header"""
     dic = dict(globals())
     hdr = "EXAMPLE_{}_HEADER"

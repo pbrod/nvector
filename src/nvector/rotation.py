@@ -9,12 +9,12 @@ from __future__ import annotations
 from typing import Optional
 
 import numpy as np
-from numpy import arctan2, array, cos, ndarray, sin, sqrt
+from numpy import arctan2, cos, sin, sqrt
 from numpy.linalg import norm
 
 from nvector import _license
 from nvector._common import _make_summary, test_docstrings
-from nvector._typing import Array, ArrayLike, NpArrayLike, format_docstring_types
+from nvector._typing import Array, ArrayLike, NdArray, NpArrayLike, format_docstring_types
 from nvector.util import _nvector_check_length, mdot, unit
 
 __all__ = [
@@ -37,7 +37,7 @@ E_ROTATION_MATRIX = {"e": np.array([[0, 0, 1.0], [0, 1.0, 0], [-1.0, 0, 0]]), "E
 # pylint: disable=invalid-name
 
 
-def E_rotation(axes: str = "e") -> ndarray:
+def E_rotation(axes: str = "e") -> NdArray:
     """
     Returns rotation matrix R_Ee defining the axes of the coordinate frame E.
 
@@ -203,7 +203,7 @@ def R2zyx(R_AB: Array) -> tuple[NpArrayLike, NpArrayLike, NpArrayLike]:
 
 
 @format_docstring_types
-def R_EL2n_E(R_EL: Array) -> ndarray:
+def R_EL2n_E(R_EL: Array) -> NdArray:
     """
     Returns n-vector from the rotation matrix R_EL.
 
@@ -232,7 +232,7 @@ def R_EL2n_E(R_EL: Array) -> ndarray:
 
 
 @format_docstring_types
-def R_EN2n_E(R_EN: Array) -> ndarray:
+def R_EN2n_E(R_EN: Array) -> NdArray:
     """
     Returns n-vector from the rotation matrix R_EN.
 
@@ -259,7 +259,7 @@ def R_EN2n_E(R_EN: Array) -> ndarray:
     return R_EL2n_E(R_EN)
 
 
-def _atleast_3d(x: ArrayLike, y: ArrayLike, z: ArrayLike) -> tuple[ndarray, ndarray, ndarray]:
+def _atleast_3d(x: ArrayLike, y: ArrayLike, z: ArrayLike) -> tuple[NdArray, NdArray, NdArray]:
     """
     Examples
     --------
@@ -284,7 +284,7 @@ def _atleast_3d(x: ArrayLike, y: ArrayLike, z: ArrayLike) -> tuple[ndarray, ndar
 
 
 @format_docstring_types
-def xyz2R(x: ArrayLike, y: ArrayLike, z: ArrayLike) -> ndarray:
+def xyz2R(x: ArrayLike, y: ArrayLike, z: ArrayLike) -> NdArray:
     """
     Returns rotation matrix from Euler angles in the xyz-order.
 
@@ -329,7 +329,7 @@ def xyz2R(x: ArrayLike, y: ArrayLike, z: ArrayLike) -> ndarray:
     sx, sy, sz = sin(x), sin(y), sin(z)
     cx, cy, cz = cos(x), cos(y), cos(z)
 
-    R_AB = array(
+    R_AB = np.array(
         [
             [cy * cz, -cy * sz, sy],
             [sy * sx * cz + cx * sz, -sy * sx * sz + cx * cz, -cy * sx],
@@ -341,7 +341,7 @@ def xyz2R(x: ArrayLike, y: ArrayLike, z: ArrayLike) -> ndarray:
 
 
 @format_docstring_types
-def zyx2R(z: ArrayLike, y: ArrayLike, x: ArrayLike) -> ndarray:
+def zyx2R(z: ArrayLike, y: ArrayLike, x: ArrayLike) -> NdArray:
     """
     Returns rotation matrix from Euler angles in the zyx-order.
 
@@ -411,7 +411,7 @@ def zyx2R(z: ArrayLike, y: ArrayLike, x: ArrayLike) -> ndarray:
     sx, sy, sz = sin(x), sin(y), sin(z)
     cx, cy, cz = cos(x), cos(y), cos(z)
 
-    R_AB = array(
+    R_AB = np.array(
         [
             [cz * cy, -sz * cx + cz * sy * sx, sz * sx + cz * sy * cx],
             [sz * cy, cz * cx + sz * sy * sx, -cz * sx + sz * sy * cx],
@@ -423,7 +423,7 @@ def zyx2R(z: ArrayLike, y: ArrayLike, x: ArrayLike) -> ndarray:
 
 
 @format_docstring_types
-def n_E2lat_lon(n_E: Array, R_Ee: Optional[Array] = None) -> tuple[ndarray, ndarray]:
+def n_E2lat_lon(n_E: Array, R_Ee: Optional[Array] = None) -> tuple[NdArray, NdArray]:
     """
     Converts n-vector(s) to latitude(s) and longitude(s).
 
@@ -465,7 +465,7 @@ def n_E2lat_lon(n_E: Array, R_Ee: Optional[Array] = None) -> tuple[ndarray, ndar
 
 
 @format_docstring_types
-def change_axes_to_E(n_E: Array, R_Ee: Optional[Array] = None) -> ndarray:
+def change_axes_to_E(n_E: Array, R_Ee: Optional[Array] = None) -> NdArray:
     """
     Change axes of the nvector(s) from "e" to "E".
 
@@ -504,7 +504,7 @@ def change_axes_to_E(n_E: Array, R_Ee: Optional[Array] = None) -> ndarray:
 
 
 @format_docstring_types
-def n_E2R_EN(n_E: Array, R_Ee: Optional[Array] = None) -> ndarray:
+def n_E2R_EN(n_E: Array, R_Ee: Optional[Array] = None) -> NdArray:
     """
     Returns the rotation matrix R_EN from n-vector.
 
@@ -543,7 +543,7 @@ def n_E2R_EN(n_E: Array, R_Ee: Optional[Array] = None) -> ndarray:
     # formed by n-vector and Earth's spin axis
     on_poles = np.flatnonzero(norm(Ny_e_direction, axis=0) == 0)
     Ny_e = unit(Ny_e_direction)
-    Ny_e[:, on_poles] = array([[0], [1], [0]])  # selected y-axis direction
+    Ny_e[:, on_poles] = np.array([[0], [1], [0]])  # selected y-axis direction
 
     # Find x-axis of N (North):
     Nx_e = np.cross(Ny_e, Nz_e, axis=0)  # Final axis found by right hand rule
@@ -557,7 +557,9 @@ def n_E2R_EN(n_E: Array, R_Ee: Optional[Array] = None) -> ndarray:
 
 
 @format_docstring_types
-def n_E_and_wa2R_EL(n_E: Array, wander_azimuth: ArrayLike, R_Ee: Optional[Array] = None) -> ndarray:
+def n_E_and_wa2R_EL(
+    n_E: Array, wander_azimuth: ArrayLike, R_Ee: Optional[NdArray] = None
+) -> NdArray:
     """
     Returns rotation matrix R_EL from n-vector and wander azimuth angle.
 
