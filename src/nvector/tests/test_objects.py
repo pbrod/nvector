@@ -69,6 +69,68 @@ def test_geo_path_repr():
     assert r == txt
 
 
+def test_Ex2_B_and_delta_in_frame_B_to_C_in_frame_E():
+    # wgs72 = nv.FrameE(name="WGS72")
+    wgs72 = nv.FrameE(a=6378135, f=1.0 / 298.26)
+
+    # Step 1: Position and orientation of B is given 400m above E:
+    n_EB_E = wgs72.Nvector(nv.unit([[1], [2], [3]]), z=-400)
+
+    assert (
+        str(n_EB_E)
+        == """Nvector(
+    normal=[[0.26726124]
+     [0.53452248]
+     [0.80178373]],
+    z=[-400],
+    frame=FrameE(a=6378135, f=0.003352779454167505, name='WGS84', axes='e'))"""
+    )
+
+    frame_B = nv.FrameB(n_EB_E, yaw=10, pitch=20, roll=30, degrees=True)
+
+    # Step 2: Delta BC decomposed in B
+    p_BC_B = frame_B.Pvector(np.r_[3000, 2000, 100].reshape((-1, 1)))
+    assert (
+        str(p_BC_B)
+        == """Pvector(
+    pvector=[[3000]
+     [2000]
+     [ 100]],
+    frame=FrameB(
+        nvector=Nvector(
+            normal=[[0.26726124]
+             [0.53452248]
+             [0.80178373]],
+            z=[-400],
+            frame=FrameE(a=6378135, f=0.003352779454167505, name='WGS84', axes='e')),
+        yaw=[0.17453293],
+        pitch=[0.34906585],
+        roll=[0.52359878]),
+    scalar=True)"""
+    )
+
+    # Step 3: Decompose delta BC in E
+    p_BC_E = p_BC_B.to_ecef_vector()
+    assert (
+        str(p_BC_E)
+        == """ECEFvector(
+    pvector=[[-2997.82830243]
+     [-1052.69638808]
+     [ 1707.29487308]],
+    frame=FrameE(a=6378135, f=0.003352779454167505, name='WGS84', axes='e'),
+    scalar=True)"""
+    )
+
+    # Step 4: Find point C by adding delta BC to EB
+    p_EB_E = n_EB_E.to_ecef_vector()
+    p_EC_E = p_EB_E + p_BC_E
+    pointC = p_EC_E.to_geo_point()
+    lat, lon, z = pointC.latlon_deg
+    true_message = "Ex2: PosC: lat, lon = 53.3264, 63.4681 deg,  height = 406.01 m"
+    msg = "Ex2: PosC: lat, lon = {:4.4f}, {:4.4f} deg,  height = {:4.2f} m"
+    assert true_message == msg.format(lat, lon, -z)
+
+
 class TestGeoPoint:
     def test_scalar_geopoint_to_nvector_to_geopoint(self):
         wgs84 = FrameE(name="WGS84")
