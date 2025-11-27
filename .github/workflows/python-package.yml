@@ -17,8 +17,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.12"] #,  "3.11", "3.10", "3.9"]
-        os: [ubuntu-latest] #, macOS-latest, windows-latest]
+        python-version: ["3.13", "3.12", "3.11", "3.10"]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
       fail-fast: false
 
     steps:
@@ -41,6 +41,9 @@ jobs:
     
     name: upload release to PyPI
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.13"]
     permissions:
       # This permission is needed for private repositories.
       contents: read
