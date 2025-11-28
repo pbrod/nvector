@@ -4,8 +4,7 @@ nvector
 
 
 
-
-    |pkg_img| |tests_img| |quality_img| |docs_img| |health_img| |coverage_img| |versions_img| |downloads_img|
+    |pkg_img| |tests_img| |docs_img| |health_img| |coverage_img| |versions_img| |downloads_img|
 
 
 The nvector library is a suite of tools written in Python to solve geographical position
@@ -45,7 +44,7 @@ using the provided functions.
 n_E is n-vector in the program code, while in documents we use :math:`\mathbf{n}^{E}`.
 E denotes an Earth-fixed coordinate frame, and it indicates that the three components of
 n-vector are along the three axes of E. More details about the notation and
-reference frames can be found in the `documentation. 
+reference frames can be found in the `documentation.
 <https://www.navlab.net/nvector/#vector_symbols>`_
 
 
