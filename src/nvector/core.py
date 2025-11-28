@@ -9,21 +9,27 @@ This file is part of NavLab and is available from www.navlab.net/nvector
 from __future__ import annotations
 
 import warnings
-from typing import Any, Union, Optional
+from typing import Any, Optional, Tuple, Union
 
 import numpy as np
-from numpy import arctan2, sin, cos, cross, dot, sqrt, ndarray
+from karney import geodesic  # @UnresolvedImport
+from numpy import arctan2, cos, cross, sin, sqrt
 from numpy.linalg import norm
 from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
 
-from karney import geodesic  # @UnresolvedImport
 from nvector import _examples, _license
-from nvector._common import test_docstrings, use_docstring, _make_summary
-from nvector.rotation import E_rotation, n_E2R_EN, n_E2lat_lon, change_axes_to_E
-from nvector.util import mdot, nthroot, unit, eccentricity2, polar_radius
-
-from nvector._typing import format_docstring_types, Array, ArrayLike, NpArrayLike
+from nvector._common import _make_summary, test_docstrings, use_docstring
+from nvector._typing import (
+    Array,
+    ArrayLike,
+    BoolArray,
+    NdArray,
+    NpArrayLike,
+    format_docstring_types,
+)
+from nvector.rotation import E_rotation, change_axes_to_E, n_E2lat_lon, n_E2R_EN
+from nvector.util import eccentricity2, mdot, nthroot, polar_radius, unit
 
 __all__ = [
     "closest_point_on_great_circle",
@@ -55,7 +61,9 @@ __all__ = [
 
 
 @format_docstring_types
-def lat_lon2n_E(latitude: ArrayLike, longitude: ArrayLike, R_Ee: Optional[Array] = None) -> ndarray:
+def lat_lon2n_E(
+    latitude: ArrayLike, longitude: ArrayLike, R_Ee: Optional[NdArray] = None
+) -> NdArray:
     """
     Converts latitude and longitude to n-vector.
 
@@ -71,7 +79,7 @@ def lat_lon2n_E(latitude: ArrayLike, longitude: ArrayLike, R_Ee: Optional[Array]
 
     Returns
     -------
-    n_E: ndarray
+    n_E: {nd_array}
         3 x n array of n-vector(s) [no unit] decomposed in E.
 
     Examples
@@ -104,11 +112,12 @@ def lat_lon2n_E(latitude: ArrayLike, longitude: ArrayLike, R_Ee: Optional[Array]
     if R_Ee is None:
         R_Ee = E_rotation()
     # Equation (3) from Gade (2010):  n-vector decomposed in E with axes="e"
+    lat_arr, lon_arr = np.broadcast_arrays(np.asarray(latitude), np.asarray(longitude))
     n_e = np.vstack(
         (
-            sin(latitude) * np.ones_like(longitude),
-            cos(latitude) * sin(longitude),
-            -cos(latitude) * cos(longitude),
+            sin(lat_arr),
+            cos(lat_arr) * sin(lon_arr),
+            -cos(lat_arr) * cos(lon_arr),
         )
     )
     # n_E = dot(R_Ee.T, n_e)
@@ -118,12 +127,12 @@ def lat_lon2n_E(latitude: ArrayLike, longitude: ArrayLike, R_Ee: Optional[Array]
 
 @use_docstring(_examples.get_examples_no_header([4], oo_solution=False))
 def n_EB_E2p_EB_E(
-    n_EB_E: ArrayLike,
+    n_EB_E: Array,
     depth: ArrayLike = 0,
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
-    R_Ee: Optional[Array] = None,
-) -> ndarray:
+    R_Ee: Optional[NdArray] = None,
+) -> NdArray:
     """
     Converts n-vector to Cartesian position vector in meters.
 
@@ -144,7 +153,7 @@ def n_EB_E2p_EB_E(
 
     Returns
     -------
-    p_EB_E: ndarray
+    p_EB_E: {nd_array}
         3 x max(m,n) array of cartesian position vector(s) [m] from E to B, decomposed in E.
 
     Notes
@@ -176,7 +185,7 @@ def n_EB_E2p_EB_E(
     # Make sure to rotate the coordinates so that:
     # x -> north pole and yz-plane coincides with the equatorial
     # plane before using equation 22!
-    n_EB_e = change_axes_to_E(n_EB_E, R_Ee)
+    n_EB_e = change_axes_to_E(np.asarray(n_EB_E), R_Ee)
     b = polar_radius(a, f)  # semi-minor axis
 
     # The following code implements equation (22) in Gade (2010):
@@ -194,7 +203,7 @@ def n_EB_E2p_EB_E(
     return p_EB_E
 
 
-def _compute_k(a: float, e_2: float, q: ndarray, Ryz_2: ndarray) -> ndarray:
+def _compute_k(a: float, e_2: float, q: NdArray, Ryz_2: NdArray) -> NdArray:
     """Returns the k value in equation (23) from Gade :cite:`Gade2010Nonsingular`"""
     p = Ryz_2 / a**2
     r = (p + q - e_2**2) / 6
@@ -207,11 +216,11 @@ def _compute_k(a: float, e_2: float, q: ndarray, Ryz_2: ndarray) -> ndarray:
     return sqrt(u + v + w**2) - w
 
 
-def _equation23(a: float, f: float, p_EB_E: ndarray) -> tuple[ndarray, ndarray, ndarray]:
+def _equation23(a: float, f: float, p_EB_E: NdArray) -> tuple[NdArray, NdArray, NdArray]:
     """equation (23) from Gade :cite:`Gade2010Nonsingular`"""
     Ryz_2 = p_EB_E[1, :] ** 2 + p_EB_E[2, :] ** 2
     Rx_2 = p_EB_E[0, :] ** 2
-    e_2 = eccentricity2(f)[0]
+    e_2 = float(eccentricity2(f)[0])
     q = (1 - e_2) / (a**2) * Rx_2
     Ryz = sqrt(Ryz_2)  # Ryz = component of p_EB_E in the equatorial plane
     k = _compute_k(a, e_2, q, Ryz_2)
@@ -228,8 +237,8 @@ def p_EB_E2n_EB_E(
     p_EB_E: Array,
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
-    R_Ee: Optional[Array] = None,
-) -> tuple[ndarray, ndarray]:
+    R_Ee: Optional[NdArray] = None,
+) -> tuple[NdArray, NdArray]:
     """
     Converts Cartesian position vector in meters to n-vector.
 
@@ -248,9 +257,9 @@ def p_EB_E2n_EB_E(
 
     Returns
     -------
-    n_EB_E: ndarray
+    n_EB_E: {nd_array}
         3 x n array of n-vector(s) [no unit] of position B, decomposed in E.
-    depth: ndarray
+    depth: {nd_array}
         1 x n array of depth(s) [m] of system B, relative to the ellipsoid (depth = -height).
 
     Notes
@@ -283,7 +292,7 @@ def p_EB_E2n_EB_E(
     # Make sure to rotate the coordinates so that:
     # x -> north pole and yz-plane coincides with the equatorial
     # plane before using equation 23!
-    p_EB_e = np.matmul(R_Ee, p_EB_E)
+    p_EB_e = np.matmul(R_Ee, np.asarray(p_EB_E))
 
     # The following code implements equation (23) from Gade (2010):
     x_scale, yz_scale, depth = _equation23(a, f, p_EB_e)
@@ -307,8 +316,8 @@ def n_EA_E_and_n_EB_E2p_AB_E(
     z_EB: ArrayLike = 0,
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
-    R_Ee: Optional[Array] = None,
-) -> ndarray:
+    R_Ee: Optional[NdArray] = None,
+) -> NdArray:
     """
     Returns the delta vector from position A to B decomposed in E.
 
@@ -335,7 +344,7 @@ def n_EA_E_and_n_EB_E2p_AB_E(
 
     Returns
     -------
-    p_AB_E: ndarray
+    p_AB_E: {nd_array}
         3 x max(j,k,m,n) array of cartesian position vector(s) [m] from A to B, decomposed in E.
 
     Notes
@@ -378,8 +387,8 @@ def n_EA_E_and_n_EB_E2p_AB_N(
     z_EB: ArrayLike = 0,
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
-    R_Ee: Optional[Array] = None,
-) -> ndarray:
+    R_Ee: Optional[NdArray] = None,
+) -> NdArray:
     """
     Returns the delta vector from position A to B decomposed in N.
 
@@ -406,7 +415,7 @@ def n_EA_E_and_n_EB_E2p_AB_N(
 
     Returns
     -------
-    p_AB_N: ndarray
+    p_AB_N: {nd_array}
         3 x max(j,k,m,n) array of cartesian position vector(s) [m] from A to B, decomposed in N.
 
     Notes
@@ -437,7 +446,7 @@ def n_EA_E_and_n_EB_E2p_AB_N(
     """
     p_AB_E = n_EA_E_and_n_EB_E2p_AB_E(n_EA_E, n_EB_E, z_EA, z_EB, a, f, R_Ee)
 
-    R_EN = n_E2R_EN(n_EA_E, R_Ee=R_Ee)
+    R_EN = n_E2R_EN(np.asarray(n_EA_E), R_Ee=R_Ee)
 
     # p_AB_N = dot(R_EN.T, p_AB_E)
     p_AB_N = mdot(np.swapaxes(R_EN, 1, 0), p_AB_E[:, None, ...]).reshape(3, -1)
@@ -458,8 +467,8 @@ def n_EA_E_and_p_AB_E2n_EB_E(
     z_EA: ArrayLike = 0,
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
-    R_Ee: Optional[Array] = None,
-) -> tuple[ndarray, ndarray]:
+    R_Ee: Optional[NdArray] = None,
+) -> tuple[NdArray, NdArray]:
     """
     Returns position B from position A and delta vector decomposed in E.
 
@@ -482,9 +491,9 @@ def n_EA_E_and_p_AB_E2n_EB_E(
 
     Returns
     -------
-    n_EB_E: ndarray
+    n_EB_E: {nd_array}
         3 x max(k,m,n) array of n-vector(s) [no unit] of position B, decomposed in E.
-    z_EB: ndarray
+    z_EB: {nd_array}
         1 x max(k,m,n) array  of depth(s) [m] of system B, relative to the ellipsoid.
         (z_EB = -height).
 
@@ -514,10 +523,10 @@ def n_EA_E_and_p_AB_E2n_EB_E(
     """
     if R_Ee is None:
         R_Ee = E_rotation()
-    n_EA_E, p_AB_E = np.atleast_2d(n_EA_E, p_AB_E)
+    n_EA_E_arr, p_AB_E_arr = np.atleast_2d(n_EA_E), np.atleast_2d(p_AB_E)
     # Function 2. in Section 5.4 in Gade (2010):
-    p_EA_E = n_EB_E2p_EB_E(n_EA_E, z_EA, a, f, R_Ee)
-    p_EB_E = p_EA_E + p_AB_E
+    p_EA_E = n_EB_E2p_EB_E(n_EA_E_arr, z_EA, a, f, R_Ee)
+    p_EB_E = p_EA_E + p_AB_E_arr
     n_EB_E, z_EB = p_EB_E2n_EB_E(p_EB_E, a, f, R_Ee)
     return n_EB_E, z_EB
 
@@ -529,8 +538,8 @@ def n_EA_E_and_p_AB_N2n_EB_E(
     z_EA: ArrayLike = 0,
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
-    R_Ee: Optional[Array] = None,
-) -> tuple[ndarray, ndarray]:
+    R_Ee: Optional[NdArray] = None,
+) -> tuple[NdArray, NdArray]:
     """
     Returns position B from position A and delta vector decomposed in N.
 
@@ -553,9 +562,9 @@ def n_EA_E_and_p_AB_N2n_EB_E(
 
     Returns
     -------
-    n_EB_E: ndarray
+    n_EB_E: {nd_array}
         3 x max(k,m,n) array of n-vector(s) [no unit] of position B, decomposed in E.
-    z_EB: ndarray
+    z_EB: {nd_array}
         1 x max(k,m,n) array of depth(s) [m] of system B, relative to the ellipsoid.
         (z_EB = -height)
 
@@ -585,27 +594,27 @@ def n_EA_E_and_p_AB_N2n_EB_E(
     """
     if R_Ee is None:
         R_Ee = E_rotation()
-    n_EA_E, p_AB_N = np.atleast_2d(n_EA_E, p_AB_N)
+    n_EA_E_arr, p_AB_N_arr = np.atleast_2d(n_EA_E), np.atleast_2d(p_AB_N)
 
-    R_EN = n_E2R_EN(n_EA_E, R_Ee=R_Ee)
+    R_EN = n_E2R_EN(n_EA_E_arr, R_Ee=R_Ee)
 
     # p_AB_E = dot(R_EN, p_AB_N)
-    p_AB_E = mdot(R_EN, p_AB_N[:, None, ...]).reshape(3, -1)
+    p_AB_E = mdot(R_EN, p_AB_N_arr[:, None, ...]).reshape(3, -1)
 
-    return n_EA_E_and_p_AB_E2n_EB_E(n_EA_E, p_AB_E, z_EA, a=a, f=f, R_Ee=R_Ee)
+    return n_EA_E_and_p_AB_E2n_EB_E(n_EA_E_arr, p_AB_E, z_EA, a=a, f=f, R_Ee=R_Ee)
 
 
 @format_docstring_types
 def _interp_vectors(
     t_i: ArrayLike,
-    t: Array,
+    t: ArrayLike,
     nvectors: Array,
     kind: Union[int, str],
     window_length: int,
     polyorder: int,
     mode: str,
     cval: Union[int, float],
-) -> ndarray:
+) -> NdArray:
     """
     Defines the interpolation function and return values from envector data.
 
@@ -613,7 +622,7 @@ def _interp_vectors(
     ----------
     t_i : {array_like}
         Real vector of length m. Vector of interpolation times.
-    t : {array}
+    t : {array_like}
         Real vector of length n. Vector of times.
     nvectors : {array}
         3 x n array of n-vectors [no unit] decomposed in E.
@@ -643,31 +652,33 @@ def _interp_vectors(
 
     Returns
     -------
-    ndarray
+    {nd_array}
         Result is a 3 x m array of interpolated n-vector(s) [no unit] decomposed in E.
     """
     if window_length > 0:
         window_length = window_length + (window_length + 1) % 2  # make sure it is an odd integer
-        options = dict(axis=1, mode=mode, cval=cval)
+        options: dict[str, Any] = {"axis": 1, "mode": mode, "cval": cval}
         normals = savgol_filter(nvectors, window_length, polyorder, **options)
     else:
         normals = nvectors
 
-    normal_i = interp1d(t, normals, axis=1, kind=kind, bounds_error=False)(t_i)
-    return normal_i.reshape(nvectors.shape[0], -1)
+    normal_i = interp1d(np.asarray(t), normals, axis=1, kind=kind, bounds_error=False)(
+        np.asarray(t_i)
+    )
+    return normal_i.reshape(np.shape(nvectors)[0], -1)
 
 
 @format_docstring_types
 def interp_nvectors(
     t_i: ArrayLike,
-    t: Array,
+    t: ArrayLike,
     nvectors: Array,
     kind: Union[int, str] = "linear",
     window_length: int = 0,
     polyorder: int = 2,
     mode: str = "interp",
     cval: Union[int, float] = 0.0,
-) -> ndarray:
+) -> NdArray:
     """
     Returns interpolated values from nvector data.
 
@@ -675,7 +686,7 @@ def interp_nvectors(
     ----------
     t_i: {array_like}
         Vector of interpolation times of length m.
-    t: {array}
+    t: {array_like}
         Vector of times of length n.
     nvectors: {array}
         3 x n array of n-vectors [no unit] decomposed in E.
@@ -708,7 +719,7 @@ def interp_nvectors(
 
     Returns
     -------
-    ndarray
+    {nd_array}
         Result is 3 x m array of interpolated n-vector(s) [no unit] decomposed in E.
 
     Notes
@@ -752,7 +763,7 @@ def interp_nvectors(
 
 
 @format_docstring_types
-def interpolate(path: tuple[Array, Array], ti: ArrayLike) -> ndarray:
+def interpolate(path: Tuple[Array, Array], ti: ArrayLike) -> NdArray:
     """
     Returns the interpolated point(s) along the path
 
@@ -766,7 +777,7 @@ def interpolate(path: tuple[Array, Array], ti: ArrayLike) -> ndarray:
 
     Returns
     -------
-    n_EB_E_ti: ndarray
+    n_EB_E_ti: {nd_array}
         3 x m array of interpolated n-vector point(s) along path.
 
     Notes
@@ -774,14 +785,15 @@ def interpolate(path: tuple[Array, Array], ti: ArrayLike) -> ndarray:
     The result for spherical Earth is returned.
 
     """
-
-    n_EB_E_t0, n_EB_E_t1 = np.atleast_2d(*path)
-    n_EB_E_ti = unit(n_EB_E_t0 + np.asarray(ti) * (n_EB_E_t1 - n_EB_E_t0), norm_zero_vector=np.nan)
+    n_EB_E_t0, n_EB_E_t1 = np.atleast_2d(path[0]), np.atleast_2d(path[1])
+    n_EB_E_ti = unit(
+        n_EB_E_t0 + np.asarray(ti)[:, np.newaxis] * (n_EB_E_t1 - n_EB_E_t0), norm_zero_vector=np.nan
+    )
     return n_EB_E_ti
 
 
 @use_docstring(_examples.get_examples_no_header([9], oo_solution=False))
-def intersect(path_a: tuple[Array, Array], path_b: tuple[Array, Array]) -> ndarray:
+def intersect(path_a: Tuple[Array, Array], path_b: Tuple[Array, Array]) -> NdArray:
     """
     Returns the intersection(s) between the great circles of the two paths
 
@@ -794,7 +806,7 @@ def intersect(path_a: tuple[Array, Array], path_b: tuple[Array, Array]) -> ndarr
 
     Returns
     -------
-    n_EC_E : ndarray
+    n_EC_E : {nd_array}
         3 x max(n, m) array of n-vector(s) [no unit] of position C decomposed in E,
         which defines the point(s) of intersection between paths.
 
@@ -808,8 +820,8 @@ def intersect(path_a: tuple[Array, Array], path_b: tuple[Array, Array]) -> ndarr
     {super}
 
     """
-    n_EA1_E, n_EA2_E = path_a
-    n_EB1_E, n_EB2_E = path_b
+    n_EA1_E, n_EA2_E = np.atleast_2d(path_a[0]), np.atleast_2d(path_a[1])
+    n_EB1_E, n_EB2_E = np.atleast_2d(path_b[0]), np.atleast_2d(path_b[1])
     # Find the intersection between the two paths, n_EC_E:
     n_EC_E_tmp = unit(
         cross(cross(n_EA1_E, n_EA2_E, axis=0), cross(n_EB1_E, n_EB2_E, axis=0), axis=0),
@@ -819,20 +831,24 @@ def intersect(path_a: tuple[Array, Array], path_b: tuple[Array, Array]) -> ndarr
     # n_EC_E_tmp is one of two solutions, the other is -n_EC_E_tmp. Select
     # the one that is closet to n_EA1_E, by selecting sign from the dot
     # product between n_EC_E_tmp and n_EA1_E:
-    n_EC_E = np.sign(dot(n_EC_E_tmp.T, n_EA1_E)) * n_EC_E_tmp
+    # n_EC_E = np.sign(dot(n_EC_E_tmp.T, n_EA1_E)) * n_EC_E_tmp
+    n_EC_E = np.sign(np.sum(n_EC_E_tmp * n_EA1_E, axis=0, keepdims=True)) * n_EC_E_tmp
     if np.any(np.isnan(n_EC_E)):
         warnings.warn("Paths are Equal. Intersection point undefined. NaN returned.", stacklevel=2)
     return n_EC_E
 
 
-def _check_window_length(window_length: int, data: ndarray) -> int:
+def _check_window_length(window_length: int, data: NdArray) -> int:
     """Make sure window length is odd and shorter than the length of the data"""
     n = len(data)
     window_length = window_length + (window_length + 1) % 2  # make sure it is an odd integer
     if window_length >= n:
-        new_length = max(n - 1 - n % 2, 1)
-        msg = "Window length must be smaller than {}, but got {}! Truncating to {}!"
-        warnings.warn(msg.format(n, window_length, new_length), stacklevel=2)
+        new_length = max(n - (n % 2 == 0), 1)
+        msg = (
+            f"Window length must be smaller than {n}, "
+            + f"but got {window_length}! Truncating to {new_length}!"
+        )
+        warnings.warn(msg, stacklevel=2)
         window_length = new_length
     return window_length
 
@@ -843,14 +859,14 @@ def course_over_ground(
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
     R_Ee: Optional[Array] = None,
-    **options: dict[str, Any],
-) -> ndarray:
+    **options: Any,
+) -> NpArrayLike:
     """
     Returns course over ground in radians from nvector positions.
 
     Parameters
     ----------
-    nvectors: {array}
+    nvectors: {array_like}
         3 x n array positions of vehicle given as n-vectors [no unit] decomposed in E.
     a : float
         Semi-major axis of the Earth ellipsoid given in [m], default WGS-84 ellipsoid.
@@ -890,7 +906,7 @@ def course_over_ground(
 
     Returns
     -------
-    cog: ndarray
+    cog: {np_array_like}
         Angle(s) in radians clockwise from True North to the direction towards
         which the vehicle travels. If n<2 NaN is returned.
 
@@ -933,31 +949,31 @@ def course_over_ground(
     --------
     n_EA_E_and_n_EB_E2azimuth, nvector.rotation.E_rotation
     """
-    nvectors = np.atleast_2d(nvectors)
-    if nvectors.shape[1] < 2:
-        return np.nan
+    _nvectors = np.atleast_2d(nvectors)
+    if _nvectors.shape[1] < 2:
+        return np.float16(np.nan)
     window_length = options.pop("window_length", 0)
     if window_length > 0:
-        window_length = _check_window_length(window_length, nvectors[0])
+        window_length = _check_window_length(window_length, _nvectors[0])
         polyorder = options.pop("polyorder", 2)
         mode = options.pop("mode", "nearest")
         if mode not in {"nearest", "interp"}:
             warnings.warn(
-                "Using {} is not a recommended mode for filtering headings data!"
-                " Use 'interp' or 'nearest' mode instead!".format(mode),
+                f"Using {mode} is not a recommended mode for filtering headings data!"
+                " Use 'interp' or 'nearest' mode instead!",
                 stacklevel=2,
             )
         cval = options.pop("cval", 0.0)
-        normal = savgol_filter(nvectors, window_length, polyorder, axis=1, mode=mode, cval=cval)
+        normal = savgol_filter(_nvectors, window_length, polyorder, axis=1, mode=mode, cval=cval)
     else:
-        normal = nvectors
+        normal = _nvectors
     n_vecs = np.hstack((normal[:, :1], unit(normal[:, :-1] + normal[:, 1:]), normal[:, -1:]))
 
     return n_EA_E_and_n_EB_E2azimuth(n_vecs[:, :-1], n_vecs[:, 1:], a=a, f=f, R_Ee=R_Ee)
 
 
 @format_docstring_types
-def great_circle_normal(n_EA_E: Array, n_EB_E: Array) -> ndarray:
+def great_circle_normal(n_EA_E: Array, n_EB_E: Array) -> NdArray:
     """
     Returns the unit normal(s) to the great circle(s)
 
@@ -970,7 +986,7 @@ def great_circle_normal(n_EA_E: Array, n_EB_E: Array) -> ndarray:
 
     Returns
     -------
-    normal : ndarray
+    normal : {nd_array}
         3 x max(k, m) array of unit normal(s).
 
     Notes
@@ -978,28 +994,27 @@ def great_circle_normal(n_EA_E: Array, n_EB_E: Array) -> ndarray:
     The shape of the output `normal` is the broadcasted shapes of `n_EA_E` and `n_EB_E`.
 
     """
-    return unit(cross(n_EA_E, n_EB_E, axis=0), norm_zero_vector=np.nan)
+    n_EA_E_arr, n_EB_E_arr = np.atleast_2d(n_EA_E), np.atleast_2d(n_EB_E)
+    return unit(cross(n_EA_E_arr, n_EB_E_arr, axis=0), norm_zero_vector=np.nan)
 
 
-def _euclidean_cross_track_distance(sin_theta: NpArrayLike, radius: ArrayLike = 1) -> NpArrayLike:
-    return sin_theta * np.asarray(radius)
+def _euclidean_cross_track_distance(sin_theta: NpArrayLike, radius: ArrayLike = 1) -> NdArray:
+    return np.asarray(sin_theta) * np.asarray(radius)
 
 
-def _great_circle_cross_track_distance(
-    sin_theta: NpArrayLike, radius: ArrayLike = 1
-) -> NpArrayLike:
-    return np.arcsin(sin_theta) * np.asarray(radius)
+def _great_circle_cross_track_distance(sin_theta: NpArrayLike, radius: ArrayLike = 1) -> NdArray:
+    return np.arcsin(np.asarray(sin_theta)) * np.asarray(radius)
     # ill conditioned for small angles:
     # return (np.arccos(-sin_theta) - np.pi / 2) * radius
 
 
 @use_docstring(_examples.get_examples_no_header([10], oo_solution=False))
 def cross_track_distance(
-    path: tuple[Array, Array],
+    path: Tuple[Array, Array],
     n_EB_E: Array,
     method: str = "greatcircle",
     radius: ArrayLike = 6371009.0,
-) -> ndarray:
+) -> NdArray:
     """
     Returns cross track distance between path A and position B.
 
@@ -1017,7 +1032,7 @@ def cross_track_distance(
 
     Returns
     -------
-    distance : ndarray
+    distance : {nd_array}
         Array of length max(k, m, n, o) of cross track distance(s).
 
     Notes
@@ -1036,15 +1051,15 @@ def cross_track_distance(
     """
     c_E = great_circle_normal(path[0], path[1])
     sin_theta = -np.sum(c_E * np.asarray(n_EB_E), axis=0)
-    if method[0].lower() == "e":
+    if method.lower().startswith("e"):
         return _euclidean_cross_track_distance(sin_theta, radius)
     return _great_circle_cross_track_distance(sin_theta, radius)
 
 
 @use_docstring(_examples.get_examples_no_header([10], oo_solution=False))
 def on_great_circle(
-    path: tuple[Array, Array], n_EB_E: Array, radius: ArrayLike = 6371009.0, atol: float = 1e-8
-) -> ndarray:
+    path: Tuple[Array, Array], n_EB_E: Array, radius: ArrayLike = 6371009.0, atol: float = 1e-8
+) -> BoolArray:
     """
     Returns True if position B is on great circle through path A.
 
@@ -1062,7 +1077,7 @@ def on_great_circle(
 
     Returns
     -------
-    ndarray
+    {bool_array}
         max(k, m, n, o) bool array. An element is True if position B is on great circle
         through path A.
 
@@ -1091,8 +1106,8 @@ def on_great_circle(
 
 @use_docstring(_examples.get_examples_no_header([10], oo_solution=False))
 def on_great_circle_path(
-    path: tuple[Array, Array], n_EB_E: Array, radius: ArrayLike = 6371009.0, atol: float = 1e-8
-) -> ndarray:
+    path: Tuple[Array, Array], n_EB_E: Array, radius: ArrayLike = 6371009.0, atol: float = 1e-8
+) -> BoolArray:
     """
     Returns True if position B is on great circle and between endpoints of path A.
 
@@ -1110,7 +1125,7 @@ def on_great_circle_path(
 
     Returns
     -------
-    ndarray
+    {bool_array}
         max(k, m, n) bool array. True if position B is on great circle and between
         endpoints of path A.
 
@@ -1133,15 +1148,15 @@ def on_great_circle_path(
     --------
     cross_track_distance, on_great_circle
     """
-    n_EB_E, n_EA1_E, n_EA2_E = np.atleast_2d(n_EB_E, *path)
+    n_EB_E_arr, n_EA1_E, n_EA2_E = np.atleast_2d(n_EB_E, path[0], path[1])
     scale = norm(n_EA2_E - n_EA1_E, axis=0)
-    ti1 = norm(n_EB_E - n_EA1_E, axis=0) / scale
-    ti2 = norm(n_EB_E - n_EA2_E, axis=0) / scale
-    return (ti1 <= 1) & (ti2 <= 1) & on_great_circle(path, n_EB_E, radius, atol=atol)
+    ti1 = norm(n_EB_E_arr - n_EA1_E, axis=0) / scale
+    ti2 = norm(n_EB_E_arr - n_EA2_E, axis=0) / scale
+    return (ti1 <= 1) & (ti2 <= 1) & on_great_circle(path, n_EB_E_arr, radius, atol=atol)
 
 
 @use_docstring(_examples.get_examples_no_header([10], oo_solution=False))
-def closest_point_on_great_circle(path: tuple[Array, Array], n_EB_E: Array) -> ndarray:
+def closest_point_on_great_circle(path: Tuple[Array, Array], n_EB_E: Array) -> NdArray:
     """
     Returns closest point C on great circle path A to position B.
 
@@ -1154,7 +1169,7 @@ def closest_point_on_great_circle(path: tuple[Array, Array], n_EB_E: Array) -> n
         3 x n array n-vector(s) of position B to find the closest point to.
     Returns
     -------
-    n_EC_E: ndarray
+    n_EC_E: {nd_array}
         3 x max(k, m, n) array n-vector(s) of closest position C on great circle path A
 
     Notes
@@ -1171,17 +1186,17 @@ def closest_point_on_great_circle(path: tuple[Array, Array], n_EB_E: Array) -> n
     cross_track_distance, great_circle_normal
 
     """
-    n_EA1_E, n_EA2_E = path
+    n_EA1_E, n_EA2_E = np.atleast_2d(path[0]), np.atleast_2d(path[1])
+    n_EB_E_arr = np.atleast_2d(n_EB_E)
     c_E = great_circle_normal(n_EA1_E, n_EA2_E)
-
-    c2 = cross(n_EB_E, c_E, axis=0)
+    c2 = cross(n_EB_E_arr, c_E, axis=0)
     n_EC_E = unit(cross(c_E, c2, axis=0))
-    return n_EC_E * np.sign(np.sum(n_EC_E * n_EB_E, axis=0, keepdims=True))
+    return n_EC_E * np.sign(np.sum(n_EC_E * n_EB_E_arr, axis=0, keepdims=True))
 
 
 def _azimuth_sphere(
     n_EA_E: Array, n_EB_E: Array, R_Ee: Optional[Array] = None
-) -> tuple[ndarray, ndarray]:
+) -> tuple[NdArray, NdArray]:
     """
     Returns azimuths from A to B and B to A, relative to North on a sphere
 
@@ -1190,8 +1205,8 @@ def _azimuth_sphere(
     --------
     https://en.wikipedia.org/wiki/Azimuth
     """
-    lat1, lon1 = n_E2lat_lon(n_EA_E, R_Ee)
-    lat2, lon2 = n_E2lat_lon(n_EB_E, R_Ee)
+    lat1, lon1 = n_E2lat_lon(np.asarray(n_EA_E), R_Ee)
+    lat2, lon2 = n_E2lat_lon(np.asarray(n_EB_E), R_Ee)
 
     w = lon2 - lon1
     cos_b1, sin_b1 = cos(lat1), sin(lat1)
@@ -1207,7 +1222,7 @@ def _azimuth_sphere(
 
 
 @use_docstring(_examples.get_examples_no_header([5], oo_solution=False))
-def great_circle_distance_rad(n_EA_E: Array, n_EB_E: Array) -> ndarray:
+def great_circle_distance_rad(n_EA_E: Array, n_EB_E: Array) -> NdArray:
     """
     Returns great circle distance in radians between positions A and B on a sphere
 
@@ -1221,7 +1236,7 @@ def great_circle_distance_rad(n_EA_E: Array, n_EB_E: Array) -> ndarray:
 
     Returns
     -------
-    distance_rad : ndarray
+    distance_rad : {nd_array}
         Array of length max(k, m), great circle distance(s) in radians
 
     Notes
@@ -1240,10 +1255,9 @@ def great_circle_distance_rad(n_EA_E: Array, n_EB_E: Array) -> ndarray:
     --------
     great_circle_distance
     """
-    n_EA_E, n_EB_E = np.atleast_2d(n_EA_E, n_EB_E)
-
-    sin_theta = norm(np.cross(n_EA_E, n_EB_E, axis=0), axis=0)
-    cos_theta = np.sum(n_EA_E * n_EB_E, axis=0)
+    n_EA_E_arr, n_EB_E_arr = np.atleast_2d(n_EA_E), np.atleast_2d(n_EB_E)
+    sin_theta = norm(np.cross(n_EA_E_arr, n_EB_E_arr, axis=0), axis=0)
+    cos_theta = np.sum(n_EA_E_arr * n_EB_E_arr, axis=0)
 
     # Alternatively:
     # sin_phi = norm(n_EA_E-n_EB_E, axis=0)/2  # phi = theta/2
@@ -1260,7 +1274,7 @@ def great_circle_distance_rad(n_EA_E: Array, n_EB_E: Array) -> ndarray:
 
 
 @use_docstring(_examples.get_examples_no_header([5], oo_solution=False))
-def great_circle_distance(n_EA_E: Array, n_EB_E: Array, radius: ArrayLike = 6371009.0) -> ndarray:
+def great_circle_distance(n_EA_E: Array, n_EB_E: Array, radius: ArrayLike = 6371009.0) -> NdArray:
     """
     Returns great circle distance between positions A and B on a sphere
 
@@ -1275,7 +1289,7 @@ def great_circle_distance(n_EA_E: Array, n_EB_E: Array, radius: ArrayLike = 6371
 
     Returns
     -------
-    distance : ndarray
+    distance : {nd_array}
         Array of length max(k, m), great circle distance(s) in meters.
 
     Notes
@@ -1305,8 +1319,8 @@ def geodesic_reckon(
     azimuth: ArrayLike,
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
-    R_Ee: Optional[Array] = None,
-) -> tuple[ndarray, NpArrayLike]:
+    R_Ee: Optional[NdArray] = None,
+) -> tuple[NdArray, NpArrayLike]:
     """
     Returns position B computed from position A, distance and azimuth.
 
@@ -1329,7 +1343,7 @@ def geodesic_reckon(
 
     Returns
     -------
-    n_EB_E: ndarray
+    n_EB_E: {nd_array}
         3 x max(m,n) array of n-vector(s) [no unit] of position B, decomposed in E.
     azimuth_b: {np_array_like}
         Scalar or vector of length max(m,n) of azimuth(s) [rad or deg] of line(s) at position(s) B.
@@ -1349,8 +1363,11 @@ def geodesic_reckon(
     n_EA_E_distance_and_azimuth2n_EB_E, nvector.rotation.E_rotation
     """
 
-    lat1, lon1 = n_E2lat_lon(n_EA_E, R_Ee)
-    lat2, lon2, alpha2 = geodesic.reckon(lat1, lon1, distance, azimuth, a, f)
+    lat1, lon1 = n_E2lat_lon(np.asarray(n_EA_E), R_Ee)
+    lat2, lon2, alpha2 = geodesic.reckon(
+        lat1, lon1, np.asarray(distance), np.asarray(azimuth), a, f
+    )
+
     #     n1_e = change_axes_to_E(n_EA_E, R_Ee)
     #     sin_lat1 = n1_e[0, :]
     #     cos_lat1 = sqrt(n1_e[1, :]**2 + n1_e[2, :]**2)
@@ -1415,14 +1432,14 @@ def geodesic_distance(
     """
     # From C.F.F. Karney (2011) "Algorithms for geodesics":
     # See also https://en.wikipedia.org/wiki/Geodesics_on_an_ellipsoid
-    lat1, lon1 = n_E2lat_lon(n_EA_E, R_Ee)
-    lat2, lon2 = n_E2lat_lon(n_EB_E, R_Ee)
+    lat1, lon1 = n_E2lat_lon(np.asarray(n_EA_E), R_Ee)
+    lat2, lon2 = n_E2lat_lon(np.asarray(n_EB_E), R_Ee)
     s12, az1, az2 = geodesic.distance(lat1, lon1, lat2, lon2, a, f)
     return s12, az1, az2
 
 
 @use_docstring(_examples.get_examples_no_header([5], oo_solution=False))
-def euclidean_distance(n_EA_E: Array, n_EB_E: Array, radius: ArrayLike = 6371009.0) -> ndarray:
+def euclidean_distance(n_EA_E: Array, n_EB_E: Array, radius: ArrayLike = 6371009.0) -> NdArray:
     """
     Returns Euclidean distance between positions A and B on a sphere.
 
@@ -1437,7 +1454,7 @@ def euclidean_distance(n_EA_E: Array, n_EB_E: Array, radius: ArrayLike = 6371009
 
     Returns
     -------
-    distance : ndarray
+    distance : {nd_array}
         Vector of length max(k, m, n) of euclidean distance(s).
 
     Notes
@@ -1452,8 +1469,8 @@ def euclidean_distance(n_EA_E: Array, n_EB_E: Array, radius: ArrayLike = 6371009
     --------
     geodesic_distance, great_circle_distance
     """
-    n_EB_E, n_EA_E = np.atleast_2d(n_EB_E, n_EA_E)
-    d_AB = norm(n_EB_E - n_EA_E, axis=0).ravel() * np.asarray(radius)
+    n_EB_E_arr, n_EA_E_arr = np.atleast_2d(n_EB_E), np.atleast_2d(n_EA_E)
+    d_AB = norm(n_EB_E_arr - n_EA_E_arr, axis=0).ravel() * np.asarray(radius)
     return d_AB
 
 
@@ -1464,7 +1481,7 @@ def n_EA_E_and_n_EB_E2azimuth(
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
     R_Ee: Optional[Array] = None,
-) -> ndarray:
+) -> NdArray:
     """
     Returns azimuth from A to B, relative to North:
 
@@ -1485,7 +1502,7 @@ def n_EA_E_and_n_EB_E2azimuth(
 
     Returns
     -------
-    azimuth: ndarray
+    azimuth: {nd_array}
         max(m, n) vector of angle(s) [rad] the line(s) makes with a meridian,
         taken clockwise from north.
 
@@ -1513,8 +1530,8 @@ def n_EA_E_and_n_EB_E2azimuth(
 
 @use_docstring(_examples.get_examples_no_header([8], oo_solution=False))
 def n_EA_E_distance_and_azimuth2n_EB_E(
-    n_EA_E: Array, distance_rad: ArrayLike, azimuth: ArrayLike, R_Ee: Optional[Array] = None
-) -> ndarray:
+    n_EA_E: Array, distance_rad: ArrayLike, azimuth: ArrayLike, R_Ee: Optional[NdArray] = None
+) -> NdArray:
     """
     Returns position B from azimuth and distance from position A
 
@@ -1532,7 +1549,7 @@ def n_EA_E_distance_and_azimuth2n_EB_E(
 
     Returns
     -------
-    n_EB_E:  3 x max(k,m,n) array
+    n_EB_E:    3 x max(k,m,n) {nd_array}
         n-vector(s) [no unit] of position B decomposed in E.
 
     Notes
@@ -1555,22 +1572,24 @@ def n_EA_E_distance_and_azimuth2n_EB_E(
 
     if R_Ee is None:
         R_Ee = E_rotation()
-    n_EA_E, distance_rad, azimuth = np.atleast_1d(n_EA_E, distance_rad, azimuth)
+    n_EA_E_arr = np.atleast_2d(n_EA_E)
+    dist_rad_arr = np.asarray(distance_rad)
+    azimuth_arr = np.asarray(azimuth)
+
     # Step1: Find unit vectors for north and east:
-    k_east_E = unit(cross(dot(R_Ee.T, [[1], [0], [0]]), n_EA_E, axis=0))
-    k_north_E = cross(n_EA_E, k_east_E, axis=0)
+    k_east_E = unit(cross(np.dot(R_Ee.T, [[1], [0], [0]]), n_EA_E_arr, axis=0))
+    k_north_E = cross(n_EA_E_arr, k_east_E, axis=0)
 
     # Step2: Find the initial direction vector d_E:
-    d_E = k_north_E * cos(azimuth) + k_east_E * sin(azimuth)
+    d_E = k_north_E * cos(azimuth_arr) + k_east_E * sin(azimuth_arr)
 
     # Step3: Find n_EB_E:
-    n_EB_E = n_EA_E * cos(distance_rad) + d_E * sin(distance_rad)
-
+    n_EB_E = n_EA_E_arr * cos(dist_rad_arr) + d_E * sin(dist_rad_arr)
     return n_EB_E
 
 
 @use_docstring(_examples.get_examples_no_header([7], oo_solution=False))
-def mean_horizontal_position(n_EB_E: Array) -> ndarray:
+def mean_horizontal_position(n_EB_E: ArrayLike) -> NdArray:
     """
     Returns the n-vector of the horizontal mean position.
 
@@ -1593,14 +1612,15 @@ def mean_horizontal_position(n_EB_E: Array) -> ndarray:
     {super}
 
     """
-    n_EM_E = unit(np.sum(n_EB_E, axis=1).reshape((3, 1)))
+    n_EB_E_arr = np.atleast_2d(n_EB_E)
+    n_EM_E = unit(np.sum(n_EB_E_arr, axis=1).reshape((3, 1)))
     return n_EM_E
 
 
 _odict = globals()
 __doc__ = (  # @ReservedAssignment
     __doc__
-    + _make_summary(dict((n, _odict[n]) for n in __all__))
+    + _make_summary({n: _odict[n] for n in __all__})
     + ".. only:: draft\n\n"
     + "    License\n    -------\n    "
     + _license.__doc__.replace("\n", "\n    ")

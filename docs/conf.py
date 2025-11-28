@@ -9,11 +9,11 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+import glob
 import importlib
 import os
-import sys
 import re
-import glob
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -84,7 +84,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinxcontrib.bibtex",
     # 'matplotlib.sphinxext.mathmpl',
-    'myst_parser', #  Allow markdown. See https://www.sphinx-doc.org/en/master/usage/markdown.html
+    "myst_parser",  #  Allow markdown. See https://www.sphinx-doc.org/en/master/usage/markdown.html
     "matplotlib.sphinxext.plot_directive",  # See https://stackoverflow.com/questions/16047271/plot-directive-in-restructured-text
 ]
 
@@ -98,9 +98,9 @@ templates_path = ["_templates"]
 #
 # source_suffix = ['.rst', '.md']
 source_suffix = {
-    '.rst': 'restructuredtext',
-    '.txt': 'markdown',
-    '.md': 'markdown',
+    ".rst": "restructuredtext",
+    ".txt": "markdown",
+    ".md": "markdown",
 }
 
 # The encoding of source files.

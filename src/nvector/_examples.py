@@ -4,17 +4,19 @@ Created on 18. jan. 2016
 @author: pab
 """
 
+from typing import Iterable
 
-def navlab_example(number):
+
+def navlab_example(number: int) -> str:
     """Returns navlab example link on restructured text format."""
-    link = "<http://www.navlab.net/nvector/#example_{0}>".format(number)
-    return "`Example {0} at www.navlab.net {1}`_\n".format(number, link)
+    link = f"<http://www.navlab.net/nvector/#example_{number}>"
+    return f"`Example {number} at www.navlab.net {link}`_\n"
 
 
-def see_also(number):
+def see_also(number: int) -> str:
     """Returns 'see also' navlab example link on restructured text format."""
-    return """See also
-    {0}\n""".format(navlab_example(number))
+    return f"""See also
+    {navlab_example(number)}\n"""
 
 
 EXAMPLE_1_HEADER = """
@@ -763,33 +765,26 @@ Alternative solution 3:
 """
 
 
-def get_examples(indices, oo_solution=True):
+def get_examples(indices: Iterable[int], oo_solution: bool = True) -> str:
     """Returns examples with header"""
     dic = dict(globals())
     hdr = "EXAMPLE_{}_HEADER"
     txt = "EXAMPLE_{}_TXT"
     sol = "EXAMPLE_{}_OBJ_SOLUTION" if oo_solution else "EXAMPLE_{}_FUN_SOLUTION"
     return "".join(
-        (
-            dic[hdr.format(i)] + dic[txt.format(i)] + dic[sol.format(i)] + see_also(i)
-            for i in indices
-        )
+        dic[hdr.format(i)] + dic[txt.format(i)] + dic[sol.format(i)] + see_also(i) for i in indices
     )
 
 
-def get_examples_no_header(indices, oo_solution=True):
+def get_examples_no_header(indices: Iterable[int], oo_solution: bool = True) -> str:
     """Returns examples with no header"""
     dic = dict(globals())
     hdr = "EXAMPLE_{}_HEADER"
     txt = "EXAMPLE_{}_TXT"
     sol = "EXAMPLE_{}_OBJ_SOLUTION" if oo_solution else "EXAMPLE_{}_FUN_SOLUTION"
     return "".join(
-        (
-            "".join(dic[hdr.format(i)].rpartition("\n")[:1])
-            + dic[txt.format(i)]
-            + dic[sol.format(i)]
-            for i in indices
-        )
+        "".join(dic[hdr.format(i)].rpartition("\n")[:1]) + dic[txt.format(i)] + dic[sol.format(i)]
+        for i in indices
     )
 
 
@@ -803,7 +798,7 @@ The functional solutions to the remaining problems can be found in
 the :doc:`functional examples </tutorials/getting_started_functional>` section
 of the tutorial.
 
-{0}{1}{2}{3}{4}{5}{6}
+{}{}{}{}{}{}{}
 
 """.format(
     EXAMPLE_1_HEADER,
@@ -825,7 +820,7 @@ In the first example the object-oriented solution is also given.
 The object-oriented solutions to the remaining problems can be found in
 the :doc:`getting started </tutorials/getting_started>` section of the tutorial.
 
-{0}{1}{2}{3}{4}{5}{6}
+{}{}{}{}{}{}{}
 
 """.format(
     EXAMPLE_1_HEADER,
@@ -838,11 +833,11 @@ the :doc:`getting started </tutorials/getting_started>` section of the tutorial.
 )
 
 
-class _DocTestOO(object):
+class _DocTestOO:
     __doc__ = GETTING_STARTED
 
 
-class _DocTestFunctional(object):
+class _DocTestFunctional:
     __doc__ = GETTING_STARTED_FUNCTIONAL
 
 

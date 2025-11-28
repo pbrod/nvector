@@ -5,17 +5,25 @@ Utility functions
 """
 
 from __future__ import annotations
+
 import warnings
-from typing import Any, NamedTuple
+from typing import Any, Dict, List, NamedTuple, Union
 
 import numpy as np
-from numpy import rad2deg, deg2rad, ndarray, float64
+from numpy import deg2rad, rad2deg
 from numpy.linalg import norm
 
 from nvector import _license
-from nvector._common import test_docstrings, _make_summary
-from nvector._typing import format_docstring_types, ArrayLike, NpArrayLike, Array, Union
-
+from nvector._common import _make_summary, test_docstrings
+from nvector._typing import (
+    Array,
+    ArrayLike,
+    BoolArray,
+    IntArrayLike,
+    NdArray,
+    NpArrayLike,
+    format_docstring_types,
+)
 
 __all__ = [
     "deg",
@@ -116,8 +124,9 @@ ELLIPSOID_IX = {
 """Inverse mapping between a name string and ellipsoid ID"""
 
 
-def eccentricity2(f: Union[float, ndarray]) -> tuple[Union[float, ndarray], Union[float, ndarray]]:
-    """Returns the first and second eccentricity squared given the flattening, f.
+def eccentricity2(f: Union[float, NdArray]) -> tuple[Union[float, NdArray], Union[float, NdArray]]:
+    """
+    Returns the first and second eccentricity squared given the flattening, f.
 
     Parameters
     ----------
@@ -134,13 +143,16 @@ def eccentricity2(f: Union[float, ndarray]) -> tuple[Union[float, ndarray], Unio
     The (first) eccentricity squared is defined as e2 = f*(2-f).
     The second eccentricity squared is defined as e2m = e2 / (1 - e2).
     """
+
     e2 = (2.0 - f) * f  # = 1-b**2/a**
     e2m = e2 / (1.0 - e2)
+
     return e2, e2m
 
 
-def polar_radius(a: Union[float, ndarray], f: Union[float, ndarray]) -> Union[float, ndarray]:
-    """Returns the polar radius b given the equatorial radius a and flattening f of the ellipsoid.
+def polar_radius(a: Union[float, NdArray], f: Union[float, NdArray]) -> Union[float, NdArray]:
+    """
+    Returns the polar radius b given the equatorial radius a and flattening f of the ellipsoid.
 
     Parameters
     ----------
@@ -165,8 +177,9 @@ def polar_radius(a: Union[float, ndarray], f: Union[float, ndarray]) -> Union[fl
     return b
 
 
-def third_flattening(f: Union[float, ndarray]) -> Union[float, ndarray]:
-    """Returns the third flattening, n, given the flattening, f.
+def third_flattening(f: Union[float, NdArray]) -> Union[float, NdArray]:
+    """
+    Returns the third flattening, n, given the flattening, f.
 
     Parameters
     ----------
@@ -186,8 +199,11 @@ def third_flattening(f: Union[float, ndarray]) -> Union[float, ndarray]:
     return f / (2.0 - f)
 
 
-def array_to_list_dict(data: Union[Any, ndarray, list, tuple, dict]) -> Union[Any, dict, list]:
-    """Convert dict arrays to dict of lists.
+def array_to_list_dict(
+    data: Union[Any, ArrayLike, Dict[Any, Any]],
+) -> Union[Any, Dict[Any, Any], List[Any]]:
+    """
+    Convert dict arrays to dict of lists.
 
     Parameters
     ----------
@@ -227,18 +243,15 @@ def array_to_list_dict(data: Union[Any, ndarray, list, tuple, dict]) -> Union[An
             data[key] = array_to_list_dict(data[key])
     elif isinstance(data, (list, tuple)):
         data = [array_to_list_dict(item) for item in data]
-    else:
-        try:
-            data = data.tolist()
-        except AttributeError:
-            pass
+    elif hasattr(data, "tolist"):
+        data = data.tolist()
     return data
 
 
 @format_docstring_types
 def isclose(
     a: ArrayLike, b: ArrayLike, rtol: float = 1e-9, atol: float = 0.0, equal_nan: bool = False
-) -> ndarray:
+) -> BoolArray:
     """
     Returns True where the two arrays `a` and `b` are element-wise equal within a tolerance.
 
@@ -258,7 +271,7 @@ def isclose(
 
     Returns
     -------
-    bool or ndarray
+    ndarray
         Returns a boolean array of where `a` and `b` are equal within the
         given tolerance. If both `a` and `b` are scalars, returns a single
         boolean value.
@@ -320,7 +333,7 @@ def isclose(
 @format_docstring_types
 def allclose(
     a: ArrayLike, b: ArrayLike, rtol: float = 1.0e-7, atol: float = 1.0e-14, equal_nan: bool = False
-) -> np.bool_:
+) -> bool:
     """
     Returns True if two arrays are element-wise equal within a tolerance.
 
@@ -369,21 +382,21 @@ def allclose(
     Examples
     --------
     >>> from nvector.util import allclose
-    >>> bool(allclose([1e10, 1e-7], [1.00001e10, 1e-8]))
+    >>> allclose([1e10, 1e-7], [1.00001e10, 1e-8])
     False
-    >>> bool(allclose([1e10, 1e-8], [1.00001e10, 1e-9]))
+    >>> allclose([1e10, 1e-8], [1.00001e10, 1e-9])
     False
-    >>> bool(allclose([1e10, 1e-8], [1.0001e10, 1e-9]))
+    >>> allclose([1e10, 1e-8], [1.0001e10, 1e-9])
     False
-    >>> bool(allclose([1.0, np.nan], [1.0, np.nan]))
+    >>> allclose([1.0, np.nan], [1.0, np.nan])
     False
-    >>> bool(allclose([1.0, np.nan], [1.0, np.nan], equal_nan=True))
+    >>> allclose([1.0, np.nan], [1.0, np.nan], equal_nan=True)
     True
     """
-    return np.all(isclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan))
+    return bool(np.all(isclose(a, b, rtol=rtol, atol=atol, equal_nan=equal_nan)))
 
 
-def _nvector_check_length(n_E: ndarray, atol: float = 0.1) -> None:
+def _nvector_check_length(n_E: NdArray, atol: float = 0.1) -> None:
     """
     Emits a warning if nvector deviates significantly from unit length.
 
@@ -414,7 +427,7 @@ def _nvector_check_length(n_E: ndarray, atol: float = 0.1) -> None:
 
 
 @format_docstring_types
-def deg(*rad_angles: ArrayLike) -> Union[float64, ndarray, tuple[ndarray, ...]]:
+def deg(*rad_angles: ArrayLike) -> Union[NpArrayLike, tuple[NpArrayLike, ...]]:
     """
     Converts angle in radians to degrees.
 
@@ -425,28 +438,28 @@ def deg(*rad_angles: ArrayLike) -> Union[float64, ndarray, tuple[ndarray, ...]]:
 
     Returns
     -------
-    deg_angles : float64, ndarray or tuple[ndarray, ...]
+    deg_angles : {np_array_like} | tuple[{np_array_like}, ...]
         Angle in degrees.
 
     Examples
     --------
     >>> import numpy as np
-    >>> from nvector.util import deg
+    >>> from nvector.util import deg, allclose
     >>> deg_number = deg(np.pi/2)
     >>> deg_number.size == 1
     True
     >>> deg_number.item()
     90.0
     >>> degs_array = deg(np.linspace(0, np.pi, 3))
-    >>> isinstance(degs_array, ndarray)
+    >>> isinstance(degs_array, np.ndarray)
     True
-    >>> bool(allclose(degs_array, [0., 90., 180.]))
+    >>> allclose(degs_array, [0., 90., 180.])
     True
     >>> degs_tuple = deg(np.pi/2, [0, np.pi])
     >>> isinstance(degs_tuple, tuple)
     True
     >>> for value, expected in zip(degs_tuple, (90.0, [  0., 180.])):
-    ...     bool(np.allclose(value, expected))
+    ...     allclose(value, expected)
     True
     True
 
@@ -465,7 +478,7 @@ def deg(*rad_angles: ArrayLike) -> Union[float64, ndarray, tuple[ndarray, ...]]:
 
 
 @format_docstring_types
-def rad(*deg_angles: ArrayLike) -> Union[float64, ndarray, tuple[ndarray, ...]]:
+def rad(*deg_angles: ArrayLike) -> Union[NpArrayLike, tuple[NpArrayLike, ...]]:
     """
     Converts angle in degrees to radians.
 
@@ -476,20 +489,20 @@ def rad(*deg_angles: ArrayLike) -> Union[float64, ndarray, tuple[ndarray, ...]]:
 
     Returns
     -------
-    rad_angles : float64 | ndarray | tuple[ndarray, ...]
+    rad_angles : {np_array_like} | tuple[{np_array_like}, ...]
         Angle in radians.
 
     Examples
     --------
     >>> import numpy as np
-    >>> from nvector.util import deg, rad
-    >>> bool(np.isclose(deg(rad(90)), 90))
+    >>> from nvector.util import deg, rad, allclose
+    >>> allclose(deg(rad(90)), 90)
     True
     >>> degs_tuple = deg(*rad(90, [0, 180]))
     >>> isinstance(degs_tuple, tuple)
     True
     >>> for value, expected in zip(degs_tuple, (90.0, [  0., 180.])):
-    ...     bool(np.allclose(value, expected))
+    ...     allclose(value, expected)
     True
     True
 
@@ -527,16 +540,16 @@ def dm2degrees(degrees: ArrayLike, minutes: ArrayLike) -> NpArrayLike:
     Examples
     --------
     >>> from nvector.util import dm2degrees, allclose
-    >>> bool(allclose(dm2degrees(10, 49.3231), 10.822051))
+    >>> allclose(dm2degrees(10, 49.3231), 10.822051)
     True
-    >>> bool(allclose(dm2degrees(10, 9.3231), 10.155385))
+    >>> allclose(dm2degrees(10, 9.3231), 10.155385)
     True
-    >>> bool(allclose(dm2degrees(1, 9.3231), 1.155385))
+    >>> allclose(dm2degrees(1, 9.3231), 1.155385)
     True
-    >>> bool(allclose(dm2degrees(-1, -9.3231), -1.155385))
+    >>> allclose(dm2degrees(-1, -9.3231), -1.155385)
     True
 
-    >>> bool(allclose(dm2degrees(0, -9.3234), -0.15539))
+    >>> allclose(dm2degrees(0, -9.3234), -0.15539)
     True
 
     See also
@@ -548,7 +561,7 @@ def dm2degrees(degrees: ArrayLike, minutes: ArrayLike) -> NpArrayLike:
 
 
 @format_docstring_types
-def degrees2dm(degrees: ArrayLike) -> tuple[Union[int, ndarray], NpArrayLike]:
+def degrees2dm(degrees: ArrayLike) -> tuple[IntArrayLike, NpArrayLike]:
     """
     Converts decimal degrees to degrees and minutes.
 
@@ -559,7 +572,7 @@ def degrees2dm(degrees: ArrayLike) -> tuple[Union[int, ndarray], NpArrayLike]:
 
     Returns
     -------
-    degs : int or ndarray
+    degs : {int_array_like}
         Angles rounded to nearest lower integer.
     minutes: {np_array_like}
         Angle in degree minutes.
@@ -567,17 +580,17 @@ def degrees2dm(degrees: ArrayLike) -> tuple[Union[int, ndarray], NpArrayLike]:
     Examples
     --------
     >>> from nvector.util import degrees2dm, allclose
-    >>> bool(allclose(degrees2dm(10.822051), (10, 49.32306)))
+    >>> allclose(degrees2dm(10.822051), (10, 49.32306))
     True
-    >>> bool(allclose(degrees2dm(10.155385),(10, 9.3231)))
+    >>> allclose(degrees2dm(10.155385),(10, 9.3231))
     True
-    >>> bool(allclose(degrees2dm(1.155385), (1, 9.3231)))
+    >>> allclose(degrees2dm(1.155385), (1, 9.3231))
     True
-    >>> bool(allclose(degrees2dm(1.15539), (1, 9.3234)))
+    >>> allclose(degrees2dm(1.15539), (1, 9.3234))
     True
-    >>> bool(allclose(degrees2dm(-1.15539), (-1, -9.3234)))
+    >>> allclose(degrees2dm(-1.15539), (-1, -9.3234))
     True
-    >>> bool(allclose(degrees2dm(-0.15539), (0, -9.3234)))
+    >>> allclose(degrees2dm(-0.15539), (0, -9.3234))
     True
 
     See also
@@ -585,13 +598,13 @@ def degrees2dm(degrees: ArrayLike) -> tuple[Union[int, ndarray], NpArrayLike]:
     dm2degrees
     """
     degrees = np.broadcast_arrays(degrees)[0]
-    degs = np.int_(degrees)
+    degs = np.array(np.int_(degrees), dtype=int)
     mins = (degrees - degs) * 60
     return degs, mins
 
 
 @format_docstring_types
-def mdot(a: Array, b: Array) -> ndarray:
+def mdot(a: Array, b: Array) -> NdArray:
     """
     Returns multiple matrix multiplications of two arrays.
     i.e. dot(a, b)[i,j,k] = sum(a[i,:,k] * b[:,j,k])
@@ -627,7 +640,7 @@ def mdot(a: Array, b: Array) -> ndarray:
         >>> tm = mdot(a, b)
         >>> tm.shape
         (3, 3, 2)
-        >>> bool(allclose(t, tm))
+        >>> allclose(t, tm)
         True
 
     3 x 3 x 2 times 3 x 1 array -> 3 x 1 x 2 array
@@ -637,28 +650,28 @@ def mdot(a: Array, b: Array) -> ndarray:
         >>> tm1 = mdot(a, b[:,0,0].reshape(-1,1))
         >>> tm1.shape
         (3, 1, 2)
-        >>> bool(allclose(t1, tm1))
+        >>> allclose(t1, tm1)
         True
 
     3 x 3  times 3 x 3 array -> 3 x 3 array
         >>> tt0 = mdot(a[..., 0], b[..., 0])
         >>> tt0.shape
         (3, 3)
-        >>> bool(allclose(t[..., 0], tt0))
+        >>> allclose(t[..., 0], tt0)
         True
 
     3 x 3  times 3 x 1 array -> 3 x 1 array
         >>> tt0 = mdot(a[..., 0], b[:, :1, 0])
         >>> tt0.shape
         (3, 1)
-        >>> bool(allclose(t[:, :1, 0], tt0))
+        >>> allclose(t[:, :1, 0], tt0)
         True
 
     3 x 3  times 3 x 1 x 2 array -> 3 x 1 x 2 array
         >>> tt0 = mdot(a[..., 0], b[:, :2, 0][:, None])
         >>> tt0.shape
         (3, 1, 2)
-        >>> bool(allclose(t[:, :2, 0][:,None], tt0))
+        >>> allclose(t[:, :2, 0][:,None], tt0)
         True
 
     See also
@@ -687,9 +700,9 @@ def nthroot(x: ArrayLike, n: int) -> NpArrayLike:
     Examples
     --------
     >>> from nvector.util import allclose, nthroot
-    >>> bool(allclose(nthroot(27.0, 3), 3.0))
+    >>> allclose(nthroot(27.0, 3), 3.0)
     True
-    >>> bool(allclose(nthroot([27.0, 64.0, 125.0], 3), [3, 4, 5]))
+    >>> allclose(nthroot([27.0, 64.0, 125.0], 3), [3, 4, 5])
     True
 
     """
@@ -770,7 +783,9 @@ def get_ellipsoid(name: Union[int, str]) -> Ellipsoid:
     """
     if isinstance(name, str):
         name = name.lower().replace(" ", "").partition("/")[0]
-    ellipsoid_id = ELLIPSOID_IX.get(name, name)
+        ellipsoid_id = ELLIPSOID_IX[name]
+    else:
+        ellipsoid_id = int(name)
 
     return ELLIPSOID[ellipsoid_id]
 
@@ -778,7 +793,7 @@ def get_ellipsoid(name: Union[int, str]) -> Ellipsoid:
 @format_docstring_types
 def unit(
     vector: Array, norm_zero_vector: Union[int, float] = 1, norm_zero_axis: int = 0
-) -> ndarray:
+) -> NdArray:
     """
     Convert input vector to a vector of unit length.
 
@@ -806,9 +821,9 @@ def unit(
     Examples
     --------
     >>> from nvector.util import unit, allclose
-    >>> bool(allclose(unit([[1, 0],[1, 0],[1, 0]]), [[ 0.57735027, 1],
-    ...                                              [ 0.57735027, 0],
-    ...                                              [ 0.57735027, 0]]))
+    >>> allclose(unit([[1, 0],[1, 0],[1, 0]]), [[ 0.57735027, 1],
+    ...                                         [ 0.57735027, 0],
+    ...                                         [ 0.57735027, 0]])
     True
     """
     if not (norm_zero_vector == 1 or np.isnan(norm_zero_vector)):
@@ -829,7 +844,7 @@ def unit(
 _odict = globals()
 __doc__ = (  # @ReservedAssignment
     __doc__
-    + _make_summary(dict((n, _odict[n]) for n in __all__))
+    + _make_summary({n: _odict[n] for n in __all__})
     + ".. only:: draft\n\n"
     + "    License\n    -------\n    "
     + _license.__doc__.replace("\n", "\n    ")

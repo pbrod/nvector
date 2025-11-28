@@ -6,11 +6,14 @@ Created on 23. jun. 2021
 
 import warnings
 from functools import partial
-import pytest
+
 import numpy as np
-from hypothesis import given, strategies as st
+import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 from numpy.testing import assert_allclose as _assert_allclose  # @UnresolvedImport
-from nvector.util import deg, rad, mdot, nthroot, get_ellipsoid, unit, Ellipsoid
+
+from nvector.util import Ellipsoid, deg, get_ellipsoid, mdot, nthroot, rad, unit
 
 assert_allclose = partial(_assert_allclose, atol=1e-15)
 

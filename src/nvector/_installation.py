@@ -1,6 +1,6 @@
 from .__init__ import __version__
 
-__doc__ = """
+__doc__ = f"""
 Install nvector
 ===============
 
@@ -29,7 +29,7 @@ Then at the Python prompt, try to import nvector:
 
     >>> import nvector as nv
     >>> print(nv.__version__)
-    {release}
+    {__version__}
 
 
 To test if the toolbox is working correctly paste the following in an interactive
@@ -44,4 +44,4 @@ or
 
 at the command prompt.
 
-""".format(release=__version__)
+"""

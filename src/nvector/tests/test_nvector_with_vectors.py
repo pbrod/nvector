@@ -5,26 +5,28 @@ Created on 10. jun. 2021
 """
 
 from functools import partial
+
 import numpy as np
 from numpy.testing import assert_allclose as _assert_allclose  # @UnresolvedImport
-from nvector.util import unit, deg, rad
+
 from nvector.core import (
-    lat_lon2n_E,
-    n_E2lat_lon,
-    n_EA_E_and_n_EB_E2p_AB_E,
-    n_EA_E_and_p_AB_E2n_EB_E,
-    p_EB_E2n_EB_E,
-    n_EB_E2p_EB_E,
-    great_circle_distance,
-    great_circle_distance_rad,
-    euclidean_distance,
-    cross_track_distance,
     closest_point_on_great_circle,
     course_over_ground,
-    on_great_circle_path,
-    n_EA_E_distance_and_azimuth2n_EB_E,
+    cross_track_distance,
+    euclidean_distance,
+    great_circle_distance,
+    great_circle_distance_rad,
+    lat_lon2n_E,
+    n_E2lat_lon,
     n_EA_E_and_n_EB_E2azimuth,
+    n_EA_E_and_n_EB_E2p_AB_E,
+    n_EA_E_and_p_AB_E2n_EB_E,
+    n_EA_E_distance_and_azimuth2n_EB_E,
+    n_EB_E2p_EB_E,
+    on_great_circle_path,
+    p_EB_E2n_EB_E,
 )
+from nvector.util import deg, rad, unit
 
 assert_allclose = partial(_assert_allclose, atol=1e-8)
 

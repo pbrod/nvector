@@ -11,13 +11,14 @@ try:
 except (ImportError, OSError, ModuleNotFoundError):
     plt = None
 try:
-    import cartopy.feature as cpf
     import cartopy.crs as ccrs
+    import cartopy.feature as cpf
 except (ImportError, OSError, ModuleNotFoundError):
     cpf = ccrs = None
 
 import numpy as np
-from nvector import rad, deg, lat_lon2n_E, unit, n_E2lat_lon
+
+from nvector import deg, lat_lon2n_E, n_E2lat_lon, rad, unit
 
 
 def _init_earth_plotter(lat, lon):
@@ -66,7 +67,7 @@ def plot_mean_position():
     n_EM_E = unit(np.sum(nvecs, axis=1).reshape((3, 1)))
     lat, lon = n_E2lat_lon(n_EM_E)
     lat, lon = deg(lat), deg(lon)
-    print("Ex7, Average lat={0:2.1f}, lon={1:2.1f}".format(lat[0], lon[0]))
+    print(f"Ex7, Average lat={lat[0]:2.1f}, lon={lon[0]:2.1f}")
 
     plotter = _init_plotter(lat[0], lon[0])
 
@@ -78,7 +79,7 @@ def plot_mean_position():
     )
 
 
-def main():
+def main() -> None:
     rotated_crs = ccrs.RotatedPole(pole_longitude=180.0, pole_latitude=90.0)
 
     ax = plt.axes(projection=rotated_crs)

@@ -5,22 +5,49 @@ Created on 26. sep. 2024
 """
 
 import warnings
-from typing import Union
-from numpy import ndarray, float64
+from typing import Any, Callable, List, Tuple, TypeVar, Union
 
-ArrayLike = Union[int, float, list, tuple, ndarray]
-ArrayLikeTxt = "int, float, list, tuple or ndarray"
+import numpy as np
+import numpy.typing as npt
 
-NpArrayLike = Union[float64, ndarray]
-NpArrayLikeTxt = "float64 or ndarray"
+# Using numpy.typing for better precision.
+# ArrayLike is the most general type, accepting scalars, lists, tuples, and numpy arrays.
+ArrayLike = npt.ArrayLike
+ArrayLikeTxt = "npt.ArrayLike"
 
-Array = Union[list, tuple, ndarray]
-ArrayTxt = "list, tuple or ndarray"
+# NpArrayLike represents either a single numpy float or a numpy array of floats.
+NpArrayLike = Union[np.floating, npt.NDArray[np.floating]]
+NpArrayLikeTxt = "np.floating | npt.NDArray[np.floating]"
 
-TYPES_DICT = dict(array=ArrayTxt, array_like=ArrayLikeTxt, np_array_like=NpArrayLikeTxt)
+
+# IntArrayLike represents either a single numpy integer or a numpy array of integers.
+IntArrayLike = Union[np.integer, npt.NDArray[np.integer]]
+IntArrayLikeTxt = "np.integer | npt.NDArray[np.integer]"
+
+NdArray = npt.NDArray[np.floating]
+NdArrayTxt = "npt.NDArray[np.floating]"
+
+BoolArray = npt.NDArray[np.bool_]
+BoolArrayTxt = "npt.NDArray[np.bool_]"
+
+# Array is a more specific type that can be a list, tuple, or numpy array.
+Array = Union[List[Any], Tuple[Any, ...], npt.NDArray[Any]]
+ArrayTxt = "List[Any] | Tuple[Any, ...] | npt.NDArray[Any]"
+
+TYPES_DICT = {
+    "array": ArrayTxt,
+    "array_like": ArrayLikeTxt,
+    "np_array_like": NpArrayLikeTxt,
+    "int_array_like": IntArrayLikeTxt,
+    "nd_array": NdArrayTxt,
+    "bool_array": BoolArrayTxt,
+}
 
 
-def format_docstring_types(func):
+F = TypeVar("F", bound=Callable[..., Any])
+
+
+def format_docstring_types(func: F) -> F:
     """This decorator modifies the decorated function's docstring with supplied types.
 
     It replaces:
