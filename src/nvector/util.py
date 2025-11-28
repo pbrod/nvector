@@ -451,7 +451,7 @@ def deg(*rad_angles: ArrayLike) -> Union[NpArrayLike, tuple[NpArrayLike, ...]]:
     >>> deg_number.item()
     90.0
     >>> degs_array = deg(np.linspace(0, np.pi, 3))
-    >>> isinstance(degs_array, ndarray)
+    >>> isinstance(degs_array, np.ndarray)
     True
     >>> allclose(degs_array, [0., 90., 180.])
     True

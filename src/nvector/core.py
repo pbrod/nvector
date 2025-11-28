@@ -20,12 +20,14 @@ from scipy.signal import savgol_filter
 
 from nvector import _examples, _license
 from nvector._common import _make_summary, test_docstrings, use_docstring
-from nvector._typing import (Array,
-                             ArrayLike,
-                             BoolArray,
-                             NdArray,
-                             NpArrayLike,
-                             format_docstring_types)
+from nvector._typing import (
+    Array,
+    ArrayLike,
+    BoolArray,
+    NdArray,
+    NpArrayLike,
+    format_docstring_types,
+)
 from nvector.rotation import E_rotation, change_axes_to_E, n_E2lat_lon, n_E2R_EN
 from nvector.util import eccentricity2, mdot, nthroot, polar_radius, unit
 

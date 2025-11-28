@@ -11,13 +11,15 @@ authors = [
 maintainers = [
   {name = "Per A. Brodtkorb, FFI"}
 ]
+
+requires-python = ">=3.10"
 dependencies = [
-    "numpy>=1.11.0",
-    "scipy>=1.3.0",
+    "numpy>=1.21.2",
+    "scipy>=1.7.3", #; python_version < \"3.14\"",
+    #"scipy>=1.16.1; python_version >= \"3.14\"",
     "karney>=1.0",
 ]
 
-requires-python = ">=3.10"
 readme = "README.rst"
 license = {text = "Simplified BSD"}
 license_file = "LICENSE.txt"
@@ -27,6 +29,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Environment :: Console",
     "Intended Audience :: Education",
     "Intended Audience :: Science/Research",
@@ -57,6 +60,9 @@ build-backend = "pdm.backend"
 [tool.pdm]
 distribution = true
 
+[tool.pdm.resolution]
+allow-prereleases = true
+
 [tool.pdm.version]
 source = "file"
 path = "src/nvector/__init__.py"
@@ -65,6 +71,7 @@ path = "src/nvector/__init__.py"
 build-docs-html = "sphinx-build -b html docs docs/_build/html -d docs/_build/doctrees"
 build-docs-latex = "sphinx-build -b latex docs docs/_build/latex -d docs/_build/doctrees"
 build-docs-pdf = "sphinx-build -b latexpdf docs docs/_build/latex -d docs/_build/doctrees"
+lock_py314 = "pdm lock -L pdm.lock314 --python 3.14 --strategy no_direct_minimal_versions -dG all"
 lock_win64 = "pdm lock -L pdm_windows.lock --python 3.13 --strategy no_direct_minimal_versions --platform windows -dG all"
 lock_linux = "pdm lock -L pdm_linux.lock --python 3.13 --strategy no_direct_minimal_versions --platform linux -dG all"
 lock_macos = "pdm lock -L pdm_macos.lock --python 3.13 --strategy no_direct_minimal_versions --platform macos -dG all"
@@ -174,7 +181,7 @@ docstring-code-line-length = 100
 
 [tool.pytest.ini_options]
 doctest_optionflags = ["NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL",  "ELLIPSIS"]
-addopts = "-rsxXf --doctest-modules --cov=nvector --cov-report=xml --ruff --ruff-format "  # --mypy
+addopts = "-rsxXf --doctest-modules --cov=nvector --cov-report=xml --ruff " #--ruff-format "  # --mypy
 testpaths = [
     "src"
 ]
