@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.0.3] - 2025-12-01
+
+### 🐛 Bug Fixes
+
+- Continous integration now works for python 3.10-3.14
+
+### 📚 Documentation
+
+- *(pyproject.toml)* Replace use of python-semantic-release with pdm-bump and git-cliff.
+- Updated test badge in README.rst
+
+### 🧪 Testing
+
+- Fix incorrect use platform-specific steps ci and coverage jobs
+
+### ⚙️ Miscellaneous Tasks
+
+- Change project short description
+- Bumped minimum required Python version up to 3.10.
+- Add script to gen macos lock file
+- Add macos lock file
+- Update .readthedocs.yml
+- Simplified python-package.yml
+- Disabled sending coverage report to codeclimate, codecov and SonarCloud
+- Remove python version in lock files
+- Remove release1, pypi-publish and test-pypi-publish jobs from workflows/python-package.yml
+
+
 ## [1.0.2] - 2024-10-04
 
 ### 📚 Documentation
