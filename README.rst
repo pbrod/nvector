@@ -592,8 +592,8 @@ the article by Karney [Kar13]_ because these methods call the
    :target: https://github.com/pbrod/nvector/actions/
 .. |quality_img| image:: https://sonarcloud.io/api/project_badges/measure?project=pbrod_nvector&metric=alert_status
    :target: https://sonarcloud.io/project/overview?id=pbrod_nvector
-.. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable
-   :target: http://Nvector.readthedocs.org/en/stable/
+.. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=latest/
+   :target: http://Nvector.readthedocs.org/en/latest/
 .. |health_img| image:: https://api.codeclimate.com/v1/badges/c04214bef610b25906fe/maintainability
    :target: https://codeclimate.com/github/pbrod/Nvector/maintainability
    :alt: Maintainability

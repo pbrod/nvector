@@ -11,7 +11,7 @@
         :target: https://sonarcloud.io/project/overview?id=pbrod_nvector
 
     .. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable
-       :target: http://Nvector.readthedocs.org/en/stable/
+       :target: http://Nvector.readthedocs.org/en/latest/
 
     .. |health_img| image:: https://api.codeclimate.com/v1/badges/c04214bef610b25906fe/maintainability
        :target: https://codeclimate.com/github/pbrod/Nvector/maintainability
