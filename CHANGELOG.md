@@ -1,13 +1,16 @@
 # Changelog
 
-## [1.0.4] - 2025-12-02
+## [1.0.5] - 2025-12-02
 
 ### 🐛 Bug Fixes
 
--  Added missing myst-parser to docs/requirements.txt.
+-  Added missing myst-parser to docs/requirements.txt.
+-  Corrected the pypi-publish job's if condition  to ensure the it triggers correctly whenever a tag starting with v is pushed, including when using git push --tags --force.
 ### 📚 Documentation
 
-- Updated link to latest version of the documentation on readthedocs
+- Updated link to latest version of the documentation on readthedocs
+- Updated CONTRIBUTING.rst
+
 ### ⚙️ Miscellaneous Tasks
 
 - Send coverage report to codecov again.
@@ -15,6 +18,7 @@
 - Deleted obsolete sonar-project.properties.
 - Added --mypy to pytest.ini_options.
 - Only publish package if the version does not exist on pypi.
+- Split github actions file python-package.yml into ci-test.yml and release.yml.
 
 ## [1.0.3] - 2025-12-01
 

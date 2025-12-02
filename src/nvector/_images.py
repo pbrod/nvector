@@ -4,7 +4,7 @@
     .. |pkg_img| image:: https://badge.fury.io/py/nvector.png
        :target: https://pypi.python.org/pypi/nvector/
 
-    .. |tests_img| image:: https://github.com/pbrod/nvector/actions/workflows/python-package.yml/badge.svg
+    .. |tests_img| image:: https://github.com/pbrod/nvector/actions/workflows/ci-test.yml/badge.svg
         :target: https://github.com/pbrod/nvector/actions/
 
     .. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable

@@ -7,7 +7,7 @@ from .objects import *  # noqa
 from .rotation import *  # noqa
 from .util import *  # noqa
 
-__version__ = "1.0.4"
+__version__ = "1.0.5"
 
 _PACKAGE_NAME = __name__
 
