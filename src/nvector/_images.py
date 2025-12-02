@@ -11,7 +11,7 @@
        :target: http://Nvector.readthedocs.org/en/latest/
 
     .. |quality_img| image:: https://qlty.sh/gh/pbrod/projects/Nvector/maintainability.svg
-        :target: https://qlty.sh/gh/pbrod/projects/Nvector
+       :target: https://qlty.sh/gh/pbrod/projects/Nvector
 
     .. |coverage_img| image:: https://codecov.io/gh/pbrod/nvector/branch/master/graph/badge.svg
        :target: https://codecov.io/gh/pbrod/nvector
