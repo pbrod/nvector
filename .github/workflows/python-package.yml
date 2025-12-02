@@ -115,6 +115,37 @@ jobs:
       - name: Run Tests
         run: pdm run pytest
 
+  coverage:
+    needs: ci
+    # Only run this job if new work is pushed to the "master" branch
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.13"]
+    steps:
+    - uses: actions/checkout@v4
+      with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of Sonar analysis
+    - name: Set up PDM
+      uses: pdm-project/setup-pdm@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        pdm install -dG test
+    - name: Run Tests and report to CodeClimate  
+      run: |
+          pdm run pytest
+
+    # See: https://martinheinz.dev/blog/69 "Ultimate CI Pipeline for All of Your Python Projects"
+    - name: Use Codecov to track coverage
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage.xml   # coverage report
+
+
   pypi-publish:
     needs: ci
     # Only run this job if a tag starting with 'v' is pushed to the "master" branch

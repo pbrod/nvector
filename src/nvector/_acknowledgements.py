@@ -7,7 +7,7 @@ based on the `nvector toolbox <http://www.navlab.net/nvector/#download>`_ for
 `FFI <http://www.ffi.no/en>`_. The nvector.core and nvector.rotation module is a
 vectorized reimplementation of the matlab nvector toolbox while the nvector.objects
 module is a new easy to use object oriented user interface to the nvector core
-functionality documented in :cite:`GadeAndBrodtkorb2020Nvector`.
+functionality documented in :cite:`GadeAndBrodtkorb2025Nvector`.
 
 Most of the content is based on the article by K. Gade :cite:`Gade2010Nonsingular`.
 

@@ -4,7 +4,7 @@ nvector
 
 
 
-    |pkg_img| |tests_img| |docs_img| |health_img| |coverage_img| |versions_img| |downloads_img|
+    |pkg_img| |tests_img| |docs_img| |quality_img| |coverage_img| |versions_img| |downloads_img|
 
 
 The nvector library is a suite of tools written in Python to solve geographical position
@@ -96,7 +96,7 @@ Then at the Python prompt, try to import nvector:
 
     >>> import nvector as nv
     >>> print(nv.__version__)
-    1.0.2
+    1.0.3
 
 
 To test if the toolbox is working correctly paste the following in an interactive
@@ -572,7 +572,7 @@ based on the `nvector toolbox <http://www.navlab.net/nvector/#download>`_ for
 `FFI <http://www.ffi.no/en>`_. The nvector.core and nvector.rotation module is a
 vectorized reimplementation of the matlab nvector toolbox while the nvector.objects
 module is a new easy to use object oriented user interface to the nvector core
-functionality documented in [GB20]_.
+functionality documented in [GB25]_.
 
 Most of the content is based on the article by K. Gade [Gad10]_.
 
@@ -590,13 +590,10 @@ the article by Karney [Kar13]_ because these methods call the
    :target: https://pypi.python.org/pypi/nvector/
 .. |tests_img| image:: https://github.com/pbrod/nvector/actions/workflows/python-package.yml/badge.svg
    :target: https://github.com/pbrod/nvector/actions/
-.. |quality_img| image:: https://sonarcloud.io/api/project_badges/measure?project=pbrod_nvector&metric=alert_status
-   :target: https://sonarcloud.io/project/overview?id=pbrod_nvector
 .. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=latest/
    :target: http://Nvector.readthedocs.org/en/latest/
-.. |health_img| image:: https://api.codeclimate.com/v1/badges/c04214bef610b25906fe/maintainability
-   :target: https://codeclimate.com/github/pbrod/Nvector/maintainability
-   :alt: Maintainability
+.. |quality_img| image:: https://qlty.sh/gh/pbrod/projects/Nvector/maintainability.svg
+   :target: https://qlty.sh/gh/pbrod/projects/Nvector
 .. |coverage_img| image:: https://codecov.io/gh/pbrod/nvector/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/pbrod/nvector
 .. |versions_img| image:: https://img.shields.io/pypi/pyversions/Nvector.svg
@@ -613,5 +610,5 @@ References
            <http://www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf>`_
 .. [Kar13] C.F.F. Karney. `Algorithms for geodesics. J. Geodesy, 87(1):43-55, 2013. <https://rdcu.be/cccgm>`_
 
-.. [GB20] K. Gade and P.A. Brodtkorb, `Nvector Documentation for Python, 2020.
-           <https://nvector.readthedocs.io/en/v0.7.6>`_
+.. [GB25] K. Gade and P.A. Brodtkorb, `Nvector Documentation for Python, 2025.
+           <https://nvector.readthedocs.io/en/latest>`_
