@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.4] - 2025-12-02
+
+### 🐛 Bug Fixes
+
+-  Added missing myst-parser to docs/requirements.txt.
+### 📚 Documentation
+
+- Updated link to latest version of the documentation on readthedocs
+### ⚙️ Miscellaneous Tasks
+
+- Send coverage report to codecov again.
+- Deleted obsolete platform specific pdm-lock-files.
+- Deleted obsolete sonar-project.properties.
+- Added --mypy to pytest.ini_options.
+- Only publish package if the version does not exist on pypi.
+
 ## [1.0.3] - 2025-12-01
 
 ### 🐛 Bug Fixes
