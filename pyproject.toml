@@ -1,3 +1,24 @@
+#Recommended build on master branch
+# git pull origin
+# pdm check-style
+# pdm format
+# pdm check-types 
+# pdm run pytest
+# pdm append-changelog  # Manually edit CHANGELOG.md to make sure it looks OK.
+# Run nvector._info (this file will generate readme.txt) and update README.rst
+# git commit
+# pdm bump pre-release --pre alpha # creates 0.1.1a1 from 0.1.0
+# pdm bump pre-release --pre beta # creates 0.1.1.b1 from 0.1.1a1
+# pdm bump pre-release --pre release-candidate # creates 0.1.1rc1 from 0.1.1b1
+# pdm bump no-pre-release # creates 0.1.1 from 0.1.1rc1
+# pdm bump micro # creates 0.1.2 from 0.1.1
+# pdm bump minor # creates 0.2.0 from 0.1.2
+# pdm bump major # creates 1.0.0 from 0.2.0
+# pdm bump suggest  # Suggest new version number
+# pdm bump tag # creates a git tag with a leading v # Note a new build is only published when the tag exists
+# git commit
+# git push --tags
+#
 [project]
 name = "nvector"
 dynamic = ["version"]
@@ -97,15 +118,7 @@ build = [
     "git-cliff>=2.6.1",
     "pdm-bump>=0.9.8",
 ]
-# pdm bump pre-release --pre alpha # creates 0.1.1a1 from 0.1.0
-# pdm bump pre-release --pre beta # creates 0.1.1.b1 from 0.1.1a1
-# pdm bump pre-release --pre release-candidate # creates 0.1.1rc1 from 0.1.1b1
-# pdm bump no-pre-release # creates 0.1.1 from 0.1.1rc1
-# pdm bump micro # creates 0.1.2 from 0.1.1
-# pdm bump minor # creates 0.2.0 from 0.1.2
-# pdm bump major # creates 1.0.0 from 0.2.0
-# pdm bump tag # creates a git tag with a leading v
-# pdm bump suggest  # Suggest new version number
+
 
 # semantic_release.commit-messages git-cliff
 # chore: Changes to the build process or auxiliary tools and libraries such as documentation generation
@@ -191,7 +204,7 @@ docstring-code-line-length = 100
 
 [tool.pytest.ini_options]
 doctest_optionflags = ["NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL",  "ELLIPSIS"]
-addopts = "-rsxXf --doctest-modules --cov=nvector --cov-report=xml --ruff " #--ruff-format "  # --mypy
+addopts = "-rsxXf --doctest-modules --cov=nvector --cov-report=xml --ruff --mypy" #--ruff-format "  # 
 testpaths = [
     "src"
 ]
