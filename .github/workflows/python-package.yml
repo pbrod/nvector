@@ -117,8 +117,8 @@ jobs:
 
   pypi-publish:
     needs: ci
-    # Only run this job if new work is pushed to the "master" branch
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    # Only run this job if a tag starting with 'v' is pushed to the "master" branch
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && github.ref == 'refs/heads/master'
     
     name: upload release to PyPI
     runs-on: ubuntu-latest
@@ -137,7 +137,10 @@ jobs:
       
     steps:
       - uses: actions/checkout@v4
-      
+        # Fetch tags to ensure the latest tag information is available
+        with:
+          fetch-depth: 0
+
       # Explicitly set up stable Python for a clean build (Best Practice)
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
@@ -146,5 +149,42 @@ jobs:
 
       - uses: pdm-project/setup-pdm@v4
       
+      # Check if version already exists on PyPI using the Git Tag
+      - name: Check if version exists on PyPI
+        id: check_version
+        shell: bash
+        run: |
+          # Install tomli to safely read the package name from pyproject.toml
+          pip install tomli
+
+          # 1. Retrieve package name from pyproject.toml (still needed for the PyPI URL)
+          PACKAGE_NAME=$(python -c "import sys; import tomli; sys.stdout.write(tomli.load(open('pyproject.toml', 'rb'))['project']['name'])")
+
+          # 2. Extract version from the pushed tag name (e.g., 'v1.2.3' -> '1.2.3')
+          # github.ref_name contains the tag name (e.g., 'v1.2.3')
+          RAW_TAG="${{ github.ref_name }}"
+          # Shell parameter expansion: removes the shortest match of 'v' from the front of the string
+          PACKAGE_VERSION="${RAW_TAG#v}" 
+          
+          echo "Package: $PACKAGE_NAME, Version: $PACKAGE_VERSION (from tag $RAW_TAG)"
+          
+          # 3. Check PyPI API for the specific version
+          PYPI_URL="https://pypi.org/pypi/$PACKAGE_NAME/$PACKAGE_VERSION/json"
+          
+          STATUS_CODE=$(curl -s -L -o /dev/null -w "%{http_code}" "$PYPI_URL")
+          
+          echo "PyPI check for $PACKAGE_VERSION returned HTTP $STATUS_CODE"
+          
+          if [ "$STATUS_CODE" -eq 200 ]; then
+            echo "version_exists=true" >> $GITHUB_OUTPUT
+            echo "::notice::Package version $PACKAGE_VERSION already exists on PyPI. Skipping publish. ?"
+          else
+            echo "version_exists=false" >> $GITHUB_OUTPUT
+            echo "::notice::Package version $PACKAGE_VERSION not found on PyPI (HTTP $STATUS_CODE). Proceeding with publish. ?"
+          fi
+
+      # Conditional Publish Step
       - name: Publish release distributions to PyPI
+        # Only runs if the check step succeeded AND the version was NOT found on PyPI
+        if: success() && steps.check_version.outputs.version_exists == 'false'
         run: pdm publish
