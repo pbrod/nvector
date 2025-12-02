@@ -48,7 +48,7 @@ your distributions preferred method (dnf, yum, apt-get, brew) or using GitHub De
 
 The following are optional, but recommended.
 
-* The CPython interpreter version 3.12
+* The CPython interpreter version 3.13
    * You can install it using official binaries, pyenv, or any Anaconda-like distribution 
 * The `PDM <https://pdm-project.org/latest/>`_ application for locking, building, and testing.
 * Dedicated IDE like PyCharm, Spyder, or `VSCodium <https://vscodium.com/>`_ to name a few. These allow more flexible git
@@ -79,9 +79,9 @@ Development Steps
    first
 
    ```shell
-   pdm use -i 3.12  # Automatically searches for Python3.12
-   pdm use /path/to/python3.12  # Instead specify path to Python3.12
-   pdm install -L pdm_<PLATFORM>.lock  # Replace <PLATFORM> with linux, windows
+   pdm use -i 3.13  # Automatically searches for Python3.13
+   pdm use /path/to/python3.13  # Instead specify path to Python3.13
+   pdm install -L pdm.lock 
    ```
     
     Now you can run tests

@@ -96,7 +96,7 @@ Then at the Python prompt, try to import nvector:
 
     >>> import nvector as nv
     >>> print(nv.__version__)
-    1.0.3
+    1.0.4
 
 
 To test if the toolbox is working correctly paste the following in an interactive
