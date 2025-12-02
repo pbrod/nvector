@@ -96,7 +96,7 @@ Then at the Python prompt, try to import nvector:
 
     >>> import nvector as nv
     >>> print(nv.__version__)
-    1.0.3
+    1.0.6
 
 
 To test if the toolbox is working correctly paste the following in an interactive
@@ -588,7 +588,7 @@ the article by Karney [Kar13]_ because these methods call the
 
 .. |pkg_img| image:: https://badge.fury.io/py/nvector.png
    :target: https://pypi.python.org/pypi/nvector/
-.. |tests_img| image:: https://github.com/pbrod/nvector/actions/workflows/python-package.yml/badge.svg
+.. |tests_img| image:: https://github.com/pbrod/nvector/actions/workflows/ci-test.yml/badge.svg
    :target: https://github.com/pbrod/nvector/actions/
 .. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=latest/
    :target: http://Nvector.readthedocs.org/en/latest/
