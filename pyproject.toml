@@ -17,7 +17,8 @@
 # pdm bump suggest  # Suggest new version number
 # pdm bump tag # creates a git tag with a leading v # Note a new build is only published when the tag exists
 # git commit
-# git push --tags
+# git push   # wait for test to complet
+# git push --tags  # publish the new version
 #
 [project]
 name = "nvector"
