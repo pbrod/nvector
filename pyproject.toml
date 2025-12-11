@@ -101,6 +101,7 @@ lock_macos = "pdm lock -L pdm_macos.lock --python 3.13 --strategy no_direct_mini
 format = "ruff format ./src/"  # format code
 check-style = "ruff check ./src/"  # check code style
 check-types = "mypy ./src/"  # check types
+test = {cmd = "pytest", env = {"MPLBACKEND" = "Agg"}}
 
 show-next-version = "git-cliff --bumped-version"  # calculate and print the next semantic version to stdout:
 show-next-changelog = "git-cliff"
@@ -204,6 +205,11 @@ convention = "numpy"
 docstring-code-line-length = 100
 
 [tool.pytest.ini_options]
+# Register all custom markers here.
+markers = [
+    "slow: marks tests as slow (time-consuming)",
+    "benchmark: marks tests used for benchmarking",
+]
 doctest_optionflags = ["NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL",  "ELLIPSIS"]
 addopts = "-rsxXf --doctest-modules --cov=nvector --cov-report=xml --ruff --mypy" #--ruff-format "  # 
 testpaths = [
