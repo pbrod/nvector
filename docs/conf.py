@@ -15,8 +15,6 @@ import os
 import re
 import sys
 from datetime import datetime
-from pathlib import Path
-
 CURRENT_YEAR = datetime.now().year
 START_YEAR = 2015
 
@@ -37,7 +35,6 @@ copyright = ", ".join((DEV_YEARS, organizations))
 __location__ = os.path.abspath(os.path.dirname(__file__))
 SOURCE_PATH = os.path.join(os.path.dirname(__location__), "src")
 sys.path.insert(0, SOURCE_PATH)
-sys.path.insert(0, os.fspath(Path(__file__).parents[1] / "src"))  # OK
 
 # -- Run sphinx-apidoc ------------------------------------------------------
 # This hack is necessary since RTD does not issue `sphinx-apidoc` before running
@@ -53,9 +50,9 @@ sys.path.insert(0, os.fspath(Path(__file__).parents[1] / "src"))  # OK
 # output_dir = os.path.join(__location__, "api")
 # module_dir = os.path.join(__location__, "../src", PACKAGE_NAME)
 # try:
-#    shutil.rmtree(output_dir)
-# except Exception:
-#    pass
+#     shutil.rmtree(output_dir)
+# except FileNotFoundError:
+#     pass
 # cmd_line_template = "sphinx-apidoc -f -o {outputdir} {moduledir}"
 # cmd_line = cmd_line_template.format(outputdir=output_dir, moduledir=module_dir)
 # apidoc.main(cmd_line.split(" "))
@@ -75,15 +72,16 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
-    #'sphinx.ext.autosummary',
+    #"sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
     "sphinx.ext.coverage",
     "sphinx.ext.ifconfig",
+    #"sphinx.ext.mathjax",
     "sphinx.ext.imgmath",
-    #'numpydoc',
+    #"numpydoc",
     "sphinx.ext.napoleon",
     "sphinxcontrib.bibtex",
-    # 'matplotlib.sphinxext.mathmpl',
+    # "matplotlib.sphinxext.mathmpl",
     "myst_parser",  #  Allow markdown. See https://www.sphinx-doc.org/en/master/usage/markdown.html
     "matplotlib.sphinxext.plot_directive",  # See https://stackoverflow.com/questions/16047271/plot-directive-in-restructured-text
 ]
