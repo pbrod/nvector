@@ -66,7 +66,7 @@ jobs:
 
       # If we're testing with Python 3.14, use a dedicated lockfile (pdm.lock314) by copying it
       # over pdm.lock before any dependency install or cache key evaluation that reads pdm.lock.
-      - name: Use pdm.lock314 (linux/mac)
+      - name: Use pdm.lock314
         if: matrix.python_version == '3.14'
         shell: bash
         run: |
@@ -99,31 +99,10 @@ jobs:
       - name: Run Tests
         run: pdm run pytest
 
-  coverage:
-    needs: ci
-    # Running coverage only on push to the "master" branch
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.13"]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of Sonar analysis
-      - name: Set up PDM
-        uses: pdm-project/setup-pdm@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          pdm install -dG test
-      - name: Run Tests and report to CodeCov  
-        run: |
-            pdm run pytest
-
       # See: https://martinheinz.dev/blog/69 "Ultimate CI Pipeline for All of Your Python Projects"
       - name: Use Codecov to track coverage
+        # Running coverage only on push to the "master" branch
+        if: matrix.os == 'ubuntu-latest' && matrix.python_version == '3.13' && github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
