@@ -67,7 +67,8 @@ jobs:
       # If we're testing with Python 3.14, use a dedicated lockfile (pdm.lock314) by copying it
       # over pdm.lock before any dependency install or cache key evaluation that reads pdm.lock.
       - name: Use pdm.lock314 (linux/mac)
-        if: matrix.python_version == '3.14' && matrix.os != 'windows-latest'
+        if: matrix.python_version == '3.14'
+        shell: bash
         run: |
           if [ -f pdm.lock314 ]; then
             echo "Using pdm.lock314 for python 3.14"
@@ -75,18 +76,6 @@ jobs:
           else
             echo "pdm.lock314 not found; falling back to pdm.lock"
           fi
-        shell: bash
-
-      - name: Use pdm.lock314 (windows)
-        if: matrix.python_version == '3.14' && matrix.os == 'windows-latest'
-        shell: powershell
-        run: |
-          if (Test-Path pdm.lock314) {
-            Write-Host "Using pdm.lock314 for python 3.14"
-            Copy-Item pdm.lock314 -Destination pdm.lock -Force
-          } else {
-            Write-Host "pdm.lock314 not found; falling back to pdm.lock"
-          }
 
       # Caching step for speed (runs after potential copy so cache key includes chosen pdm.lock)
       - name: Set up PDM cache
