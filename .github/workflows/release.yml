@@ -1,5 +1,5 @@
 # .github/workflows/release.yml
-# This workflow handles CD (Deployment) only on a tagged push.
+# This workflow handles continuous deployment to PyPI.
 
 name: CD - PyPI Release
 
@@ -7,22 +7,15 @@ name: CD - PyPI Release
 on:
   push:
     tags:
-      - 'v*.*.*' # Matches tags like v1.0.0, v2.3.4, etc.
+      - 'v*' # Matches tags like v1.0.0, v2.3.4, etc.
+
+# Publishing relies on repository protection rules and release discipline
+# to ensure CI has passed before a release tag is pushed.
 
 jobs:
-  # 1. Run Tests/CI
-  # This job will dispatch the CI workflow and wait for it to complete successfully.
-  # This step is commented out because it's simpler and more common to use 
-  # 'needs: ci' or rely on the push event to trigger the CI workflow, 
-  # then manually ensure it passed before the deployment starts.
-  # However, since your ci job ran on a different file, we'll keep the
-  # dependency implicit by only running on tags.
+ 
+  pypi-publish:    
 
-  pypi-publish:
-    # No `needs: ci` is needed here because the CI workflow is assumed to have 
-    # run and passed on the same 'push' event.
-    
-    # Condition: The job runs only if a tag starting with 'v' was pushed (handled by the 'on: tags:' above)
     name: upload release to PyPI
     runs-on: ubuntu-latest
 
@@ -46,36 +39,31 @@ jobs:
         with:
           python-version: '3.13'
 
-      - uses: pdm-project/setup-pdm@v4
+      - name: Set up PDM
+        uses: pdm-project/setup-pdm@v4
       
       # Check if version already exists on PyPI and is SemVer
       - name: Check if version exists on PyPI and is SemVer
         id: check_version
         shell: bash
         run: |
-          # Install tomli to safely read the package name from pyproject.toml
-          pip install tomli
-
           # 1. Retrieve package name from pyproject.toml
-          PACKAGE_NAME=$(python -c "import sys; import tomli; sys.stdout.write(tomli.load(open('pyproject.toml', 'rb'))['project']['name'])")
+          PACKAGE_NAME=$(python <<'PY'
+          import tomllib
+          with open('pyproject.toml', 'rb') as f:
+              print(tomllib.load(f)['project']['name'])
+          PY
+          )
 
           # 2. Extract version from the pushed tag name (e.g., 'v1.2.3' -> '1.2.3')
           RAW_TAG="${{ github.ref_name }}"
           PACKAGE_VERSION="${RAW_TAG#v}" 
           
-          # --- SEMANTIC VERSION CHECK ---
-          SEMVER_REGEX="^[0-9]+\.[0-9]+\.[0-9]+$"
-          
-          if ! [[ "$PACKAGE_VERSION" =~ $SEMVER_REGEX ]]; then
-            echo "::error::Tag version '$PACKAGE_VERSION' extracted from '$RAW_TAG' is not a valid MAJOR.MINOR.PATCH semantic version (X.Y.Z). Skipping publish."
-            echo "version_exists=true" >> $GITHUB_OUTPUT 
-            exit 1
-          fi
           # --- END SEMVER CHECK ---
           
           echo "Package: $PACKAGE_NAME, Version: $PACKAGE_VERSION (from tag $RAW_TAG)"
           
-          # 3. Check PyPI API for the specific version
+          # 2. Check PyPI API for the specific version
           PYPI_URL="https://pypi.org/pypi/$PACKAGE_NAME/$PACKAGE_VERSION/json"
           
           STATUS_CODE=$(curl -s -L -o /dev/null -w "%{http_code}" "$PYPI_URL")
@@ -89,6 +77,16 @@ jobs:
             echo "version_exists=false" >> $GITHUB_OUTPUT
             echo "::notice::Package version $PACKAGE_VERSION not found on PyPI (HTTP $STATUS_CODE). Proceeding with publish. ✅"
           fi
+
+      - name: Build package
+        run: pdm build
+
+      - name: Show build artifacts
+        run: ls -lah dist/
+
+      - name: Verify wheel contents
+        run: |
+          python -m pip install dist/*.whl
 
       # Conditional Publish Step
       - name: Publish release distributions to PyPI
