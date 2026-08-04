@@ -43,156 +43,186 @@ If you are proposing a feature:
 Development Prerequisites
 -------------------------
 
-To set up `nvector` on your local host for development, you only need the Git application. You can download Git using
-your distributions preferred method (dnf, yum, apt-get, brew) or using GitHub Desktop. 
+To set up `nvector` on your local host for development, you only need Git.
+You can install Git using your distribution's preferred method (dnf, yum,
+apt-get, brew, etc.) or by using GitHub Desktop.
 
-The following are optional, but recommended.
+The following tools are recommended:
 
-* The CPython interpreter version 3.13
-   * You can install it using official binaries, pyenv, or any Anaconda-like distribution 
-* The `PDM <https://pdm-project.org/latest/>`_ application for locking, building, and testing.
-* Dedicated IDE like PyCharm, Spyder, or `VSCodium <https://vscodium.com/>`_ to name a few. These allow more flexible git
-  control.
-
+* Python 3.13 for development (Python 3.10 or newer is required).
+* The `PDM <https://pdm-project.org/latest/>`_ package manager for dependency
+  management, testing, and packaging.
+* An IDE such as PyCharm, Spyder, VS Codium, or Visual Studio Code.
 
 Development Steps
 -----------------
 
-1. `Fork nvector on GitHub <https://github.com/pbrod/nvector>`_
+1. Fork `nvector` on GitHub:
 
-2. Clone your fork locally. Using the command line would be:
+   https://github.com/pbrod/nvector
 
-   ```shell
-   git clone git@github.com/<USER>/nvector.git
-   ```
+2. Clone your fork locally:
 
-3. Create a branch for local development. Using the command line would be:
+   .. code-block:: shell
 
-   ```shell
-   git checkout -b name-of-your-bugfix-or-feature
-   ```
+       git clone git@github.com:<USER>/nvector.git
 
-   Now you can make changes and commit them.
-  
-4. When you're done making changes, run all the checks to ensure that nothing
-   is broken on your local system. To run tests locally, you should install a PDM virtual environment 
-   first
+3. Create a development branch:
 
-   ```shell
-   pdm use -i 3.13  # Automatically searches for Python3.13
-   pdm use /path/to/python3.13  # Instead specify path to Python3.13
-   pdm install -L pdm.lock 
-   ```
-    
-    Now you can run tests
+   .. code-block:: shell
 
-    ```shell
-    pdm run pytest 
-    ```
-   
-   If you have multiple Pythons installed to your path (3.9+), then you can use nox
+       git checkout develop
+       git checkout -b name-of-your-bugfix-or-feature
 
-   ```shell
-   pdm run nox
-   ```
-   
-5. For linting the source code you can use `ruff <https://pypi.org/project/ruff/#description>`_:
+4. Install the development environment:
 
-    ```shell
-    ruff format ./src
-    ```
-    
-6. Update/add documentation (in ``docs``), if relevant.
-   
-7. Add your name to the ``AUTHORS.rst`` file as an author.
+   .. code-block:: shell
 
-8. Commit your changes. Using the command line would be:
+       pdm use -i 3.13
+       pdm install -d
 
-   ```shell
-   git add <FILE1> <FILE2> ... <FILEN>
-   git commit -m "<type>(<scope>): <subject> <BLANK LINE> <body> <BLANK LINE> <footer>"
-   ```
+   This installs the project together with the development dependencies.
+
+   To run the full local validation suite:
+
+   .. code-block:: shell
+
+       pdm all-tests
+
+   To run only the tests:
+
+   .. code-block:: shell
+
+       pdm run pytest
+
+   If you have multiple Python versions installed, you can also run:
+
+   .. code-block:: shell
+
+       pdm run nox
+
+5. Format and lint the source code:
+
+   .. code-block:: shell
+
+       pdm format
+       pdm check-style
+       pdm check-types
+
+6. Update documentation in ``docs`` if relevant.
+
+7. Consider adding your name to ``AUTHORS.rst`` for significant contributions.
+
+8. Commit your changes:
+
+   .. code-block:: shell
+
+       git add <FILE1> <FILE2> ...
+       git commit -m "<type>(<scope>): <subject>"
 
    See :ref:`commit-message-guidelines`.
 
+9. Push your branch:
 
-9. Once you are happy with the local changes, push to GitHub:
+   .. code-block:: shell
 
-   ```
-   git push origin name-of-your-bugfix-or-feature
-   ```
-   
-   Note that each push will trigger the Continuous Integration workflow. Check the ``Actions`` tab on your fork 
-   repository home like github.com/<USER>/nvector/actions
+       git push origin name-of-your-bugfix-or-feature
 
-10. Submit a pull request through the GitHub website. Pull requests should be
-    made to the ``develop`` branch (subject to change).  Note that automated tests will be run on
-    GitHub actions, but these must be initialized by a member of the team.
+   Each push automatically triggers the GitHub Actions CI workflow.
+
+10. Submit a pull request against the ``develop`` branch.
+
+
+Release Tooling
+---------------
+
+Release tooling is installed separately from the normal development
+dependencies.
+
+To install release tools:
+
+.. code-block:: shell
+
+    pdm install -G release
+
+This installs utilities such as:
+
+* git-cliff
+* pdm-bump
+
+These tools are only required when preparing a release.
+
+See ``RELEASE.md`` for the complete release workflow and publishing process.
+
 
 .. _commit-message-guidelines:
 
-Commit message guidelines
+Commit Message Guidelines
 -------------------------
-The `nvector` project  uses python-semantic-release for automating the releases.
-By analyzing the commit messages it takes care of incrementing the version number
-and update the changelog as well as publish the package.
 
-Therefore the commit messages must follow the 
-`angular commit message style <https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#commits>`_
-This leads to more readable messages that are easy to follow when looking through the 
-project history.
-Each commit message consists of a ``header``, a ``body`` and a ``footer``. 
-The header has a special format that includes a ``type``, a ``scope`` and a ``subject``::
+The `nvector` project uses Conventional Commits together with
+`git-cliff` and `pdm-bump` for changelog generation and release
+management.
 
-    <type>(<scope>): <subject>
-    <BLANK LINE>
-    <body>
-    <BLANK LINE>
-    <footer>
+The ``type`` should be one of:
 
-The ``header`` is mandatory and the ``scope`` of the ``header`` is optional.
+* feat: A new feature
+* fix: A bug fix
+* docs: Documentation changes
+* style: Formatting changes only
+* refactor: Refactoring without feature or bug fixes
+* perf: Performance improvements
+* test: Test changes
+* ci: Continuous integration changes
+* chore: Build or tooling changes
 
-Any line of the commit message cannot be longer than 100 characters! 
-This allows the message to be easier to read on GitHub as well as in various git tools.
-The ``body`` or ``footer`` can begin with BREAKING CHANGE: 
-followed by a short description to create a major release.
+Examples:
 
-The ``type`` must be one of the following:
+.. code-block:: text
 
-   * feat: A new feature
-   * fix: A bug fix
-   * docs: Documentation only changes
-   * style: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
-   * refactor: A code change that neither fixes a bug nor adds a feature
-   * perf: A code change that improves performance
-   * test: Adding missing or correcting existing tests
-   * chore: Changes to the build process or auxiliary tools and libraries such as documentation generation
+    feat(core): add geodesic helper
 
-The ``scope`` could be anything specifying place of the commit change. 
-For example $core, $objects, $rotation, etc...
+.. code-block:: text
 
-The ``subject`` contains succinct description of the change:
+    fix(objects): correct distance calculation
 
-  * use the imperative, present tense: "change" not "changed" nor "changes"
-  * don't capitalize first letter
-  * no dot (.) at the end
+.. code-block:: text
 
-The ``body`` should include the motivation for the change and contrast this 
-with previous behavior. Use the imperative, present tense: 
-"change" not "changed" nor "changes". 
+    ci: update GitHub Actions workflow
 
-The ``footer`` should contain any information about Breaking Changes and is 
-also the place to reference GitHub issues that this commit closes.
 
-Breaking Changes should start with the word BREAKING CHANGE: with a space or two newlines. 
-The rest of the commit message is then used for this.
+The ``scope`` identifies the area of the project affected by the change.
+
+Examples include ``core``, ``objects``, ``rotation``, ``docs``, ``ci``, and
+similar project components.
+
+The ``subject`` contains a concise description of the change:
+
+* Use the imperative, present tense: "change" not "changed" or "changes".
+* Do not capitalize the first letter.
+* Do not end the subject with a period.
+
+The ``body`` should explain the motivation for the change and contrast it with
+previous behavior. Use the imperative, present tense throughout.
+
+The ``footer`` should contain information about breaking changes and references
+to GitHub issues that are closed by the commit.
+
+Breaking changes should begin with:
+
+.. code-block:: text
+
+    BREAKING CHANGE: description
+
+The remainder of the footer should explain the impact of the change and any
+required migration steps.
 
 
 Pull Request Guidelines
 -----------------------
 
 If you need some code review or feedback while you're developing the code, just
-make a pull request. Pull requests should be made to the ``develop`` branch (subject to change).
+make a pull request. Pull requests should be made aginst the ``develop`` branch.
 
 For merging, you should:
 
