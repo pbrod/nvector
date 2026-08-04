@@ -134,8 +134,8 @@ all-tests = {composite = ["format", "check-style", "check-types", "tests", "docs
 show-next-version = "git-cliff --bumped-version"  # calculate and print the next semantic version to stdout:
 show-next-changelog = "git-cliff"
 append-changelog = "git-cliff --unreleased --prepend CHANGELOG.md"  # prepend new entries to CHANGELOG.md without footer part
-update-license = "python build_package.py update-license"
-update-readme = "python build_package.py update-readme"
+update-license = "python update_license.py"
+update-readme = "python update_readme.py"
 prepare-release = {composite = ["update-license", "update-readme", "append-changelog"]}
 
 
