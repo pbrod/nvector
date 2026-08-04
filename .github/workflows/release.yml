@@ -42,8 +42,7 @@ jobs:
       - name: Set up PDM
         uses: pdm-project/setup-pdm@v4
       
-      # Check if version already exists on PyPI and is SemVer
-      - name: Check if version exists on PyPI and is SemVer
+      - name: Check whether this version already exists on PyPI
         id: check_version
         shell: bash
         run: |
@@ -58,8 +57,6 @@ jobs:
           # 2. Extract version from the pushed tag name (e.g., 'v1.2.3' -> '1.2.3')
           RAW_TAG="${{ github.ref_name }}"
           PACKAGE_VERSION="${RAW_TAG#v}" 
-          
-          # --- END SEMVER CHECK ---
           
           echo "Package: $PACKAGE_NAME, Version: $PACKAGE_VERSION (from tag $RAW_TAG)"
           
