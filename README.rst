@@ -584,31 +584,40 @@ FrameE.inverse, GeoPoint.distance_and_azimuth or GeoPoint.displace methods you s
 the article by Karney [Kar13]_ because these methods call the
 `karney library <https://pypi.python.org/pypi/karney>`_ to do the calculations.
 
-
-
 .. |pkg_img| image:: https://badge.fury.io/py/nvector.png
    :target: https://pypi.python.org/pypi/nvector/
+
 .. |tests_img| image:: https://github.com/pbrod/nvector/actions/workflows/ci-test.yml/badge.svg
-   :target: https://github.com/pbrod/nvector/actions/
-.. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=latest/
+    :target: https://github.com/pbrod/nvector/actions/
+
+.. |docs_img| image:: https://readthedocs.org/projects/pip/badge/?version=stable
    :target: http://Nvector.readthedocs.org/en/latest/
+
 .. |quality_img| image:: https://qlty.sh/gh/pbrod/projects/Nvector/maintainability.svg
    :target: https://qlty.sh/gh/pbrod/projects/Nvector
+
 .. |coverage_img| image:: https://codecov.io/gh/pbrod/nvector/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/pbrod/nvector
+
 .. |versions_img| image:: https://img.shields.io/pypi/pyversions/Nvector.svg
    :target: https://github.com/pbrod/nvector
+
 .. |downloads_img| image:: https://pepy.tech/badge/nvector/month
    :target: https://pepy.tech/project/nvector
    :alt: PyPI - Downloads
 
-
 References
 ==========
 
-.. [Gad10] K. Gade, `A Nonsingular Horizontal Position Representation, J. Navigation, 63(3):395-417, 2010.
+.. [Gad10] K. Gade, `A Nonsingular Horizontal Position Representation,
+           J. Navigation, 63(3):395-417, 2010.
            <http://www.navlab.net/Publications/A_Nonsingular_Horizontal_Position_Representation.pdf>`_
-.. [Kar13] C.F.F. Karney. `Algorithms for geodesics. J. Geodesy, 87(1):43-55, 2013. <https://rdcu.be/cccgm>`_
 
-.. [GB25] K. Gade and P.A. Brodtkorb, `Nvector Documentation for Python, 2025.
+.. [Kar13] C.F.F. Karney, `Algorithms for geodesics.
+           J. Geodesy, 87(1):43-55, 2013.
+           <https://rdcu.be/cccgm>`_
+
+.. [GB25] K. Gade and P.A. Brodtkorb,
+           `Nvector Documentation for Python, 2025.
            <https://nvector.readthedocs.io/en/latest>`_
+

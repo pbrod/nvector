@@ -1,5 +1,42 @@
 # Changelog
 
+## [unreleased]
+
+### 🐛 Bug Fixes
+
+- Fixed the maintainability badge.
+- Fixed imports for `test_docstrings` and docstring examples.
+
+### 🚜 Refactor
+
+- Improved type annotations and type checking across the code base.
+- Moved `test` and `test_docstrings` utilities into `testing.py`.
+- Simplified `pyproject.toml` and refreshed lock files.
+
+### 📚 Documentation
+
+- Added release workflow documentation (`RELEASE.md`).
+- Improved release, deployment, and contributor documentation.
+- Updated project documentation and quality badges.
+- Added `update_license.py` and `update_readme.py` utilities to automate generation of project documentation files from source modules.
+
+### 🧪 Testing
+
+- Added explicit Ruff style checks to CI.
+- Added explicit MyPy type checks to CI.
+- Added support for testing against Python 3.15.
+- Added a `test` PDM script and documented pytest markers.
+
+### ⚙️ CI/CD
+
+- Simplified the CI workflow configuration.
+- Improved lock-file handling in CI.
+- Added package build verification and wheel installation checks.
+- Added PyPI release validation to prevent publishing existing versions.
+- Modernized GitHub Actions CI and PyPI release workflows.
+- Removed obsolete documentation build configuration.
+
+
 ## [1.0.6] - 2025-12-02
 
 ### 🐛 Bug Fixes
