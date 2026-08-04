@@ -1,6 +1,6 @@
 # Changelog
 
-## [unreleased]
+## [1.1.0] - 2026-08-04
 
 ### 🐛 Bug Fixes
 
@@ -42,7 +42,7 @@
 ### 🐛 Bug Fixes
 
 -  Added missing myst-parser to docs/requirements.txt.
--  Corrected the pypi-publish job's if condition  to ensure the it triggers correctly whenever a tag starting with v is pushed, including when using git push --tags --force.
+-  Corrected the pypi-publish job's if condition  to ensure the it triggers correctly whenever a tag starting with v is pushed, including when using git push --tags --force.
 ### 📚 Documentation
 
 - Updated link to latest version of the documentation on readthedocs
