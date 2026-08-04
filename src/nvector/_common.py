@@ -95,14 +95,6 @@ def use_docstring(
     return _doc
 
 
-def test_docstrings(filename: str) -> None:
-    import doctest
-
-    print(f"Testing docstrings in {filename!s}")
-    doctest.testmod(optionflags=doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS)
-    print("Docstrings tested")
-
-
 def write_readme(doc: str) -> None:
     with open("readme.txt", "w") as fid:
         fid.write(doc)
