@@ -76,6 +76,15 @@ jobs:
       - name: Install dependencies
         run: pdm install -dG test
 
+      - name: Check formatting
+        run: pdm format --check
+
+      - name: Run Ruff
+        run: pdm check-style
+
+      - name: Run MyPy
+        run: pdm check-types
+
       - name: Run tests
         run: pdm run pytest
 
