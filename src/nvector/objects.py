@@ -14,7 +14,7 @@ from karney import geodesic  # @UnresolvedImport
 from numpy.linalg import norm
 
 from nvector import _examples, _license
-from nvector._common import _make_summary, test_docstrings, use_docstring
+from nvector._common import _make_summary, use_docstring
 from nvector._typing import (
     Array,
     ArrayLike,
@@ -1539,7 +1539,7 @@ class GeoPath(_Common):
         ...                  (50.99270338, 2.89977984)))
         True
 
-        >>> bool(nv.allclose(GeoPath(point_c, point).track_distance(),  810.76312076))
+        >>> bool(nv.allclose(nv.GeoPath(point_c, point).track_distance(),  810.76312076))
         True
 
         """
@@ -1577,7 +1577,7 @@ class GeoPath(_Common):
         >>> bool(np.allclose((point.latitude_deg, point.longitude_deg),
         ...                  (51.00038411380564, 1.900003311624411)))
         True
-        >>> bool(np.allclose(GeoPath(pointC, point).track_distance(),  42.67368351))
+        >>> bool(np.allclose(nv.GeoPath(pointC, point).track_distance(),  42.67368351))
         True
         >>> pointD = wgs84.GeoPoint(51.0, 2.1, degrees=True)
         >>> pointE = path.closest_point_on_path(pointD) # 51.0000, 002.0000
@@ -2184,5 +2184,7 @@ __doc__ = (
 
 
 if __name__ == "__main__":
+    from nvector.testing import test_docstrings
+
     # print(__doc__)
     test_docstrings(__file__)

@@ -13,7 +13,7 @@ from numpy import arctan2, cos, sin, sqrt
 from numpy.linalg import norm
 
 from nvector import _license
-from nvector._common import _make_summary, test_docstrings
+from nvector._common import _make_summary
 from nvector._typing import Array, ArrayLike, NdArray, NpArrayLike, format_docstring_types
 from nvector.util import _nvector_check_length, mdot, unit
 
@@ -614,4 +614,6 @@ __doc__ = (
 
 
 if __name__ == "__main__":
+    from nvector.testing import test_docstrings
+
     test_docstrings(__file__)

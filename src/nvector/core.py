@@ -19,7 +19,7 @@ from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
 
 from nvector import _examples, _license
-from nvector._common import _make_summary, test_docstrings, use_docstring
+from nvector._common import _make_summary, use_docstring
 from nvector._typing import (
     Array,
     ArrayLike,
@@ -1628,5 +1628,7 @@ __doc__ = (  # @ReservedAssignment
 
 
 if __name__ == "__main__":
+    from nvector.testing import test_docstrings
+
     print(__doc__)
     test_docstrings(__file__)

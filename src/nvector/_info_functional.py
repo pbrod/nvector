@@ -4,6 +4,6 @@ __doc__ = GETTING_STARTED_FUNCTIONAL  # @ReservedAssignment
 
 
 if __name__ == "__main__":
-    from nvector._common import test_docstrings
+    from nvector.testing import test_docstrings
 
     test_docstrings(__file__)

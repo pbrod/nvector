@@ -74,9 +74,7 @@ def plot_mean_position():
     plotter(lon, lat, linewidth=5, marker="o", color="r")
     plotter(lons, lats, linewidth=5, marker="o", color="k")
 
-    plt.title(
-        "Figure of mean position (red dot) compared to \npositions " "A, B, and C (black dots)."
-    )
+    plt.title("Figure of mean position (red dot) compared to \npositions A, B, and C (black dots).")
 
 
 def main() -> None:
@@ -92,6 +90,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    from nvector._common import test_docstrings
+    from nvector.testing import test_docstrings
 
     test_docstrings(__file__)

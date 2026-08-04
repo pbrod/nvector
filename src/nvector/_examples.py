@@ -842,7 +842,7 @@ class _DocTestFunctional:
 
 
 if __name__ == "__main__":
-    from nvector._common import test_docstrings
+    from nvector.testing import test_docstrings
 
     # print(GETTING_STARTED)
     # print(GETTING_STARTED_FUNCTIONAL)

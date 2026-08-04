@@ -14,7 +14,7 @@ from numpy import deg2rad, rad2deg
 from numpy.linalg import norm
 
 from nvector import _license
-from nvector._common import _make_summary, test_docstrings
+from nvector._common import _make_summary
 from nvector._typing import (
     Array,
     ArrayLike,
@@ -221,6 +221,7 @@ def array_to_list_dict(
     Examples
     --------
     >>> import numpy as np
+    >>> from nvector.util import array_to_list_dict
     >>> data1 = dict(a=np.zeros((3,)), b=(1,2,3), c=[], d=1, e="test",
     ...              f=np.nan, g=[1], h=[np.nan], i=None)
     >>> e1 = array_to_list_dict(data1)
@@ -852,4 +853,6 @@ __doc__ = (  # @ReservedAssignment
 
 
 if __name__ == "__main__":
+    from nvector.testing import test_docstrings
+
     test_docstrings(__file__)
