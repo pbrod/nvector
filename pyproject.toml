@@ -11,9 +11,10 @@
 #
 # Prepare release:
 # pdm install -G release   # Install release tools if needed
-# pdm prepare-release      # update README.rst, LICENSE.xt and CHANGELOG.md. Inspect and check!          
+# pdm prepare-release      # update README.rst, LICENSE.xt and CHANGELOG.md. Inspect and verify.          
 # git add .
 # git commit
+# git push
 #
 # Determine version:
 # pdm bump suggest
@@ -26,12 +27,15 @@
 # pdm bump major                                # creates 1.0.0 from 0.2.0 
 #
 # Release:
-# git push
-# merge develop -> master
-# git checkout master
+# Merge to master:
+# git checkout master:
 # git pull origin master
+# git pull origin master
+# git merge --no-ff develop
+# git push origin master                        # Wait for CI to complete successfully
+#
+# Create and publish release tag:
 # pdm bump tag                                  # creates a git tag with a leading v 
-# git push origin master                        # wait for tests to complete
 # git push --tags                               # publish the new version
 #
 # Note:
@@ -41,6 +45,15 @@
 # Rebuilding the lock files:
 # pdm lock
 # pdm lock-py314
+#
+# After the release, merge master back into develop
+# so that release commits and version changes are present in develop:
+#
+# git checkout develop
+# git pull origin develop
+# git merge master
+# git push origin develop
+#
 
 
 [project]
