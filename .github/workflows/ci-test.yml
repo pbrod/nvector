@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # If we're testing with Python 3.14, use a dedicated lockfile (pdm.lock314) by copying it
       # over pdm.lock before any dependency install or cache key evaluation that reads pdm.lock.
@@ -60,7 +60,7 @@ jobs:
 
       # Caching step for speed (runs after potential copy so cache key includes chosen pdm.lock)
       - name: Cache PDM packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cache/pdm
@@ -92,7 +92,7 @@ jobs:
       - name: Use Codecov to track coverage
         # Run Codecov once for push events on Ubuntu/Python 3.13
         if: matrix.os == 'ubuntu-latest' && matrix.python_version == '3.13' && github.event_name == 'push'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml    # coverage report
