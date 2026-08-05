@@ -13,7 +13,6 @@ def test_test_function_exists() -> None:
 
 
 def test_test_calls_pytest_main(monkeypatch: pytest.MonkeyPatch) -> None:
-
     called: dict[str, Any] = {}
 
     def fake_main(args: list[str], plugins: list[Any] | None = None) -> int:
@@ -31,7 +30,6 @@ def test_test_calls_pytest_main(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_test_forwards_plugins(monkeypatch: pytest.MonkeyPatch) -> None:
-
     called: dict[str, Any] = {}
 
     def fake_main(args: list[str], plugins: list[Any] | None = None) -> int:
@@ -49,7 +47,6 @@ def test_test_forwards_plugins(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_test_raises_helpful_error_without_pytest(monkeypatch: pytest.MonkeyPatch) -> None:
-
     original_import = __import__
 
     def fake_import(name: str, *args: Any, **kwargs: Any) -> Any:
