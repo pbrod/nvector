@@ -603,14 +603,18 @@ def n_E_and_wa2R_EL(
     return np.squeeze(R_EL)
 
 
-_odict = globals()
-__doc__ = (
-    __doc__  # @ReservedAssignment
-    + _make_summary({n: _odict[n] for n in __all__})
-    + ".. only:: draft\n\n"
-    + "    License\n    -------\n    "
-    + _license.__doc__.replace("\n", "\n    ")
-)
+if __doc__ is not None:
+    # Safely build module docstring even when frozen (cx_Freeze) or run with -OO
+    _odict = globals()
+    _license_doc = _license.__doc__.replace("\n", "\n    ") if _license.__doc__ else ""
+
+    _sections = [
+        __doc__,
+        _make_summary({n: _odict[n] for n in __all__ if n in _odict}),
+        ".. only:: draft\n\n    License\n    -------\n    ",
+        _license_doc,
+    ]
+    __doc__ = "".join(part for part in _sections if part)
 
 
 if __name__ == "__main__":

@@ -1617,14 +1617,23 @@ def mean_horizontal_position(n_EB_E: ArrayLike) -> NdArray:
     return n_EM_E
 
 
-_odict = globals()
-__doc__ = (  # @ReservedAssignment
-    __doc__
-    + _make_summary({n: _odict[n] for n in __all__})
-    + ".. only:: draft\n\n"
-    + "    License\n    -------\n    "
-    + _license.__doc__.replace("\n", "\n    ")
-)
+if __doc__ is not None:
+    # Safely construct module docstring; guards against cx_Freeze and python -OO
+    _globals = globals()
+    _summary = _make_summary({name: _globals[name] for name in __all__ if name in _globals})
+
+    # Indent license text safely if docstring exists
+    _license_doc = (
+        _license.__doc__.replace("\n", "\n    ") if getattr(_license, "__doc__", None) else ""
+    )
+
+    _sections = [
+        __doc__,
+        _summary,
+        ".. only:: draft\n\n    License\n    -------\n    ",
+        _license_doc,
+    ]
+    __doc__ = "".join(part for part in _sections if part)
 
 
 if __name__ == "__main__":
