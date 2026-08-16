@@ -9,9 +9,9 @@ name: CI - Tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
   schedule:
     # Runs Monday through Friday at 02:00 UTC
     - cron: '0 2 * * 1-5'
