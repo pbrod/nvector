@@ -73,7 +73,7 @@ jobs:
         run: pdm check-types
 
       - name: Run test suite
-        run: pdm run pytest tests/ --cov=nvector --cov-report=xml
+        run: pdm run pytest --cov=nvector --cov-report=xml
 
       - name: Build package distribution
         run: pdm build
