@@ -139,6 +139,7 @@ format = "ruff format ./src/"  # format code
 check-style = "ruff check ./src/"  # check code style
 check-types = "mypy ./src/"  # check types
 tests = {cmd = "pytest", env = {MPLBACKEND = "Agg"}}
+test = {composite = ["tests"]}
 all-tests = {composite = ["format", "check-style", "check-types", "tests", "docs-doctest"]}
 
 show-next-version = "git-cliff --bumped-version"  # calculate and print the next semantic version to stdout:
@@ -148,10 +149,8 @@ update-license = "python update_license.py"
 update-readme = "python update_readme.py"
 prepare-release = {composite = ["update-license", "update-readme", "append-changelog"]}
 
-
 #[tool.pdm.scripts.check-commits]
 #shell = "gitlint --commits $(git describe --tags --abbrev=0)..HEAD lint"
-
 
 [dependency-groups]
 build = [
@@ -253,5 +252,5 @@ markers = [
 doctest_optionflags = ["NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL",  "ELLIPSIS"]
 addopts = "-rsxXf --doctest-modules" #
 testpaths = [
-    "src"
+    "src",
 ]
