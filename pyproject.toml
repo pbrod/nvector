@@ -1,4 +1,4 @@
-# 
+#
 # Recommended release workflow
 #
 # Development:
@@ -25,7 +25,7 @@
 #   pdm bump no-pre-release                       # creates 0.1.1 from 0.1.1rc1
 #   pdm bump micro                                # creates 0.1.2 from 0.1.1
 #   pdm bump minor                                # creates 0.2.0 from 0.1.2
-#   pdm bump major                                # creates 1.0.0 from 0.2.0 
+#   pdm bump major                                # creates 1.0.0 from 0.2.0
 #
 # Release:
 #  Merge develop into master:
@@ -35,7 +35,7 @@
 #   git push origin master                        # Wait for CI to complete successfully
 #
 # Create and publish release tag:
-#   pdm bump tag                                  # creates a git tag with a leading v 
+#   pdm bump tag                                  # creates a git tag with a leading v
 #   git push --tags                               # publish the new version
 #
 # Note:
@@ -129,11 +129,7 @@ docs-pdf = "sphinx-build -b latexpdf docs docs/_build/latex -d docs/_build/doctr
 docs-doctest = "sphinx-build -b doctest docs docs/_build/doctest -d docs/_build/doctrees"
 lock = "pdm lock -dG all"
 lock-py314 = "pdm lock -L pdm.lock314 --python 3.14 --strategy no_direct_minimal_versions -dG all"
-lock-win64 = "pdm lock -L pdm_windows.lock --python 3.13 --strategy no_direct_minimal_versions --platform windows -dG all"
-lock-linux = "pdm lock -L pdm_linux.lock --python 3.13 --strategy no_direct_minimal_versions --platform linux -dG all"
-lock-macos = "pdm lock -L pdm_macos.lock --python 3.13 --strategy no_direct_minimal_versions --platform macos -dG all"
 lock-all = {composite = ["lock", "lock-py314"]}
-
 
 format = "ruff format ./src/"  # format code
 check-style = "ruff check ./src/"  # check code style
