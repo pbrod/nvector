@@ -1,5 +1,4 @@
 from functools import wraps
-from typing import Any
 
 from ._common import use_docstring
 from ._info import __doc__ as __doc__  # @UnresolvedImport
