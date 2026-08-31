@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 from timeit import default_timer as timer
 from typing import Any
 
@@ -23,7 +24,6 @@ def test_docstrings(filename: str) -> Any:
 def test(
     package_name: str,
     *options: str,
-    plugins: Any | None = None,
 ) -> int:
     """
     Run tests for package using pytest.
@@ -55,14 +55,13 @@ def test(
     {super}
 
     """
-    try:
-        import pytest
-    except ImportError as exc:
-        raise ImportError(
-            "pytest is required to run package tests. Install it with: pip install pytest."
-        ) from exc
+    command = [
+        sys.executable,
+        "-m",
+        "pytest",
+        "--pyargs",
+        package_name,
+        *options,
+    ]
 
-    return pytest.main(
-        ["--pyargs", package_name, *options],
-        plugins=plugins,
-    )
+    return subprocess.call(command)
