@@ -154,5 +154,5 @@ import {_PACKAGE_NAME} as {_PACKAGE_NAME[:2]}
 """
 )
 @wraps(_test)
-def test(*options: str, plugins: Any | None = None) -> int:
-    return _test(__name__, *options, plugins=plugins)
+def test(*options: str) -> int:
+    return _test(__name__, *options)
