@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from timeit import default_timer as timer
 from typing import Any
 
