@@ -13,13 +13,14 @@
 
 ### 📦 Dependencies
 
-- Update lockfile
+- Update lockfiles
 
 
 ### ⚙️ Maintenance
 
 - Update CI configuration
 - General project maintenance updates
+- *(cliff)* Improve changelog generation and commit grouping
 - *(pyproject)* Enhance project metadata, tooling, and release documentation
   - Add keywords and Python classifiers
   - Standardize project URLs
@@ -27,16 +28,16 @@
   - Document release and maintenance workflow
 
 
-### 🛡️ Security
-
-- *(cliff)* Improve changelog generation and commit grouping
-
-
 ### ♻️ Refactoring
 
 - *(test)* Run pytest in a subprocess
 - *(__init__.py)* Replace wildcard imports with explicit imports
-- Improve safety and readability of dynamic docstring assembly
+- Refactor dynamic docstring assembly for improved safety and readability
+- *(_typing)* Replace `Union` with PEP 604 union syntax
+  - Use `X | Y` type annotations
+  - Remove legacy `typing.Union` usage
+  - Align type hints with Python 3.10+ requirements
+  - Satisfy Ruff UP007 checks
 
 
 ### 📚 Documentation
@@ -54,7 +55,7 @@
 
 ### 🧪 Testing
 
-- Add support for testing `testing.py`
+- Add tests for `testing.py`
 - Fix mypy errors in `test_testing.py`
 - Remove obsolete `test_test_forwards_plugins`
 - Remove obsolete `pytest.main` tests
@@ -63,7 +64,7 @@
 ### 📦 Build System
 
 - *(deps)* Update `pyproject.toml` syntax
-- Update release workflow scripts
+- Update release workflow scripts and automation
 
 
 ### 🏗️ CI/CD
