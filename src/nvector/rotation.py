@@ -6,8 +6,6 @@ Module related to rotation matrices and angles
 
 from __future__ import annotations
 
-from typing import Optional
-
 import numpy as np
 from numpy import arctan2, cos, sin, sqrt
 from numpy.linalg import norm
@@ -423,7 +421,7 @@ def zyx2R(z: ArrayLike, y: ArrayLike, x: ArrayLike) -> NdArray:
 
 
 @format_docstring_types
-def n_E2lat_lon(n_E: Array, R_Ee: Optional[Array] = None) -> tuple[NdArray, NdArray]:
+def n_E2lat_lon(n_E: Array, R_Ee: Array | None = None) -> tuple[NdArray, NdArray]:
     """
     Converts n-vector(s) to latitude(s) and longitude(s).
 
@@ -465,7 +463,7 @@ def n_E2lat_lon(n_E: Array, R_Ee: Optional[Array] = None) -> tuple[NdArray, NdAr
 
 
 @format_docstring_types
-def change_axes_to_E(n_E: Array, R_Ee: Optional[Array] = None) -> NdArray:
+def change_axes_to_E(n_E: Array, R_Ee: Array | None = None) -> NdArray:
     """
     Change axes of the nvector(s) from "e" to "E".
 
@@ -504,7 +502,7 @@ def change_axes_to_E(n_E: Array, R_Ee: Optional[Array] = None) -> NdArray:
 
 
 @format_docstring_types
-def n_E2R_EN(n_E: Array, R_Ee: Optional[Array] = None) -> NdArray:
+def n_E2R_EN(n_E: Array, R_Ee: Array | None = None) -> NdArray:
     """
     Returns the rotation matrix R_EN from n-vector.
 
@@ -558,7 +556,7 @@ def n_E2R_EN(n_E: Array, R_Ee: Optional[Array] = None) -> NdArray:
 
 @format_docstring_types
 def n_E_and_wa2R_EL(
-    n_E: Array, wander_azimuth: ArrayLike, R_Ee: Optional[NdArray] = None
+    n_E: Array, wander_azimuth: ArrayLike, R_Ee: NdArray | None = None
 ) -> NdArray:
     """
     Returns rotation matrix R_EL from n-vector and wander azimuth angle.

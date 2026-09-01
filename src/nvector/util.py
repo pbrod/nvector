@@ -7,7 +7,7 @@ Utility functions
 from __future__ import annotations
 
 import warnings
-from typing import Any, Dict, List, NamedTuple, Union
+from typing import Any, NamedTuple
 
 import numpy as np
 from numpy import deg2rad, rad2deg
@@ -124,7 +124,7 @@ ELLIPSOID_IX = {
 """Inverse mapping between a name string and ellipsoid ID"""
 
 
-def eccentricity2(f: Union[float, NdArray]) -> tuple[Union[float, NdArray], Union[float, NdArray]]:
+def eccentricity2(f: float | NdArray) -> tuple[float | NdArray, float | NdArray]:
     """
     Returns the first and second eccentricity squared given the flattening, f.
 
@@ -150,7 +150,7 @@ def eccentricity2(f: Union[float, NdArray]) -> tuple[Union[float, NdArray], Unio
     return e2, e2m
 
 
-def polar_radius(a: Union[float, NdArray], f: Union[float, NdArray]) -> Union[float, NdArray]:
+def polar_radius(a: float | NdArray, f: float | NdArray) -> float | NdArray:
     """
     Returns the polar radius b given the equatorial radius a and flattening f of the ellipsoid.
 
@@ -177,7 +177,7 @@ def polar_radius(a: Union[float, NdArray], f: Union[float, NdArray]) -> Union[fl
     return b
 
 
-def third_flattening(f: Union[float, NdArray]) -> Union[float, NdArray]:
+def third_flattening(f: float | NdArray) -> float | NdArray:
     """
     Returns the third flattening, n, given the flattening, f.
 
@@ -200,8 +200,8 @@ def third_flattening(f: Union[float, NdArray]) -> Union[float, NdArray]:
 
 
 def array_to_list_dict(
-    data: Union[Any, ArrayLike, Dict[Any, Any]],
-) -> Union[Any, Dict[Any, Any], List[Any]]:
+    data: Any | ArrayLike | dict[Any, Any],
+) -> Any | dict[Any, Any] | list[Any]:
     """
     Convert dict arrays to dict of lists.
 
@@ -428,7 +428,7 @@ def _nvector_check_length(n_E: NdArray, atol: float = 0.1) -> None:
 
 
 @format_docstring_types
-def deg(*rad_angles: ArrayLike) -> Union[NpArrayLike, tuple[NpArrayLike, ...]]:
+def deg(*rad_angles: ArrayLike) -> NpArrayLike | tuple[NpArrayLike, ...]:
     """
     Converts angle in radians to degrees.
 
@@ -479,7 +479,7 @@ def deg(*rad_angles: ArrayLike) -> Union[NpArrayLike, tuple[NpArrayLike, ...]]:
 
 
 @format_docstring_types
-def rad(*deg_angles: ArrayLike) -> Union[NpArrayLike, tuple[NpArrayLike, ...]]:
+def rad(*deg_angles: ArrayLike) -> NpArrayLike | tuple[NpArrayLike, ...]:
     """
     Converts angle in degrees to radians.
 
@@ -718,7 +718,7 @@ def nthroot(x: ArrayLike, n: int) -> NpArrayLike:
     return y
 
 
-def get_ellipsoid(name: Union[int, str]) -> Ellipsoid:
+def get_ellipsoid(name: int | str) -> Ellipsoid:
     """
     Returns semi-major axis (a), flattening (f) and name of reference ellipsoid as a named tuple.
 
@@ -793,7 +793,7 @@ def get_ellipsoid(name: Union[int, str]) -> Ellipsoid:
 
 @format_docstring_types
 def unit(
-    vector: Array, norm_zero_vector: Union[int, float] = 1, norm_zero_axis: int = 0
+    vector: Array, norm_zero_vector: int | float = 1, norm_zero_axis: int = 0
 ) -> NdArray:
     """
     Convert input vector to a vector of unit length.

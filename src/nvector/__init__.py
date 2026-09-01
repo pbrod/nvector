@@ -73,7 +73,7 @@ from .util import (
     unit,
 )
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 _PACKAGE_NAME = __name__
 

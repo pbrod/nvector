@@ -4,7 +4,7 @@ Created on 18. jan. 2016
 @author: pab
 """
 
-from typing import Iterable
+from collections.abc import Iterable
 
 
 def navlab_example(number: int) -> str:

@@ -3,7 +3,8 @@ from __future__ import annotations
 import inspect
 import textwrap
 import warnings
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 from ._typing import TYPES_DICT, F
 
@@ -64,7 +65,7 @@ def use_docstring_from(cls: object) -> Callable[..., Any]:
 
 
 def use_docstring(
-    docstring: Optional[str] = "", type_dict: Optional[dict[str, str]] = None
+    docstring: str | None = "", type_dict: dict[str, str] | None = None
 ) -> Callable[..., Any]:
     """This decorator modifies the decorated function's docstring with supplied docstring.
 
