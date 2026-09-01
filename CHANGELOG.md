@@ -20,6 +20,11 @@
 
 - Update CI configuration
 - General project maintenance updates
+- *(pyproject)* Enhance project metadata, tooling, and release documentation
+  - Add keywords and Python classifiers
+  - Standardize project URLs
+  - Enable Ruff pyupgrade checks
+  - Document release and maintenance workflow
 
 
 ### 🛡️ Security
