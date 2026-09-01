@@ -5,7 +5,8 @@ Created on 26. sep. 2024
 """
 
 import warnings
-from typing import Any, Callable, List, Tuple, TypeVar, Union
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 import numpy as np
 import numpy.typing as npt
@@ -16,12 +17,12 @@ ArrayLike = npt.ArrayLike
 ArrayLikeTxt = "npt.ArrayLike"
 
 # NpArrayLike represents either a single numpy float or a numpy array of floats.
-NpArrayLike = Union[np.floating, npt.NDArray[np.floating]]
+NpArrayLike = np.floating | npt.NDArray[np.floating]
 NpArrayLikeTxt = "np.floating | npt.NDArray[np.floating]"
 
 
 # IntArrayLike represents either a single numpy integer or a numpy array of integers.
-IntArrayLike = Union[np.integer, npt.NDArray[np.integer]]
+IntArrayLike = np.integer | npt.NDArray[np.integer]
 IntArrayLikeTxt = "np.integer | npt.NDArray[np.integer]"
 
 NdArray = npt.NDArray[np.floating]
@@ -31,7 +32,7 @@ BoolArray = npt.NDArray[np.bool_]
 BoolArrayTxt = "npt.NDArray[np.bool_]"
 
 # Array is a more specific type that can be a list, tuple, or numpy array.
-Array = Union[List[Any], Tuple[Any, ...], npt.NDArray[Any]]
+Array = list[Any] | tuple[Any, ...] | npt.NDArray[Any]
 ArrayTxt = "List[Any] | Tuple[Any, ...] | npt.NDArray[Any]"
 
 TYPES_DICT = {

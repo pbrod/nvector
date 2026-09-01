@@ -1,16 +1,17 @@
 # .github/workflows/ci.yml
 # This workflow runs Continuous Integration (CI) including tests and linting.
 # for a variety of Python versions
-# For more information see: 
+# For more information see:
 # https://py-pkgs.org/08-ci-cd
 # https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
 name: CI - Tests
 
-# Controls when the workflow will run
 on:
   push:
+    branches: [main, develop]
   pull_request:
+    branches: [main, develop]
   schedule:
     # Runs Monday through Friday at 02:00 UTC
     - cron: '0 2 * * 1-5'
@@ -19,11 +20,8 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# A workflow run is made up of one or more jobs that can run 
-# sequentially or in parallel
 jobs:
   ci:
-    # Set up operating system
     runs-on: ${{ matrix.os }}
 
     # Ensure matplotlib uses a non-interactive backend on all runners
@@ -34,44 +32,33 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Use underscore keys to avoid expression access issues (use matrix.python_version)
-        python_version: ["3.15", "3.14", "3.13", "3.12", "3.11", "3.10"]
-        # Runner labels: use lowercase macos-latest
+        python_version: ["3.15.0-rc.1", "3.14", "3.13", "3.12", "3.11", "3.10"]
         os: [ubuntu-latest, macos-latest, windows-latest]
 
-    continue-on-error: ${{ matrix.python_version == '3.15' }}
+    continue-on-error: ${{ startsWith(matrix.python_version, '3.15') }}
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v5
 
-      # If we're testing with Python 3.14, use a dedicated lockfile (pdm.lock314) by copying it
-      # over pdm.lock before any dependency install or cache key evaluation that reads pdm.lock.
-      - name: Use pdm.lock314
-        if: matrix.python_version == '3.14'
+      # Swap lockfile for Python 3.14 prior to setup-pdm
+      - name: Select Python 3.14 lockfile
+        if: matrix.python_version == '3.14' || startsWith(matrix.python_version, '3.15')
         shell: bash
         run: |
           if [ -f pdm.lock314 ]; then
-            echo "Using pdm.lock314 for python 3.14"
+            echo "Using pdm.lock314 for Python >= 3.14"
             cp pdm.lock314 pdm.lock
-          else
-            echo "pdm.lock314 not found; falling back to pdm.lock"
           fi
-
-      # Caching step for speed (runs after potential copy so cache key includes chosen pdm.lock)
-      - name: Cache PDM packages
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.cache/pdm
-          key: ${{ runner.os }}-pdm-${{ matrix.python_version }}-${{ hashFiles('pyproject.toml', 'pdm.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pdm-${{ matrix.python_version }}-
 
       - name: Set up PDM
         uses: pdm-project/setup-pdm@v4
         with:
           python-version: ${{ matrix.python_version }}
+          cache: true
+          cache-dependency-path: |
+            pyproject.toml
+            pdm.lock
 
       - name: Install dependencies
         run: pdm install -dG test
@@ -79,29 +66,35 @@ jobs:
       - name: Check formatting
         run: pdm format --check
 
-      - name: Run Ruff
+      - name: Run Ruff linter
         run: pdm check-style
 
-      - name: Run MyPy
+      - name: Run MyPy static analysis
         run: pdm check-types
 
-      - name: Run tests
-        run: pdm run pytest
+      - name: Run test suite
+        run: pdm run pytest --cov=nvector --cov-report=xml
 
-      - name: Build package
+      - name: Build package distribution
         run: pdm build
 
       - name: Verify wheel installation
         shell: bash
         run: |
-          python -m pip install --upgrade pip
-          pip install dist/*.whl
+          python -m venv test_env
 
-      # See: https://martinheinz.dev/blog/69 "Ultimate CI Pipeline for All of Your Python Projects"
-      - name: Use Codecov to track coverage
-        # Run Codecov once for push events on Ubuntu/Python 3.13
+          test_env/Scripts/python -m pip install --upgrade pip || \
+          test_env/bin/python -m pip install --upgrade pip
+
+          test_env/Scripts/pip install dist/*.whl || \
+          test_env/bin/pip install dist/*.whl
+
+          test_env/Scripts/python -c "import nvector; print(nvector.__version__)" || \
+          test_env/bin/python -c "import nvector; print(nvector.__version__)"
+
+      - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python_version == '3.13' && github.event_name == 'push'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage.xml    # coverage report
+          files: ./coverage.xml

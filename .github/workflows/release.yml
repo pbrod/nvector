@@ -13,8 +13,8 @@ on:
 # to ensure CI has passed before a release tag is pushed.
 
 jobs:
- 
-  pypi-publish:    
+
+  pypi-publish:
 
     name: upload release to PyPI
     runs-on: ubuntu-latest
@@ -22,13 +22,13 @@ jobs:
     permissions:
       contents: read
       id-token: write
-      
+
     environment:
       name: pypi
       url: https://pypi.org/p/nvector
-      
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         # Fetch tags to ensure the latest tag information is available
         with:
           fetch-depth: 0
@@ -41,7 +41,7 @@ jobs:
 
       - name: Set up PDM
         uses: pdm-project/setup-pdm@v4
-      
+
       - name: Check whether this version already exists on PyPI
         id: check_version
         shell: bash
@@ -56,17 +56,17 @@ jobs:
 
           # 2. Extract version from the pushed tag name (e.g., 'v1.2.3' -> '1.2.3')
           RAW_TAG="${{ github.ref_name }}"
-          PACKAGE_VERSION="${RAW_TAG#v}" 
-          
+          PACKAGE_VERSION="${RAW_TAG#v}"
+
           echo "Package: $PACKAGE_NAME, Version: $PACKAGE_VERSION (from tag $RAW_TAG)"
-          
+
           # 2. Check PyPI API for the specific version
           PYPI_URL="https://pypi.org/pypi/$PACKAGE_NAME/$PACKAGE_VERSION/json"
-          
+
           STATUS_CODE=$(curl -s -L -o /dev/null -w "%{http_code}" "$PYPI_URL")
-          
+
           echo "PyPI check for $PACKAGE_VERSION returned HTTP $STATUS_CODE"
-          
+
           if [ "$STATUS_CODE" -eq 200 ]; then
             echo "version_exists=true" >> $GITHUB_OUTPUT
             echo "::notice::Package version $PACKAGE_VERSION already exists on PyPI. Skipping publish. ❌"

@@ -9,7 +9,7 @@ This file is part of NavLab and is available from www.navlab.net/nvector
 from __future__ import annotations
 
 import warnings
-from typing import Any, Optional, Tuple, Union
+from typing import Any
 
 import numpy as np
 from karney import geodesic  # @UnresolvedImport
@@ -61,9 +61,7 @@ __all__ = [
 
 
 @format_docstring_types
-def lat_lon2n_E(
-    latitude: ArrayLike, longitude: ArrayLike, R_Ee: Optional[NdArray] = None
-) -> NdArray:
+def lat_lon2n_E(latitude: ArrayLike, longitude: ArrayLike, R_Ee: NdArray | None = None) -> NdArray:
     """
     Converts latitude and longitude to n-vector.
 
@@ -131,7 +129,7 @@ def n_EB_E2p_EB_E(
     depth: ArrayLike = 0,
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
-    R_Ee: Optional[NdArray] = None,
+    R_Ee: NdArray | None = None,
 ) -> NdArray:
     """
     Converts n-vector to Cartesian position vector in meters.
@@ -237,7 +235,7 @@ def p_EB_E2n_EB_E(
     p_EB_E: Array,
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
-    R_Ee: Optional[NdArray] = None,
+    R_Ee: NdArray | None = None,
 ) -> tuple[NdArray, NdArray]:
     """
     Converts Cartesian position vector in meters to n-vector.
@@ -316,7 +314,7 @@ def n_EA_E_and_n_EB_E2p_AB_E(
     z_EB: ArrayLike = 0,
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
-    R_Ee: Optional[NdArray] = None,
+    R_Ee: NdArray | None = None,
 ) -> NdArray:
     """
     Returns the delta vector from position A to B decomposed in E.
@@ -387,7 +385,7 @@ def n_EA_E_and_n_EB_E2p_AB_N(
     z_EB: ArrayLike = 0,
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
-    R_Ee: Optional[NdArray] = None,
+    R_Ee: NdArray | None = None,
 ) -> NdArray:
     """
     Returns the delta vector from position A to B decomposed in N.
@@ -467,7 +465,7 @@ def n_EA_E_and_p_AB_E2n_EB_E(
     z_EA: ArrayLike = 0,
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
-    R_Ee: Optional[NdArray] = None,
+    R_Ee: NdArray | None = None,
 ) -> tuple[NdArray, NdArray]:
     """
     Returns position B from position A and delta vector decomposed in E.
@@ -538,7 +536,7 @@ def n_EA_E_and_p_AB_N2n_EB_E(
     z_EA: ArrayLike = 0,
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
-    R_Ee: Optional[NdArray] = None,
+    R_Ee: NdArray | None = None,
 ) -> tuple[NdArray, NdArray]:
     """
     Returns position B from position A and delta vector decomposed in N.
@@ -609,11 +607,11 @@ def _interp_vectors(
     t_i: ArrayLike,
     t: ArrayLike,
     nvectors: Array,
-    kind: Union[int, str],
+    kind: int | str,
     window_length: int,
     polyorder: int,
     mode: str,
-    cval: Union[int, float],
+    cval: int | float,
 ) -> NdArray:
     """
     Defines the interpolation function and return values from envector data.
@@ -673,11 +671,11 @@ def interp_nvectors(
     t_i: ArrayLike,
     t: ArrayLike,
     nvectors: Array,
-    kind: Union[int, str] = "linear",
+    kind: int | str = "linear",
     window_length: int = 0,
     polyorder: int = 2,
     mode: str = "interp",
-    cval: Union[int, float] = 0.0,
+    cval: int | float = 0.0,
 ) -> NdArray:
     """
     Returns interpolated values from nvector data.
@@ -763,7 +761,7 @@ def interp_nvectors(
 
 
 @format_docstring_types
-def interpolate(path: Tuple[Array, Array], ti: ArrayLike) -> NdArray:
+def interpolate(path: tuple[Array, Array], ti: ArrayLike) -> NdArray:
     """
     Returns the interpolated point(s) along the path
 
@@ -793,7 +791,7 @@ def interpolate(path: Tuple[Array, Array], ti: ArrayLike) -> NdArray:
 
 
 @use_docstring(_examples.get_examples_no_header([9], oo_solution=False))
-def intersect(path_a: Tuple[Array, Array], path_b: Tuple[Array, Array]) -> NdArray:
+def intersect(path_a: tuple[Array, Array], path_b: tuple[Array, Array]) -> NdArray:
     """
     Returns the intersection(s) between the great circles of the two paths
 
@@ -858,7 +856,7 @@ def course_over_ground(
     nvectors: Array,
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
-    R_Ee: Optional[Array] = None,
+    R_Ee: Array | None = None,
     **options: Any,
 ) -> NpArrayLike:
     """
@@ -1010,7 +1008,7 @@ def _great_circle_cross_track_distance(sin_theta: NpArrayLike, radius: ArrayLike
 
 @use_docstring(_examples.get_examples_no_header([10], oo_solution=False))
 def cross_track_distance(
-    path: Tuple[Array, Array],
+    path: tuple[Array, Array],
     n_EB_E: Array,
     method: str = "greatcircle",
     radius: ArrayLike = 6371009.0,
@@ -1058,7 +1056,7 @@ def cross_track_distance(
 
 @use_docstring(_examples.get_examples_no_header([10], oo_solution=False))
 def on_great_circle(
-    path: Tuple[Array, Array], n_EB_E: Array, radius: ArrayLike = 6371009.0, atol: float = 1e-8
+    path: tuple[Array, Array], n_EB_E: Array, radius: ArrayLike = 6371009.0, atol: float = 1e-8
 ) -> BoolArray:
     """
     Returns True if position B is on great circle through path A.
@@ -1106,7 +1104,7 @@ def on_great_circle(
 
 @use_docstring(_examples.get_examples_no_header([10], oo_solution=False))
 def on_great_circle_path(
-    path: Tuple[Array, Array], n_EB_E: Array, radius: ArrayLike = 6371009.0, atol: float = 1e-8
+    path: tuple[Array, Array], n_EB_E: Array, radius: ArrayLike = 6371009.0, atol: float = 1e-8
 ) -> BoolArray:
     """
     Returns True if position B is on great circle and between endpoints of path A.
@@ -1156,7 +1154,7 @@ def on_great_circle_path(
 
 
 @use_docstring(_examples.get_examples_no_header([10], oo_solution=False))
-def closest_point_on_great_circle(path: Tuple[Array, Array], n_EB_E: Array) -> NdArray:
+def closest_point_on_great_circle(path: tuple[Array, Array], n_EB_E: Array) -> NdArray:
     """
     Returns closest point C on great circle path A to position B.
 
@@ -1195,7 +1193,7 @@ def closest_point_on_great_circle(path: Tuple[Array, Array], n_EB_E: Array) -> N
 
 
 def _azimuth_sphere(
-    n_EA_E: Array, n_EB_E: Array, R_Ee: Optional[Array] = None
+    n_EA_E: Array, n_EB_E: Array, R_Ee: Array | None = None
 ) -> tuple[NdArray, NdArray]:
     """
     Returns azimuths from A to B and B to A, relative to North on a sphere
@@ -1319,7 +1317,7 @@ def geodesic_reckon(
     azimuth: ArrayLike,
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
-    R_Ee: Optional[NdArray] = None,
+    R_Ee: NdArray | None = None,
 ) -> tuple[NdArray, NpArrayLike]:
     """
     Returns position B computed from position A, distance and azimuth.
@@ -1382,7 +1380,7 @@ def geodesic_distance(
     n_EB_E: Array,
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
-    R_Ee: Optional[Array] = None,
+    R_Ee: Array | None = None,
 ) -> tuple[NpArrayLike, NpArrayLike, NpArrayLike]:
     """
     Returns surface distance between positions A and B on an ellipsoid.
@@ -1480,7 +1478,7 @@ def n_EA_E_and_n_EB_E2azimuth(
     n_EB_E: Array,
     a: float = 6378137.0,
     f: float = 1.0 / 298.257223563,
-    R_Ee: Optional[Array] = None,
+    R_Ee: Array | None = None,
 ) -> NdArray:
     """
     Returns azimuth from A to B, relative to North:
@@ -1530,7 +1528,7 @@ def n_EA_E_and_n_EB_E2azimuth(
 
 @use_docstring(_examples.get_examples_no_header([8], oo_solution=False))
 def n_EA_E_distance_and_azimuth2n_EB_E(
-    n_EA_E: Array, distance_rad: ArrayLike, azimuth: ArrayLike, R_Ee: Optional[NdArray] = None
+    n_EA_E: Array, distance_rad: ArrayLike, azimuth: ArrayLike, R_Ee: NdArray | None = None
 ) -> NdArray:
     """
     Returns position B from azimuth and distance from position A
@@ -1617,14 +1615,23 @@ def mean_horizontal_position(n_EB_E: ArrayLike) -> NdArray:
     return n_EM_E
 
 
-_odict = globals()
-__doc__ = (  # @ReservedAssignment
-    __doc__
-    + _make_summary({n: _odict[n] for n in __all__})
-    + ".. only:: draft\n\n"
-    + "    License\n    -------\n    "
-    + _license.__doc__.replace("\n", "\n    ")
-)
+if __doc__ is not None:
+    # Safely construct module docstring; guards against cx_Freeze and python -OO
+    _globals = globals()
+    _summary = _make_summary({name: _globals[name] for name in __all__ if name in _globals})
+
+    # Indent license text safely if docstring exists
+    _license_doc = (
+        _license.__doc__.replace("\n", "\n    ") if getattr(_license, "__doc__", None) else ""
+    )
+
+    _sections = [
+        __doc__,
+        _summary,
+        ".. only:: draft\n\n    License\n    -------\n    ",
+        _license_doc,
+    ]
+    __doc__ = "".join(part for part in _sections if part)
 
 
 if __name__ == "__main__":

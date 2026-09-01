@@ -1,46 +1,57 @@
-# 
+#
 # Recommended release workflow
 #
 # Development:
-# git checkout develop
-# git pull origin develop
-# pdm format
-# pdm check-style
-# pdm check-types
-# pdm all-tests
-#
-# Prepare release:
-# pdm install -G release   # Install release tools if needed
-# pdm prepare-release      # update README.rst, LICENSE.xt and CHANGELOG.md. Inspect and check!          
-# git add .
-# git commit
+#   git checkout develop
+#   git pull origin develop
+#   pdm format
+#   pdm check-style
+#   pdm check-types
+#   pdm all-tests
 #
 # Determine version:
-# pdm bump suggest
-# pdm bump pre-release --pre alpha              # creates 0.1.1a1 from 0.1.0
-# pdm bump pre-release --pre beta               # creates 0.1.1.b1 from 0.1.1a1
-# pdm bump pre-release --pre release-candidate  # creates 0.1.1rc1 from 0.1.1b1
-# pdm bump no-pre-release                       # creates 0.1.1 from 0.1.1rc1
-# pdm bump micro                                # creates 0.1.2 from 0.1.1
-# pdm bump minor                                # creates 0.2.0 from 0.1.2
-# pdm bump major                                # creates 1.0.0 from 0.2.0 
+#   pdm bump suggest
+#   pdm bump pre-release --pre alpha              # creates 0.1.1a1 from 0.1.0
+#   pdm bump pre-release --pre beta               # creates 0.1.1b1 from 0.1.1a1
+#   pdm bump pre-release --pre release-candidate  # creates 0.1.1rc1 from 0.1.1b1
+#   pdm bump no-pre-release                       # creates 0.1.1 from 0.1.1rc1
+#   pdm bump micro                                # creates 0.1.2 from 0.1.1
+#   pdm bump minor                                # creates 0.2.0 from 0.1.2
+#   pdm bump major                                # creates 1.0.0 from 0.2.0
+#
+# Prepare release:
+#   pdm install -G release   # Install release tools if needed
+#   pdm prepare-release      # update README.rst, LICENSE.txt and CHANGELOG.md. Inspect and verify.
+#   git log v1.1.0..HEAD --oneline > log.txt
+#   git add .
+#   git commit -m "chore(release): prepare release"
+#   git push origin develop
 #
 # Release:
-# git push
-# merge develop -> master
-# git checkout master
-# git pull origin master
-# pdm bump tag                                  # creates a git tag with a leading v 
-# git push origin master                        # wait for tests to complete
-# git push --tags                               # publish the new version
+#  Merge develop into master:
+#   git checkout master
+#   git pull origin master
+#   git merge --no-ff develop
+#   git push origin master                        # Wait for CI to complete successfully
+#
+# Create and publish release tag:
+#   pdm bump tag                                  # creates a git tag with a leading v
+#   git push --tags                               # publish the new version
 #
 # Note:
 # Publishing to PyPI occurs when a tag beginning with 'v'
 # is pushed and the GitHub release workflow succeeds.
 #
 # Rebuilding the lock files:
-# pdm lock
-# pdm lock-py314
+#   pdm lock-all
+#
+# After the release, merge master back into develop
+# so that release commits and version changes are present in develop:
+#   git checkout develop
+#   git pull origin develop
+#   git merge master
+#   git push origin develop
+
 
 
 [project]
@@ -60,16 +71,24 @@ maintainers = [
 requires-python = ">=3.10"
 dependencies = [
     "numpy>=1.21.2",
-    "scipy>=1.7.3", #; python_version < \"3.14\"",
-    #"scipy>=1.16.1; python_version >= \"3.14\"",
+    "scipy>=1.7.3",
     "karney>=1.0",
 ]
 
 readme = "README.rst"
-license = {text = "Simplified BSD"}
-license_file = "LICENSE.txt"
+license = {file = "LICENSE.txt"}
+
+keywords = [
+    "geodesy",
+    "navigation",
+    "gis",
+    "geographic",
+    "nvector",
+]
+
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -93,8 +112,10 @@ plot =["matplotlib>=3.8.0",
        "Cartopy>=0.22.0",]
 
 [project.urls]
-repository  = "https://github.com/pbrod/nvector/"
-documentation = "https://nvector.readthedocs.io/en/latest/"
+Homepage = "https://github.com/pbrod/nvector/"
+Documentation = "https://nvector.readthedocs.io/en/latest/"
+Repository = "https://github.com/pbrod/nvector/"
+Issues = "https://github.com/pbrod/nvector/issues"
 
 
 [build-system]
@@ -119,16 +140,13 @@ docs-pdf = "sphinx-build -b latexpdf docs docs/_build/latex -d docs/_build/doctr
 docs-doctest = "sphinx-build -b doctest docs docs/_build/doctest -d docs/_build/doctrees"
 lock = "pdm lock -dG all"
 lock-py314 = "pdm lock -L pdm.lock314 --python 3.14 --strategy no_direct_minimal_versions -dG all"
-lock-win64 = "pdm lock -L pdm_windows.lock --python 3.13 --strategy no_direct_minimal_versions --platform windows -dG all"
-lock-linux = "pdm lock -L pdm_linux.lock --python 3.13 --strategy no_direct_minimal_versions --platform linux -dG all"
-lock-macos = "pdm lock -L pdm_macos.lock --python 3.13 --strategy no_direct_minimal_versions --platform macos -dG all"
 lock-all = {composite = ["lock", "lock-py314"]}
-
 
 format = "ruff format ./src/"  # format code
 check-style = "ruff check ./src/"  # check code style
 check-types = "mypy ./src/"  # check types
-tests = {cmd = "pytest", env = {"MPLBACKEND" = "Agg"}}
+tests = {cmd = "pytest", env = {MPLBACKEND = "Agg"}}
+test = {composite = ["tests"]}
 all-tests = {composite = ["format", "check-style", "check-types", "tests", "docs-doctest"]}
 
 show-next-version = "git-cliff --bumped-version"  # calculate and print the next semantic version to stdout:
@@ -138,14 +156,12 @@ update-license = "python update_license.py"
 update-readme = "python update_readme.py"
 prepare-release = {composite = ["update-license", "update-readme", "append-changelog"]}
 
-
 #[tool.pdm.scripts.check-commits]
 #shell = "gitlint --commits $(git describe --tags --abbrev=0)..HEAD lint"
 
-
 [dependency-groups]
 build = [
-    "setuptools>=39.2",  # MHogan: Pycharm complains oddly without this on Windows platform
+    "setuptools>=39.2",  # Retained for PyCharm compatibility on Windows
     "spyder-kernels",    # Mhogan: If you want to use Spyder
     "click>=8.3.1",
 ]
@@ -154,7 +170,7 @@ release = [
     "pdm-bump>=0.9.8",
 ]
 
-# semantic_release.commit-messages git-cliff
+# Conventional Commit types used by git-cliff
 # chore: Changes to the build process or auxiliary tools and libraries such as documentation generation
 # docs: Documentation only changes
 # feat: A new feature
@@ -220,7 +236,7 @@ select = ["B",  # flake8-bugbear
           "F",  # PyFlakes
           "I",  # isort
           "Q",
-          # "UP", # pyupgrade
+          "UP", # pyupgrade
           ]
 
 # On top of the numpy convention, disable `D417`, which requires
@@ -241,7 +257,7 @@ markers = [
     "benchmark: marks tests used for benchmarking",
 ]
 doctest_optionflags = ["NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL",  "ELLIPSIS"]
-addopts = "-rsxXf --doctest-modules --cov=nvector --cov-report=xml" #
+addopts = "-rsxXf --doctest-modules" #
 testpaths = [
-    "src"
+    "src",
 ]
