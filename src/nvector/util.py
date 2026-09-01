@@ -792,9 +792,7 @@ def get_ellipsoid(name: int | str) -> Ellipsoid:
 
 
 @format_docstring_types
-def unit(
-    vector: Array, norm_zero_vector: int | float = 1, norm_zero_axis: int = 0
-) -> NdArray:
+def unit(vector: Array, norm_zero_vector: int | float = 1, norm_zero_axis: int = 0) -> NdArray:
     """
     Convert input vector to a vector of unit length.
 

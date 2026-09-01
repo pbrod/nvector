@@ -555,9 +555,7 @@ def n_E2R_EN(n_E: Array, R_Ee: Array | None = None) -> NdArray:
 
 
 @format_docstring_types
-def n_E_and_wa2R_EL(
-    n_E: Array, wander_azimuth: ArrayLike, R_Ee: NdArray | None = None
-) -> NdArray:
+def n_E_and_wa2R_EL(n_E: Array, wander_azimuth: ArrayLike, R_Ee: NdArray | None = None) -> NdArray:
     """
     Returns rotation matrix R_EL from n-vector and wander azimuth angle.
 

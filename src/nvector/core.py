@@ -61,9 +61,7 @@ __all__ = [
 
 
 @format_docstring_types
-def lat_lon2n_E(
-    latitude: ArrayLike, longitude: ArrayLike, R_Ee: NdArray | None = None
-) -> NdArray:
+def lat_lon2n_E(latitude: ArrayLike, longitude: ArrayLike, R_Ee: NdArray | None = None) -> NdArray:
     """
     Converts latitude and longitude to n-vector.
 

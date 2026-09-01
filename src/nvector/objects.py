@@ -713,9 +713,7 @@ class Nvector(_Common):
     z: NdArray
     frame: FrameE
 
-    def __init__(
-        self, normal: ArrayLike, z: ArrayLike = 0, frame: FrameE | None = None
-    ) -> None:
+    def __init__(self, normal: ArrayLike, z: ArrayLike = 0, frame: FrameE | None = None) -> None:
         """
         Initialize geographical position(s) given as n-vector(s) and depth(s) in frame E
 
@@ -1147,9 +1145,7 @@ class ECEFvector(_Pvector):  # _Common):
     frame: FrameE
     scalar: bool
 
-    def __init__(
-        self, pvector: Array, frame: FrameE | None = None, scalar: bool | None = None
-    ):
+    def __init__(self, pvector: Array, frame: FrameE | None = None, scalar: bool | None = None):
         """
         Initialize geographical position(s) given as cartesian position vector(s) in a frame.
 
@@ -1495,9 +1491,7 @@ class GeoPath(_Common):
             return self._on_ellipsoid_path(point, rtol=rtol, atol=atol)
         return self._on_great_circle_path(point, rtol=rtol, atol=atol)
 
-    def _closest_point_on_great_circle(
-        self, point: Nvector | GeoPoint | ECEFvector
-    ) -> Nvector:
+    def _closest_point_on_great_circle(self, point: Nvector | GeoPoint | ECEFvector) -> Nvector:
         point_c = point.to_nvector()
         point_a, point_b = self.nvectors()
         path = (point_a.normal, point_b.normal)
@@ -1505,9 +1499,7 @@ class GeoPath(_Common):
         normal_d = closest_point_on_great_circle(path, point_c.normal)
         return point_c.frame.Nvector(normal_d, z)
 
-    def closest_point_on_great_circle(
-        self, point: Nvector | GeoPoint | ECEFvector
-    ) -> GeoPoint:
+    def closest_point_on_great_circle(self, point: Nvector | GeoPoint | ECEFvector) -> GeoPoint:
         """
         Returns closest point on great circle path to the point.
 
