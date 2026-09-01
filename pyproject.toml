@@ -149,6 +149,7 @@ tests = {cmd = "pytest", env = {MPLBACKEND = "Agg"}}
 test = {composite = ["tests"]}
 all-tests = {composite = ["format", "check-style", "check-types", "tests", "docs-doctest"]}
 
+show-version = "python -c \"from nvector import __version__; print(__version__)\""
 show-next-version = "git-cliff --bumped-version"  # calculate and print the next semantic version to stdout:
 show-next-changelog = "git-cliff"
 append-changelog = "git-cliff --unreleased --prepend CHANGELOG.md"  # prepend new entries to CHANGELOG.md without footer part
@@ -162,7 +163,7 @@ prepare-release = {composite = ["update-license", "update-readme", "append-chang
 [dependency-groups]
 build = [
     "setuptools>=39.2",  # Retained for PyCharm compatibility on Windows
-    "spyder-kernels",    # Mhogan: If you want to use Spyder
+    "spyder-kernels",    # If you want to use Spyder
     "click>=8.3.1",
 ]
 release = [
