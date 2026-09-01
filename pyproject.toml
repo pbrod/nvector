@@ -31,7 +31,7 @@
 #  Merge develop into master:
 #   git checkout master
 #   git pull origin master
-#   git merge --no-ff develop
+#   git merge --no-ff develop                     # Vim: Press Esc, Type: ':wq', Press Enter
 #   git push origin master                        # Wait for CI to complete successfully
 #
 # Create and publish release tag:
