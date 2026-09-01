@@ -24,9 +24,8 @@
 #   pdm prepare-release      # update README.rst, LICENSE.txt and CHANGELOG.md. Inspect and verify.
 #   git log v1.1.0..HEAD --oneline > log.txt
 #   git add .
-#   git commit
-#   git push
-#
+#   git commit -m "chore(release): prepare release"
+#   git push origin develop
 #
 # Release:
 #  Merge develop into master:
@@ -79,8 +78,17 @@ dependencies = [
 readme = "README.rst"
 license = {file = "LICENSE.txt"}
 
+keywords = [
+    "geodesy",
+    "navigation",
+    "gis",
+    "geographic",
+    "nvector",
+]
+
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -104,8 +112,10 @@ plot =["matplotlib>=3.8.0",
        "Cartopy>=0.22.0",]
 
 [project.urls]
-repository  = "https://github.com/pbrod/nvector/"
-documentation = "https://nvector.readthedocs.io/en/latest/"
+Homepage = "https://github.com/pbrod/nvector/"
+Documentation = "https://nvector.readthedocs.io/en/latest/"
+Repository = "https://github.com/pbrod/nvector/"
+Issues = "https://github.com/pbrod/nvector/issues"
 
 
 [build-system]
@@ -151,7 +161,7 @@ prepare-release = {composite = ["update-license", "update-readme", "append-chang
 
 [dependency-groups]
 build = [
-    "setuptools>=39.2",  # MHogan: Pycharm complains oddly without this on Windows platform
+    "setuptools>=39.2",  # Retained for PyCharm compatibility on Windows
     "spyder-kernels",    # Mhogan: If you want to use Spyder
     "click>=8.3.1",
 ]
@@ -160,7 +170,7 @@ release = [
     "pdm-bump>=0.9.8",
 ]
 
-# semantic_release.commit-messages git-cliff
+# Conventional Commit types used by git-cliff
 # chore: Changes to the build process or auxiliary tools and libraries such as documentation generation
 # docs: Documentation only changes
 # feat: A new feature
@@ -226,7 +236,7 @@ select = ["B",  # flake8-bugbear
           "F",  # PyFlakes
           "I",  # isort
           "Q",
-          # "UP", # pyupgrade
+          "UP", # pyupgrade
           ]
 
 # On top of the numpy convention, disable `D417`, which requires
