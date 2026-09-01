@@ -9,14 +9,6 @@
 #   pdm check-types
 #   pdm all-tests
 #
-# Prepare release:
-#   pdm install -G release   # Install release tools if needed
-#   pdm prepare-release      # update README.rst, LICENSE.txt and CHANGELOG.md. Inspect and verify.
-#   git log v0.9.42..HEAD --oneline > log.txt
-#   git add .
-#   git commit
-#   git push
-#
 # Determine version:
 #   pdm bump suggest
 #   pdm bump pre-release --pre alpha              # creates 0.1.1a1 from 0.1.0
@@ -26,6 +18,15 @@
 #   pdm bump micro                                # creates 0.1.2 from 0.1.1
 #   pdm bump minor                                # creates 0.2.0 from 0.1.2
 #   pdm bump major                                # creates 1.0.0 from 0.2.0
+#
+# Prepare release:
+#   pdm install -G release   # Install release tools if needed
+#   pdm prepare-release      # update README.rst, LICENSE.txt and CHANGELOG.md. Inspect and verify.
+#   git log v1.1.0..HEAD --oneline > log.txt
+#   git add .
+#   git commit
+#   git push
+#
 #
 # Release:
 #  Merge develop into master:

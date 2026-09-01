@@ -1,5 +1,75 @@
 # Changelog
 
+## [1.2.0] - 2026-09-01
+
+
+### 🐛 Bug Fixes
+
+- *(__init__)* Explicit re-exports and `__all__` definition to resolve Ruff F401
+- *(nvector.test)* Remove unsupported `plugins` argument
+- *(nvector.testing)* Add missing `sys` import
+- *(nvector.__init__)* Remove unused `Any` import
+
+
+### 📦 Dependencies
+
+- Update lockfile
+
+
+### ⚙️ Maintenance
+
+- Update CI configuration
+- General project maintenance updates
+
+
+### 🛡️ Security
+
+- *(cliff)* Improve changelog generation and commit grouping
+
+
+### ♻️ Refactoring
+
+- *(test)* Run pytest in a subprocess
+- *(__init__.py)* Replace wildcard imports with explicit imports
+- Improve safety and readability of dynamic docstring assembly
+
+
+### 📚 Documentation
+
+- *(pyproject.toml)* Update build process documentation
+- *(changelog)* Normalize historical release history
+- *(changelog)* Add git-cliff configuration
+
+
+### 🎨 Styling
+
+- *(pyproject.toml)* Fix typos
+- General style cleanups
+
+
+### 🧪 Testing
+
+- Add support for testing `testing.py`
+- Fix mypy errors in `test_testing.py`
+- Remove obsolete `test_test_forwards_plugins`
+- Remove obsolete `pytest.main` tests
+
+
+### 📦 Build System
+
+- *(deps)* Update `pyproject.toml` syntax
+- Update release workflow scripts
+
+
+### 🏗️ CI/CD
+
+- Fix caching paths and coverage generation in CI workflow
+- Fix Python 3.10 Windows wheel-install test
+- Add Python 3.15 RC testing and update lock files
+- Replace Python 3.15 with 3.15.0-rc.1 in CI
+- Update `actions/checkout` to v5 in release workflow
+
+
 ## [1.1.0] - 2026-08-04
 
 ### 🐛 Bug Fixes
