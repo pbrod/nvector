@@ -1,4 +1,5 @@
-from typing import Any
+import subprocess
+import sys
 
 import pytest
 
@@ -12,34 +13,23 @@ def test_test_function_exists() -> None:
     assert callable(nvector.test)
 
 
-def test_test_calls_pytest_main(monkeypatch: pytest.MonkeyPatch) -> None:
-    called: dict[str, Any] = {}
+def test_test_invokes_subprocess(monkeypatch: pytest.MonkeyPatch) -> None:
+    called: dict[str, list[str]] = {}
 
-    def fake_main(args: list[str]) -> int:
+    def fake_call(args: list[str]) -> int:
         called["args"] = args
-
         return 0
 
-    monkeypatch.setattr(pytest, "main", fake_main)
+    monkeypatch.setattr(subprocess, "call", fake_call)
 
     rc = testing.test(_PACKAGE_NAME, "-q")
 
     assert rc == 0
-    assert called["args"] == ["--pyargs", _PACKAGE_NAME, "-q"]
-
-
-def test_test_raises_helpful_error_without_pytest(monkeypatch: pytest.MonkeyPatch) -> None:
-    original_import = __import__
-
-    def fake_import(name: str, *args: Any, **kwargs: Any) -> Any:
-        if name == "pytest":
-            raise ImportError
-        return original_import(name, *args, **kwargs)
-
-    monkeypatch.setattr("builtins.__import__", fake_import)
-
-    with pytest.raises(
-        ImportError,
-        match="pytest is required",
-    ):
-        testing.test(_PACKAGE_NAME)
+    assert called["args"] == [
+        sys.executable,
+        "-m",
+        "pytest",
+        "--pyargs",
+        _PACKAGE_NAME,
+        "-q",
+    ]
